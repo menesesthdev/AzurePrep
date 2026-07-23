@@ -1,0 +1,13 @@
+<Project>
+
+  <!--
+    Propriedades compartilhadas por todos os projetos da solução.
+    AllowMissingPrunePackageData: contorna o erro NETSDK1226 do SDK .NET 10
+    quando os metadados de "prune" do framework não estão presentes na instalação
+    local (o ref pack do ASP.NET Core é então restaurado via NuGet).
+  -->
+  <PropertyGroup>
+    <AllowMissingPrunePackageData>true</AllowMissingPrunePackageData>
+  </PropertyGroup>
+
+</Project>

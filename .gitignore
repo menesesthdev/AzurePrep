@@ -1,0 +1,29 @@
+# Build
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+# Banco SQLite local (recriado no startup via Migrate + Seed)
+*.db
+*.db-shm
+*.db-wal
+src/AzurePrep.Web/App_Data/*.db*
+*.design.db*
+
+# Documentação interna de sessões (não versionada)
+/docs/
+
+# IDE / usuário
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# .NET
+project.lock.json
+*.nupkg
+TestResults/
+[Cc]overage*/
