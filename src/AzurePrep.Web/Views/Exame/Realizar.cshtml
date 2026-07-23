@@ -1,0 +1,95 @@
+﻿@model RealizarProvaViewModel
+@{
+    Layout = null;
+    var state = Model.State;
+    var initialData = new
+    {
+        attemptId = state.AttemptId,
+        remainingSeconds = state.RemainingSeconds,
+        totalQuestions = state.Questions.Count,
+        statuses = state.Questions.Select(q => new
+        {
+            number = q.Number,
+            answered = q.IsAnswered,
+            flagged = q.IsFlaggedForReview
+        }),
+        urls = new
+        {
+            question = Url.Action("Questao", "Exame", new { attemptId = state.AttemptId, number = 0 })!.Replace("/0", "/{n}"),
+            answer = Url.Action("SalvarResposta", "Exame", new { attemptId = state.AttemptId }),
+            finish = Url.Action("Finalizar", "Exame", new { attemptId = state.AttemptId })
+        }
+    };
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@state.ExamCode · Simulado em andamento</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="exam-body">
+    <!-- Header fixo: identificação do exame + timer regressivo sempre visível -->
+    <header class="exam-header">
+        <div class="exam-header__exam">
+            <span class="exam-header__code">@state.ExamCode</span>
+            <span class="exam-header__name">@state.ExamName</span>
+        </div>
+        <div class="exam-header__timer" id="timer" aria-live="polite" title="Tempo restante">
+            --:--
+        </div>
+        <button type="button" class="btn btn--danger" id="btn-finish-top">Finalizar prova</button>
+    </header>
+
+    <div class="exam-layout">
+        <!-- Coluna central: a questão atual (trocada via AJAX, sem recarregar a página) -->
+        <section class="exam-main">
+            <div id="question-container">
+                @await Html.PartialAsync("_Questao", Model.FirstQuestion)
+            </div>
+
+            <div class="exam-toolbar">
+                <button type="button" class="btn" id="btn-prev">◀ Anterior</button>
+                <label class="flag-toggle">
+                    <input type="checkbox" id="flag-toggle" />
+                    <span>Marcar para revisão</span>
+                </label>
+                <button type="button" class="btn" id="btn-next">Próxima ▶</button>
+            </div>
+        </section>
+
+        <!-- Painel de navegação lateral: grid com status por questão -->
+        <aside class="exam-nav" aria-label="Navegação entre questões">
+            <h2 class="exam-nav__title">Questões</h2>
+            <div class="exam-nav__grid" id="nav-grid">
+                @foreach (var q in state.Questions)
+                {
+                    <button type="button" class="nav-cell" data-number="@q.Number">@q.Number</button>
+                }
+            </div>
+            <ul class="exam-nav__legend">
+                <li><span class="dot dot--answered"></span> Respondida</li>
+                <li><span class="dot dot--flagged"></span> Marcada para revisão</li>
+                <li><span class="dot dot--unanswered"></span> Não respondida</li>
+            </ul>
+            <button type="button" class="btn btn--block" id="btn-review">Ir para revisão</button>
+        </aside>
+    </div>
+
+    <!-- Modal de confirmação de finalização -->
+    <div class="modal" id="finish-modal" hidden>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="finish-title">
+            <h2 class="modal__title" id="finish-title">Finalizar prova?</h2>
+            <p class="modal__body" id="finish-summary">Revise antes de confirmar.</p>
+            <div class="modal__actions">
+                <button type="button" class="btn" id="btn-finish-cancel">Continuar prova</button>
+                <button type="button" class="btn btn--danger" id="btn-finish-confirm">Finalizar agora</button>
+            </div>
+        </div>
+    </div>
+
+    <script id="exam-data" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(initialData))</script>
+    <script src="~/js/exam.js" asp-append-version="true"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+﻿@model QuestaoDto
+@{
+    var isMultiple = Model.Type == TipoDeQuestao.EscolhaMultipla;
+    var inputType = isMultiple ? "checkbox" : "radio";
+    var selected = Model.SelectedOptionIds.ToHashSet();
+}
+
+<article class="question"
+         data-number="@Model.Number"
+         data-question-id="@Model.Id"
+         data-type="@Model.Type"
+         data-flagged="@(Model.IsFlaggedForReview ? "true" : "false")">
+
+    <div class="question__meta">
+        <span class="question__position">Questão @Model.Number de @Model.TotalQuestions</span>
+        @if (isMultiple)
+        {
+            <span class="question__hint">(Selecione duas)</span>
+        }
+        else if (Model.Type == TipoDeQuestao.SimNao)
+        {
+            <span class="question__hint">Verdadeiro ou Falso</span>
+        }
+    </div>
+
+    <h2 class="question__text">@Model.Text</h2>
+
+    <ul class="options">
+        @foreach (var option in Model.Options)
+        {
+            var inputId = $"opt-{option.Id}";
+            <li class="option">
+                <label class="option__label" for="@inputId">
+                    <input class="option__input"
+                           type="@inputType"
+                           id="@inputId"
+                           name="answer-@Model.Id"
+                           value="@option.Id"
+                           checked="@(selected.Contains(option.Id))" />
+                    <span class="option__text">@option.Text</span>
+                </label>
+            </li>
+        }
+    </ul>
+</article>

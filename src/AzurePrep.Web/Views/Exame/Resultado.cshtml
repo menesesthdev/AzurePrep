@@ -1,0 +1,102 @@
+﻿@model ResultadoDaProvaDto
+@{
+    ViewData["Title"] = $"Resultado · {Model.ExamCode}";
+    var duration = Model.FinishedAt - Model.StartedAt;
+    string TypeLabel(TipoDeQuestao t) => t switch
+    {
+        TipoDeQuestao.EscolhaMultipla => "Múltipla escolha",
+        TipoDeQuestao.SimNao => "Verdadeiro/Falso",
+        _ => "Escolha única"
+    };
+}
+
+<section class="result">
+    <div class="result__headline result__headline--@(Model.Passed ? "pass" : "fail")">
+        <div class="result__score">
+            <span class="result__score-value">@Model.ScorePercent.ToString("0.#")%</span>
+            <span class="result__score-label">@(Model.Passed ? "Aprovado" : "Reprovado")</span>
+        </div>
+        <dl class="result__meta">
+            <div>
+                <dt>Acertos</dt>
+                <dd>@Model.CorrectAnswers de @Model.TotalQuestions</dd>
+            </div>
+            <div>
+                <dt>Nota de corte</dt>
+                <dd>@Model.PassingScorePercent%</dd>
+            </div>
+            <div>
+                <dt>Tempo utilizado</dt>
+                <dd>@($"{(int)duration.TotalMinutes}m {duration.Seconds:00}s")</dd>
+            </div>
+        </dl>
+    </div>
+
+    <section class="result__section">
+        <h2 class="section-title">Desempenho por domínio</h2>
+        <div class="skill-breakdown">
+            @foreach (var area in Model.SkillAreas)
+            {
+                <div class="skill-row">
+                    <div class="skill-row__head">
+                        <span class="skill-row__name">@area.Name</span>
+                        <span class="skill-row__score">@area.CorrectAnswers/@area.TotalQuestions (@area.ScorePercent.ToString("0.#")%)</span>
+                    </div>
+                    <div class="skill-row__bar">
+                        <div class="skill-row__fill" style="width:@area.ScorePercent.ToString(System.Globalization.CultureInfo.InvariantCulture)%"></div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <section class="result__section">
+        <h2 class="section-title">Revisão questão a questão</h2>
+        <div class="review-list">
+            @foreach (var q in Model.Questions)
+            {
+                <details class="review-item review-item--@(q.WasCorrect ? "correct" : "incorrect")">
+                    <summary class="review-item__summary">
+                        <span class="review-item__badge">@(q.WasCorrect ? "Correta" : "Incorreta")</span>
+                        <span class="review-item__number">Questão @q.Number</span>
+                        <span class="review-item__type">@TypeLabel(q.Type)</span>
+                    </summary>
+                    <div class="review-item__body">
+                        <p class="review-item__text">@q.Text</p>
+                        <ul class="review-options">
+                            @foreach (var o in q.Options)
+                            {
+                                var css = o.IsCorrect ? "review-option--correct"
+                                    : (o.WasSelected ? "review-option--wrong" : "");
+                                <li class="review-option @css">
+                                    <span class="review-option__mark">
+                                        @if (o.IsCorrect)
+                                        {
+                                            <text>✓</text>
+                                        }
+                                        else if (o.WasSelected)
+                                        {
+                                            <text>✕</text>
+                                        }
+                                    </span>
+                                    <span class="review-option__text">@o.Text</span>
+                                    @if (o.WasSelected)
+                                    {
+                                        <span class="review-option__tag">sua resposta</span>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        <div class="review-item__explanation">
+                            <strong>Explicação:</strong> @q.Explanation
+                        </div>
+                    </div>
+                </details>
+            }
+        </div>
+    </section>
+
+    <div class="result__actions">
+        <a class="btn btn--primary" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+    </div>
+</section>

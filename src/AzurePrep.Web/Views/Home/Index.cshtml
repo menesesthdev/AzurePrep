@@ -1,0 +1,54 @@
+﻿@model IReadOnlyList<ResumoDeExameDto>
+@{
+    ViewData["Title"] = "Início";
+}
+
+<section class="hero">
+    <h1 class="hero__title">Pratique como na prova real</h1>
+    <p class="hero__lead">
+        Simulados que replicam a experiência da prova de certificação — timer, navegação entre
+        questões, marcação para revisão e score report por domínio. Sem gamificação, sem distração.
+    </p>
+</section>
+
+<section class="exam-list">
+    <h2 class="section-title">Exames disponíveis</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p class="empty-state">Nenhum exame cadastrado ainda.</p>
+    }
+    else
+    {
+        <div class="exam-grid">
+            @foreach (var exam in Model)
+            {
+                <article class="exam-card">
+                    <header class="exam-card__header">
+                        <span class="exam-card__code">@exam.Code</span>
+                        <h3 class="exam-card__name">@exam.Name</h3>
+                    </header>
+                    <dl class="exam-card__meta">
+                        <div>
+                            <dt>Questões</dt>
+                            <dd>@exam.TotalQuestions</dd>
+                        </div>
+                        <div>
+                            <dt>Tempo</dt>
+                            <dd>@exam.TimeLimitMinutes min</dd>
+                        </div>
+                        <div>
+                            <dt>Nota de corte</dt>
+                            <dd>@exam.PassingScorePercent%</dd>
+                        </div>
+                    </dl>
+                    <form asp-controller="Exame" asp-action="Iniciar" method="post" class="exam-card__action">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="examId" value="@exam.Id" />
+                        <button type="submit" class="btn btn--primary">Iniciar simulado</button>
+                    </form>
+                </article>
+            }
+        </div>
+    }
+</section>
