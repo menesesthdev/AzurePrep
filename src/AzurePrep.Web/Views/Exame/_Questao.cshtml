@@ -1,29 +1,43 @@
-﻿@model QuestaoDto
+@model QuestaoDto
 @{
     var isMultiple = Model.Type == TipoDeQuestao.EscolhaMultipla;
     var inputType = isMultiple ? "checkbox" : "radio";
     var selected = Model.SelectedOptionIds.ToHashSet();
+
+    // A prova real imprime a quantidade exigida por extenso ("Escolha duas.").
+    var quantidadePorExtenso = Model.RequiredSelections switch
+    {
+        2 => "duas",
+        3 => "três",
+        4 => "quatro",
+        5 => "cinco",
+        _ => Model.RequiredSelections.ToString()
+    };
 }
 
 <article class="question"
          data-number="@Model.Number"
          data-question-id="@Model.Id"
          data-type="@Model.Type"
+         data-required="@Model.RequiredSelections"
          data-flagged="@(Model.IsFlaggedForReview ? "true" : "false")">
 
-    <div class="question__meta">
-        <span class="question__position">Questão @Model.Number de @Model.TotalQuestions</span>
-        @if (isMultiple)
-        {
-            <span class="question__hint">(Selecione duas)</span>
-        }
-        else if (Model.Type == TipoDeQuestao.SimNao)
-        {
-            <span class="question__hint">Verdadeiro ou Falso</span>
-        }
-    </div>
+    <p class="question__counter">Item @Model.Number de @Model.TotalQuestions</p>
 
-    <h2 class="question__text">@Model.Text</h2>
+    <div class="question__text">@Model.Text</div>
+
+    @* Linhas de instrução padronizadas — mesmo lugar e mesmo tom da prova real. *@
+    @if (isMultiple)
+    {
+        <p class="question__instruction">Escolha @quantidadePorExtenso.</p>
+        <p class="question__note">OBSERVAÇÃO: Cada seleção correta vale um ponto.</p>
+    }
+    else if (Model.Type == TipoDeQuestao.SimNao)
+    {
+        <p class="question__instruction">
+            Selecione <strong>Sim</strong> se a afirmação for verdadeira. Caso contrário, selecione <strong>Não</strong>.
+        </p>
+    }
 
     <ul class="options">
         @foreach (var option in Model.Options)

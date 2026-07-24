@@ -1,4 +1,4 @@
-﻿@model RealizarProvaViewModel
+@model RealizarProvaViewModel
 @{
     Layout = null;
     var state = Model.State;
@@ -11,7 +11,9 @@
         {
             number = q.Number,
             answered = q.IsAnswered,
-            flagged = q.IsFlaggedForReview
+            flagged = q.IsFlaggedForReview,
+            selectedCount = q.SelectedCount,
+            required = q.RequiredSelections
         }),
         urls = new
         {
@@ -30,61 +32,100 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="exam-body">
-    <!-- Header fixo: identificação do exame + timer regressivo sempre visível -->
-    <header class="exam-header">
-        <div class="exam-header__exam">
-            <span class="exam-header__code">@state.ExamCode</span>
-            <span class="exam-header__name">@state.ExamName</span>
+    @*
+        Layout fiel à entrega real (Pearson VUE / Microsoft): barra superior com identificação
+        e tempo, área única de conteúdo e barra de ações fixa embaixo. Sem painel lateral de
+        navegação — na prova real a navegação é linear e o salto entre itens só acontece pela
+        tela de revisão.
+    *@
+    <header class="exam-bar">
+        <div class="exam-bar__title">
+            <span class="exam-bar__code">@state.ExamCode</span>
+            <span class="exam-bar__name">@state.ExamName</span>
         </div>
-        <div class="exam-header__timer" id="timer" aria-live="polite" title="Tempo restante">
-            --:--
+        <div class="exam-bar__clock">
+            <span class="exam-bar__clock-label">Tempo restante</span>
+            <span class="exam-bar__clock-value" id="timer" aria-live="off">--:--</span>
         </div>
-        <button type="button" class="btn btn--danger" id="btn-finish-top">Finalizar prova</button>
     </header>
 
-    <div class="exam-layout">
-        <!-- Coluna central: a questão atual (trocada via AJAX, sem recarregar a página) -->
-        <section class="exam-main">
+    <main class="exam-stage">
+        <!-- Área da questão (trocada via AJAX, sem recarregar a página) -->
+        <section class="exam-sheet" id="question-view">
             <div id="question-container">
                 @await Html.PartialAsync("_Questao", Model.FirstQuestion)
             </div>
-
-            <div class="exam-toolbar">
-                <button type="button" class="btn" id="btn-prev">◀ Anterior</button>
-                <label class="flag-toggle">
-                    <input type="checkbox" id="flag-toggle" />
-                    <span>Marcar para revisão</span>
-                </label>
-                <button type="button" class="btn" id="btn-next">Próxima ▶</button>
-            </div>
         </section>
 
-        <!-- Painel de navegação lateral: grid com status por questão -->
-        <aside class="exam-nav" aria-label="Navegação entre questões">
-            <h2 class="exam-nav__title">Questões</h2>
-            <div class="exam-nav__grid" id="nav-grid">
-                @foreach (var q in state.Questions)
-                {
-                    <button type="button" class="nav-cell" data-number="@q.Number">@q.Number</button>
-                }
-            </div>
-            <ul class="exam-nav__legend">
-                <li><span class="dot dot--answered"></span> Respondida</li>
-                <li><span class="dot dot--flagged"></span> Marcada para revisão</li>
-                <li><span class="dot dot--unanswered"></span> Não respondida</li>
-            </ul>
-            <button type="button" class="btn btn--block" id="btn-review">Ir para revisão</button>
-        </aside>
-    </div>
+        <!-- Tela de revisão: substitui a questão, como na prova real -->
+        <section class="exam-sheet review-screen" id="review-view" hidden>
+            <h1 class="review-screen__title">Tela de revisão</h1>
+            <p class="review-screen__help">
+                Selecione um item para voltar a ele. Itens incompletos e marcados aparecem
+                destacados. Ao encerrar a prova, não será possível retornar.
+            </p>
 
-    <!-- Modal de confirmação de finalização -->
+            <div class="review-screen__filters" role="group" aria-label="Filtrar itens">
+                <button type="button" class="btn btn--filter is-active" data-filter="all">Revisar todos</button>
+                <button type="button" class="btn btn--filter" data-filter="incomplete">Revisar incompletos</button>
+                <button type="button" class="btn btn--filter" data-filter="marked">Revisar marcados</button>
+            </div>
+
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Item</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Marcado</th>
+                    </tr>
+                </thead>
+                <tbody id="review-rows"></tbody>
+            </table>
+            <p class="review-screen__empty" id="review-empty" hidden>Nenhum item nesta categoria.</p>
+        </section>
+    </main>
+
+    <!-- Barra de ações fixa: marcação e comentários à esquerda, navegação à direita -->
+    <footer class="exam-actions">
+        <div class="exam-actions__left">
+            <label class="mark-toggle">
+                <input type="checkbox" id="flag-toggle" />
+                <span>Marcar para revisão</span>
+            </label>
+            <button type="button" class="btn btn--link" id="btn-comments">Comentários</button>
+        </div>
+        <div class="exam-actions__right">
+            <button type="button" class="btn" id="btn-review">Tela de revisão</button>
+            <button type="button" class="btn" id="btn-prev">Anterior</button>
+            <button type="button" class="btn btn--primary" id="btn-next">Próxima</button>
+            <button type="button" class="btn btn--primary" id="btn-end" hidden>Encerrar prova</button>
+        </div>
+    </footer>
+
+    <!-- Confirmação de encerramento -->
     <div class="modal" id="finish-modal" hidden>
         <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="finish-title">
-            <h2 class="modal__title" id="finish-title">Finalizar prova?</h2>
-            <p class="modal__body" id="finish-summary">Revise antes de confirmar.</p>
+            <h2 class="modal__title" id="finish-title">Encerrar a prova?</h2>
+            <p class="modal__body" id="finish-summary"></p>
+            <p class="modal__warning">Após encerrar, não será possível retornar aos itens.</p>
             <div class="modal__actions">
-                <button type="button" class="btn" id="btn-finish-cancel">Continuar prova</button>
-                <button type="button" class="btn btn--danger" id="btn-finish-confirm">Finalizar agora</button>
+                <button type="button" class="btn" id="btn-finish-cancel">Voltar à prova</button>
+                <button type="button" class="btn btn--primary" id="btn-finish-confirm">Encerrar prova</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comentário sobre o item (a prova real permite enviar feedback por questão) -->
+    <div class="modal" id="comments-modal" hidden>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="comments-title">
+            <h2 class="modal__title" id="comments-title">Comentários sobre o item</h2>
+            <p class="modal__body">
+                Registre aqui qualquer observação sobre este item. O comentário não afeta sua nota.
+            </p>
+            <textarea class="modal__textarea" id="comments-text" rows="6"></textarea>
+            <div class="modal__actions">
+                <button type="button" class="btn" id="btn-comments-cancel">Cancelar</button>
+                <button type="button" class="btn btn--primary" id="btn-comments-save">Salvar</button>
             </div>
         </div>
     </div>

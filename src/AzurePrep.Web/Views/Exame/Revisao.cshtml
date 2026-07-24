@@ -1,0 +1,96 @@
+@model ResultadoDaProvaDto
+@{
+    ViewData["Title"] = $"Revisão · {Model.ExamCode}";
+    var inv = System.Globalization.CultureInfo.InvariantCulture;
+    string TypeLabel(TipoDeQuestao t) => t switch
+    {
+        TipoDeQuestao.EscolhaMultipla => "Múltipla escolha",
+        TipoDeQuestao.SimNao => "Sim/Não",
+        _ => "Escolha única"
+    };
+}
+
+@*
+    Modo de estudo — deliberadamente fora da simulação. A prova real nunca mostra quais
+    itens você errou; esta tela existe porque o objetivo aqui é aprender com o erro.
+*@
+<section class="hero">
+    <h1 class="hero__title">Revisão da tentativa</h1>
+    <p class="hero__lead">
+        @Model.ExamCode · @Model.CorrectAnswers de @Model.TotalQuestions itens corretos
+        (@Model.ScorePercent.ToString("0.#")%). Nota: @Model.ScaledScore de 1000.
+    </p>
+    <p class="result__note">
+        Esta tela não existe na prova real — lá o candidato recebe apenas a nota e o desempenho
+        por domínio. Use-a para entender por que cada distrator estava errado.
+    </p>
+</section>
+
+<section class="result__section">
+    <h2 class="section-title">Desempenho por domínio</h2>
+    <div class="skill-breakdown">
+        @foreach (var area in Model.SkillAreas)
+        {
+            <div class="skill-row">
+                <div class="skill-row__head">
+                    <span class="skill-row__name">@area.Name</span>
+                    <span class="skill-row__score">@area.CorrectAnswers/@area.TotalQuestions (@area.ScorePercent.ToString("0.#")%)</span>
+                </div>
+                <div class="skill-row__bar">
+                    <div class="skill-row__fill" style="width:@area.ScorePercent.ToString("0.##", inv)%"></div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="result__section">
+    <h2 class="section-title">Questão a questão</h2>
+    <div class="review-list">
+        @foreach (var q in Model.Questions)
+        {
+            <details class="review-item review-item--@(q.WasCorrect ? "correct" : "incorrect")">
+                <summary class="review-item__summary">
+                    <span class="review-item__badge">@(q.WasCorrect ? "Correta" : "Incorreta")</span>
+                    <span class="review-item__number">Item @q.Number</span>
+                    <span class="review-item__type">@TypeLabel(q.Type)</span>
+                </summary>
+                <div class="review-item__body">
+                    <p class="review-item__text">@q.Text</p>
+                    <ul class="review-options">
+                        @foreach (var o in q.Options)
+                        {
+                            var css = o.IsCorrect ? "review-option--correct"
+                                : (o.WasSelected ? "review-option--wrong" : "");
+                            <li class="review-option @css">
+                                <span class="review-option__mark">
+                                    @if (o.IsCorrect)
+                                    {
+                                        <text>✓</text>
+                                    }
+                                    else if (o.WasSelected)
+                                    {
+                                        <text>✕</text>
+                                    }
+                                </span>
+                                <span class="review-option__text">@o.Text</span>
+                                @if (o.WasSelected)
+                                {
+                                    <span class="review-option__tag">sua resposta</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                    <div class="review-item__explanation">
+                        <strong>Explicação:</strong> @q.Explanation
+                    </div>
+                </div>
+            </details>
+        }
+    </div>
+</section>
+
+<div class="result__actions">
+    <a class="btn" asp-controller="Exame" asp-action="Resultado" asp-route-attemptId="@Model.AttemptId">Voltar ao score report</a>
+    <a class="btn" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+</div>

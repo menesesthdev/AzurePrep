@@ -100,9 +100,23 @@ public class ExameController : Controller
         return Json(new { redirectUrl = Url.Action(nameof(Resultado), new { attemptId }) });
     }
 
-    // Tela de resultado: score, aprovado/reprovado, breakdown por skill area e revisão.
+    // Score report: nota na escala 1–1000 e desempenho por domínio — o que a prova real entrega.
     [HttpGet("{attemptId:guid}/result")]
     public async Task<IActionResult> Resultado(Guid attemptId, CancellationToken cancellationToken)
+    {
+        var result = await _session.ObterResultadoAsync(attemptId, cancellationToken);
+        if (result is null)
+        {
+            return RedirectToAction(nameof(Realizar), new { attemptId });
+        }
+
+        return View(result);
+    }
+
+    // Modo de estudo: revisão questão a questão com gabarito e explicação. Fica fora do score
+    // report de propósito — a prova real não revela quais itens o candidato errou.
+    [HttpGet("{attemptId:guid}/review")]
+    public async Task<IActionResult> Revisao(Guid attemptId, CancellationToken cancellationToken)
     {
         var result = await _session.ObterResultadoAsync(attemptId, cancellationToken);
         if (result is null)
