@@ -16,6 +16,16 @@ internal static class Guard
         return value.Trim();
     }
 
+    public static Guid NotEmpty(Guid value, string paramName)
+    {
+        if (value == Guid.Empty)
+        {
+            throw new ArgumentException("Identificador não pode ser vazio.", paramName);
+        }
+
+        return value;
+    }
+
     public static int Positive(int value, string paramName)
     {
         if (value <= 0)

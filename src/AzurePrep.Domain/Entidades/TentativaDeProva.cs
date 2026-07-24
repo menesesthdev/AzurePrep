@@ -15,14 +15,18 @@ public class TentativaDeProva : Entity
     {
     }
 
-    public TentativaDeProva(Guid examId, DateTime startedAt, Guid? id = null)
+    public TentativaDeProva(Guid examId, Guid userId, DateTime startedAt, Guid? id = null)
         : base(id ?? Guid.NewGuid())
     {
         ExamId = examId;
+        UserId = Guard.NotEmpty(userId, nameof(userId));
         StartedAt = startedAt;
     }
 
     public Guid ExamId { get; private set; }
+
+    /// <summary>Dono da tentativa. Obrigatório — o simulado exige login.</summary>
+    public Guid UserId { get; private set; }
 
     public DateTime StartedAt { get; private set; }
 
