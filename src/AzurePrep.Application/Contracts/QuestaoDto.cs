@@ -9,6 +9,11 @@ public sealed record OpcaoDeQuestaoDto(Guid Id, string Text, int OrderIndex);
 /// Questão renderizável durante a prova, já com a seleção atual do candidato e o estado
 /// de "marcada para revisão". Nunca carrega a informação de qual opção é a correta.
 /// </summary>
+/// <remarks>
+/// <paramref name="RequiredSelections"/> é a quantidade de alternativas que o candidato deve
+/// marcar. Não revela o gabarito — é a mesma informação que a prova real imprime no enunciado
+/// ("Escolha duas."), e é o que permite classificar a questão como incompleta na revisão.
+/// </remarks>
 public sealed record QuestaoDto(
     Guid Id,
     int Number,
@@ -17,4 +22,5 @@ public sealed record QuestaoDto(
     IReadOnlyList<OpcaoDeQuestaoDto> Options,
     IReadOnlyList<Guid> SelectedOptionIds,
     bool IsFlaggedForReview,
-    int TotalQuestions);
+    int TotalQuestions,
+    int RequiredSelections);

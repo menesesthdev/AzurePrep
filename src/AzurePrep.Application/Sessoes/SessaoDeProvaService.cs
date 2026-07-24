@@ -62,7 +62,9 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
                 question.Id,
                 i + 1,
                 answer?.IsAnswered ?? false,
-                answer?.IsFlaggedForReview ?? false));
+                answer?.IsFlaggedForReview ?? false,
+                answer?.SelectedOptionIds.Count ?? 0,
+                SelecoesExigidas(question)));
         }
 
         return new EstadoDaTentativaDto(
@@ -111,7 +113,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             options,
             answer?.SelectedOptionIds.ToList() ?? new List<Guid>(),
             answer?.IsFlaggedForReview ?? false,
-            questions.Count);
+            questions.Count,
+            SelecoesExigidas(question));
     }
 
     public async Task SalvarRespostaAsync(SalvarRespostaRequest request, CancellationToken cancellationToken = default)
@@ -191,6 +194,11 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
     private static IReadOnlyList<Questao> QuestoesOrdenadas(Exame exam)
         => exam.Questions.OrderBy(q => q.Id).ToList();
 
+    // Quantas alternativas o candidato precisa marcar. Corresponde ao "Escolha duas." impresso
+    // no enunciado da prova real — informa a quantidade, nunca quais são.
+    private static int SelecoesExigidas(Questao question)
+        => Math.Max(1, question.CorrectOptionIds.Count);
+
     private int CalcularSegundosRestantes(Exame exam, TentativaDeProva attempt)
     {
         if (attempt.IsFinished)
@@ -250,6 +258,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             attempt.StartedAt,
             attempt.FinishedAt ?? attempt.StartedAt,
             skillAreas,
-            reviews);
+            reviews,
+            score.ScaledScore,
+            EscalaDeNota.NotaDeCorte);
     }
 }

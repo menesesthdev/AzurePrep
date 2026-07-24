@@ -26,6 +26,11 @@ public sealed record RevisaoDeQuestaoDto(
 /// Resultado completo de uma tentativa finalizada: score, aprovação, breakdown por skill area
 /// e a revisão questão a questão.
 /// </summary>
+/// <remarks>
+/// O score report fiel exibe apenas <see cref="ScaledScore"/> (escala 1–1000, corte em
+/// <see cref="ScaledPassingScore"/>) — o percentual e a revisão questão a questão existem só
+/// para o modo de estudo, que na prova real não é oferecido.
+/// </remarks>
 public sealed record ResultadoDaProvaDto(
     Guid AttemptId,
     string ExamCode,
@@ -38,4 +43,6 @@ public sealed record ResultadoDaProvaDto(
     DateTime StartedAt,
     DateTime FinishedAt,
     IReadOnlyList<ResultadoPorAreaDto> SkillAreas,
-    IReadOnlyList<RevisaoDeQuestaoDto> Questions);
+    IReadOnlyList<RevisaoDeQuestaoDto> Questions,
+    int ScaledScore,
+    int ScaledPassingScore);
