@@ -12,6 +12,7 @@ public sealed class TentativaDeProvaConfiguration : IEntityTypeConfiguration<Ten
         builder.HasKey(a => a.Id);
 
         builder.Property(a => a.ExamId).IsRequired();
+        builder.Property(a => a.UserId).IsRequired();
         builder.Property(a => a.StartedAt).IsRequired();
         builder.Property(a => a.FinishedAt);
         builder.Property(a => a.ScorePercent).HasPrecision(5, 2);
@@ -21,6 +22,15 @@ public sealed class TentativaDeProvaConfiguration : IEntityTypeConfiguration<Ten
             .WithMany()
             .HasForeignKey(a => a.ExamId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Apagar o usuário leva junto o histórico de tentativas dele.
+        builder.HasOne<Usuario>()
+            .WithMany()
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Histórico do candidato: "minhas tentativas, da mais recente para a mais antiga".
+        builder.HasIndex(a => new { a.UserId, a.StartedAt });
 
         builder.HasMany(a => a.Answers)
             .WithOne()

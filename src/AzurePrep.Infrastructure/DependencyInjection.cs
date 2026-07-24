@@ -25,6 +25,7 @@ public static class DependencyInjection
 
         services.AddScoped<IExameRepository, ExameRepository>();
         services.AddScoped<ITentativaDeProvaRepository, TentativaDeProvaRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
         services.AddSingleton<IClock, SystemClock>();
 

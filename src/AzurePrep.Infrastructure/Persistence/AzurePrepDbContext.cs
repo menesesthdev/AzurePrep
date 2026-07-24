@@ -22,6 +22,7 @@ public class AzurePrepDbContext : DbContext, IUnitOfWork
     public DbSet<OpcaoDeResposta> AnswerOptions => Set<OpcaoDeResposta>();
     public DbSet<TentativaDeProva> ExamAttempts => Set<TentativaDeProva>();
     public DbSet<RespostaDaTentativa> ExamAttemptAnswers => Set<RespostaDaTentativa>();
+    public DbSet<Usuario> Users => Set<Usuario>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
