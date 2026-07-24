@@ -12,13 +12,26 @@ namespace AzurePrep.Web.Controllers;
 [Route("conta")]
 public class ContaController : Controller
 {
+    /// <summary>
+    /// Chave sob a qual o provedor escolhido atravessa o fluxo OAuth. É necessária porque
+    /// no callback autenticamos contra o COOKIE externo, e o ticket dele se identifica como
+    /// "AzurePrep.External" — o nome do provedor não sobrevive por ali. AuthenticationProperties,
+    /// em compensação, são serializadas no "state" e devolvidas intactas pelo provedor.
+    /// </summary>
+    private const string ChaveDoProvedor = "azureprep:provedor";
+
     private readonly IAutenticacaoService _autenticacao;
     private readonly IAuthenticationSchemeProvider _schemes;
+    private readonly ILogger<ContaController> _logger;
 
-    public ContaController(IAutenticacaoService autenticacao, IAuthenticationSchemeProvider schemes)
+    public ContaController(
+        IAutenticacaoService autenticacao,
+        IAuthenticationSchemeProvider schemes,
+        ILogger<ContaController> logger)
     {
         _autenticacao = autenticacao;
         _schemes = schemes;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -54,6 +67,9 @@ public class ContaController : Controller
             RedirectUri = Url.Action(nameof(Callback), new { returnUrl })
         };
 
+        // Carimba quem originou o login para que o callback saiba de onde a identidade veio.
+        properties.Items[ChaveDoProvedor] = provider;
+
         return Challenge(properties, provider);
     }
 
@@ -64,15 +80,31 @@ public class ContaController : Controller
         var result = await HttpContext.AuthenticateAsync(EsquemasDeAutenticacao.Externo);
         if (!result.Succeeded || result.Principal is null)
         {
+            // A tela mostra só "tente novamente" de propósito — mas sem registrar a causa
+            // real aqui ("Correlation failed", escopo negado, code expirado) qualquer
+            // problema de OAuth vira adivinhação.
+            _logger.LogWarning(
+                result.Failure,
+                "Callback de login externo falhou antes de identificar o provedor.");
             return RedirectToAction(nameof(Login), new { erro = true });
         }
 
-        var scheme = result.Ticket?.AuthenticationScheme ?? string.Empty;
-        var provider = AutenticacaoSetup.ProvedorDoEsquema(scheme);
+        // Lê o carimbo deixado no Entrar. Não dá para usar result.Ticket.AuthenticationScheme:
+        // o ticket é o do cookie externo, não o do provedor.
+        string? scheme = null;
+        result.Properties?.Items.TryGetValue(ChaveDoProvedor, out scheme);
+
+        var provider = scheme is null ? null : AutenticacaoSetup.ProvedorDoEsquema(scheme);
         var providerKey = result.Principal.FindFirstValue(ClaimTypes.NameIdentifier);
 
         if (provider is null || string.IsNullOrWhiteSpace(providerKey))
         {
+            // Autenticou no provedor mas veio sem identidade utilizável — normalmente
+            // esquema inesperado ou claim NameIdentifier ausente.
+            _logger.LogWarning(
+                "Login externo sem identidade utilizável. Esquema: {Esquema}, temChave: {TemChave}.",
+                scheme ?? "(ausente)",
+                !string.IsNullOrWhiteSpace(providerKey));
             return RedirectToAction(nameof(Login), new { erro = true });
         }
 

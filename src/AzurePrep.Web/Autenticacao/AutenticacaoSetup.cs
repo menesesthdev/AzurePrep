@@ -2,6 +2,7 @@ using AspNet.Security.OAuth.GitHub;
 using AspNet.Security.OAuth.LinkedIn;
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Domain.Enums;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
@@ -66,7 +67,7 @@ public static class AutenticacaoSetup
             {
                 options.ClientId = google["ClientId"]!;
                 options.ClientSecret = google["ClientSecret"]!;
-                options.SignInScheme = EsquemasDeAutenticacao.Externo;
+                AplicarComum(options);
             });
         }
 
@@ -77,7 +78,7 @@ public static class AutenticacaoSetup
             {
                 options.ClientId = github["ClientId"]!;
                 options.ClientSecret = github["ClientSecret"]!;
-                options.SignInScheme = EsquemasDeAutenticacao.Externo;
+                AplicarComum(options);
                 // Sem este escopo o GitHub não devolve e-mail algum.
                 options.Scope.Add("user:email");
             });
@@ -93,7 +94,7 @@ public static class AutenticacaoSetup
             {
                 options.ClientId = linkedIn["ClientId"]!;
                 options.ClientSecret = linkedIn["ClientSecret"]!;
-                options.SignInScheme = EsquemasDeAutenticacao.Externo;
+                AplicarComum(options);
             });
         }
 
@@ -104,6 +105,34 @@ public static class AutenticacaoSetup
                 .Build());
 
         return services;
+    }
+
+    /// <summary>
+    /// Ajustes que valem para todo provedor externo — ficam num só lugar porque um deles
+    /// divergir dos outros é exatamente o tipo de bug que só aparece em runtime.
+    /// </summary>
+    private static void AplicarComum(RemoteAuthenticationOptions options)
+    {
+        options.SignInScheme = EsquemasDeAutenticacao.Externo;
+
+        // O padrão do framework para o cookie de correlação é SameSite=None, que o browser
+        // só aceita acompanhado de Secure — e Secure só vale sobre HTTPS. Rodando em
+        // http://localhost o cookie é descartado silenciosamente e TODO callback falha com
+        // "Correlation failed", sem pista nenhuma na tela.
+        //
+        // Lax resolve porque não exige Secure e ainda acompanha o retorno do provedor: o
+        // callback é uma navegação de topo por GET, que Lax permite. É o mesmo raciocínio
+        // já aplicado ao cookie da aplicação, logo acima.
+        //
+        // ⚠️ Se algum provedor passar a responder com response_mode=form_post (callback por
+        // POST), Lax deixa de enviar o cookie — aí a saída é voltar para None e exigir HTTPS.
+        options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+
+        // O default é Always, que marca o cookie como Secure mesmo sobre http:// — e aí o
+        // browser descarta de novo, pelo mesmo motivo. SameAsRequest mantém Secure em
+        // produção (HTTPS) sem quebrar o desenvolvimento local, e é a mesma política já
+        // usada nos dois cookies de sessão acima.
+        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
     }
 
     private static bool Configurado(IConfigurationSection section)
