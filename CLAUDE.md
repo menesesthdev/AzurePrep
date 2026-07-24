@@ -96,9 +96,27 @@ Isso não é "nice to have", é o diferencial do AzurePrep. A referência de cal
 - AutoMapper entre Domain e DTOs/ViewModels quando fizer sentido
 - Testes unitários (xUnit) desde a primeira etapa — objetivo explícito do projeto, não é opcional
 
+## Autenticação (login social, sem senha)
+
+Login **obrigatório** para fazer simulado. Não existe senha local nem cadastro: a identidade vem sempre de um provedor externo — **Google, LinkedIn, GitHub**.
+
+- **Sem ASP.NET Core Identity.** Cookie de autenticação + handlers OAuth, mapeando para a entidade `Usuario` do Domain. Evita as ~7 tabelas do Identity e mantém o schema no padrão do projeto.
+- **Dois esquemas de cookie** (`EsquemasDeAutenticacao`): `Aplicacao` é a sessão; `Externo` é temporário e só existe entre o callback do provedor e a criação da sessão. É esse intervalo que permite trocar as claims externas por um `Usuario` local.
+- **Chave natural da identidade é o par (`Provider`, `ProviderKey`)**, nunca o e-mail — o GitHub pode não devolver e-mail, e a mesma pessoa pode ter o mesmo e-mail em dois provedores. Vincular contas de provedores diferentes é recurso à parte, ainda não implementado.
+- **`NameIdentifier` no cookie da aplicação é o Id LOCAL do `Usuario`**, não o id do provedor. `IUsuarioAtual` lê exatamente essa claim.
+- **Posse da tentativa é imposta na Application**, não no controller: `SessaoDeProvaService` resolve toda tentativa por `ObterTentativaDoUsuarioAsync`, que devolve `null` para tentativa de outro dono (o Web responde 404 e não confirma que o id existe). O controller não tem como esquecer de checar porque não é ele quem checa.
+- **Política padrão exige autenticação** (`SetFallbackPolicy`); o que é público leva `[AllowAnonymous]` explícito — hoje só login/callback e a página de erro.
+- **`/conta/entrar` é POST com antiforgery**, não GET: um GET permitiria login CSRF, prendendo a pessoa numa conta que não é dela. `returnUrl` passa por `Url.IsLocalUrl` para barrar open redirect.
+- **Credenciais nunca no appsettings versionado** — usar `dotnet user-secrets` em `Authentication:{Google,GitHub,LinkedIn}:{ClientId,ClientSecret}`. Cada provedor só é registrado se tiver credencial, então a app sobe e a tela de login funciona com apenas um deles configurado.
+- **LinkedIn usa OpenID Connect** ("Sign In with LinkedIn using OpenID Connect", escopos `openid`/`profile`/`email`, userinfo em `/v2/userinfo`) — é preciso habilitar esse produto no app do LinkedIn, senão o callback volta com `unauthorized_scope`. **GitHub exige o escopo `user:email`**, sem ele não vem e-mail nenhum.
+
 ## Banco de dados
 
 SQLite via EF Core Migrations. Arquivo em `src/AzurePrep.Web/App_Data/azureprep.db` (ajustável). Evitar recursos específicos de um único provider na modelagem — se o projeto crescer, a migração pra PostgreSQL deve ser barata.
+
+**Decisão (mantida com login social):** seguir no SQLite, com **WAL habilitado** no startup (leitores param de bloquear o escritor). O que quebraria o SQLite não é volume nem autenticação, é **deploy multi-instância ou disco efêmero** — esse é o gatilho para migrar pro PostgreSQL, não uma data. É a disciplina provider-agnostic acima que mantém essa migração barata.
+
+> ⚠️ Dívida conhecida: `ScorePercent` é `decimal` e o SQLite não tem tipo decimal nativo, então ordenação/comparação numérica é imprecisa. Hoje não morde porque ninguém ordena por nota — vai morder quando existir histórico ordenado ou ranking.
 
 ## Comandos úteis
 
@@ -108,10 +126,21 @@ dotnet run --project src/AzurePrep.Web
 dotnet ef migrations add NomeDaMigration --project src/AzurePrep.Infrastructure --startup-project src/AzurePrep.Web
 dotnet ef database update --project src/AzurePrep.Infrastructure --startup-project src/AzurePrep.Web
 dotnet test
+
+# Credenciais OAuth (nunca commitar — ficam fora do repositório)
+cd src/AzurePrep.Web
+dotnet user-secrets init
+dotnet user-secrets set "Authentication:Google:ClientId"     "..."
+dotnet user-secrets set "Authentication:Google:ClientSecret" "..."
+dotnet user-secrets set "Authentication:GitHub:ClientId"     "..."
+dotnet user-secrets set "Authentication:GitHub:ClientSecret" "..."
+dotnet user-secrets set "Authentication:LinkedIn:ClientId"     "..."
+dotnet user-secrets set "Authentication:LinkedIn:ClientSecret" "..."
 ```
+
+Callback a cadastrar em cada provedor (ajuste host/porta): `/signin-google`, `/signin-github`, `/signin-linkedin`.
 
 ## Fora de escopo por agora
 
-- Autenticação/multi-usuário
 - Deploy em nuvem
 - Outros exames além do AZ-900 (mas o modelo de dados já deve suportar)
