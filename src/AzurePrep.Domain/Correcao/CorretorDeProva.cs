@@ -66,6 +66,7 @@ public static class CorretorDeProva
             totalCorrect,
             scorePercent,
             passed,
-            skillAreaScores);
+            skillAreaScores,
+            EscalaDeNota.Converter(scorePercent, exam.PassingScorePercent));
     }
 }
