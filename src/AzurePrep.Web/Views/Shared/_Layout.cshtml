@@ -13,6 +13,22 @@
                 <span class="site-brand__mark">AzurePrep</span>
                 <span class="site-brand__sub">Simulados de certificação Microsoft</span>
             </a>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                var avatar = User.FindFirst("avatar")?.Value;
+                <div class="site-user">
+                    @if (!string.IsNullOrWhiteSpace(avatar))
+                    {
+                        <img class="site-user__avatar" src="@avatar" alt="" referrerpolicy="no-referrer" />
+                    }
+                    <span class="site-user__name">@User.Identity.Name</span>
+                    <form asp-controller="Conta" asp-action="Sair" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn site-user__signout">Sair</button>
+                    </form>
+                </div>
+            }
         </div>
     </header>
 

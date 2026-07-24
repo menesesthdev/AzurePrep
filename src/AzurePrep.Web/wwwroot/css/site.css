@@ -129,6 +129,104 @@ a { color: var(--c-primary); }
 .exam-card__action { margin-top: auto; }
 
 /* ==========================================================================
+   Login — mesma paleta da prova. Uma decisão só na tela: escolher o provedor.
+   Sem campo de senha, sem cadastro, sem "esqueci minha senha".
+   ========================================================================== */
+.login-body {
+    background: var(--c-bg);
+    min-height: 100vh;
+}
+.login {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 20px;
+}
+.login__card {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    /* Faixa azul no topo: assina a marca sem precisar de logo. */
+    border-top: 4px solid var(--c-primary);
+}
+.login__brand { display: flex; flex-direction: column; margin-bottom: 28px; }
+.login__mark { font-weight: 700; font-size: 1.3rem; color: var(--c-primary); }
+.login__sub { font-size: .8rem; color: var(--c-text-muted); }
+
+.login__title { font-size: 1.5rem; margin: 0 0 6px; }
+.login__lead { margin: 0 0 26px; color: var(--c-text-muted); font-size: .95rem; }
+
+.login__error {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    font-size: .9rem;
+    color: var(--c-danger);
+    background: var(--c-danger-tint);
+    border: 1px solid #e3c3c3;
+    border-radius: var(--radius);
+}
+.login__error code { font-size: .85em; }
+
+.login__providers { display: flex; flex-direction: column; gap: 12px; }
+
+/* Botão neutro com o glifo colorido da marca: o reconhecimento vem do ícone,
+   então a paleta sóbria do projeto se mantém e o alvo continua óbvio. */
+.provider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    font: inherit;
+    font-size: .98rem;
+    font-weight: 600;
+    padding: 13px 16px;
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    color: var(--c-text);
+    cursor: pointer;
+    transition: background .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.provider:hover { background: #f5f7f9; border-color: var(--c-text-muted); }
+.provider:focus-visible { outline: 2px solid var(--c-primary); outline-offset: 2px; }
+.provider__icon { display: flex; flex-shrink: 0; }
+
+.login__legal {
+    margin: 26px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--c-border);
+    font-size: .8rem;
+    color: var(--c-text-muted);
+    line-height: 1.5;
+}
+.login__footnote {
+    max-width: 420px;
+    margin: 0;
+    text-align: center;
+    font-size: .78rem;
+    color: var(--c-text-muted);
+}
+
+/* Identificação do usuário logado no cabeçalho interno. */
+.site-user { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.site-user__avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--c-border); }
+.site-user__name { font-size: .9rem; font-weight: 600; }
+.site-user__signout { font: inherit; font-size: .85rem; padding: 6px 12px; }
+
+@media (max-width: 480px) {
+    .login__card { padding: 28px 22px; }
+    .site-user__name { display: none; }
+}
+
+/* ==========================================================================
    Tela de prova — replica o chrome da entrega real (Pearson VUE / Microsoft):
    barra superior clara, área única de conteúdo, barra de ações fixa embaixo.
    ========================================================================== */

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using AzurePrep.Application.Exames;
 using AzurePrep.Web.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AzurePrep.Web.Controllers;
@@ -20,6 +21,9 @@ public class HomeController : Controller
         return View(exams);
     }
 
+    // A página de erro precisa responder mesmo para quem não está logado — caso contrário
+    // uma falha durante o login viraria um laço de redirecionamento para /conta/login.
+    [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
