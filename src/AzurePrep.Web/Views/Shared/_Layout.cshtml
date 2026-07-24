@@ -4,14 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] · AzurePrep</title>
+    <partial name="_Favicon" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header class="site-header">
         <div class="site-header__inner">
             <a class="site-brand" asp-controller="Home" asp-action="Index">
-                <span class="site-brand__mark">AzurePrep</span>
-                <span class="site-brand__sub">Simulados de certificação Microsoft</span>
+                <img class="site-brand__logo" src="~/img/icone-192.png" asp-append-version="true"
+                     width="36" height="36" alt="" />
+                <span class="site-brand__text">
+                    <span class="site-brand__mark">AzurePrep</span>
+                    <span class="site-brand__sub">Simulados de certificação Microsoft</span>
+                </span>
             </a>
 
             @if (User.Identity?.IsAuthenticated == true)

@@ -1,0 +1,12 @@
+@*
+    Ícones da aba/atalho, centralizados aqui porque as telas de login e de prova têm
+    Layout = null e cada uma monta o próprio <head> — sem este partial os três heads
+    divergiriam com o tempo.
+
+    O favicon.ico (16/32/48 embutidos) cobre o pedido automático do browser por
+    /favicon.ico e os navegadores antigos; os PNGs cobrem o resto.
+*@
+<link rel="icon" href="~/favicon.ico" sizes="any" />
+<link rel="icon" type="image/png" sizes="32x32" href="~/img/icone-32.png" asp-append-version="true" />
+<link rel="icon" type="image/png" sizes="16x16" href="~/img/icone-16.png" asp-append-version="true" />
+<link rel="apple-touch-icon" sizes="180x180" href="~/img/icone-180.png" asp-append-version="true" />

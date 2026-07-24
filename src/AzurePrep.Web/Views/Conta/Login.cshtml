@@ -18,14 +18,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Entrar · AzurePrep</title>
+    <partial name="_Favicon" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="login-body">
     <main class="login">
         <div class="login__card">
             <div class="login__brand">
-                <span class="login__mark">AzurePrep</span>
-                <span class="login__sub">Simulados de certificação Microsoft</span>
+                @* A logo já traz o nome e o descritivo, então aqui ela substitui o texto
+                   em vez de duplicá-lo — o alt cobre quem não carrega a imagem. *@
+                <span class="login__logo">
+                    <img src="~/img/logo-azureprep.png" asp-append-version="true"
+                         width="180" height="180" decoding="async"
+                         alt="AzurePrep — simulados para exames Azure" />
+                </span>
             </div>
 
             <h1 class="login__title">Entrar</h1>
