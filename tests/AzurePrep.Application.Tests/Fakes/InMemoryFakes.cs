@@ -1,7 +1,37 @@
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Domain.Entidades;
+using AzurePrep.Domain.Enums;
 
 namespace AzurePrep.Application.Tests.Fakes;
+
+/// <summary>Usuário logado controlável — trocar o Id simula outra pessoa na mesma sessão.</summary>
+public sealed class FakeUsuarioAtual : IUsuarioAtual
+{
+    public FakeUsuarioAtual(Guid? id = null) => Id = id ?? Guid.NewGuid();
+    public Guid? Id { get; set; }
+}
+
+public sealed class InMemoryUsuarioRepository : IUsuarioRepository
+{
+    private readonly List<Usuario> _usuarios = new();
+
+    public IReadOnlyList<Usuario> Todos => _usuarios;
+
+    public Task<Usuario?> ObterPorProvedorAsync(
+        ProvedorDeLogin provider,
+        string providerKey,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(_usuarios.FirstOrDefault(u => u.Provider == provider && u.ProviderKey == providerKey));
+
+    public Task<Usuario?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
+        => Task.FromResult(_usuarios.FirstOrDefault(u => u.Id == id));
+
+    public Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default)
+    {
+        _usuarios.Add(usuario);
+        return Task.CompletedTask;
+    }
+}
 
 /// <summary>Relógio controlável para testar tempo restante e finalização.</summary>
 public sealed class FixedClock : IClock

@@ -1,6 +1,8 @@
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Application.Contracts;
 using AzurePrep.Application.Sessoes;
+using AzurePrep.Domain.Entidades;
+using AzurePrep.Domain.Enums;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Repositories;
 using AzurePrep.Infrastructure.Time;
@@ -28,16 +30,42 @@ public sealed class SessaoDeProvaPersistenceTests : IDisposable
         using var ctx = CreateContext();
         ctx.Database.EnsureCreated();
         AzurePrepDbSeeder.SemearAsync(ctx).GetAwaiter().GetResult();
+
+        // A tentativa tem FK obrigatória para Users, e o SQLite valida FK — o dono
+        // precisa existir antes de qualquer tentativa ser gravada.
+        ctx.Users.Add(new Usuario(
+            ProvedorDeLogin.Google,
+            providerKey: "provider-key-de-teste",
+            name: "Candidato de Teste",
+            email: "teste@example.com",
+            avatarUrl: null,
+            createdAt: _clock.UtcNow,
+            id: _usuarioId));
+        ctx.SaveChanges();
     }
 
     private AzurePrepDbContext CreateContext()
         => new(new DbContextOptionsBuilder<AzurePrepDbContext>().UseSqlite(_connection).Options);
 
     // Cada "request" recebe seu próprio contexto e serviço (como no ciclo scoped da web).
+    // Todas as "requests" do teste representam a mesma pessoa logada.
+    private static readonly Guid _usuarioId = Guid.NewGuid();
+    private readonly IUsuarioAtual _usuario = new FixedUsuarioAtual(_usuarioId);
+
     private (SessaoDeProvaService service, AzurePrepDbContext ctx) NewRequest()
     {
         var ctx = CreateContext();
-        return (new SessaoDeProvaService(new ExameRepository(ctx), new TentativaDeProvaRepository(ctx), ctx, _clock), ctx);
+        return (new SessaoDeProvaService(
+            new ExameRepository(ctx),
+            new TentativaDeProvaRepository(ctx),
+            ctx,
+            _clock,
+            _usuario), ctx);
+    }
+
+    private sealed class FixedUsuarioAtual(Guid id) : IUsuarioAtual
+    {
+        public Guid? Id { get; } = id;
     }
 
     private async Task<Guid> GetSeededExamIdAsync()

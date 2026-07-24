@@ -28,14 +28,22 @@ public class SessaoDeProvaServiceTests
 
     private static (SessaoDeProvaService service, Exame exam, FixedClock clock) BuildService()
     {
+        var (service, exam, clock, _) = BuildServiceComUsuario();
+        return (service, exam, clock);
+    }
+
+    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario) BuildServiceComUsuario()
+    {
         var exam = BuildExam();
         var clock = new FixedClock(Iniciar);
+        var usuario = new FakeUsuarioAtual();
         var service = new SessaoDeProvaService(
             new InMemoryExamRepository(exam),
             new InMemoryExamAttemptRepository(),
             new FakeUnitOfWork(),
-            clock);
-        return (service, exam, clock);
+            clock,
+            usuario);
+        return (service, exam, clock, usuario);
     }
 
     private static Guid CorrectOption(QuestaoDto q) => q.Options.First().Id; // OrderIndex 0 = correta neste seed de teste
@@ -179,5 +187,49 @@ public class SessaoDeProvaServiceTests
 
         // Segundo finish não deve re-corrigir nem mudar o horário de finalização.
         Assert.Equal(finishedAt, second!.FinishedAt);
+    }
+
+    // ---- Isolamento entre usuários --------------------------------------
+    // Ids de tentativa aparecem na URL. Sem a checagem de posse, trocar o Guid daria
+    // acesso à prova de outra pessoa — inclusive para alterar respostas dela.
+
+    [Fact]
+    public async Task Attempt_DeOutroUsuario_NaoEhVisivel()
+    {
+        var (service, exam, _, usuario) = BuildServiceComUsuario();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        usuario.Id = Guid.NewGuid(); // outra pessoa, mesma aplicação
+
+        Assert.Null(await service.ObterEstadoAsync(attemptId));
+        Assert.Null(await service.ObterQuestaoAsync(attemptId, 1));
+        Assert.Null(await service.ObterResultadoAsync(attemptId));
+    }
+
+    [Fact]
+    public async Task SalvarResposta_EmAttemptDeOutroUsuario_Falha()
+    {
+        var (service, exam, _, usuario) = BuildServiceComUsuario();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+        var question = await service.ObterQuestaoAsync(attemptId, 1);
+
+        usuario.Id = Guid.NewGuid();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.SalvarRespostaAsync(new SalvarRespostaRequest(
+                attemptId,
+                question!.Id,
+                new[] { CorrectOption(question) },
+                false,
+                10)));
+    }
+
+    [Fact]
+    public async Task IniciarTentativa_SemUsuarioLogado_Falha()
+    {
+        var (service, exam, _, usuario) = BuildServiceComUsuario();
+        usuario.Id = null;
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.IniciarTentativaAsync(exam.Id));
     }
 }
