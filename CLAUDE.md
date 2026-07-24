@@ -17,7 +17,7 @@ Se em algum momento o Claude Code (ou eu) sugerir "buscar questões que caíram 
 - .NET 10, ASP.NET Core MVC
 - EF Core + SQLite (`Microsoft.Data.Sqlite`)
 - xUnit para testes — **prioridade desde o início**, não deixar pra depois (gap conhecido a corrigir neste projeto)
-- UI: priorizar fidelidade visual ao ambiente de prova real (timer fixo no topo, painel de navegação lateral com status por questão, cores neutras) sobre qualquer frescura visual
+- UI: priorizar fidelidade visual ao ambiente de prova real (timer fixo no topo, navegação linear + tela de revisão, cores neutras) sobre qualquer frescura visual
 
 ## Arquitetura
 
@@ -37,20 +37,26 @@ AzurePrep.sln
 
 Dependências: `Web` → `Application` + `Infrastructure`; `Infrastructure` → `Application`; `Application` → `Domain`.
 
-## Modelo de domínio (rascunho inicial — ajustar durante o desenvolvimento)
+## Modelo de domínio (nomes de tipo em português; propriedades em inglês = colunas do banco)
 
-- **Exam** — Id, Code (ex: "AZ-900"), Name, TimeLimitMinutes, PassingScorePercent, TotalQuestions
-- **SkillArea** — Id, ExamId, Name, WeightPercent (ex: "Descrever conceitos de nuvem — 25-30%")
-- **Question** — Id, ExamId, SkillAreaId, Text, Type (SingleChoice, MultipleChoice, YesNo), Explanation
-- **AnswerOption** — Id, QuestionId, Text, IsCorrect, OrderIndex
-- **ExamAttempt** — Id, ExamId, StartedAt, FinishedAt, ScorePercent, Passed
-- **ExamAttemptAnswer** — Id, ExamAttemptId, QuestionId, SelectedOptionIds, IsFlaggedForReview, TimeSpentSeconds
+- **Exame** (`Exam`) — Id, Code (ex: "AZ-900"), Name, TimeLimitMinutes, PassingScorePercent, TotalQuestions
+- **AreaDeHabilidade** (`SkillArea`) — Id, ExamId, Name, WeightPercent (ex: "Descrever conceitos de nuvem — 25-30%")
+- **Questao** (`Question`) — Id, ExamId, SkillAreaId, Text, Type (`TipoDeQuestao`: EscolhaUnica, EscolhaMultipla, SimNao), Explanation
+- **OpcaoDeResposta** (`AnswerOption`) — Id, QuestionId, Text, IsCorrect, OrderIndex
+- **TentativaDeProva** (`ExamAttempt`) — Id, ExamId, StartedAt, FinishedAt, ScorePercent, Passed
+- **RespostaDaTentativa** (`ExamAttemptAnswer`) — Id, ExamAttemptId, QuestionId, SelectedOptionIds, IsFlaggedForReview, TimeSpentSeconds
+
+> Nota (nomes entre parênteses): o modelo foi traduzido para português nos **tipos e métodos**; as **propriedades** e o **schema do banco** (nomes de tabela/coluna, fixados por `ToTable`/convenção) seguem em inglês. Correção: `CorretorDeProva` (era `ExamGrader`); placares: `PlacarDaProva`/`PlacarPorArea`. Serviços: `CatalogoDeExamesService`, `SessaoDeProvaService`. Repositórios: `IExameRepository`, `ITentativaDeProvaRepository`.
+
+> **Nota exibida ≠ percentual armazenado.** `PassingScorePercent` continua sendo a regra de negócio (é o que define `Passed`), mas nunca aparece na UI. `EscalaDeNota` converte o percentual para a escala 1–1000 ancorando o percentual de corte do exame em exatamente 700 — assim a nota mostrada e o veredito jamais se contradizem. A escala real da Microsoft é derivada de Teoria de Resposta ao Item e nunca é divulgada; a nossa é uma aproximação linear por partes, deliberadamente documentada como tal.
 
 ## Fluxo da prova (o coração do diferencial)
 
 1. Tela inicial → botão "Iniciar Simulado"
-2. Tela de questão: timer regressivo fixo, número da questão (ex: "12 de 40"), painel lateral com status de cada questão (não respondida / respondida / marcada para revisão), botão "marcar para revisão", navegação anterior/próxima
-3. Ao zerar o tempo ou finalizar manualmente → tela de resultado com score, aprovado/reprovado (baseado no `PassingScorePercent`), revisão questão a questão com explicação
+2. Tela de questão: timer regressivo fixo, indicador "Item 12 de 40", navegação **linear** (Anterior / Próxima), toggle "Marcar para revisão", botão "Comentários"
+3. Tela de revisão (acessível a qualquer momento): tabela de todos os itens com status Completo / Incompleto / Não visto + coluna Marcado, filtros por categoria, clique na linha volta ao item
+4. Ao zerar o tempo ou encerrar manualmente → **score report** na escala 1–1000 (corte 700) com desempenho por domínio
+5. A revisão questão a questão com gabarito e explicação é uma **tela separada**, acessada a partir do score report — não faz parte da simulação
 
 ## Metodologia de criação de questões (o que dá a dificuldade real)
 
@@ -66,23 +72,27 @@ O objetivo é uma questão que **quem só decorou termo erra, e quem entende o c
 
 ## Especificação da interface de prova (fidelidade é o produto)
 
-Isso não é "nice to have", é o diferencial do AzurePrep. Elementos obrigatórios:
+Isso não é "nice to have", é o diferencial do AzurePrep. A referência de calibração é o **exam sandbox oficial da Microsoft** (`aka.ms/examdemo`) — demo pública da interface de entrega, não é dump de conteúdo. Elementos obrigatórios:
 
-- **Header fixo**: código/nome do exame + timer regressivo (formato MM:SS ou HH:MM:SS), sempre visível, sem precisar rolar a página
-- **Indicador de posição**: "Questão 12 de 40"
-- **Opções de resposta**: radio button pra single choice; checkbox pra multiple response, com texto "(Selecione duas)" explícito acima das opções
-- **Painel de navegação lateral**: grid com o número de todas as questões, cor/ícone por status — não respondida, respondida, marcada para revisão. Clicar em qualquer número pula direto pra aquela questão
-- **Barra inferior**: botões Anterior / Próxima, toggle "Marcar para revisão", botão "Ir para revisão"
-- **Tela de revisão final** (antes de submeter): lista de todas as questões com status, permite voltar e alterar qualquer resposta, modal de confirmação em "Finalizar prova"
-- **Tela de resultado**: score %, aprovado/reprovado, breakdown por skill area (como um score report real), modo de revisão questão a questão com explicação
+- **Barra superior fixa**: código/nome do exame à esquerda, "Tempo restante" + relógio HH:MM:SS à direita. Fundo claro (cinza), texto escuro — o chrome da prova real é discreto, não uma faixa colorida
+- **Indicador de posição**: "Item 12 de 40", no topo da área da questão
+- **Opções de resposta**: radio pra single choice, checkbox pra multiple response. Sem "cartão"/borda por alternativa — é radio + texto, com hover e destaque de selecionada
+- **Fraseado padronizado**, derivado do modelo e não hardcoded: "Escolha duas." (quantidade vem de `RequiredSelections`), "OBSERVAÇÃO: Cada seleção correta vale um ponto." em múltipla resposta, e a instrução Sim/Não nos itens de afirmação
+- **Barra de ações fixa no rodapé**: à esquerda "Marcar para revisão" e "Comentários"; à direita "Tela de revisão", "Anterior", "Próxima". No último item, "Próxima" dá lugar a "Encerrar prova"
+- ⚠️ **Sem painel de navegação lateral.** A prova real não tem grid de questões — a navegação é linear e o único jeito de saltar entre itens é pela tela de revisão. Não reintroduzir
+- **Tela de revisão**: substitui a área da questão (não é modal). Tabela Item / Status / Marcado, com status **Completo, Incompleto, Não visto** — múltipla resposta parcialmente marcada é Incompleto. Filtros "Revisar todos / incompletos / marcados". Clique na linha volta ao item. Modal de confirmação em "Encerrar prova", com aviso de que não dá pra voltar
+- **Score report**: nota na **escala 1–1000, corte em 700** (nunca percentual), veredito aprovado/reprovado, régua da escala e barras por domínio **sem números** — igual ao relatório real, que não revela contagem de acertos nem quais itens foram errados
+- **Revisão de estudo**: tela à parte (`exam/{id}/review`), com gabarito, explicação por distrator e números por domínio. Deve deixar explícito que não existe na prova real
 - **Estilo visual**: neutro e sério — tons de azul/cinza/branco, nada de gamificação, emoji ou cor vibrante. Tem que parecer ambiente de prova, não app de quiz
 - **Timer zerado = submissão automática**, sem exceção
 - Fluxo deve se comportar como SPA (AJAX/partial views no MVC) — sem recarregar a página inteira a cada navegação de questão, pra não quebrar a imersão
 
 ## Convenções de código
 
-- SOLID; nomes de classes/métodos/variáveis em inglês; comentários em português quando ajudarem
-- Clean Architecture + DDD leve, mesmo padrão dos outros projetos .NET
+- **Idioma (decisão do projeto):** o domínio é em **português** — nomes de **tipos** (classes/interfaces/enums/records), **métodos**, **arquivos, pastas e namespaces de negócio**. Comentários também em português.
+  - **Mantém-se em inglês:** termos de framework/convenção .NET (`Controller`, `DbContext`, `Repository`, `Service`, `Dto`, `Request`, `ViewModel`, `Configuration`, `UnitOfWork`, `Entity`, `Guard`), as pastas de convenção do MVC (`Controllers`, `Views`, `Models`) e de infra (`Persistence`, `Repositories`, `Configurations`), as **propriedades das entidades** e o **schema do banco** (tabelas/colunas) — para não poluir com `HasColumnName` e manter portabilidade.
+  - Sufixo técnico + raiz de negócio, ex.: `IExameRepository`, `SessaoDeProvaService`, `QuestaoDto`, `ExameController`, `RealizarProvaViewModel`.
+- SOLID; Clean Architecture + DDD leve, mesmo padrão dos outros projetos .NET
 - AutoMapper entre Domain e DTOs/ViewModels quando fizer sentido
 - Testes unitários (xUnit) desde a primeira etapa — objetivo explícito do projeto, não é opcional
 
