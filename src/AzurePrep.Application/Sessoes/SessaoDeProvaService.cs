@@ -11,34 +11,55 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
     private readonly ITentativaDeProvaRepository _attemptRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
+    private readonly IUsuarioAtual _usuarioAtual;
 
     public SessaoDeProvaService(
         IExameRepository examRepository,
         ITentativaDeProvaRepository attemptRepository,
         IUnitOfWork unitOfWork,
-        IClock clock)
+        IClock clock,
+        IUsuarioAtual usuarioAtual)
     {
         _examRepository = examRepository;
         _attemptRepository = attemptRepository;
         _unitOfWork = unitOfWork;
         _clock = clock;
+        _usuarioAtual = usuarioAtual;
     }
 
     public async Task<Guid> IniciarTentativaAsync(Guid examId, CancellationToken cancellationToken = default)
     {
+        var userId = _usuarioAtual.Id
+                     ?? throw new InvalidOperationException("É preciso estar autenticado para iniciar uma tentativa.");
+
         var exam = await _examRepository.ObterPorIdAsync(examId, cancellationToken)
                    ?? throw new InvalidOperationException($"Exame {examId} não encontrado.");
 
-        var attempt = new TentativaDeProva(exam.Id, _clock.UtcNow);
+        var attempt = new TentativaDeProva(exam.Id, userId, _clock.UtcNow);
         await _attemptRepository.AdicionarAsync(attempt, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return attempt.Id;
     }
 
-    public async Task<EstadoDaTentativaDto?> ObterEstadoAsync(Guid attemptId, CancellationToken cancellationToken = default)
+    /// <summary>
+    /// Carrega a tentativa só se ela pertencer a quem está logado. Devolver <c>null</c> para
+    /// tentativa de outro dono faz o Web responder 404 — não confirma que o id existe.
+    /// </summary>
+    private async Task<TentativaDeProva?> ObterTentativaDoUsuarioAsync(Guid attemptId, CancellationToken cancellationToken)
     {
         var attempt = await _attemptRepository.ObterPorIdAsync(attemptId, cancellationToken);
+        if (attempt is null || attempt.UserId != _usuarioAtual.Id)
+        {
+            return null;
+        }
+
+        return attempt;
+    }
+
+    public async Task<EstadoDaTentativaDto?> ObterEstadoAsync(Guid attemptId, CancellationToken cancellationToken = default)
+    {
+        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
         if (attempt is null)
         {
             return null;
@@ -80,7 +101,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<QuestaoDto?> ObterQuestaoAsync(Guid attemptId, int number, CancellationToken cancellationToken = default)
     {
-        var attempt = await _attemptRepository.ObterPorIdAsync(attemptId, cancellationToken);
+        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
         if (attempt is null)
         {
             return null;
@@ -119,7 +140,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task SalvarRespostaAsync(SalvarRespostaRequest request, CancellationToken cancellationToken = default)
     {
-        var attempt = await _attemptRepository.ObterPorIdAsync(request.AttemptId, cancellationToken)
+        var attempt = await ObterTentativaDoUsuarioAsync(request.AttemptId, cancellationToken)
                       ?? throw new InvalidOperationException($"Tentativa {request.AttemptId} não encontrada.");
 
         if (attempt.IsFinished)
@@ -147,7 +168,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<ResultadoDaProvaDto?> FinalizarTentativaAsync(Guid attemptId, CancellationToken cancellationToken = default)
     {
-        var attempt = await _attemptRepository.ObterPorIdAsync(attemptId, cancellationToken);
+        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
         if (attempt is null)
         {
             return null;
@@ -173,7 +194,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<ResultadoDaProvaDto?> ObterResultadoAsync(Guid attemptId, CancellationToken cancellationToken = default)
     {
-        var attempt = await _attemptRepository.ObterPorIdAsync(attemptId, cancellationToken);
+        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
         if (attempt is null || !attempt.IsFinished)
         {
             return null;
