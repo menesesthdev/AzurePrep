@@ -2,6 +2,18 @@
 @{
     Layout = null;
     var erro = Context.Request.Query.ContainsKey("erro");
+    var senhaAlterada = Context.Request.Query.ContainsKey("senhaAlterada");
+
+    // Chega por redirect do limitador de requisições (OnRejected), não por ação do controller.
+    var limiteAtingido = Context.Request.Query.ContainsKey("limite");
+
+    // Erros que não pertencem a um campo — hoje, "e-mail ou senha incorretos". Renderizados
+    // à mão em vez de asp-validation-summary porque o summary emite marcação vazia quando
+    // não há erro, e aí o espaçamento do card muda sem nada na tela.
+    var falhaDeCredencial = ViewData.ModelState.TryGetValue(string.Empty, out var geral)
+                            && geral.Errors.Count > 0
+        ? geral.Errors[0].ErrorMessage
+        : null;
 
     // Rótulo e glifo de cada provedor. O SVG é inline para não haver requisição extra
     // nem dependência externa na primeira tela que a pessoa vê.
@@ -36,8 +48,24 @@
 
             <h1 class="login__title">Entrar</h1>
             <p class="login__lead">
-                Use uma conta que você já tem. Não criamos senha e não pedimos cadastro.
+                Use seu e-mail e senha, ou entre com uma conta que você já tem.
             </p>
+
+            @if (senhaAlterada)
+            {
+                <p class="login__sucesso" role="status">
+                    Senha alterada. Entre com a nova senha.
+                </p>
+            }
+
+            @if (limiteAtingido)
+            {
+                @* Aviso por IP, não por conta: não revela se algum e-mail tem cadastro aqui. *@
+                <p class="login__error" role="alert">
+                    Muitas tentativas a partir deste computador. Aguarde alguns minutos e
+                    tente de novo.
+                </p>
+            }
 
             @if (erro)
             {
@@ -46,16 +74,40 @@
                 </p>
             }
 
-            @if (Model.Provedores.Count == 0)
+            @if (falhaDeCredencial is not null)
             {
-                <p class="login__error" role="alert">
-                    Nenhum provedor de login está configurado. Cadastre as credenciais em
-                    <code>Authentication:Google</code>, <code>Authentication:LinkedIn</code> ou
-                    <code>Authentication:GitHub</code>.
-                </p>
+                <p class="login__error" role="alert">@falhaDeCredencial</p>
             }
-            else
+
+            <form class="auth-form" asp-action="EntrarComSenha" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+
+                <div class="field">
+                    <label class="field__label" asp-for="Email"></label>
+                    <input class="field__input" asp-for="Email" type="email"
+                           autocomplete="email" autocapitalize="none" spellcheck="false"
+                           placeholder="voce@exemplo.com" />
+                    <span class="field__error" asp-validation-for="Email"></span>
+                </div>
+
+                <div class="field">
+                    <div class="field__linha">
+                        <label class="field__label" asp-for="Senha"></label>
+                        <a class="field__acao" asp-action="EsqueciSenha">Esqueci minha senha</a>
+                    </div>
+                    <input class="field__input" asp-for="Senha" type="password"
+                           autocomplete="current-password" />
+                    <span class="field__error" asp-validation-for="Senha"></span>
+                </div>
+
+                <button type="submit" class="btn btn--primary auth-form__submit">Entrar</button>
+            </form>
+
+            @if (Model.Provedores.Count > 0)
             {
+                <div class="login__divider"><span>ou continue com</span></div>
+
                 <div class="login__providers">
                     @foreach (var scheme in Model.Provedores)
                     {
@@ -98,6 +150,11 @@
                     }
                 </div>
             }
+
+            <p class="login__alt">
+                Não tem conta?
+                <a asp-action="Cadastrar" asp-route-returnUrl="@Model.ReturnUrl">Cadastrar</a>
+            </p>
 
             <p class="login__legal">
                 Ao entrar, você concorda que usamos sua conta apenas para identificar suas

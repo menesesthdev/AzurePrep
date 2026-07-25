@@ -17,6 +17,10 @@ public sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         builder.Property(u => u.Name).IsRequired().HasMaxLength(200);
         builder.Property(u => u.Email).HasMaxLength(320);
         builder.Property(u => u.AvatarUrl).HasMaxLength(500);
+
+        // Nulo em conta social — só a conta local tem senha nossa. O tamanho cobre com folga
+        // o formato "pbkdf2-sha256$iteracoes$salt$hash" e deixa espaço para um algoritmo futuro.
+        builder.Property(u => u.PasswordHash).HasMaxLength(400);
         builder.Property(u => u.CreatedAt).IsRequired();
         builder.Property(u => u.LastLoginAt).IsRequired();
 

@@ -14,8 +14,11 @@ public sealed class FakeUsuarioAtual : IUsuarioAtual
 public sealed class InMemoryUsuarioRepository : IUsuarioRepository
 {
     private readonly List<Usuario> _usuarios = new();
+    private readonly List<TokenDeRedefinicaoDeSenha> _tokens = new();
 
     public IReadOnlyList<Usuario> Todos => _usuarios;
+
+    public IReadOnlyList<TokenDeRedefinicaoDeSenha> Tokens => _tokens;
 
     public Task<Usuario?> ObterPorProvedorAsync(
         ProvedorDeLogin provider,
@@ -26,10 +29,67 @@ public sealed class InMemoryUsuarioRepository : IUsuarioRepository
     public Task<Usuario?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
         => Task.FromResult(_usuarios.FirstOrDefault(u => u.Id == id));
 
+    // Em memória não existe diferença entre rastreado e não rastreado: a instância é a mesma.
+    public Task<Usuario?> ObterPorIdParaAtualizacaoAsync(Guid id, CancellationToken cancellationToken = default)
+        => ObterPorIdAsync(id, cancellationToken);
+
     public Task AdicionarAsync(Usuario usuario, CancellationToken cancellationToken = default)
     {
         _usuarios.Add(usuario);
         return Task.CompletedTask;
+    }
+
+    public Task AdicionarTokenDeRedefinicaoAsync(
+        TokenDeRedefinicaoDeSenha token,
+        CancellationToken cancellationToken = default)
+    {
+        _tokens.Add(token);
+        return Task.CompletedTask;
+    }
+
+    public Task<TokenDeRedefinicaoDeSenha?> ObterTokenDeRedefinicaoAsync(
+        string tokenHash,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(_tokens.FirstOrDefault(t => t.TokenHash == tokenHash));
+
+    public Task<IReadOnlyList<TokenDeRedefinicaoDeSenha>> ObterTokensAtivosDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<TokenDeRedefinicaoDeSenha>>(
+            _tokens.Where(t => t.UserId == userId && t.UsedAt is null).ToList());
+}
+
+/// <summary>
+/// Gerador previsível: token sequencial e hash com prefixo. Determinístico para o teste poder
+/// afirmar qual token foi emitido — a aleatoriedade de verdade é do
+/// <c>GeradorDeTokenSeguro</c>, coberto na Infrastructure.
+/// </summary>
+public sealed class FakeGeradorDeTokenSeguro : IGeradorDeTokenSeguro
+{
+    private int _contador;
+
+    public string UltimoGerado { get; private set; } = string.Empty;
+
+    public string Gerar() => UltimoGerado = $"token-{++_contador}";
+
+    public string Hash(string token) => $"hash:{token}";
+}
+
+/// <summary>
+/// Hasher determinístico e barato. O PBKDF2 real custa centenas de milissegundos por chamada
+/// de propósito — usá-lo aqui tornaria a suíte lenta sem testar nada da regra de cadastro.
+/// A derivação de verdade é coberta em <c>HasherDeSenhaPbkdf2Tests</c>.
+/// </summary>
+public sealed class FakeHasherDeSenha : IHasherDeSenha
+{
+    public int ChamadasDeVerificacao { get; private set; }
+
+    public string Hash(string senha) => $"fake:{senha}";
+
+    public bool Verificar(string senha, string hash)
+    {
+        ChamadasDeVerificacao++;
+        return hash == $"fake:{senha}";
     }
 }
 

@@ -23,7 +23,7 @@ src/AzurePrep.Web/App_Data/*.db*
 *.suo
 
 # Config local do Claude Code (específica da máquina, não compartilhada)
-.claude/settings.local.json
+.claude/
 
 # .NET
 project.lock.json

@@ -3,6 +3,7 @@ using System;
 using AzurePrep.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AzurePrep.Infrastructure.Migrations
 {
     [DbContext(typeof(AzurePrepDbContext))]
-    partial class AzurePrepDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260725011427_SenhaDeContaLocal")]
+    partial class SenhaDeContaLocal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
@@ -201,39 +204,6 @@ namespace AzurePrep.Infrastructure.Migrations
                     b.ToTable("ExamAttempts", (string)null);
                 });
 
-            modelBuilder.Entity("AzurePrep.Domain.Entidades.TokenDeRedefinicaoDeSenha", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UsedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("PasswordResetTokens", (string)null);
-                });
-
             modelBuilder.Entity("AzurePrep.Domain.Entidades.Usuario", b =>
                 {
                     b.Property<Guid>("Id")
@@ -251,13 +221,7 @@ namespace AzurePrep.Infrastructure.Migrations
                         .HasMaxLength(320)
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("FailedLoginAttempts")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTime>("LastLoginAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("LockoutEndsAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -335,15 +299,6 @@ namespace AzurePrep.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AzurePrep.Domain.Entidades.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AzurePrep.Domain.Entidades.TokenDeRedefinicaoDeSenha", b =>
-                {
                     b.HasOne("AzurePrep.Domain.Entidades.Usuario", null)
                         .WithMany()
                         .HasForeignKey("UserId")

@@ -131,8 +131,10 @@ a { color: var(--c-primary); }
 .exam-card__action { margin-top: auto; }
 
 /* ==========================================================================
-   Login — mesma paleta da prova. Uma decisão só na tela: escolher o provedor.
-   Sem campo de senha, sem cadastro, sem "esqueci minha senha".
+   Login e cadastro — mesma paleta da prova (azul/cinza/branco, sem cor
+   vibrante). Duas entradas na tela: e-mail e senha acima, provedores sociais
+   abaixo. O card é o mesmo nas duas telas, então o cadastro reaproveita
+   .login__* e só troca o conteúdo do formulário.
    ========================================================================== */
 .login-body {
     background: var(--c-bg);
@@ -238,7 +240,92 @@ a { color: var(--c-primary); }
 }
 .login__error code { font-size: .85em; }
 
+/* Confirmação (senha alterada). Verde discreto, o mesmo já usado para item respondido na
+   prova — sem parabéns nem emoji, no tom do resto do produto. */
+.login__sucesso {
+    margin: 0 0 20px;
+    padding: 12px 14px;
+    font-size: .9rem;
+    color: var(--c-answered);
+    background: #eef5f1;
+    border: 1px solid #cfe0d6;
+    border-radius: var(--radius);
+}
+
+.login__hint {
+    margin: 18px 0 0;
+    font-size: .85rem;
+    color: var(--c-text-muted);
+}
+
+/* ---- Formulário de e-mail e senha ---------------------------------------
+   Campos empilhados, rótulo acima do controle e erro logo abaixo dele: é a
+   ordem em que o leitor de tela anuncia e a que não desloca o resto do card
+   quando uma mensagem aparece.
+   -------------------------------------------------------------------------- */
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field__label { font-size: .85rem; font-weight: 600; color: var(--c-text); }
+.field__input {
+    font: inherit;
+    font-size: .95rem;
+    padding: 10px 12px;
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    background: var(--c-surface);
+    color: var(--c-text);
+    transition: border-color .12s ease, box-shadow .12s ease;
+}
+.field__input::placeholder { color: #9aa5b1; }
+.field__input:hover { border-color: var(--c-text-muted); }
+.field__input:focus {
+    outline: none;
+    border-color: var(--c-primary);
+    /* Anel discreto no azul do tema, no lugar do outline padrão do browser. */
+    box-shadow: 0 0 0 3px var(--c-primary-tint);
+}
+/* Rótulo e ação na mesma linha ("Senha" à esquerda, "Esqueci minha senha" à direita). */
+.field__linha { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.field__acao { font-size: .8rem; }
+
+.field__hint { font-size: .78rem; color: var(--c-text-muted); }
+.field__error { font-size: .8rem; color: var(--c-danger); }
+/* O tag helper de validação emite o span mesmo sem erro — vazio, não deve ocupar linha. */
+.field__error:empty { display: none; }
+.field__input.input-validation-error { border-color: var(--c-danger); }
+.field__input.input-validation-error:focus { box-shadow: 0 0 0 3px var(--c-danger-tint); }
+
+.auth-form__submit { margin-top: 4px; padding: 12px 16px; font-weight: 600; }
+
+/* Separador "ou continue com": a linha atravessa e o rótulo abre espaço nela. */
+.login__divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 18px;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--c-text-muted);
+}
+.login__divider::before,
+.login__divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--c-border);
+}
+
 .login__providers { display: flex; flex-direction: column; gap: 12px; }
+
+/* Caminho alternativo (cadastrar / entrar): presente, sem competir com o botão primário. */
+.login__alt {
+    margin: 22px 0 0;
+    text-align: center;
+    font-size: .9rem;
+    color: var(--c-text-muted);
+}
+.login__alt a { font-weight: 600; }
 
 /* Botão neutro com o glifo colorido da marca: o reconhecimento vem do ícone,
    então a paleta sóbria do projeto se mantém e o alvo continua óbvio. */
