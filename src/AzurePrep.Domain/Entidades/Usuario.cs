@@ -4,14 +4,17 @@ using AzurePrep.Domain.Enums;
 namespace AzurePrep.Domain.Entidades;
 
 /// <summary>
-/// Pessoa que usa o simulado. A identidade vem inteiramente de um provedor externo
-/// (Google, LinkedIn, GitHub) — o projeto não guarda senha nem hash de senha.
+/// Pessoa que usa o simulado. A identidade pode vir de um provedor externo (Google, LinkedIn,
+/// GitHub) ou de uma conta local com e-mail e senha — neste caso guardamos apenas o
+/// <see cref="PasswordHash"/>, nunca a senha em si.
 /// </summary>
 /// <remarks>
 /// A chave natural é o par <see cref="Provider"/> + <see cref="ProviderKey"/>, não o e-mail:
 /// a mesma pessoa pode ter o mesmo e-mail em dois provedores, e o GitHub pode nem devolver
-/// e-mail (o usuário escolhe mantê-lo privado). Vincular contas de provedores diferentes é
-/// um recurso à parte — hoje cada par gera um usuário.
+/// e-mail (o usuário escolhe mantê-lo privado). Na conta local a chave é o próprio e-mail
+/// normalizado, o que dá "uma conta local por e-mail" pelo mesmo índice único, sem regra nova.
+/// Vincular contas de provedores diferentes (ou somar senha a uma conta social) é um recurso
+/// à parte — hoje cada par gera um usuário.
 /// </remarks>
 public class Usuario : Entity
 {
@@ -20,6 +23,7 @@ public class Usuario : Entity
     {
     }
 
+    /// <summary>Conta vinda de provedor externo — sem senha nossa para guardar.</summary>
     public Usuario(
         ProvedorDeLogin provider,
         string providerKey,
@@ -30,6 +34,13 @@ public class Usuario : Entity
         Guid? id = null)
         : base(id ?? Guid.NewGuid())
     {
+        if (provider == ProvedorDeLogin.Local)
+        {
+            throw new ArgumentException(
+                $"Conta local deve ser criada por {nameof(CriarComSenha)}, que exige senha.",
+                nameof(provider));
+        }
+
         Provider = provider;
         ProviderKey = Guard.NotNullOrWhiteSpace(providerKey, nameof(providerKey));
         Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
@@ -39,9 +50,48 @@ public class Usuario : Entity
         LastLoginAt = createdAt;
     }
 
+    /// <summary>
+    /// Conta local. Recebe o hash já calculado: derivar senha é responsabilidade da
+    /// infraestrutura (custo, algoritmo, parâmetros), e o domínio segue sem dependências.
+    /// </summary>
+    public static Usuario CriarComSenha(
+        string name,
+        string email,
+        string passwordHash,
+        DateTime createdAt,
+        Guid? id = null)
+        => new(name, email, passwordHash, createdAt, id);
+
+    private Usuario(string name, string email, string passwordHash, DateTime createdAt, Guid? id)
+        : base(id ?? Guid.NewGuid())
+    {
+        var normalizado = NormalizarEmail(email);
+
+        Provider = ProvedorDeLogin.Local;
+        // Chave natural = e-mail normalizado, então o índice único (Provider, ProviderKey)
+        // já impede duas contas locais para o mesmo e-mail.
+        ProviderKey = normalizado;
+        Email = normalizado;
+        Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
+        PasswordHash = Guard.NotNullOrWhiteSpace(passwordHash, nameof(passwordHash));
+        CreatedAt = createdAt;
+        LastLoginAt = createdAt;
+    }
+
+    /// <summary>
+    /// Forma canônica do e-mail para comparação: sem espaços nas pontas e em minúsculas.
+    /// Sem isso "Ana@x.com" e "ana@x.com" criariam duas contas e o login falharia conforme
+    /// como a pessoa digitou.
+    /// </summary>
+    public static string NormalizarEmail(string email)
+        => Guard.NotNullOrWhiteSpace(email, nameof(email)).ToLowerInvariant();
+
     public ProvedorDeLogin Provider { get; private set; }
 
-    /// <summary>Identificador da pessoa dentro do provedor (claim NameIdentifier).</summary>
+    /// <summary>
+    /// Identificador da pessoa dentro do provedor (claim NameIdentifier). Na conta local,
+    /// o e-mail normalizado.
+    /// </summary>
     public string ProviderKey { get; private set; } = string.Empty;
 
     public string Name { get; private set; } = string.Empty;
@@ -51,9 +101,18 @@ public class Usuario : Entity
 
     public string? AvatarUrl { get; private set; }
 
+    /// <summary>
+    /// Hash da senha, só em conta local — <c>null</c> em conta social, e é justamente esse
+    /// <c>null</c> que impede tentar validar senha contra quem nunca cadastrou uma.
+    /// </summary>
+    public string? PasswordHash { get; private set; }
+
     public DateTime CreatedAt { get; private set; }
 
     public DateTime LastLoginAt { get; private set; }
+
+    /// <summary>Conta com senha nossa, em oposição às que dependem de provedor externo.</summary>
+    public bool EhContaLocal => Provider == ProvedorDeLogin.Local;
 
     /// <summary>
     /// Reaplica o perfil vindo do provedor a cada login — nome, foto e e-mail mudam lá fora
@@ -78,4 +137,10 @@ public class Usuario : Entity
 
         LastLoginAt = at;
     }
+
+    /// <summary>
+    /// Carimba o acesso da conta local. Não há perfil a re-sincronizar: nome e e-mail só
+    /// mudam se a própria pessoa editar.
+    /// </summary>
+    public void RegistrarLoginLocal(DateTime at) => LastLoginAt = at;
 }
