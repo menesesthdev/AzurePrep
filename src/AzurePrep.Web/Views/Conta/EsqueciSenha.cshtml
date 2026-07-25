@@ -1,0 +1,77 @@
+@model EsqueciSenhaViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Esqueci minha senha · AzurePrep</title>
+    <partial name="_Favicon" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-body">
+    <main class="login">
+        <div class="login__card">
+            <div class="login__brand">
+                <span class="login__logo">
+                    <img src="~/img/logo-azureprep.png" asp-append-version="true"
+                         width="180" height="180" decoding="async"
+                         alt="AzurePrep — simulados para exames Azure" />
+                </span>
+            </div>
+
+            @if (Model.Enviado)
+            {
+                @* Confirmação idêntica exista ou não conta com esse e-mail: é o que impede a
+                   tela de servir para descobrir quem está cadastrado. *@
+                <h1 class="login__title">Verifique seu e-mail</h1>
+                <p class="login__lead">
+                    Se existe uma conta com senha para <strong>@Model.Email</strong>, enviamos um
+                    link para criar uma nova senha. O link vale por uma hora e serve uma única vez.
+                </p>
+                <p class="login__hint">
+                    Não recebeu? Confira a caixa de spam. Contas criadas com Google, LinkedIn ou
+                    GitHub não têm senha aqui — nesse caso, entre pelo botão do provedor.
+                </p>
+
+                <p class="login__alt">
+                    <a asp-action="Login">Voltar para o login</a>
+                </p>
+            }
+            else
+            {
+                <h1 class="login__title">Esqueci minha senha</h1>
+                <p class="login__lead">
+                    Informe o e-mail da sua conta. Enviaremos um link para você criar uma senha nova.
+                </p>
+
+                <form class="auth-form" asp-action="EsqueciSenha" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="field">
+                        <label class="field__label" asp-for="Email"></label>
+                        <input class="field__input" asp-for="Email" type="email"
+                               autocomplete="email" autocapitalize="none" spellcheck="false"
+                               placeholder="voce@exemplo.com" />
+                        <span class="field__error" asp-validation-for="Email"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary auth-form__submit">Enviar link</button>
+                </form>
+
+                <p class="login__alt">
+                    Lembrou a senha?
+                    <a asp-action="Login">Entrar</a>
+                </p>
+            }
+        </div>
+
+        <p class="login__footnote">
+            Questões 100% originais, escritas a partir do Skills Measured outline oficial.
+            Este simulado não reproduz conteúdo real de provas.
+        </p>
+    </main>
+</body>
+</html>

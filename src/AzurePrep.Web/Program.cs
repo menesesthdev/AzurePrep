@@ -2,20 +2,37 @@ using AzurePrep.Application;
 using AzurePrep.Infrastructure;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Web.Autenticacao;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Único diretório com estado que sobrevive ao processo: banco SQLite e chaves de criptografia.
+// Em container é ele que recebe o volume — o resto do sistema de arquivos é descartável.
+var diretorioDeDados = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+var diretorioDeChaves = Path.Combine(diretorioDeDados, "dp-keys");
+Directory.CreateDirectory(diretorioDeChaves);
 
 // Camadas da aplicação (Clean Architecture).
 builder.Services.AddControllersWithViews();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacaoSocial(builder.Configuration);
+builder.Services.AddLimiteDeTentativas();
+
+// As chaves do Data Protection cifram o cookie de autenticação e os tokens antiforgery. O padrão
+// as guarda numa pasta do perfil do usuário — que num container é disco efêmero: a cada restart
+// nasceriam chaves novas, derrubando todas as sessões e fazendo os formulários falharem com
+// "the antiforgery token could not be decrypted". Persistir junto do banco resolve os dois casos
+// (container e troca de máquina) e mantém um só diretório a preservar/backupear.
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(diretorioDeChaves))
+    .SetApplicationName("AzurePrep");
 
 var app = builder.Build();
 
-// Garante a pasta do SQLite, aplica migrations e semeia o banco no startup.
-Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data"));
+// Aplica migrations e semeia o banco no startup — é o que permite ao container subir com o
+// volume vazio e se auto-inicializar.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AzurePrepDbContext>();
@@ -42,10 +59,18 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Depois de Authentication/Authorization: assim o 429 não gasta cota de quem já está logado
+// navegando normalmente, e o limitador só vê o que chega aos endpoints marcados.
+app.UseRateLimiter();
+
 // MapStaticAssets mapeia wwwroot como ENDPOINTS, e a política de fallback (exige autenticação)
 // vale para todo endpoint sem metadata de autorização — inclusive esses. Sem AllowAnonymous o
 // CSS/JS responde 302 para a tela de login e a página carrega sem estilo nenhum.
 app.MapStaticAssets().AllowAnonymous();
+
+// Sinal de vida para orquestrador/proxy: responde sem tocar no banco e sem exigir login (a
+// política padrão exige autenticação, então precisa de AllowAnonymous explícito).
+app.MapGet("/health", () => Results.Ok("ok")).AllowAnonymous();
 
 app.MapControllerRoute(
     name: "default",

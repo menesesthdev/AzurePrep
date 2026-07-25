@@ -1,3 +1,4 @@
+using AzurePrep.Domain.Autenticacao;
 using AzurePrep.Domain.Common;
 using AzurePrep.Domain.Enums;
 
@@ -111,8 +112,18 @@ public class Usuario : Entity
 
     public DateTime LastLoginAt { get; private set; }
 
+    /// <summary>Falhas de senha consecutivas. Zera a cada login bem-sucedido.</summary>
+    public int FailedLoginAttempts { get; private set; }
+
+    /// <summary>
+    /// Instante até o qual a conta não aceita login. <c>null</c> quando não há bloqueio.
+    /// </summary>
+    public DateTime? LockoutEndsAt { get; private set; }
+
     /// <summary>Conta com senha nossa, em oposição às que dependem de provedor externo.</summary>
     public bool EhContaLocal => Provider == ProvedorDeLogin.Local;
+
+    public bool EstaBloqueada(DateTime agora) => LockoutEndsAt is { } fim && agora < fim;
 
     /// <summary>
     /// Reaplica o perfil vindo do provedor a cada login — nome, foto e e-mail mudam lá fora
@@ -139,8 +150,56 @@ public class Usuario : Entity
     }
 
     /// <summary>
-    /// Carimba o acesso da conta local. Não há perfil a re-sincronizar: nome e e-mail só
-    /// mudam se a própria pessoa editar.
+    /// Carimba o acesso da conta local e limpa o histórico de falhas. Não há perfil a
+    /// re-sincronizar: nome e e-mail só mudam se a própria pessoa editar.
     /// </summary>
-    public void RegistrarLoginLocal(DateTime at) => LastLoginAt = at;
+    public void RegistrarLoginLocal(DateTime at)
+    {
+        LastLoginAt = at;
+
+        // Acerto zera o contador: o limite é de falhas CONSECUTIVAS. Sem isso, quem erra a
+        // senha de vez em quando ao longo de meses acabaria bloqueado sem nunca ter sofrido
+        // ataque nenhum.
+        FailedLoginAttempts = 0;
+        LockoutEndsAt = null;
+    }
+
+    /// <summary>
+    /// Contabiliza uma senha errada e bloqueia a conta ao atingir
+    /// <see cref="PoliticaDeTentativasDeLogin.MaximoDeFalhas"/>.
+    /// </summary>
+    public void RegistrarFalhaDeLogin(DateTime at)
+    {
+        FailedLoginAttempts++;
+
+        if (FailedLoginAttempts >= PoliticaDeTentativasDeLogin.MaximoDeFalhas)
+        {
+            LockoutEndsAt = at.Add(PoliticaDeTentativasDeLogin.DuracaoDoBloqueio);
+
+            // Zera junto: o bloqueio já pagou por estas falhas. Se não zerasse, a primeira
+            // falha depois do bloqueio expirar bloquearia de novo na hora.
+            FailedLoginAttempts = 0;
+        }
+    }
+
+    /// <summary>
+    /// Troca a senha (redefinição por link) e devolve a conta ao estado limpo — inclusive
+    /// liberando bloqueio, porque quem provou controlar o e-mail é o dono e não deve ficar
+    /// preso pelas tentativas de quem o atacou.
+    /// </summary>
+    public void DefinirNovaSenha(string passwordHash, DateTime at)
+    {
+        if (!EhContaLocal)
+        {
+            // Definir senha numa conta social a converteria em local pela porta de trás,
+            // sem que a pessoa tenha pedido — e o (Provider, ProviderKey) dela nem casa
+            // com o de uma conta local.
+            throw new InvalidOperationException("Conta de provedor externo não tem senha para redefinir.");
+        }
+
+        PasswordHash = Guard.NotNullOrWhiteSpace(passwordHash, nameof(passwordHash));
+        FailedLoginAttempts = 0;
+        LockoutEndsAt = null;
+        LastLoginAt = at;
+    }
 }
