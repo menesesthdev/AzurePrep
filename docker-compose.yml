@@ -1,0 +1,29 @@
+name: azureprep
+
+services:
+  web:
+    build: .
+    image: azureprep:local
+    container_name: azureprep-web
+    restart: unless-stopped
+
+    ports:
+      # host:container — a aplicação escuta na 8080 por rodar sem privilégio.
+      - "8080:8080"
+
+    # Credenciais (OAuth, SMTP) vêm daqui. `dotnet user-secrets` NÃO existe dentro do container:
+    # é ferramenta de desenvolvimento e nem chega à imagem. Copie .env.exemplo para .env.
+    env_file:
+      - .env
+
+    volumes:
+      # O ÚNICO estado que precisa sobreviver: banco SQLite + chaves de Data Protection.
+      # Sem este volume, cada `docker compose up --build` começaria com banco vazio e chaves
+      # novas — todo usuário cadastrado perdido e todo cookie invalidado.
+      - dados:/app/App_Data
+
+volumes:
+  # Volume nomeado, não bind mount: o dono do diretório vem da imagem (usuário `app`), então a
+  # aplicação escreve sem ajuste de permissão no host. Bind mount de pasta do host entraria com
+  # o UID do host e o processo sem privilégio não conseguiria gravar.
+  dados:

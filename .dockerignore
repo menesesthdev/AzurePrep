@@ -1,0 +1,41 @@
+# Tudo aqui deixa de ser enviado ao daemon do Docker no build. Além de acelerar, evita dois
+# problemas concretos: obj/ da máquina local quebrando o restore dentro do container (caminhos
+# absolutos diferentes) e o banco de desenvolvimento vazando para dentro da imagem.
+
+# Saída de build local
+**/bin/
+**/obj/
+artifacts/
+TestResults/
+[Cc]overage*/
+
+# Banco e chaves locais — o container tem os seus, no volume
+**/App_Data/
+**/*.db
+**/*.db-shm
+**/*.db-wal
+
+# Histórico e metadados do repositório
+.git/
+.gitignore
+.github/
+
+# Nada disso é usado em runtime
+tests/
+docs/
+assets/
+tools/
+*.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+.env
+.env.exemplo
+
+# IDE / ferramentas locais
+.vs/
+.vscode/
+.idea/
+.claude/
+*.user
+*.suo

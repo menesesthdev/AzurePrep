@@ -15,6 +15,9 @@ src/AzurePrep.Web/App_Data/*.db*
 # Documentação interna de sessões (não versionada)
 /docs/
 
+# Credenciais do container (OAuth, SMTP) — o modelo versionado é o .env.exemplo
+.env
+
 # IDE / usuário
 .vs/
 .vscode/
