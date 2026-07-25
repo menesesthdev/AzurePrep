@@ -7,6 +7,7 @@ using AzurePrep.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AzurePrep.Infrastructure;
 
@@ -69,7 +70,12 @@ public static class DependencyInjection
         }
         else
         {
-            services.AddSingleton<IEnviadorDeEmail, EnviadorDeEmailParaLog>();
+            // O motivo é calculado aqui, onde a configuração está à mão, e viaja até a mensagem
+            // de log — assim quem for buscar o link no console já lê qual chave está faltando.
+            var motivo = opcoes.MotivoDeNaoEnviar();
+            services.AddSingleton<IEnviadorDeEmail>(sp => new EnviadorDeEmailParaLog(
+                sp.GetRequiredService<ILogger<EnviadorDeEmailParaLog>>(),
+                motivo));
         }
     }
 }

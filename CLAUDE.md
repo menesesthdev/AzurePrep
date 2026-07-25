@@ -178,6 +178,12 @@ dotnet user-secrets set "Email:RemetenteEndereco"  "seu-endereco@gmail.com"
 `EnviadorDeEmailParaLog`: a mensagem inteira aparece no console em nível Warning e você copia o
 link do terminal. É o suficiente para desenvolver e não exige conta em lugar nenhum.
 
+> Regra de decisão (`OpcoesDeEmail.EstaConfigurado`): usa SMTP quando há host **e** as
+> credenciais não estão pela metade. Credencial nenhuma com host preenchido é válida (é o
+> servidor local de teste, que não autentica); **usuário sem senha não é** — cai no log e a
+> mensagem diz qual chave falta. Sem essa regra, apontar para o Gmail antes de colar a senha de
+> app faria o envio falhar em silêncio e o link desaparecer das duas pontas.
+
 **2. Servidor SMTP local de teste — vê o envio real, sem conta.** `tools/smtp-de-teste.py` é um
 servidor SMTP mínimo (só stdlib) que imprime o e-mail decodificado e destaca o link:
 
