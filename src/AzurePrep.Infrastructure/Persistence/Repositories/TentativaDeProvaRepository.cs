@@ -24,4 +24,19 @@ public sealed class TentativaDeProvaRepository : ITentativaDeProvaRepository
         => await _db.ExamAttempts
             .Include(a => a.Answers)
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
+
+    // AsNoTracking: o histórico é só leitura, nada aqui vai ser alterado.
+    //
+    // Ordenação por StartedAt e NÃO por nota: o SQLite não tem decimal nativo, então ordenar
+    // por ScorePercent seria impreciso (é a dívida registrada no CLAUDE.md). Data é DateTime,
+    // que o provider ordena corretamente — e é a ordem que o histórico quer de todo jeito.
+    public async Task<IReadOnlyList<TentativaDeProva>> ObterDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+        => await _db.ExamAttempts
+            .AsNoTracking()
+            .Include(a => a.Answers)
+            .Where(a => a.UserId == userId)
+            .OrderByDescending(a => a.StartedAt)
+            .ToListAsync(cancellationToken);
 }

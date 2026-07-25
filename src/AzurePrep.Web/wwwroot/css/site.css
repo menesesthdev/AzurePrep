@@ -623,8 +623,96 @@ a { color: var(--c-primary); }
 .review-option__tag { margin-left: auto; font-size: .72rem; color: var(--c-text-muted); font-style: italic; }
 .review-item__explanation { font-size: .9rem; color: var(--c-text); background: #f9fafb; border: 1px solid var(--c-border); border-radius: var(--radius); padding: 12px 14px; }
 
+/* ==========================================================================
+   Histórico do usuário — mesma sobriedade do score report: número e veredito,
+   sem gráfico decorativo nem cor vibrante.
+   ========================================================================== */
+
+/* Rótulo só para leitor de tela (cabeçalho de coluna de ações, por exemplo). */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.historico__bloco { margin-bottom: 36px; }
+.historico__nota { margin: -8px 0 16px; font-size: .85rem; color: var(--c-text-muted); }
+
+.historico-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.historico-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+}
+/* Faixa âmbar à esquerda: mesma cor de "marcado para revisão" na prova — sinaliza
+   pendência sem alarmar. */
+.historico-item--aberta { border-left: 3px solid var(--c-flagged); }
+.historico-item__info { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.historico-item__data { font-size: .9rem; font-weight: 600; }
+.historico-item__progresso { font-size: .82rem; color: var(--c-text-muted); }
+.historico-item .btn { margin-left: auto; flex-shrink: 0; }
+
+/* Painel de números: dado grande, rótulo pequeno. Sem ícone e sem cor de fundo. */
+.painel-numeros {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    margin: 0;
+    background: var(--c-border);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+.painel-numeros__item { background: var(--c-surface); padding: 16px 18px; }
+.painel-numeros dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .03em; color: var(--c-text-muted); }
+.painel-numeros dd { margin: 6px 0 0; font-size: 1.5rem; font-weight: 700; }
+.painel-numeros__variacao { font-size: .85rem; font-weight: 600; margin-left: 6px; }
+.painel-numeros__variacao--sobe { color: var(--c-answered); }
+.painel-numeros__variacao--cai { color: var(--c-danger); }
+
+/* Tabela larga rola dentro do próprio container — a página nunca rola na horizontal. */
+.tabela-rolavel { overflow-x: auto; border: 1px solid var(--c-border); border-radius: var(--radius); }
+.historico-tabela { width: 100%; border-collapse: collapse; background: var(--c-surface); font-size: .92rem; }
+.historico-tabela th,
+.historico-tabela td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--c-border); white-space: nowrap; }
+.historico-tabela thead th {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    color: var(--c-text-muted);
+    background: #f9fafb;
+}
+.historico-tabela tbody tr:last-child td { border-bottom: 0; }
+.historico-tabela tbody tr:hover { background: var(--c-primary-tint); }
+.historico-tabela__nota { font-weight: 700; font-variant-numeric: tabular-nums; }
+.historico-tabela__acoes { display: flex; gap: 14px; }
+.historico-tabela__acoes a { font-size: .85rem; }
+
+.selo { font-size: .75rem; font-weight: 700; text-transform: uppercase; padding: 3px 9px; border-radius: 4px; }
+.selo--aprovado { background: #e6f0ea; color: var(--c-answered); }
+.selo--reprovado { background: var(--c-danger-tint); color: var(--c-danger); }
+
+/* Navegação principal do cabeçalho. */
+.site-nav { display: flex; gap: 20px; margin-left: 32px; }
+.site-nav__link { font-size: .92rem; font-weight: 600; color: var(--c-text-muted); text-decoration: none; }
+.site-nav__link:hover { color: var(--c-primary); }
+.site-nav__link--ativo { color: var(--c-primary); }
+
 /* ---- Responsivo --------------------------------------------------------- */
 @media (max-width: 720px) {
+    .site-nav { margin-left: 16px; gap: 14px; }
+    .historico-item { flex-wrap: wrap; }
+    .historico-item .btn { margin-left: 0; }
     .exam-bar { gap: 12px; padding: 0 14px; }
     .exam-bar__name { display: none; }
     .exam-bar__clock-label { display: none; }

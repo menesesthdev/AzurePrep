@@ -1,4 +1,4 @@
-﻿@model IReadOnlyList<ResumoDeExameDto>
+﻿@model InicioViewModel
 @{
     ViewData["Title"] = "Início";
 }
@@ -11,17 +11,42 @@
     </p>
 </section>
 
+@* Avisa antes do botão "Iniciar simulado": quem parou no meio de uma prova deve retomá-la em
+   vez de abrir outra e deixar a primeira sem correção. *@
+@if (Model.EmAndamento.Count > 0)
+{
+    <section class="historico__bloco">
+        <ul class="historico-lista">
+            @foreach (var t in Model.EmAndamento)
+            {
+                <li class="historico-item historico-item--aberta">
+                    <div class="historico-item__info">
+                        <span class="exam-card__code">@t.ExamCode</span>
+                        <span class="historico-item__data">Você tem um simulado em andamento</span>
+                        <span class="historico-item__progresso">
+                            Iniciado em @t.StartedAt.ToLocalTime().ToString("dd/MM 'às' HH:mm") ·
+                            @t.QuestoesRespondidas de @t.TotalDeQuestoes itens respondidos
+                        </span>
+                    </div>
+                    <a class="btn btn--primary" asp-controller="Exame" asp-action="Realizar"
+                       asp-route-attemptId="@t.Id">Retomar</a>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
 <section class="exam-list">
     <h2 class="section-title">Exames disponíveis</h2>
 
-    @if (Model.Count == 0)
+    @if (Model.Exames.Count == 0)
     {
         <p class="empty-state">Nenhum exame cadastrado ainda.</p>
     }
     else
     {
         <div class="exam-grid">
-            @foreach (var exam in Model)
+            @foreach (var exam in Model.Exames)
             {
                 <article class="exam-card">
                     <header class="exam-card__header">

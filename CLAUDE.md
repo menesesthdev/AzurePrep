@@ -209,9 +209,23 @@ domínio: o remetente é o próprio endereço da conta. Passos:
    a conta autenticada.
 
 Limites que importam: ~500 mensagens/dia, e é conta pessoal — serve para desenvolvimento,
-portfólio e uso próprio, não para base real de usuários. Quando houver deploy e usuários de
-verdade, o caminho é um serviço transacional (Brevo, Resend, SES); a troca é só a classe
-`EnviadorDeEmailSmtp`, porque o resto do código conhece apenas `IEnviadorDeEmail`.
+portfólio e uso próprio, não para base real de usuários. O Gmail **envia para qualquer
+destinatário**, não só para a própria conta; o problema não é técnico, é limite, reputação e
+risco de suspensão da conta pessoal.
+
+**Hotmail/Outlook pessoal não serve** como alternativa: a Microsoft descontinuou autenticação
+básica nessas contas e exige OAuth 2.0, que o `SmtpClient` da BCL não fala (precisaria de MailKit
+e do fluxo OAuth). Mais trabalho, limite menor, nenhum ganho.
+
+**Caminho para a nuvem — sem domínio.** Serviços transacionais aceitam remetente verificado
+avulso: Brevo (300/dia grátis), SendGrid (100/dia). A diferença estrutural em relação ao Gmail é
+que **login SMTP e remetente deixam de ser a mesma coisa**: as credenciais são do provedor e o
+`RemetenteEndereco` é o endereço verificado — então com domínio próprio depois muda-se só o
+remetente. Como esses provedores oferecem relay SMTP, a migração é **só variável de ambiente**;
+`EnviadorDeEmailSmtp` só precisaria ser trocada por um provedor exclusivamente por API. Ressalva:
+remetente `@gmail.com` saindo de outro provedor não tem DKIM alinhado, então parte cai em spam —
+domínio próprio com SPF/DKIM é o que resolve de fato. Os três cenários estão prontos e comentados
+em `.env.exemplo`.
 
 Callback a cadastrar em cada provedor (ajuste host/porta): `/signin-google`, `/signin-github`, `/signin-linkedin`.
 

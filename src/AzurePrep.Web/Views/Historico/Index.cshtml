@@ -1,0 +1,139 @@
+@model HistoricoDoUsuarioDto
+@{
+    ViewData["Title"] = "Meu histórico";
+    var temAlgo = Model.EmAndamento.Count > 0 || Model.Concluidas.Count > 0;
+}
+
+<section class="hero">
+    <h1 class="hero__title">Meu histórico</h1>
+    <p class="hero__lead">
+        Todas as suas tentativas ficam vinculadas à sua conta. A nota segue a escala 1–1000 da
+        prova real, com aprovação em 700.
+    </p>
+</section>
+
+@if (!temAlgo)
+{
+    <p class="empty-state">
+        Você ainda não iniciou nenhum simulado.
+        <a asp-controller="Home" asp-action="Index">Escolher um exame</a>.
+    </p>
+}
+else
+{
+    @* Em andamento vem primeiro: é o que exige ação da pessoa agora. *@
+    @if (Model.EmAndamento.Count > 0)
+    {
+        <section class="historico__bloco">
+            <h2 class="section-title">Em andamento</h2>
+            <p class="historico__nota">
+                O tempo do simulado continua contando desde o início da tentativa. Se ele já
+                esgotou, a prova é encerrada e corrigida ao ser reaberta.
+            </p>
+
+            <ul class="historico-lista">
+                @foreach (var t in Model.EmAndamento)
+                {
+                    <li class="historico-item historico-item--aberta">
+                        <div class="historico-item__info">
+                            <span class="exam-card__code">@t.ExamCode</span>
+                            <span class="historico-item__data">
+                                Iniciada em @t.StartedAt.ToLocalTime().ToString("dd/MM/yyyy 'às' HH:mm")
+                            </span>
+                            <span class="historico-item__progresso">
+                                @t.QuestoesRespondidas de @t.TotalDeQuestoes itens respondidos
+                            </span>
+                        </div>
+                        <a class="btn btn--primary" asp-controller="Exame" asp-action="Realizar"
+                           asp-route-attemptId="@t.Id">Retomar</a>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (Model.Desempenho is { } d)
+    {
+        <section class="historico__bloco">
+            <h2 class="section-title">Desempenho</h2>
+            <dl class="painel-numeros">
+                <div class="painel-numeros__item">
+                    <dt>Simulados concluídos</dt>
+                    <dd>@d.TotalConcluidas</dd>
+                </div>
+                <div class="painel-numeros__item">
+                    <dt>Aprovações</dt>
+                    <dd>@d.Aprovacoes</dd>
+                </div>
+                <div class="painel-numeros__item">
+                    <dt>Melhor nota</dt>
+                    <dd>@d.MelhorNota</dd>
+                </div>
+                <div class="painel-numeros__item">
+                    <dt>Nota mais recente</dt>
+                    <dd>
+                        @d.NotaMaisRecente
+                        @if (d.VariacaoDesdeAAnterior is { } v && v != 0)
+                        {
+                            @* Sinal explícito: "+40" e "−40" se leem sem precisar de cor. *@
+                            <span class="painel-numeros__variacao painel-numeros__variacao--@(v > 0 ? "sobe" : "cai")">
+                                @(v > 0 ? "+" : "−")@Math.Abs(v)
+                            </span>
+                        }
+                    </dd>
+                </div>
+            </dl>
+        </section>
+    }
+
+    @if (Model.Concluidas.Count > 0)
+    {
+        <section class="historico__bloco">
+            <h2 class="section-title">Simulados concluídos</h2>
+
+            <div class="tabela-rolavel">
+                <table class="historico-tabela">
+                    <thead>
+                        <tr>
+                            <th scope="col">Exame</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Duração</th>
+                            <th scope="col">Nota</th>
+                            <th scope="col">Resultado</th>
+                            <th scope="col"><span class="sr-only">Ações</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in Model.Concluidas)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="exam-card__code">@t.ExamCode</span>
+                                </td>
+                                <td>@((t.FinishedAt ?? t.StartedAt).ToLocalTime().ToString("dd/MM/yyyy HH:mm"))</td>
+                                <td>
+                                    @if (t.Duracao is { } dur)
+                                    {
+                                        @($"{(int)dur.TotalMinutes}m {dur.Seconds:00}s")
+                                    }
+                                </td>
+                                <td class="historico-tabela__nota">@t.NotaEscalada</td>
+                                <td>
+                                    <span class="selo selo--@(t.Aprovado == true ? "aprovado" : "reprovado")">
+                                        @(t.Aprovado == true ? "Aprovado" : "Reprovado")
+                                    </span>
+                                </td>
+                                <td class="historico-tabela__acoes">
+                                    <a asp-controller="Exame" asp-action="Resultado"
+                                       asp-route-attemptId="@t.Id">Score report</a>
+                                    <a asp-controller="Exame" asp-action="Revisao"
+                                       asp-route-attemptId="@t.Id">Revisão</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+}

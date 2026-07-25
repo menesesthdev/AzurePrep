@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using AzurePrep.Application.Exames;
+using AzurePrep.Application.Historico;
 using AzurePrep.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,16 +10,20 @@ namespace AzurePrep.Web.Controllers;
 public class HomeController : Controller
 {
     private readonly ICatalogoDeExamesService _catalog;
+    private readonly IHistoricoDeProvasService _historico;
 
-    public HomeController(ICatalogoDeExamesService catalog)
+    public HomeController(ICatalogoDeExamesService catalog, IHistoricoDeProvasService historico)
     {
         _catalog = catalog;
+        _historico = historico;
     }
 
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var exams = await _catalog.ObterExamesDisponiveisAsync(cancellationToken);
-        return View(exams);
+        var historico = await _historico.ObterHistoricoAsync(cancellationToken);
+
+        return View(new InicioViewModel(exams, historico.EmAndamento));
     }
 
     // A página de erro precisa responder mesmo para quem não está logado — caso contrário

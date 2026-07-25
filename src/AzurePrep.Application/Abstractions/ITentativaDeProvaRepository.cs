@@ -18,4 +18,17 @@ public interface ITentativaDeProvaRepository
 
     /// <summary>Tentativa com suas respostas carregadas.</summary>
     Task<TentativaDeProva?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Todas as tentativas de um usuário, mais recentes primeiro, com as respostas carregadas
+    /// (o histórico mostra o progresso das que ficaram em andamento).
+    /// </summary>
+    /// <remarks>
+    /// Filtrar por <paramref name="userId"/> aqui, e não depois em memória, é o que mantém a
+    /// regra de posse no mesmo lugar das outras consultas: quem chama não tem como pedir
+    /// "todas as tentativas" por engano.
+    /// </remarks>
+    Task<IReadOnlyList<TentativaDeProva>> ObterDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

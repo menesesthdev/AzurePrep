@@ -21,6 +21,15 @@
 
             @if (User.Identity?.IsAuthenticated == true)
             {
+                @* Navegação só para quem está logado: o histórico não existe sem conta. *@
+                var atual = ViewContext.RouteData.Values["controller"]?.ToString();
+                <nav class="site-nav">
+                    <a class="site-nav__link @(atual == "Home" ? "site-nav__link--ativo" : "")"
+                       asp-controller="Home" asp-action="Index">Exames</a>
+                    <a class="site-nav__link @(atual == "Historico" ? "site-nav__link--ativo" : "")"
+                       asp-controller="Historico" asp-action="Index">Meu histórico</a>
+                </nav>
+
                 var avatar = User.FindFirst("avatar")?.Value;
                 <div class="site-user">
                     @if (!string.IsNullOrWhiteSpace(avatar))

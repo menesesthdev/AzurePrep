@@ -147,4 +147,14 @@ public sealed class InMemoryExamAttemptRepository : ITentativaDeProvaRepository
 
     public Task<TentativaDeProva?> ObterPorIdAsync(Guid id, CancellationToken cancellationToken = default)
         => Task.FromResult(_attempts.GetValueOrDefault(id));
+
+    // Mesma ordem do repositório real (mais recente primeiro) — o serviço de histórico depende
+    // dela para saber qual é "a nota atual" e qual é "a anterior".
+    public Task<IReadOnlyList<TentativaDeProva>> ObterDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<TentativaDeProva>>(_attempts.Values
+            .Where(a => a.UserId == userId)
+            .OrderByDescending(a => a.StartedAt)
+            .ToList());
 }

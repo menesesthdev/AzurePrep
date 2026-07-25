@@ -1,5 +1,6 @@
 using AzurePrep.Application.Autenticacao;
 using AzurePrep.Application.Exames;
+using AzurePrep.Application.Historico;
 using AzurePrep.Application.Sessoes;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ICatalogoDeExamesService, CatalogoDeExamesService>();
         services.AddScoped<ISessaoDeProvaService, SessaoDeProvaService>();
+        services.AddScoped<IHistoricoDeProvasService, HistoricoDeProvasService>();
         services.AddScoped<IAutenticacaoService, AutenticacaoService>();
 
         return services;
