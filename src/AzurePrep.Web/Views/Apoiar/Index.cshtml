@@ -1,0 +1,99 @@
+@model ApoiarViewModel
+@{
+    ViewData["Title"] = "Apoiar o projeto";
+    var cultura = new System.Globalization.CultureInfo("pt-BR");
+    string Reais(decimal v) => v.ToString("C0", cultura);
+}
+
+@*
+    Tom deliberadamente igual ao resto do produto: sem barra de meta, sem contador de
+    apoiadores, sem emoji. O argumento é a transparência de custo, não a pressão.
+*@
+<section class="hero">
+    <h1 class="hero__title">Apoiar o projeto</h1>
+    <p class="hero__lead">
+        O AzurePrep é gratuito, sem anúncios e sem rastreadores. Se ele ajudou na sua
+        preparação, você pode contribuir com o custo de manter o simulado no ar.
+    </p>
+</section>
+
+<section class="apoio">
+    <div class="apoio__qr">
+        @* SVG gerado no servidor a partir do payload — nenhuma requisição sai da página. *@
+        @Html.Raw(Model.QrCodeSvg)
+        <p class="apoio__qr-legenda">
+            @if (Model.ValorSelecionado is { } valor)
+            {
+                <text>QR de @Reais(valor)</text>
+            }
+            else
+            {
+                <text>QR de valor livre</text>
+            }
+        </p>
+    </div>
+
+    <div class="apoio__acoes">
+        <div class="apoio__valores" role="group" aria-label="Escolher valor">
+            <a class="btn btn--filter @(Model.ValorSelecionado is null ? "is-active" : "")"
+               asp-action="Index">Outro valor</a>
+            @foreach (var sugerido in Model.ValoresSugeridos)
+            {
+                <a class="btn btn--filter @(Model.ValorSelecionado == sugerido ? "is-active" : "")"
+                   asp-action="Index" asp-route-valor="@sugerido.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                    @Reais(sugerido)
+                </a>
+            }
+        </div>
+
+        <p class="apoio__rotulo" id="rotulo-copia-e-cola">Pix copia e cola</p>
+        <code class="apoio__payload" id="pix-payload" aria-labelledby="rotulo-copia-e-cola">@Model.Payload</code>
+
+        <button type="button" class="btn btn--primary apoio__copiar"
+                id="btn-copiar-pix" data-rotulo="Copiar código Pix">Copiar código Pix</button>
+        <span class="apoio__aviso-copia" id="aviso-copia" role="status"></span>
+
+        <p class="apoio__nota">
+            O valor livre é digitado por você no aplicativo do banco. Como o código é o mesmo
+            para todo mundo, o recebimento não identifica quem doou.
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.LinkExterno))
+        {
+            <p class="apoio__externo">
+                <a href="@Model.LinkExterno" rel="noopener noreferrer nofollow" target="_blank">@Model.LinkExternoRotulo</a>
+            </p>
+        }
+    </div>
+</section>
+
+<section class="result__section">
+    <h2 class="section-title">Para onde vai</h2>
+    <p class="result__note">
+        @if (!string.IsNullOrWhiteSpace(Model.CustoMensal))
+        {
+            <text>Hospedagem e domínio custam @Model.CustoMensal, hoje pagos do próprio bolso. </text>
+        }
+        As doações cobrem esse custo e o tempo de escrever questões novas — cada questão é
+        original, redigida a partir do Skills Measured outline público da Microsoft, com
+        explicação de por que cada alternativa errada está errada.
+    </p>
+    <p class="result__note">
+        <strong>Doar não desbloqueia nada.</strong> Todos os simulados, a tela de revisão e o
+        gabarito comentado continuam disponíveis para qualquer pessoa, doando ou não. Esta
+        página é uma contribuição voluntária, não uma compra.
+    </p>
+    <p class="result__note">
+        O nome do titular da conta aparece na confirmação do seu aplicativo do banco, como em
+        qualquer Pix. O AzurePrep não recebe, não armazena e não vê nenhum dado seu nessa
+        transação.
+    </p>
+</section>
+
+<div class="result__actions">
+    <a class="btn" asp-controller="Home" asp-action="Index">Voltar ao início</a>
+</div>
+
+@section Scripts {
+    <script src="~/js/apoiar.js" asp-append-version="true"></script>
+}

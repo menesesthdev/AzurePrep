@@ -1,5 +1,7 @@
+using System.Globalization;
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Infrastructure.Aleatoriedade;
+using AzurePrep.Infrastructure.Doacao;
 using AzurePrep.Infrastructure.Email;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Repositories;
@@ -39,8 +41,45 @@ public static class DependencyInjection
         services.AddSingleton<IGeradorDeTokenSeguro, GeradorDeTokenSeguro>();
 
         AdicionarEnvioDeEmail(services, configuration);
+        AdicionarDoacao(services, configuration);
 
         return services;
+    }
+
+    /// <summary>
+    /// Lê a seção <c>Doacao</c> e registra o gerador de QR. As opções são registradas sempre,
+    /// configuradas ou não: quem decide se a página de apoio existe é
+    /// <see cref="OpcoesDeDoacao.EstaConfigurado"/>, consultado pelo Web em um lugar só.
+    /// </summary>
+    private static void AdicionarDoacao(IServiceCollection services, IConfiguration configuration)
+    {
+        var secao = configuration.GetSection(OpcoesDeDoacao.Secao);
+        var opcoes = new OpcoesDeDoacao
+        {
+            ChavePix = secao["ChavePix"],
+            NomeDoRecebedor = secao["NomeDoRecebedor"] ?? "AzurePrep",
+            Cidade = secao["Cidade"] ?? "SAO PAULO",
+            CustoMensal = secao["CustoMensal"],
+            LinkExterno = secao["LinkExterno"],
+            LinkExternoRotulo = secao["LinkExternoRotulo"] ?? "Doar de fora do Brasil"
+        };
+
+        // Lista vem como "Doacao:ValoresSugeridos:0", "…:1" — o valor inválido é ignorado em vez
+        // de derrubar a aplicação no startup por causa de um botão de doação.
+        var valores = secao.GetSection("ValoresSugeridos").GetChildren()
+            .Select(item => decimal.TryParse(item.Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var v) ? v : 0m)
+            .Where(v => v > 0m)
+            .ToArray();
+
+        if (valores.Length > 0)
+        {
+            opcoes.ValoresSugeridos = valores;
+        }
+
+        services.AddSingleton(opcoes);
+
+        // Sem estado por chamada e com cache interno: singleton é o registro certo.
+        services.AddSingleton<IGeradorDeQrCode, GeradorDeQrCodeSvg>();
     }
 
     /// <summary>

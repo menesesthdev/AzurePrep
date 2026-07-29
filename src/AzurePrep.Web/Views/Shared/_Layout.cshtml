@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@inject OpcoesDeDoacao Doacao
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="utf-8" />
@@ -54,6 +55,15 @@
         <div class="site-footer__inner">
             Questões 100% originais, escritas a partir do Skills Measured outline oficial.
             Este simulado não reproduz conteúdo real de provas.
+
+            @* Só aparece com chave Pix configurada — sem ela a rota nem existe. *@
+            @if (Doacao.EstaConfigurado)
+            {
+                <p class="site-footer__apoio">
+                    Gratuito e sem anúncios.
+                    <a asp-controller="Apoiar" asp-action="Index">Apoiar o projeto</a>
+                </p>
+            }
         </div>
     </footer>
 

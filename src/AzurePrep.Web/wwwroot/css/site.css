@@ -720,6 +720,69 @@ a { color: var(--c-primary); }
 .site-nav__link--ativo { color: var(--c-primary); }
 
 /* ==========================================================================
+   Página de apoio — mesma sobriedade do resto: sem barra de meta, sem contador
+   de apoiadores, sem cor de destaque. O argumento é o custo declarado, não a
+   pressão visual.
+   ========================================================================== */
+.apoio {
+    display: flex;
+    gap: 32px;
+    align-items: flex-start;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 32px;
+}
+.apoio__qr { flex-shrink: 0; width: 220px; text-align: center; }
+/* O SVG vem com largura própria do gerador; aqui ele passa a acompanhar o container. */
+.apoio__qr svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+}
+.apoio__qr-legenda { margin: 10px 0 0; font-size: .78rem; color: var(--c-text-muted); }
+
+.apoio__acoes { flex: 1; min-width: 0; }
+.apoio__valores { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+.apoio__rotulo { margin: 0 0 6px; font-size: .85rem; font-weight: 600; }
+
+/* Payload longo (~134 caracteres) quebrado em qualquer ponto: é uma sequência sem
+   espaços, então sem break-all ele esticaria o cartão inteiro. */
+.apoio__payload {
+    display: block;
+    font-family: ui-monospace, SFMono-Regular, "Cascadia Mono", Menlo, Consolas, monospace;
+    font-size: .76rem;
+    line-height: 1.6;
+    word-break: break-all;
+    color: var(--c-text-muted);
+    background: #f9fafb;
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+}
+.apoio__copiar { margin-top: 14px; }
+.apoio__aviso-copia { margin-left: 12px; font-size: .85rem; color: var(--c-answered); }
+.apoio__nota { margin: 18px 0 0; font-size: .85rem; color: var(--c-text-muted); }
+.apoio__externo { margin: 14px 0 0; font-size: .9rem; }
+
+/* Chamada no fim do score report: uma linha discreta, depois dos botões — nunca
+   durante a prova, que é onde a imersão é o produto. */
+.result__apoio {
+    margin: 28px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--c-border);
+    font-size: .85rem;
+    color: var(--c-text-muted);
+}
+
+/* Link permanente no rodapé: presença constante, custo zero de atenção. */
+.site-footer__apoio { margin: 8px 0 0; }
+
+/* ==========================================================================
    Responsivo
 
    O layout é o mesmo em qualquer largura — o que muda é como ele se
@@ -799,6 +862,13 @@ a { color: var(--c-primary); }
 
     .score-report { padding: 26px 18px; }
     .exam-card__meta { flex-wrap: wrap; gap: 16px 20px; }
+
+    /* QR acima e ações abaixo: em coluna o QR fica centralizado e continua grande
+       o bastante para ser lido por outro aparelho. */
+    .apoio { flex-direction: column; align-items: center; padding: 22px 18px; gap: 24px; }
+    .apoio__acoes { width: 100%; }
+    .apoio__copiar { display: block; width: 100%; }
+    .apoio__aviso-copia { display: block; margin: 10px 0 0; }
 
     /* ---- Barra de ações da prova em duas linhas --------------------------
        Linha 1: marcar para revisão + comentários (secundários).

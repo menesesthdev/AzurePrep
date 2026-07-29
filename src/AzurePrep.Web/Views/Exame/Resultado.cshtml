@@ -1,4 +1,5 @@
 @model ResultadoDaProvaDto
+@inject OpcoesDeDoacao Doacao
 @{
     ViewData["Title"] = $"Resultado · {Model.ExamCode}";
     var duration = Model.FinishedAt - Model.StartedAt;
@@ -83,4 +84,16 @@
         </a>
         <a class="btn" asp-controller="Home" asp-action="Index">Voltar ao início</a>
     </div>
+
+    @*
+        Único ponto do fluxo de prova onde o assunto aparece, e ainda assim depois dos botões:
+        aqui o valor já foi entregue. Durante a simulação não entra nada — a imersão é o produto.
+    *@
+    @if (Doacao.EstaConfigurado)
+    {
+        <p class="result__apoio">
+            Este simulado é gratuito e sem anúncios.
+            <a asp-controller="Apoiar" asp-action="Index">Apoiar o projeto</a>
+        </p>
+    }
 </section>
