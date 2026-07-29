@@ -36,6 +36,10 @@ html, body {
     font-family: var(--font);
     font-size: 16px;
     line-height: 1.5;
+    /* iOS infla o texto sozinho ao girar o aparelho; a escala fica com o viewport. */
+    -webkit-text-size-adjust: 100%;
+    /* Palavra longa (URL, nome de serviço) quebra em vez de esticar a página. */
+    overflow-wrap: break-word;
 }
 
 h1, h2, h3 { line-height: 1.25; }
@@ -104,7 +108,9 @@ a { color: var(--c-primary); }
 .section-title { font-size: 1.15rem; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--c-border); }
 .empty-state { color: var(--c-text-muted); }
 
-.exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+/* min() no mínimo da coluna: abaixo de 280px de espaço o cartão acompanha o
+   container em vez de estourar a largura da tela. */
+.exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); gap: 20px; }
 .exam-card {
     background: var(--c-surface);
     border: 1px solid var(--c-border);
@@ -139,9 +145,13 @@ a { color: var(--c-primary); }
 .login-body {
     background: var(--c-bg);
     min-height: 100vh;
+    /* dvh desconta a barra do navegador móvel, que 100vh ignora e faz sobrar
+       uma faixa rolável no fim da tela. No desktop dvh e vh são iguais. */
+    min-height: 100dvh;
 }
 .login {
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -372,10 +382,7 @@ a { color: var(--c-primary); }
 .site-user__name { font-size: .9rem; font-weight: 600; }
 .site-user__signout { font: inherit; font-size: .85rem; padding: 6px 12px; }
 
-@media (max-width: 480px) {
-    .login__card { padding: 28px 22px; }
-    .site-user__name { display: none; }
-}
+/* (os ajustes por largura de login e cabeçalho estão na seção "Responsivo", no fim) */
 
 /* ==========================================================================
    Tela de prova — replica o chrome da entrega real (Pearson VUE / Microsoft):
@@ -521,6 +528,10 @@ a { color: var(--c-primary); }
     max-width: 460px;
     width: calc(100% - 40px);
     box-shadow: 0 10px 40px rgba(15, 23, 42, .25);
+    /* Com o teclado virtual aberto sobra pouca altura: o diálogo rola por dentro
+       em vez de ter os botões empurrados para fora da tela. */
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
 }
 .modal__title { margin: 0 0 12px; font-size: 1.2rem; }
 .modal__body { margin: 0 0 12px; color: var(--c-text-muted); }
@@ -708,18 +719,192 @@ a { color: var(--c-primary); }
 .site-nav__link:hover { color: var(--c-primary); }
 .site-nav__link--ativo { color: var(--c-primary); }
 
-/* ---- Responsivo --------------------------------------------------------- */
+/* ==========================================================================
+   Responsivo
+
+   O layout é o mesmo em qualquer largura — o que muda é como ele se
+   reorganiza quando deixa de caber. Nada aqui altera a aparência no desktop:
+   são pontos de quebra, alvos de toque e correções de viewport móvel.
+
+   Princípios aplicados:
+   - Nenhuma tela rola na horizontal. O que é largo demais (tabela de
+     histórico) rola dentro do próprio container.
+   - Texto que some por falta de espaço vira `.sr-only`, não `display: none` —
+     o leitor de tela continua anunciando "Tempo restante".
+   - A barra de ações da prova nunca é cortada: em telas estreitas ela vira
+     duas linhas (secundário em cima, navegação embaixo), e a altura reservada
+     por `--exam-actions-h` acompanha, senão a barra fixa cobriria a questão.
+   ========================================================================== */
+
+/* ---- ≤ 860px: cabeçalho começa a apertar -------------------------------- */
+@media (max-width: 860px) {
+    /* O descritivo é o texto mais dispensável da barra — sai antes que a
+       navegação comece a quebrar em duas linhas. */
+    .site-brand__sub { display: none; }
+    .site-nav__link { white-space: nowrap; }
+    /* Nome longo trunca em vez de empurrar o botão "Sair" para fora. */
+    .site-user__name {
+        max-width: 160px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* ---- ≤ 720px: tablet em pé e celular deitado ---------------------------- */
 @media (max-width: 720px) {
     .site-nav { margin-left: 16px; gap: 14px; }
+
+    /* Cartão de tentativa em andamento: botão desce para baixo do texto. */
     .historico-item { flex-wrap: wrap; }
     .historico-item .btn { margin-left: 0; }
-    .exam-bar { gap: 12px; padding: 0 14px; }
+
+    /* Na barra da prova o código do exame e o relógio são o que importa;
+       o nome por extenso é o primeiro a sair. */
+    .exam-bar { gap: 12px; padding: 0 16px; }
     .exam-bar__name { display: none; }
-    .exam-bar__clock-label { display: none; }
+
     .exam-stage { padding: 24px 16px 32px; }
-    .exam-actions { gap: 8px; padding: 0 14px; }
-    .exam-actions__right { gap: 6px; }
-    .exam-actions .btn { padding: 8px 10px; font-size: .88rem; }
-    .mark-toggle span { display: none; }
+    .exam-actions { gap: 12px; padding: 0 16px; }
+    .exam-actions__right { gap: 8px; }
+    .exam-actions .btn { padding: 8px 12px; font-size: .9rem; }
+
     .result__meta { gap: 24px; }
+}
+
+/* ---- ≤ 640px: celular em pé --------------------------------------------- */
+@media (max-width: 640px) {
+    /* Cabeçalho em duas linhas: marca e usuário em cima, navegação embaixo.
+       Com dois links não compensa esconder o menu atrás de um botão — o que
+       exigiria script numa página que hoje não carrega nenhum. */
+    .site-header__inner {
+        flex-wrap: wrap;
+        height: auto;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        row-gap: 10px;
+    }
+    .site-brand { flex: 1 1 auto; min-width: 0; }
+    .site-nav {
+        /* base 100% força a navegação a ocupar a linha inteira, sozinha */
+        order: 3;
+        flex: 1 0 100%;
+        margin-left: 0;
+    }
+
+    .site-header__inner,
+    .site-footer__inner,
+    .site-main { padding-left: 16px; padding-right: 16px; }
+    .site-main { padding-top: 24px; padding-bottom: 32px; }
+
+    .score-report { padding: 26px 18px; }
+    .exam-card__meta { flex-wrap: wrap; gap: 16px 20px; }
+
+    /* ---- Barra de ações da prova em duas linhas --------------------------
+       Linha 1: marcar para revisão + comentários (secundários).
+       Linha 2: tela de revisão + anterior/próxima, dividindo a largura —
+       são os alvos usados a cada item, então ficam grandes e ao alcance do
+       polegar. A ordem do HTML já é essa; só o empilhamento muda. */
+    :root { --exam-actions-h: 104px; }
+    .exam-body { padding-bottom: calc(var(--exam-actions-h) + 8px); }
+    .exam-actions {
+        flex-wrap: wrap;
+        align-content: center;
+        height: auto;
+        min-height: var(--exam-actions-h);
+        padding: 10px 12px;
+        gap: 10px;
+    }
+    .exam-actions__left { flex: 1 0 100%; justify-content: space-between; }
+    .exam-actions__right { flex: 1 0 100%; margin-left: 0; gap: 8px; }
+    .exam-actions__right .btn {
+        flex: 1 1 0;
+        min-height: 42px;
+        padding: 8px 6px;
+        white-space: nowrap;
+    }
+    /* "Tela de revisão" é o rótulo mais longo; ganha um pouco mais de espaço
+       para não quebrar em duas linhas. */
+    .exam-actions__right .btn:first-child { flex-grow: 1.4; }
+
+    /* Alternativas com área de toque maior — errar o alvo numa prova
+       cronometrada custa tempo. */
+    .option__label { padding: 14px 8px; gap: 14px; }
+    .option__input { width: 18px; height: 18px; }
+    .mark-toggle input { width: 18px; height: 18px; }
+}
+
+/* ---- ≤ 480px: celulares estreitos --------------------------------------- */
+@media (max-width: 480px) {
+    .login__card { padding: 28px 22px; }
+    .login { padding: 24px 14px; }
+
+    /* O avatar já identifica a conta; o nome sai para caber o botão "Sair". */
+    .site-user__name { display: none; }
+
+    .hero__title { font-size: 1.55rem; }
+    .score-report__value { font-size: 2.8rem; }
+    .modal__dialog { padding: 22px 18px; width: calc(100% - 24px); }
+
+    /* Revisão de estudo: cabeçalho do item e alternativa longa passam a
+       quebrar em vez de espremer o tipo da questão contra a borda. */
+    .review-item__summary { flex-wrap: wrap; gap: 8px 10px; padding: 12px 14px; }
+    .review-item__type { margin-left: 0; }
+    .review-item__body { padding: 0 14px 14px; }
+    /* Só o rótulo "sua resposta" desce de linha: o ✓/✕ precisa continuar
+       colado ao texto da alternativa a que se refere. */
+    .review-option { flex-wrap: wrap; align-items: flex-start; }
+    .review-option__mark { flex: 0 0 16px; }
+    .review-option__text { flex: 1 1 0; min-width: 0; }
+    .review-option__tag { flex: 1 0 100%; margin-left: 26px; }
+
+    .review-table th:first-child { width: 64px; }
+    .review-table th:last-child { width: 84px; }
+    .review-row td { padding: 12px 8px; }
+    .review-screen__filters { gap: 8px; }
+    .review-screen__filters .btn { flex: 1 1 auto; padding: 9px 8px; font-size: .85rem; }
+}
+
+/* ---- ≤ 400px: o piso do que se atende (iPhone SE e similares) ------------ */
+@media (max-width: 400px) {
+    /* Aqui o rótulo do relógio não cabe ao lado do valor. Vira só-leitor-de-tela
+       em vez de sumir: o número sozinho não diria do que é o tempo. */
+    .exam-bar__clock-label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+        border: 0;
+    }
+    .exam-bar { padding: 0 12px; }
+    .exam-actions__right .btn { font-size: .84rem; }
+    .mark-toggle { font-size: .88rem; }
+
+    /* A logo grande empurraria o formulário para fora da primeira dobra. */
+    .login__logo { width: 132px; height: 132px; }
+}
+
+/* ---- Toque: sem estado de hover preso ----------------------------------- */
+/* Em tela sensível ao toque o :hover fica grudado no último item tocado — numa
+   lista de alternativas isso se confunde com "selecionada". A seleção real
+   (:checked) continua destacada. */
+@media (hover: none) {
+    .option__label:hover { background: transparent; }
+    .option__label:has(.option__input:checked):hover { background: var(--c-primary-tint); }
+    .review-row:hover { background: transparent; }
+    .historico-tabela tbody tr:hover { background: transparent; }
+    .provider:hover { background: var(--c-surface); border-color: var(--c-border-strong); }
+}
+
+/* ---- Ponteiro grosso: campos sem zoom automático ------------------------- */
+/* O Safari no iOS dá zoom em qualquer campo com fonte abaixo de 16px e não
+   volta ao normal depois — o resto da página fica deslocado. 16px exatos
+   evitam isso; a diferença visual para os .95rem atuais é imperceptível. */
+@media (pointer: coarse) {
+    .field__input,
+    .modal__textarea { font-size: 16px; }
 }
