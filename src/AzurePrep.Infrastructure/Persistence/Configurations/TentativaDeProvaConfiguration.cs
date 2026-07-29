@@ -38,5 +38,13 @@ public sealed class TentativaDeProvaConfiguration : IEntityTypeConfiguration<Ten
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.Navigation(a => a.Answers).UsePropertyAccessMode(PropertyAccessMode.Field);
+
+        // A composição sorteada pertence à tentativa e morre com ela.
+        builder.HasMany(a => a.Questions)
+            .WithOne()
+            .HasForeignKey(q => q.ExamAttemptId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Navigation(a => a.Questions).UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

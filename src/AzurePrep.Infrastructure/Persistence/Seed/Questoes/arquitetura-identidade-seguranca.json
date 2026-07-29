@@ -1,0 +1,394 @@
+{
+  "exameCode": "AZ-900",
+  "area": "arquitetura",
+  "questoes": [
+    {
+      "id": "az900-arqid-entra-id-01",
+      "topico": "Microsoft Entra ID",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa sem nenhum servidor próprio contrata três aplicações SaaS de fornecedores diferentes e publica duas aplicações web no Azure. A diretoria quer que cada funcionário use uma única identidade corporativa para acessar tudo, e que o desligamento de alguém seja feito em um único lugar. Qual serviço atende diretamente a esse requisito?",
+      "explicacao": "O Microsoft Entra ID é o provedor de identidade e o diretório em nuvem da organização: centraliza as contas, autentica em aplicações SaaS e próprias por protocolos modernos e permite desabilitar a conta em um só ponto (correta). O Microsoft Entra Domain Services entrega um domínio gerenciado com LDAP, Kerberos e ingresso em domínio, voltado a aplicações legadas — ele depende de um tenant do Entra ID já existente e não é o que autentica aplicações SaaS modernas. O RBAC autoriza o que uma identidade já autenticada pode fazer sobre recursos do Azure, mas não cria nem autentica identidades. O Azure Policy governa propriedades de recursos, como região e SKU, e não tem relação com identidade.",
+      "opcoes": [
+        { "texto": "Microsoft Entra ID, como provedor de identidade em nuvem da organização.", "correta": true },
+        { "texto": "Microsoft Entra Domain Services, com um domínio gerenciado na nuvem.", "correta": false },
+        { "texto": "Azure Role-Based Access Control (RBAC), no escopo da assinatura.", "correta": false },
+        { "texto": "Azure Policy, com uma iniciativa aplicada ao management group.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-entra-id-02",
+      "topico": "Microsoft Entra ID",
+      "tipo": "SimNao",
+      "enunciado": "Afirmação: um tenant do Microsoft Entra ID é um controlador de domínio do Active Directory hospedado pela Microsoft, de modo que servidores Windows da empresa podem ser ingressados nele e receber Group Policy. Essa afirmação é verdadeira?",
+      "explicacao": "A afirmação é FALSA. Um tenant do Entra ID é uma instância dedicada de um diretório de identidade em nuvem, baseado em protocolos como OAuth 2.0, OpenID Connect e SAML — ele não é um controlador de domínio e não fala Kerberos, LDAP nem Group Policy, então servidores não são ingressados nele nos moldes do AD DS. Quem entrega domínio gerenciado, ingresso em domínio e Group Policy na nuvem é o Microsoft Entra Domain Services. Dispositivos podem ser registrados ou ingressados no Entra ID, mas isso é gerenciamento por Intune, e não ingresso em domínio com Group Policy. Confundir os dois é o erro clássico de quem decorou que o Entra ID seria o Active Directory na nuvem.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqid-entra-id-03",
+      "topico": "Microsoft Entra ID",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma organização acabou de criar seu tenant do Microsoft Entra ID e precisa decidir quais necessidades passarão a ser resolvidas por ele. Quais DOIS cenários são atendidos diretamente pelo Microsoft Entra ID? Selecione DUAS opções.",
+      "explicacao": "O Entra ID é um diretório de identidade: permite colaboração com parceiros por meio de contas convidadas (B2B) e autentica funcionários em aplicações SaaS de terceiros com a conta corporativa (corretas). Aplicar Group Policy exige um domínio Active Directory, o que na nuvem é papel do Microsoft Entra Domain Services, não do Entra ID. Definir em quais regiões novos recursos podem ser criados é Azure Policy, ou seja, governança de propriedades de recurso e não de identidade. Criptografar discos de máquinas virtuais é um controle das camadas de computação e dados, sem relação com o diretório.",
+      "opcoes": [
+        { "texto": "Conceder acesso a parceiros externos por meio de contas convidadas (B2B).", "correta": true },
+        { "texto": "Autenticar funcionários em aplicações SaaS de terceiros com a conta corporativa.", "correta": true },
+        { "texto": "Aplicar Group Policy aos servidores Windows de uma aplicação legada.", "correta": false },
+        { "texto": "Definir em quais regiões do Azure novos recursos podem ser criados.", "correta": false },
+        { "texto": "Criptografar automaticamente os discos das máquinas virtuais de produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-entra-ds-01",
+      "topico": "Microsoft Entra Domain Services",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai migrar para o Azure uma aplicação de RH antiga que autentica usuários por LDAP e exige que o servidor de aplicação esteja ingressado em um domínio Active Directory. A equipe de infraestrutura não quer instalar, corrigir nem operar controladores de domínio em máquinas virtuais. Qual serviço atende ao requisito?",
+      "explicacao": "O Microsoft Entra Domain Services fornece um domínio gerenciado compatível com AD DS — ingresso em domínio, LDAP, Kerberos e NTLM — sem que o cliente opere controladores de domínio (correta). O Entra ID sozinho não fala LDAP nem Kerberos e não aceita ingresso em domínio, portanto sincronizar usuários para ele não resolve a exigência da aplicação legada. O single sign-on por SAML só funciona se a aplicação suportar protocolos modernos, o que não é o caso descrito. O Azure Arc estende o plano de gerenciamento do Azure a servidores fora do Azure, mas não fornece serviço de diretório algum.",
+      "opcoes": [
+        { "texto": "Microsoft Entra Domain Services, com um domínio gerenciado pela Microsoft.", "correta": true },
+        { "texto": "Microsoft Entra ID, com os usuários sincronizados do diretório local.", "correta": false },
+        { "texto": "Microsoft Entra ID com single sign-on baseado em SAML para a aplicação.", "correta": false },
+        { "texto": "Azure Arc, para projetar os servidores da empresa dentro do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-entra-ds-02",
+      "topico": "Microsoft Entra Domain Services",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe propõe desativar todos os controladores de domínio da empresa e usar somente o Microsoft Entra ID. Antes de aprovar o plano, a arquiteta pede a lista de capacidades que o Entra ID sozinho não entrega. Qual das capacidades a seguir o Microsoft Entra ID NÃO oferece, exigindo o Microsoft Entra Domain Services?",
+      "explicacao": "Ingresso em domínio, Kerberos, NTLM e LDAP são capacidades do AD DS reproduzidas na nuvem pelo Microsoft Entra Domain Services; o Entra ID não as oferece, e por isso essa é a resposta (correta). Autenticação multifator, single sign-on com protocolos modernos como OpenID Connect e colaboração B2B com contas convidadas são funções nativas do próprio Entra ID, de modo que nenhuma delas justifica o Domain Services. A confusão testada é supor que o Entra ID substitui o Active Directory em tudo: ele substitui o papel de provedor de identidade moderno, não o de serviço de domínio para aplicações legadas.",
+      "opcoes": [
+        { "texto": "Ingresso de máquinas virtuais em um domínio com autenticação Kerberos.", "correta": true },
+        { "texto": "Autenticação multifator para os usuários corporativos da organização.", "correta": false },
+        { "texto": "Single sign-on para aplicações SaaS baseadas em OpenID Connect.", "correta": false },
+        { "texto": "Contas convidadas para colaboração com empresas parceiras externas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-autenticacao-01",
+      "topico": "Autenticação e autorização",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma analista entra no portal do Azure com a conta corporativa e conclui a verificação em dois fatores sem erro. Ao tentar criar uma máquina virtual no resource group do seu projeto, recebe uma mensagem informando que não tem permissão para executar a operação. Qual é a natureza do problema enfrentado por ela?",
+      "explicacao": "A autenticação responde à pergunta \"quem é você\" e foi concluída com sucesso; o erro apareceu no momento de executar uma ação, ou seja, na autorização, que responde \"o que você pode fazer\" e no Azure é decidida por RBAC (correta). As duas opções de autenticação estão erradas porque o login e o segundo fator foram aceitos — se tivessem falhado, ela sequer entraria no portal. A opção sobre região descreve uma restrição de governança aplicada por Azure Policy, que produziria uma mensagem de recurso não conforme, e não de falta de permissão.",
+      "opcoes": [
+        { "texto": "De autorização: a identidade foi comprovada, mas falta permissão para a ação.", "correta": true },
+        { "texto": "De autenticação: a identidade da analista não foi comprovada corretamente.", "correta": false },
+        { "texto": "De autenticação: o segundo fator expirou antes da criação do recurso.", "correta": false },
+        { "texto": "De autorização: a assinatura não permite máquinas virtuais nessa região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-autenticacao-02",
+      "topico": "Autenticação e autorização",
+      "tipo": "SimNao",
+      "enunciado": "Ao revisar o desenho de segurança de uma assinatura do Azure, um analista classifica cada controle como autenticação ou autorização e registra a seguinte afirmação: exigir autenticação multifator de um usuário é uma forma de autorização, porque essa exigência determina quais recursos ele poderá administrar depois de entrar no ambiente. Essa afirmação é verdadeira?",
+      "explicacao": "A afirmação é FALSA. A autenticação multifator reforça a autenticação, que é a comprovação de que a pessoa é quem diz ser, exigindo fatores de categorias diferentes. O que ela pode administrar depois de entrar é decidido pela autorização, no Azure implementada por RBAC. Um usuário pode passar por MFA e ainda assim não ter permissão nenhuma sobre recursos, o que mostra que os dois conceitos são independentes: um trata de identidade comprovada, o outro de permissão concedida. Tratar MFA como autorização é exatamente o erro que a questão testa.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqid-sso-01",
+      "topico": "Single sign-on (SSO)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os funcionários de uma empresa reclamam que precisam memorizar senhas diferentes para o portal de RH, a ferramenta de chamados e o pacote de produtividade, e o service desk registra um volume alto de pedidos de redefinição. Todas as aplicações suportam protocolos de identidade modernos. Qual abordagem resolve o problema descrito?",
+      "explicacao": "O single sign-on faz com que uma única autenticação no Entra ID valha para todas as aplicações federadas, o que elimina as senhas separadas e a origem dos chamados (correta). A autenticação multifator acrescenta um fator à verificação, mas não reduz o número de credenciais — na prática adiciona uma etapa a cada aplicação. O RBAC trata de autorização sobre recursos do Azure e não tem efeito nenhum sobre quantas senhas o usuário mantém. Aumentar o prazo de expiração apenas adia o problema e piora a postura de segurança, sem eliminar as credenciais múltiplas.",
+      "opcoes": [
+        { "texto": "Configurar single sign-on no Microsoft Entra ID para as três aplicações.", "correta": true },
+        { "texto": "Exigir autenticação multifator dos usuários nas três aplicações.", "correta": false },
+        { "texto": "Criar atribuições de função RBAC para os usuários das três aplicações.", "correta": false },
+        { "texto": "Aumentar o prazo de expiração das senhas usadas nas três aplicações.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-sso-02",
+      "topico": "Single sign-on (SSO)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de implantar single sign-on para dezenas de aplicações, o time de segurança alerta que uma única credencial comprometida passaria a abrir todas elas de uma vez. A direção quer mitigar esse risco sem abrir mão do single sign-on. Qual medida atende a esse objetivo?",
+      "explicacao": "Com single sign-on, o ponto de verificação passa a ser a autenticação central, e é nela que se investe: a MFA torna a senha isolada insuficiente e o acesso condicional avalia risco, dispositivo e localização antes de conceder acesso (correta). Manter uma senha distinta por aplicação anula justamente o benefício do SSO que a direção quer preservar. Atribuir a função Reader é autorização sobre recursos do Azure, não protege o login nas aplicações e ainda impediria quem precisa escrever de trabalhar. O Defender for Cloud cuida da postura e da proteção de cargas de trabalho, não da autenticação dos usuários.",
+      "opcoes": [
+        { "texto": "Reforçar a autenticação central com MFA e políticas de acesso condicional.", "correta": true },
+        { "texto": "Criar uma senha distinta para cada aplicação, mantendo o SSO ativo.", "correta": false },
+        { "texto": "Atribuir a função Reader do RBAC a todos os usuários das aplicações.", "correta": false },
+        { "texto": "Habilitar o Microsoft Defender for Cloud nas assinaturas das aplicações.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-mfa-01",
+      "topico": "Autenticação multifator (MFA)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma organização exige autenticação multifator, definida como a combinação de fatores de categorias diferentes: algo que você sabe, algo que você tem e algo que você é. Quatro propostas de combinação foram apresentadas pelas equipes. Qual das combinações a seguir NÃO satisfaz o requisito de autenticação multifator?",
+      "explicacao": "Senha e pergunta de segurança são ambas segredos memorizados, ou seja, dois fatores da categoria \"algo que você sabe\" — dois fatores da mesma categoria não constituem MFA, e por isso essa é a combinação que não satisfaz o requisito (correta). Senha com aprovação no Microsoft Authenticator combina \"sabe\" com \"tem\", assim como senha com código de token físico. Impressão digital com chave de segurança combina \"é\" com \"tem\". O erro testado é contar dois segredos memorizados como se fossem dois fatores distintos, o que dá a falsa sensação de ter implantado MFA.",
+      "opcoes": [
+        { "texto": "Senha da conta seguida da resposta a uma pergunta de segurança.", "correta": true },
+        { "texto": "Senha da conta seguida de aprovação no Microsoft Authenticator.", "correta": false },
+        { "texto": "Senha da conta seguida de um código gerado por token físico.", "correta": false },
+        { "texto": "Leitura de impressão digital seguida do uso de chave de segurança.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-mfa-02",
+      "topico": "Autenticação multifator (MFA)",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Antes de definir quais combinações valem como autenticação multifator, uma empresa está classificando os métodos de verificação que oferece aos funcionários pela categoria de fator a que cada um pertence: algo que você sabe, algo que você tem ou algo que você é. Quais DOIS métodos pertencem à categoria \"algo que você tem\"? Selecione DUAS opções.",
+      "explicacao": "A chave de segurança FIDO2 e o telefone com o Microsoft Authenticator são objetos que o usuário possui fisicamente, o que caracteriza a categoria \"algo que você tem\" (corretas). Senha e resposta a pergunta de segurança são segredos memorizados e pertencem a \"algo que você sabe\". Reconhecimento facial é uma característica biométrica da pessoa, portanto \"algo que você é\". Errar essa classificação leva a combinar dois fatores da mesma categoria e a acreditar, sem razão, que se implantou autenticação multifator.",
+      "opcoes": [
+        { "texto": "Chave de segurança FIDO2 conectada à porta USB do computador.", "correta": true },
+        { "texto": "Notificação de aprovação enviada ao Microsoft Authenticator.", "correta": true },
+        { "texto": "Senha definida pelo usuário no primeiro acesso à sua conta.", "correta": false },
+        { "texto": "Reconhecimento facial feito pela câmera frontal do dispositivo.", "correta": false },
+        { "texto": "Resposta a uma pergunta de segurança cadastrada previamente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-mfa-03",
+      "topico": "Autenticação multifator (MFA)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma campanha de phishing capturou a senha correta de vários funcionários de uma empresa, e os invasores tentaram usá-las imediatamente no portal corporativo. Nenhuma das tentativas resultou em acesso ao ambiente. Qual controle explica DIRETAMENTE esse resultado?",
+      "explicacao": "A autenticação multifator exige um segundo fator que o invasor não capturou junto com a senha, de modo que a senha correta sozinha deixa de ser suficiente para entrar (correta). O single sign-on reduz o número de autenticações, mas não acrescenta verificação nenhuma — com SSO e sem MFA, a senha roubada abriria mais portas, não menos. A complexidade mínima dificulta adivinhação e força bruta, mas é irrelevante quando a senha foi entregue pelo próprio usuário ao golpista. As atribuições RBAC decidem o que uma identidade autenticada pode fazer e só atuariam depois de o invasor já ter entrado.",
+      "opcoes": [
+        { "texto": "A autenticação multifator exigida em todos os acessos ao portal.", "correta": true },
+        { "texto": "O single sign-on configurado entre o portal e o Microsoft Entra ID.", "correta": false },
+        { "texto": "A política de complexidade mínima exigida para as senhas locais.", "correta": false },
+        { "texto": "As atribuições de função RBAC aplicadas no escopo da assinatura.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-sem-senha-01",
+      "topico": "Autenticação sem senha",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa entrega notebooks Windows corporativos e quer que os funcionários entrem no dispositivo e nas aplicações da organização usando biometria ou PIN, com a credencial protegida por hardware no próprio aparelho e sem nenhuma senha a ser digitada ou roubada. Qual método de autenticação atende a esse cenário?",
+      "explicacao": "O Windows Hello for Business substitui a senha por biometria ou PIN, com a chave privada protegida por hardware no TPM e vinculada àquele dispositivo, que é exatamente o cenário descrito (correta). A chave FIDO2 também é um método sem senha, mas é um dispositivo externo a distribuir e gerenciar, desnecessário quando o requisito é usar o próprio notebook. A autenticação multifator por SMS não é autenticação sem senha: ela mantém a senha como primeiro fator. O single sign-on trata de reaproveitar uma autenticação entre aplicações, e não de eliminar a senha do processo.",
+      "opcoes": [
+        { "texto": "Windows Hello for Business, com a credencial vinculada ao dispositivo.", "correta": true },
+        { "texto": "Chave de segurança FIDO2 distribuída a cada um dos funcionários.", "correta": false },
+        { "texto": "Autenticação multifator por SMS enviado ao telefone do funcionário.", "correta": false },
+        { "texto": "Single sign-on entre o notebook e as aplicações da organização.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-sem-senha-02",
+      "topico": "Autenticação sem senha",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Em uma fábrica, os operadores compartilham estações de trabalho, não recebem telefone corporativo e não podem levar o celular pessoal para a área de produção. A empresa quer eliminar a digitação de senhas nesses acessos, mantendo autenticação forte. Qual método de autenticação sem senha é o mais adequado?",
+      "explicacao": "A chave de segurança FIDO2 é um autenticador portátil que não depende de telefone e acompanha a pessoa entre estações compartilhadas, atendendo às restrições descritas (correta). A entrada sem senha pelo Microsoft Authenticator exige justamente o celular que os operadores não têm em mãos. O Windows Hello for Business vincula a credencial ao dispositivo, o que se ajusta mal a estações usadas por muitos operadores diferentes. A autenticação multifator por chamada telefônica não é método sem senha, pois pressupõe a senha como primeiro fator, e um ramal compartilhado não identifica pessoa alguma.",
+      "opcoes": [
+        { "texto": "Chaves de segurança FIDO2, entregues individualmente a cada operador.", "correta": true },
+        { "texto": "Entrada sem senha pelo aplicativo Microsoft Authenticator no celular.", "correta": false },
+        { "texto": "Windows Hello for Business configurado nas estações compartilhadas.", "correta": false },
+        { "texto": "Autenticação multifator por chamada telefônica ao ramal do setor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-sem-senha-03",
+      "topico": "Autenticação sem senha",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Depois de constatar que a maior parte dos incidentes começou com senhas roubadas, uma organização decidiu padronizar apenas métodos de verificação que dispensem completamente o uso de senha pelos usuários do Microsoft Entra ID. A equipe recebeu cinco propostas para avaliar. Quais TRÊS métodos atendem a esse critério? Selecione TRÊS opções.",
+      "explicacao": "Windows Hello for Business, chaves de segurança FIDO2 e a entrada sem senha pelo Microsoft Authenticator concluem a autenticação por biometria, PIN vinculado ao dispositivo ou chave criptográfica, sem que exista senha no processo (corretas). O código de uso único por SMS é um segundo fator de MFA e só entra em cena depois que a senha foi digitada, portanto não elimina a senha. A expiração periódica é uma política de senha e mantém a senha no centro do processo. A confusão testada aqui é tratar \"autenticação multifator\" e \"autenticação sem senha\" como se fossem sinônimos.",
+      "opcoes": [
+        { "texto": "Windows Hello for Business, com biometria ou PIN no dispositivo.", "correta": true },
+        { "texto": "Chaves de segurança FIDO2 conectadas por USB ou aproximação.", "correta": true },
+        { "texto": "Entrada sem senha pelo aplicativo Microsoft Authenticator.", "correta": true },
+        { "texto": "Código de uso único enviado por SMS ao telefone do usuário.", "correta": false },
+        { "texto": "Expiração periódica obrigatória das senhas dos funcionários.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-acesso-condicional-01",
+      "topico": "Acesso condicional",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer que os funcionários que acessam o e-mail corporativo de dentro do escritório entrem apenas com a credencial habitual, mas que os acessos vindos de fora da rede corporativa exijam uma verificação adicional. A condição deve ser avaliada a cada tentativa de acesso. Qual recurso atende ao requisito?",
+      "explicacao": "As políticas de acesso condicional avaliam sinais como usuário, localização, dispositivo, aplicação e risco a cada tentativa e decidem entre conceder, exigir MFA ou bloquear, sendo o único recurso capaz de aplicar a exigência somente a parte dos acessos (correta). Tornar a MFA obrigatória para todos é indiscriminado e passaria a exigir o segundo fator também dentro do escritório, o que contraria o requisito. O RBAC é autorização sobre recursos do Azure e não participa do login no e-mail. As regras de NSG filtram tráfego entre sub-redes e desconhecem identidade de usuário e serviço SaaS.",
+      "opcoes": [
+        { "texto": "Políticas de acesso condicional configuradas no Microsoft Entra ID.", "correta": true },
+        { "texto": "Autenticação multifator obrigatória para todos os funcionários.", "correta": false },
+        { "texto": "Atribuições de função RBAC no escopo da assinatura do Azure.", "correta": false },
+        { "texto": "Regras de grupo de segurança de rede na sub-rede do escritório.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-acesso-condicional-02",
+      "topico": "Acesso condicional",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A área de segurança determinou que dispositivos não registrados ou fora de conformidade com as políticas da empresa fiquem impedidos de abrir as aplicações corporativas, mesmo quando o usuário informa credenciais válidas e conclui o segundo fator. Qual mecanismo aplica essa decisão no momento do acesso?",
+      "explicacao": "O estado de conformidade do dispositivo é um dos sinais do acesso condicional, que pode negar a sessão mesmo com credenciais válidas e MFA concluída (correta). O RBAC não avalia dispositivo: ele concede ou nega permissões sobre recursos do Azure à identidade, independentemente de onde ela se encontra. O Azure Policy avalia propriedades de recursos do Azure, como região, SKU e tags, e não participa do fluxo de login. O Defender for Cloud emite recomendações e alertas de postura e de ameaça, mas recomendar não é bloquear um acesso em tempo real.",
+      "opcoes": [
+        { "texto": "Uma política de acesso condicional que barra dispositivos não conformes.", "correta": true },
+        { "texto": "Uma atribuição de função RBAC removendo o acesso desses usuários.", "correta": false },
+        { "texto": "Uma definição do Azure Policy negando recursos fora de conformidade.", "correta": false },
+        { "texto": "Uma recomendação do Microsoft Defender for Cloud sobre dispositivos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-acesso-condicional-03",
+      "topico": "Acesso condicional",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma arquiteta está desenhando políticas de acesso condicional e precisa saber quais informações podem ser usadas como sinal na decisão de conceder, restringir ou bloquear um acesso. Quais TRÊS itens são sinais avaliados por uma política de acesso condicional? Selecione TRÊS opções.",
+      "explicacao": "Localização de rede, estado de conformidade do dispositivo e risco da entrada estão entre os sinais avaliados pelo acesso condicional, ao lado de usuário, grupo e aplicação de destino (corretas). O tamanho da máquina virtual e o tipo de redundância da conta de armazenamento são propriedades de recursos de infraestrutura, governadas por Azure Policy e sem qualquer participação na decisão de acesso. A confusão testada é misturar controle de acesso a identidades com governança de configuração de recursos, que são camadas diferentes e usam serviços diferentes.",
+      "opcoes": [
+        { "texto": "A localização de rede a partir da qual a autenticação é feita.", "correta": true },
+        { "texto": "O estado de conformidade do dispositivo usado naquele acesso.", "correta": true },
+        { "texto": "O risco de entrada detectado para aquela tentativa de acesso.", "correta": true },
+        { "texto": "O tamanho da máquina virtual que hospeda a aplicação alvo.", "correta": false },
+        { "texto": "O tipo de redundância definido na conta de armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-acesso-condicional-04",
+      "topico": "Acesso condicional",
+      "tipo": "SimNao",
+      "enunciado": "Afirmação: uma política de acesso condicional pode conceder o acesso sem exigir autenticação multifator quando os sinais avaliados indicam baixo risco, como um dispositivo em conformidade acessando de um local confiável. Essa afirmação é verdadeira?",
+      "explicacao": "A afirmação é VERDADEIRA. O acesso condicional é um mecanismo de decisão baseado em sinais e pode conceder o acesso, exigir MFA, exigir dispositivo em conformidade ou bloquear, conforme o resultado da avaliação. É essa granularidade que o distingue de simplesmente habilitar MFA para toda a organização: quem imagina que acesso condicional significa apenas \"MFA sempre ligada\" erra a questão. Exigir sempre o segundo fator continua sendo possível, mas é uma configuração entre várias, e não a definição do recurso.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": true },
+        { "texto": "Falso", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-rbac-01",
+      "topico": "Controle de acesso baseado em função (RBAC)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento precisa criar e excluir recursos somente dentro do resource group do seu projeto, sem qualquer permissão sobre os demais resource groups da mesma assinatura. A empresa segue o princípio do menor privilégio. Qual abordagem atende exatamente a esse requisito?",
+      "explicacao": "Uma atribuição de função RBAC vale do escopo escolhido para baixo, então a função Contributor no resource group concede o poder de criar e excluir ali dentro e nada fora dele (correta). Contributor na assinatura seria herdado por todos os resource groups, o que viola o menor privilégio exigido. Owner no resource group excede o necessário porque acrescenta o direito de conceder permissões a terceiros. O Azure Policy não concede nem nega permissões a pessoas: ele avalia se as propriedades dos recursos estão em conformidade com as regras definidas.",
+      "opcoes": [
+        { "texto": "Atribuir a função Contributor à equipe no escopo do resource group.", "correta": true },
+        { "texto": "Atribuir a função Contributor à equipe no escopo da assinatura.", "correta": false },
+        { "texto": "Atribuir a função Owner à equipe no escopo do resource group.", "correta": false },
+        { "texto": "Criar uma definição do Azure Policy permitindo alterações à equipe.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-rbac-02",
+      "topico": "Controle de acesso baseado em função (RBAC)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa levantou quatro requisitos de controle para sua assinatura do Azure e pretende atender todos eles usando apenas atribuições de função do Azure RBAC. Qual dos requisitos a seguir NÃO pode ser atendido por RBAC, exigindo outro serviço do Azure?",
+      "explicacao": "Restringir a região em que um recurso pode ser criado é uma condição sobre a propriedade do recurso, terreno do Azure Policy — o RBAC não examina os valores das propriedades, então esse é o requisito que ele não atende (correta). Os outros três descrevem quem pode fazer o quê e em qual escopo: uma função apropriada para o time de rede, a função Reader para os auditores na assinatura e uma função de administração de banco no escopo dos servidores SQL. Guardar a distinção \"o RBAC decide QUEM pode agir; o Azure Policy decide QUE propriedades o recurso pode ter\" resolve a maior parte das questões desse par.",
+      "opcoes": [
+        { "texto": "Impedir que máquinas virtuais sejam criadas fora da região Brazil South.", "correta": true },
+        { "texto": "Permitir que apenas o time de rede altere os grupos de segurança de rede.", "correta": false },
+        { "texto": "Conceder acesso somente de leitura aos auditores em toda a assinatura.", "correta": false },
+        { "texto": "Permitir que a equipe de dados administre apenas os bancos de dados SQL.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-rbac-03",
+      "topico": "Controle de acesso baseado em função (RBAC)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador atribui a função Reader a um grupo no escopo de uma assinatura que contém quatro resource groups e dezenas de recursos. Nenhuma outra atribuição de função existe nesse ambiente. Qual é o efeito dessa atribuição sobre o que os membros do grupo conseguem visualizar?",
+      "explicacao": "As atribuições de função do RBAC são herdadas do escopo escolhido para todos os escopos filhos, então Reader na assinatura alcança os quatro resource groups e todos os recursos dentro deles (correta). As duas opções que limitam o alcance ignoram essa herança, que é justamente o benefício do modelo de escopos aninhados. A última opção inverte o sentido da herança: ela desce de management group para assinatura, de assinatura para resource group e daí para o recurso, mas nunca sobe — por isso uma atribuição feita na assinatura não afeta as outras assinaturas do mesmo management group.",
+      "opcoes": [
+        { "texto": "Podem ler todos os resource groups e recursos dentro daquela assinatura.", "correta": true },
+        { "texto": "Podem ler apenas a assinatura, sem enxergar os resource groups nela.", "correta": false },
+        { "texto": "Podem ler os quatro resource groups, mas não os recursos dentro deles.", "correta": false },
+        { "texto": "Podem ler todas as assinaturas do management group que contém essa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-rbac-04",
+      "topico": "Controle de acesso baseado em função (RBAC)",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de governança listou cinco requisitos e precisa separar aqueles que são resolvidos por atribuições de função do Azure RBAC dos que exigem outros serviços. Quais DOIS requisitos são atendidos por RBAC? Selecione DUAS opções.",
+      "explicacao": "Os dois primeiros requisitos descrevem quem pode executar quais operações e em qual escopo, que é precisamente o que uma atribuição de função RBAC expressa (corretas). Exigir tag de centro de custo preenchida e restringir as regiões de provisionamento são condições sobre propriedades de recursos e pertencem ao Azure Policy. Impedir a exclusão acidental do resource group é papel de um resource lock do tipo CanNotDelete, que vale inclusive para quem tem permissão de excluir — outro mecanismo, com outro propósito. Misturar essas três famílias de controle é o erro mais comum do domínio de governança.",
+      "opcoes": [
+        { "texto": "Somente o time de rede pode modificar os grupos de segurança de rede.", "correta": true },
+        { "texto": "Os auditores devem ter acesso de leitura a toda a assinatura de produção.", "correta": true },
+        { "texto": "Todo recurso criado deve conter a tag de centro de custo preenchida.", "correta": false },
+        { "texto": "Nenhum recurso pode ser provisionado fora das regiões brasileiras.", "correta": false },
+        { "texto": "O resource group de produção não pode ser excluído por engano.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-zero-trust-01",
+      "topico": "Modelo Zero Trust",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa adota o modelo Zero Trust. Um funcionário conectado à rede cabeada do escritório, usando um notebook corporativo, tenta abrir o sistema financeiro interno e é solicitado a autenticar novamente e a comprovar que o dispositivo está em conformidade. Qual princípio do Zero Trust esse comportamento representa?",
+      "explicacao": "Verificar explicitamente significa autenticar e autorizar com base em todos os sinais disponíveis — identidade, dispositivo, localização e risco — em cada solicitação, mesmo quando ela vem de dentro da rede, que é o que a cena descreve (correta). O menor privilégio trata da amplitude das permissões concedidas, e não do ato de reverificar a cada acesso. Presumir a violação trata de segmentar, cifrar e monitorar para conter um invasor que já esteja dentro do ambiente. A última opção é o oposto do Zero Trust: a confiança implícita na rede interna é exatamente a premissa que o modelo abandona.",
+      "opcoes": [
+        { "texto": "Verificar explicitamente, autenticando e autorizando a cada solicitação.", "correta": true },
+        { "texto": "Usar o acesso com privilégio mínimo, limitando permissões por função.", "correta": false },
+        { "texto": "Presumir a violação, segmentando e limitando o alcance do incidente.", "correta": false },
+        { "texto": "Confiar na rede interna, dispensando verificações dentro do perímetro.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-zero-trust-02",
+      "topico": "Modelo Zero Trust",
+      "tipo": "SimNao",
+      "enunciado": "Durante a apresentação de um projeto de adoção do modelo Zero Trust, um integrante da equipe de rede resume o modelo com a seguinte afirmação: as requisições originadas dentro da rede corporativa são consideradas confiáveis e por isso dispensam nova verificação de identidade e de conformidade do dispositivo. Essa afirmação é verdadeira?",
+      "explicacao": "A afirmação é FALSA e descreve justamente o modelo de perímetro que o Zero Trust substitui. O princípio \"nunca confie, sempre verifique\" parte da premissa de que a rede interna pode já estar comprometida, de modo que a localização não é credencial: identidade, dispositivo e risco são avaliados a cada solicitação, venha ela de onde vier. Isso não elimina os controles de rede, que seguem sendo uma das camadas da defesa em profundidade, mas eles deixam de ser a base da confiança concedida.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqid-defesa-profundidade-01",
+      "topico": "Defesa em profundidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de segurança organiza seus controles pelas camadas do modelo de defesa em profundidade. Ela precisa classificar dois deles: a criptografia dos dados em repouso em uma conta de armazenamento e a exigência de autenticação multifator no login dos administradores. A quais camadas esses controles pertencem, respectivamente?",
+      "explicacao": "Criptografar dados em repouso protege a informação armazenada e pertence à camada de dados; exigir MFA no login é controle da camada de identidade e acesso (correta). A camada de rede trata de segmentação e filtragem de tráfego, como os NSGs, o que não descreve a exigência de MFA. A camada de perímetro lida com o que chega da internet, como a proteção contra DDoS, e a camada de aplicação cuida do código e de suas dependências — nenhuma delas corresponde a criptografia de armazenamento. A camada de computação trata do endurecimento de máquinas virtuais e endpoints, não do dado armazenado.",
+      "opcoes": [
+        { "texto": "Camada de dados e camada de identidade e acesso.", "correta": true },
+        { "texto": "Camada de dados e camada de rede da organização.", "correta": false },
+        { "texto": "Camada de aplicação e camada de perímetro externo.", "correta": false },
+        { "texto": "Camada de computação e camada de identidade e acesso.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-defesa-profundidade-02",
+      "topico": "Defesa em profundidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma organização está distribuindo seus controles de segurança entre as camadas da defesa em profundidade e precisa identificar o que compõe a camada de identidade e acesso. Quais DOIS controles pertencem a essa camada? Selecione DUAS opções.",
+      "explicacao": "Exigir MFA dos administradores e conceder permissões por RBAC com menor privilégio determinam quem entra e o que cada um pode fazer, o que caracteriza a camada de identidade e acesso (corretas). Filtrar tráfego entre sub-redes com grupos de segurança de rede é camada de rede. Manter antimalware atualizado nas máquinas virtuais é camada de computação, voltada ao endurecimento do host. Criptografar dados em repouso é camada de dados. Todos são controles válidos e recomendados: o que a questão testa é entender que a defesa em profundidade os organiza em camadas distintas, para que a falha de uma não comprometa o conjunto.",
+      "opcoes": [
+        { "texto": "Exigir autenticação multifator de todos os administradores do ambiente.", "correta": true },
+        { "texto": "Conceder permissões por RBAC seguindo o princípio do menor privilégio.", "correta": true },
+        { "texto": "Filtrar o tráfego entre as sub-redes com grupos de segurança de rede.", "correta": false },
+        { "texto": "Manter o antimalware atualizado nas máquinas virtuais do ambiente.", "correta": false },
+        { "texto": "Habilitar a criptografia dos dados em repouso no armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-defender-cloud-01",
+      "topico": "Microsoft Defender for Cloud",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria de uma empresa quer uma visão única de quão segura está a configuração de suas assinaturas do Azure, com uma pontuação que evolua conforme as correções forem aplicadas e uma lista priorizada do que resolver primeiro. Qual serviço fornece exatamente isso?",
+      "explicacao": "O secure score do Microsoft Defender for Cloud mede a postura de segurança da configuração do ambiente e prioriza as recomendações de correção, que é literalmente o pedido da diretoria (correta). O Microsoft Sentinel é o SIEM e SOAR da Microsoft: ingere e correlaciona logs para investigar e responder a incidentes, mas não pontua a postura de configuração. O Entra ID Protection avalia risco de contas e de entradas, um recorte de identidade e não da configuração dos recursos. O Azure Advisor traz recomendações de várias categorias e resume a de segurança vinda do próprio Defender for Cloud, sem ser a origem da pontuação.",
+      "opcoes": [
+        { "texto": "Microsoft Defender for Cloud, com o secure score e as recomendações.", "correta": true },
+        { "texto": "Microsoft Sentinel, com a correlação dos eventos de segurança coletados.", "correta": false },
+        { "texto": "Microsoft Entra ID Protection, com a detecção de riscos de identidade.", "correta": false },
+        { "texto": "Azure Advisor, com as recomendações de custo, desempenho e operação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-defender-cloud-02",
+      "topico": "Microsoft Defender for Cloud",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa mantém máquinas virtuais no Azure, servidores físicos no data center próprio e algumas instâncias em outro provedor de nuvem pública. A área de segurança quer avaliar a postura de todos esses recursos em um único painel, com recomendações comparáveis entre eles. Qual solução atende ao cenário?",
+      "explicacao": "O Defender for Cloud cobre recursos fora do Azure — servidores locais e de outras nuvens conectados por meio do Azure Arc ou dos conectores multi-cloud nativos — e apresenta a postura e as recomendações no mesmo painel (correta). A segunda opção descreve o serviço certo com um limite que não existe, e serve de distrator para quem acredita que a proteção só vale dentro do Azure. O Entra Domain Services entrega um domínio gerenciado para aplicações legadas e não avalia postura de segurança. Os grupos de segurança de rede filtram tráfego dentro de redes virtuais do Azure e não alcançam servidores locais nem de outro provedor.",
+      "opcoes": [
+        { "texto": "Microsoft Defender for Cloud, cobrindo recursos híbridos e multi-cloud.", "correta": true },
+        { "texto": "Microsoft Defender for Cloud, limitado apenas às assinaturas do Azure.", "correta": false },
+        { "texto": "Microsoft Entra Domain Services, com os servidores unidos ao domínio.", "correta": false },
+        { "texto": "Grupos de segurança de rede aplicados às sub-redes de cada ambiente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqid-defender-cloud-03",
+      "topico": "Microsoft Defender for Cloud",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O time de operações recebe um alerta indicando tentativas repetidas de entrada por força bruta contra uma máquina virtual Linux em produção, acompanhado de orientação de resposta. A empresa não implantou nenhuma plataforma de SIEM em seu ambiente. Qual serviço originou esse alerta?",
+      "explicacao": "Além de avaliar a postura, o Defender for Cloud oferece proteção de cargas de trabalho, que detecta ameaças em execução — como força bruta contra uma máquina virtual — e gera alertas com orientação de resposta (correta). O Microsoft Sentinel poderia analisar o mesmo evento, mas o enunciado informa que não há SIEM implantado, então não pode ser a origem do alerta. O Entra ID Protection detecta risco em contas do Entra ID e não ataques contra o sistema operacional de uma máquina virtual. O Azure Policy avalia conformidade de configuração dos recursos e nunca emite alerta de ameaça em tempo de execução.",
+      "opcoes": [
+        { "texto": "Microsoft Defender for Cloud, pela proteção de cargas de trabalho.", "correta": true },
+        { "texto": "Microsoft Sentinel, pela análise correlacionada dos logs coletados.", "correta": false },
+        { "texto": "Microsoft Entra ID Protection, pela detecção de entradas arriscadas.", "correta": false },
+        { "texto": "Azure Policy, pela avaliação de conformidade dos recursos criados.", "correta": false }
+      ]
+    }
+  ]
+}

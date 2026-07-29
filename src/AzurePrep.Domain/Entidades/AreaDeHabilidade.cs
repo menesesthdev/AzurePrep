@@ -15,15 +15,23 @@ public class AreaDeHabilidade : Entity
     {
     }
 
-    public AreaDeHabilidade(Guid examId, string name, decimal weightPercent, Guid? id = null)
+    public AreaDeHabilidade(Guid examId, string key, string name, decimal weightPercent, Guid? id = null)
         : base(id ?? Guid.NewGuid())
     {
         ExamId = examId;
+        Key = Guard.NotNullOrWhiteSpace(key, nameof(key));
         Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
         WeightPercent = Guard.InRange(weightPercent, 0m, 100m, nameof(weightPercent));
     }
 
     public Guid ExamId { get; private set; }
+
+    /// <summary>
+    /// Slug estável da área (ex.: "conceitos-de-nuvem"). É por ele que os arquivos de seed
+    /// referenciam o domínio — o <see cref="Name"/> é texto de UI e pode ser reescrito sem
+    /// quebrar nada, o Key não.
+    /// </summary>
+    public string Key { get; private set; } = string.Empty;
 
     public string Name { get; private set; } = string.Empty;
 

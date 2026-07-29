@@ -10,13 +10,13 @@ public class CorretorDeProvaTests
     private static (Exame exam, List<Questao> questions) BuildExam()
     {
         var exam = new Exame("AZ-900", "Azure Fundamentals", timeLimitMinutes: 45, passingScorePercent: 70, totalQuestions: 4);
-        var areaCloud = exam.AdicionarAreaDeHabilidade("Conceitos de nuvem", 30m);
-        var areaGov = exam.AdicionarAreaDeHabilidade("Gestão e governança", 30m);
+        var areaCloud = exam.AdicionarAreaDeHabilidade("conceitos-de-nuvem", "Conceitos de nuvem", 30m);
+        var areaGov = exam.AdicionarAreaDeHabilidade("governanca", "Gestão e governança", 30m);
 
         var questions = new List<Questao>();
         for (var i = 0; i < 2; i++)
         {
-            var q = new Questao(exam.Id, areaCloud.Id, $"Cloud {i}", TipoDeQuestao.EscolhaUnica, "exp");
+            var q = new Questao(exam.Id, areaCloud.Id, $"cloud-{i}", $"Cloud {i}", TipoDeQuestao.EscolhaUnica, "exp");
             q.AdicionarOpcao("certa", true, 0);
             q.AdicionarOpcao("errada", false, 1);
             questions.Add(q);
@@ -24,7 +24,7 @@ public class CorretorDeProvaTests
 
         for (var i = 0; i < 2; i++)
         {
-            var q = new Questao(exam.Id, areaGov.Id, $"Gov {i}", TipoDeQuestao.EscolhaUnica, "exp");
+            var q = new Questao(exam.Id, areaGov.Id, $"gov-{i}", $"Gov {i}", TipoDeQuestao.EscolhaUnica, "exp");
             q.AdicionarOpcao("certa", true, 0);
             q.AdicionarOpcao("errada", false, 1);
             questions.Add(q);
@@ -96,10 +96,10 @@ public class CorretorDeProvaTests
     {
         // Exame com corte em 75% e 4 questões: 3 certas = 75% deve aprovar (>=).
         var exam = new Exame("AZ-900", "Azure Fundamentals", 45, passingScorePercent: 75, totalQuestions: 4);
-        var area = exam.AdicionarAreaDeHabilidade("Área", 100m);
+        var area = exam.AdicionarAreaDeHabilidade("area", "Área", 100m);
         var questions = Enumerable.Range(0, 4).Select(i =>
         {
-            var q = new Questao(exam.Id, area.Id, $"Q{i}", TipoDeQuestao.EscolhaUnica, "exp");
+            var q = new Questao(exam.Id, area.Id, $"q-{i}", $"Q{i}", TipoDeQuestao.EscolhaUnica, "exp");
             q.AdicionarOpcao("certa", true, 0);
             q.AdicionarOpcao("errada", false, 1);
             return q;

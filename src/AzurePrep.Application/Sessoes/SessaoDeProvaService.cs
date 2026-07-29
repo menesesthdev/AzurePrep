@@ -1,5 +1,6 @@
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Application.Contracts;
+using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
 using AzurePrep.Domain.Correcao;
 
@@ -9,6 +10,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 {
     private readonly IExameRepository _examRepository;
     private readonly ITentativaDeProvaRepository _attemptRepository;
+    private readonly ISorteadorDeQuestoes _sorteador;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUsuarioAtual _usuarioAtual;
@@ -16,12 +18,14 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
     public SessaoDeProvaService(
         IExameRepository examRepository,
         ITentativaDeProvaRepository attemptRepository,
+        ISorteadorDeQuestoes sorteador,
         IUnitOfWork unitOfWork,
         IClock clock,
         IUsuarioAtual usuarioAtual)
     {
         _examRepository = examRepository;
         _attemptRepository = attemptRepository;
+        _sorteador = sorteador;
         _unitOfWork = unitOfWork;
         _clock = clock;
         _usuarioAtual = usuarioAtual;
@@ -35,7 +39,14 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         var exam = await _examRepository.ObterPorIdAsync(examId, cancellationToken)
                    ?? throw new InvalidOperationException($"Exame {examId} não encontrado.");
 
+        // A composição da prova é decidida agora e gravada com a tentativa: é o que garante que
+        // reabrir o simulado mostre exatamente os mesmos itens, e o que permite ao próximo
+        // sorteio saber o que esta pessoa já viu.
+        var questionIds = await _sorteador.SortearAsync(exam.Id, userId, cancellationToken);
+
         var attempt = new TentativaDeProva(exam.Id, userId, _clock.UtcNow);
+        attempt.DefinirQuestoes(questionIds);
+
         await _attemptRepository.AdicionarAsync(attempt, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
@@ -59,19 +70,13 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<EstadoDaTentativaDto?> ObterEstadoAsync(Guid attemptId, CancellationToken cancellationToken = default)
     {
-        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
-        if (attempt is null)
+        var contexto = await CarregarContextoAsync(attemptId, cancellationToken);
+        if (contexto is null)
         {
             return null;
         }
 
-        var exam = await _examRepository.ObterComConteudoAsync(attempt.ExamId, cancellationToken);
-        if (exam is null)
-        {
-            return null;
-        }
-
-        var questions = QuestoesOrdenadas(exam);
+        var (attempt, exam, questions) = contexto.Value;
         var answersByQuestion = attempt.Answers.ToDictionary(a => a.QuestionId);
 
         var statuses = new List<StatusDaQuestaoDto>(questions.Count);
@@ -101,19 +106,13 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<QuestaoDto?> ObterQuestaoAsync(Guid attemptId, int number, CancellationToken cancellationToken = default)
     {
-        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
-        if (attempt is null)
+        var contexto = await CarregarContextoAsync(attemptId, cancellationToken);
+        if (contexto is null)
         {
             return null;
         }
 
-        var exam = await _examRepository.ObterComConteudoAsync(attempt.ExamId, cancellationToken);
-        if (exam is null)
-        {
-            return null;
-        }
-
-        var questions = QuestoesOrdenadas(exam);
+        var (attempt, _, questions) = contexto.Value;
         if (number < 1 || number > questions.Count)
         {
             return null;
@@ -168,19 +167,13 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<ResultadoDaProvaDto?> FinalizarTentativaAsync(Guid attemptId, CancellationToken cancellationToken = default)
     {
-        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
-        if (attempt is null)
+        var contexto = await CarregarContextoAsync(attemptId, cancellationToken);
+        if (contexto is null)
         {
             return null;
         }
 
-        var exam = await _examRepository.ObterComConteudoAsync(attempt.ExamId, cancellationToken);
-        if (exam is null)
-        {
-            return null;
-        }
-
-        var questions = QuestoesOrdenadas(exam);
+        var (attempt, exam, questions) = contexto.Value;
 
         if (!attempt.IsFinished)
         {
@@ -194,26 +187,72 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
     public async Task<ResultadoDaProvaDto?> ObterResultadoAsync(Guid attemptId, CancellationToken cancellationToken = default)
     {
-        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
-        if (attempt is null || !attempt.IsFinished)
+        var contexto = await CarregarContextoAsync(attemptId, cancellationToken);
+        if (contexto is null || !contexto.Value.Attempt.IsFinished)
         {
             return null;
         }
 
-        var exam = await _examRepository.ObterComConteudoAsync(attempt.ExamId, cancellationToken);
+        var (attempt, exam, questions) = contexto.Value;
+        return MontarResultado(exam, questions, attempt);
+    }
+
+    /// <summary>
+    /// Tudo que qualquer operação da sessão precisa: a tentativa (já validada como do usuário),
+    /// o exame com seus domínios e as questões DAQUELA prova, na ordem sorteada.
+    /// </summary>
+    private async Task<(TentativaDeProva Attempt, Exame Exam, IReadOnlyList<Questao> Questions)?> CarregarContextoAsync(
+        Guid attemptId,
+        CancellationToken cancellationToken)
+    {
+        var attempt = await ObterTentativaDoUsuarioAsync(attemptId, cancellationToken);
+        if (attempt is null)
+        {
+            return null;
+        }
+
+        var exam = await _examRepository.ObterComAreasAsync(attempt.ExamId, cancellationToken);
         if (exam is null)
         {
             return null;
         }
 
-        return MontarResultado(exam, QuestoesOrdenadas(exam), attempt);
+        return (attempt, exam, await CarregarQuestoesAsync(attempt, cancellationToken));
     }
 
-    // Ordem estável das questões dentro de uma tentativa. Por ora usa todas as questões do
-    // exame, ordenadas por Id (determinístico com o seed). Quando o banco passar a ter mais
-    // questões que TotalQuestions, aqui entra a seleção/embaralhamento por tentativa.
-    private static IReadOnlyList<Questao> QuestoesOrdenadas(Exame exam)
-        => exam.Questions.OrderBy(q => q.Id).ToList();
+    /// <summary>
+    /// As questões da tentativa, na ordem em que foram sorteadas.
+    /// </summary>
+    /// <remarks>
+    /// O fallback é rede de segurança para tentativa sem composição gravada (anterior ao sorteio,
+    /// quando a prova era literalmente "todas as questões do exame"). A migration reconstrói a
+    /// composição dessas tentativas antigas justamente para que este caminho não seja usado — ele
+    /// só sabe recuperar o que foi respondido, então item deixado em branco se perderia. O que ele
+    /// impede é o desfecho pior: corrigir uma prova antiga de 8 itens contra um banco de centenas.
+    /// </remarks>
+    private async Task<IReadOnlyList<Questao>> CarregarQuestoesAsync(
+        TentativaDeProva attempt,
+        CancellationToken cancellationToken)
+    {
+        var ids = attempt.Questions.Select(q => q.QuestionId).ToList();
+
+        if (ids.Count == 0)
+        {
+            var respondidas = attempt.Answers.Select(a => a.QuestionId).ToHashSet();
+            var exam = await _examRepository.ObterComConteudoAsync(attempt.ExamId, cancellationToken);
+            return exam is null
+                ? Array.Empty<Questao>()
+                : exam.Questions.Where(q => respondidas.Contains(q.Id)).OrderBy(q => q.Id).ToList();
+        }
+
+        var questions = await _examRepository.ObterQuestoesAsync(ids, cancellationToken);
+        var byId = questions.ToDictionary(q => q.Id);
+
+        return ids
+            .Where(byId.ContainsKey)
+            .Select(id => byId[id])
+            .ToList();
+    }
 
     // Quantas alternativas o candidato precisa marcar. Corresponde ao "Escolha duas." impresso
     // no enunciado da prova real — informa a quantidade, nunca quais são.

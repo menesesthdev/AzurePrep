@@ -1,4 +1,5 @@
 using AzurePrep.Application.Abstractions;
+using AzurePrep.Infrastructure.Aleatoriedade;
 using AzurePrep.Infrastructure.Email;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Repositories;
@@ -31,6 +32,7 @@ public static class DependencyInjection
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 
         services.AddSingleton<IClock, SystemClock>();
+        services.AddSingleton<IGeradorDeAleatoriedade, GeradorDeAleatoriedade>();
 
         // Sem estado entre chamadas (salt é sorteado a cada hash), então singleton basta.
         services.AddSingleton<IHasherDeSenha, HasherDeSenhaPbkdf2>();

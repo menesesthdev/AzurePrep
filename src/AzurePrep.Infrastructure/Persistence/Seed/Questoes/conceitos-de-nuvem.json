@@ -1,0 +1,650 @@
+{
+  "exameCode": "AZ-900",
+  "area": "conceitos-de-nuvem",
+  "questoes": [
+    {
+      "id": "az900-nuvem-definicao-01",
+      "topico": "Computação em nuvem e recursos compartilhados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um grupo de pesquisa precisa de 200 servidores durante três dias para processar um lote de imagens e, terminado o processamento, não terá mais uso para essa capacidade. A instituição não quer adquirir hardware. Qual característica fundamental da computação em nuvem torna esse cenário viável?",
+      "explicacao": "A nuvem entrega capacidade sob demanda a partir de um pool de recursos compartilhado entre vários clientes, e essa capacidade volta ao pool quando é liberada — é exatamente isso que permite usar 200 servidores por três dias (correta). Reservar fisicamente servidores exclusivos por todo o contrato descreve hospedagem dedicada, que reintroduz o custo de capacidade ociosa que o grupo quer evitar. Comprar o hardware e apenas hospedá-lo no data center do provedor é colocation, e mantém o investimento inicial. Distribuir a carga entre servidores próprios é processamento on-premises, limitado justamente pelo hardware que a instituição não tem.",
+      "opcoes": [
+        { "texto": "A capacidade é provisionada sob demanda a partir de um pool de recursos compartilhado e devolvida ao pool quando deixa de ser usada.", "correta": true },
+        { "texto": "O provedor reserva fisicamente 200 servidores de uso exclusivo do cliente durante toda a vigência do contrato.", "correta": false },
+        { "texto": "O hardware é adquirido pela instituição e apenas hospedado no data center do provedor, que cuida da operação.", "correta": false },
+        { "texto": "A carga é distribuída entre os servidores já existentes no data center da própria instituição.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-definicao-02",
+      "topico": "Computação em nuvem e recursos compartilhados",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe de segurança revisa a adoção de nuvem pública e registra a seguinte afirmação no relatório: em um serviço de nuvem pública, a infraestrutura física subjacente é compartilhada entre vários clientes, e o isolamento entre eles é obtido por controles lógicos, e não por hardware separado para cada cliente. A afirmação está correta?",
+      "explicacao": "Verdadeiro. Nuvem pública é multilocatária por definição: o mesmo hardware atende clientes diferentes, e o isolamento vem de controles lógicos — hipervisor, redes virtuais e identidade — mantidos pelo provedor. Responder Falso é o erro de quem confunde nuvem pública com nuvem privada, em que a infraestrutura é dedicada a uma única organização. Existe a opção paga de host dedicado dentro da nuvem pública, mas ela é uma exceção contratada, não o funcionamento padrão do modelo.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": true },
+        { "texto": "Falso", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-definicao-03",
+      "topico": "Computação em nuvem e recursos compartilhados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Em uma empresa, entre o pedido de um servidor novo e a entrega pelo time de infraestrutura passam-se em média seis semanas, por causa do ciclo de cotação, compra e instalação. Após migrar para a nuvem pública, esse prazo cai para minutos. Qual característica da nuvem explica DIRETAMENTE essa mudança?",
+      "explicacao": "Agilidade é a capacidade de provisionar e descartar recursos rapidamente por autoatendimento, sem passar por ciclo de aquisição de hardware — é o que elimina as seis semanas (correta). Elasticidade é o ajuste automático da capacidade já provisionada conforme a carga varia; ela não tem relação com o tempo de obter o primeiro recurso, e essa é a confusão mais comum aqui. Alta disponibilidade trata de manter o serviço no ar durante falhas, não de velocidade de entrega. Distribuição geográfica trata de aproximar os recursos dos usuários para reduzir latência.",
+      "opcoes": [
+        { "texto": "Agilidade: os recursos são criados por autoatendimento em minutos, sem ciclo de compra de hardware.", "correta": true },
+        { "texto": "Elasticidade: a capacidade alocada aumenta e diminui sozinha conforme a demanda varia.", "correta": false },
+        { "texto": "Alta disponibilidade: o serviço permanece operando mesmo quando um componente falha.", "correta": false },
+        { "texto": "Distribuição geográfica: os recursos podem ser criados em regiões próximas dos usuários.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-definicao-04",
+      "topico": "Computação em nuvem e recursos compartilhados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um diretor afirma que a empresa já opera em nuvem porque virtualizou todos os servidores do data center próprio e criou um catálogo interno de máquinas virtuais. As solicitações continuam passando por aprovação da equipe de infraestrutura e o custo é rateado entre as áreas com base no parque já adquirido. Quais DUAS características ainda faltam para caracterizar computação em nuvem? Selecione DUAS opções.",
+      "explicacao": "Faltam o provisionamento por autoatendimento, em que o próprio solicitante obtém o recurso sem aprovação manual, e a cobrança baseada no consumo real, em vez de rateio de um parque já pago (as duas corretas). Usar máquinas virtuais em vez de servidores físicos é virtualização, que é premissa da nuvem mas não a define — a empresa já faz isso e ainda assim não tem nuvem. Discos redundantes tratam de tolerância a falha de hardware local, e manter o sistema operacional atualizado é higiene operacional; nenhum dos dois diz respeito ao modelo de entrega do recurso.",
+      "opcoes": [
+        { "texto": "Provisionamento por autoatendimento, sem depender de solicitação e aprovação manual a cada pedido.", "correta": true },
+        { "texto": "Cobrança conforme o consumo real de cada área, em vez de rateio de um parque já adquirido.", "correta": true },
+        { "texto": "Uso de máquinas virtuais no lugar de servidores físicos dedicados a cada aplicação.", "correta": false },
+        { "texto": "Uso de discos redundantes nos servidores para tolerar a falha de uma unidade isolada.", "correta": false },
+        { "texto": "Instalação da versão mais recente do sistema operacional em todas as máquinas virtuais.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-01",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa substituiu seu servidor de colaboração próprio por uma suíte entregue como SaaS. O diretor de TI conclui que, por ser SaaS, a empresa deixou de ter qualquer responsabilidade de segurança sobre o serviço. Pelo modelo de responsabilidade compartilhada, qual responsabilidade continua sendo da empresa nesse modelo?",
+      "explicacao": "Mesmo em SaaS, informações e dados, contas de usuário e identidades e os dispositivos de acesso permanecem sempre com o cliente — gerenciar quem acessa o quê e classificar o que está armazenado é da empresa (correta). Aplicar patches no sistema operacional dos servidores que hospedam o serviço é do provedor em SaaS, e essa é a fronteira que quem decorou a sigla erra. Redundância de rede física entre data centers é do provedor em qualquer modelo. Corrigir vulnerabilidades no código do produto é do fornecedor, porque a aplicação é dele — em PaaS e IaaS o código próprio seria do cliente.",
+      "opcoes": [
+        { "texto": "Gerenciar as contas de usuário, os acessos concedidos e a classificação dos dados armazenados no serviço.", "correta": true },
+        { "texto": "Aplicar correções de segurança no sistema operacional dos servidores que hospedam a suíte.", "correta": false },
+        { "texto": "Configurar a redundância da rede física entre os data centers que sustentam o serviço.", "correta": false },
+        { "texto": "Atualizar o código da aplicação de colaboração para corrigir vulnerabilidades do produto.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-02",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe mantém uma aplicação web em máquinas virtuais (IaaS) e decide movê-la para um serviço de aplicação gerenciado (PaaS), sem alterar o código. Quais DUAS responsabilidades deixam de ser da equipe e passam para a Microsoft com essa mudança? Selecione DUAS opções.",
+      "explicacao": "Ao sair de IaaS para PaaS, o cliente entrega ao provedor a manutenção do sistema operacional e do runtime da plataforma de execução (as duas corretas) — é exatamente essa a fronteira que o modelo desloca. Definir quem acessa a aplicação e com qual permissão pertence a identidades e acessos, que é do cliente em IaaS, PaaS e SaaS. Classificar e proteger os dados também é do cliente em todos os modelos. Corrigir vulnerabilidades no código próprio continua sendo do cliente em PaaS: a plataforma é gerenciada, a aplicação não — confundir isso é tratar PaaS como se fosse SaaS.",
+      "opcoes": [
+        { "texto": "Aplicar correções de segurança no sistema operacional em que a aplicação é executada.", "correta": true },
+        { "texto": "Manter atualizado o runtime e a plataforma de execução que hospeda a aplicação.", "correta": true },
+        { "texto": "Definir quem pode acessar a aplicação e com qual nível de permissão em cada função.", "correta": false },
+        { "texto": "Classificar os dados manipulados pela aplicação e decidir como devem ser protegidos.", "correta": false },
+        { "texto": "Corrigir vulnerabilidades encontradas no código-fonte da própria aplicação web.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-03",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "SimNao",
+      "enunciado": "Durante uma auditoria, um analista registra a seguinte afirmação: no modelo de responsabilidade compartilhada, a responsabilidade pelos controles de segurança física do data center — acesso às instalações, energia e hardware — varia conforme o modelo de serviço adotado, sendo do cliente em IaaS e do provedor em PaaS e SaaS. A afirmação está correta?",
+      "explicacao": "Falso. Segurança física do data center, hosts físicos e rede física são sempre do provedor, nos três modelos de serviço — o cliente nunca chega perto do prédio. O que de fato varia com o modelo é a faixa intermediária: sistema operacional, controles de rede virtual e a aplicação. Responder Verdadeiro é generalizar corretamente que algo varia, mas aplicar essa variação à camada errada. Nas duas pontas o modelo é fixo: hardware e instalações sempre do provedor; dados, identidades e dispositivos sempre do cliente.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-04",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de segurança precisa determinar quem responde pela configuração dos controles de rede de uma carga que roda em máquinas virtuais no Azure: regras de firewall e segmentação entre as sub-redes da aplicação. Pelo modelo de responsabilidade compartilhada, qual afirmação está correta?",
+      "explicacao": "Em IaaS, os controles de rede da carga — regras de firewall e segmentação da rede virtual — são configurados pelo cliente, que é quem conhece o desenho da aplicação (correta). Dizer que a Microsoft responde porque opera a rede do Azure confunde a rede física do data center, que é do provedor, com a rede virtual do cliente, que é dele. Atribuir os controles à camada de hipervisor comete o mesmo erro em outra roupagem. Condicionar a responsabilidade à existência de IP público também está errado: a fronteira do modelo não depende de a carga estar exposta à internet.",
+      "opcoes": [
+        { "texto": "O cliente responde pelos controles, porque em IaaS a configuração da rede virtual da carga é de quem a opera.", "correta": true },
+        { "texto": "A Microsoft responde pelos controles, porque toda a infraestrutura de rede do Azure é operada pelo provedor.", "correta": false },
+        { "texto": "A Microsoft responde pelos controles, porque a filtragem de tráfego é função da camada de hipervisor.", "correta": false },
+        { "texto": "O cliente responde apenas quando a máquina virtual tem IP público; cargas internas ficam com o provedor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-05",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe hoje mantém o SQL Server instalado em uma máquina virtual e decide adotar Azure SQL Database, um serviço de banco de dados gerenciado (PaaS). Considerando o modelo de responsabilidade compartilhada, qual responsabilidade a equipe DEIXA de ter com essa mudança?",
+      "explicacao": "Com o banco gerenciado, o provedor passa a manter o sistema operacional e o motor de banco de dados atualizados — é a única das opções que muda de lado (correta). Definir permissões de leitura e escrita pertence a identidades e acessos, que continua sendo do cliente em qualquer modelo. Decidir quais dados são confidenciais e como protegê-los é classificação de dados, também sempre do cliente. Modelar o esquema e otimizar consultas é trabalho sobre a aplicação e os dados, que a plataforma gerenciada não assume — supor que assume é confundir PaaS com um serviço pronto de ponta a ponta.",
+      "opcoes": [
+        { "texto": "Aplicar atualizações no sistema operacional e no motor do banco de dados que executa a carga.", "correta": true },
+        { "texto": "Definir quais usuários e aplicações têm permissão de leitura e de escrita nas tabelas.", "correta": false },
+        { "texto": "Decidir quais dados armazenados são confidenciais e quais controles adicionais exigem.", "correta": false },
+        { "texto": "Modelar o esquema das tabelas e otimizar as consultas executadas pela aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-06",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma organização opera cargas em IaaS, em PaaS e em SaaS e quer documentar quais responsabilidades permanecem com ela independentemente do modelo de serviço, para não abrir lacuna de controle ao migrar cargas entre modelos. Quais TRÊS responsabilidades são sempre do cliente? Selecione TRÊS opções.",
+      "explicacao": "Informações e dados, contas e identidades e os dispositivos usados para acessar o serviço nunca mudam de lado: são do cliente em IaaS, PaaS e SaaS (as três corretas). Os controles do sistema operacional variam com o modelo — são do cliente em IaaS e do provedor em PaaS e SaaS —, portanto não cabem em uma lista do que é sempre do cliente. A infraestrutura física e o hardware do data center estão no extremo oposto: são sempre do provedor. Confundir uma responsabilidade variável com uma fixa é o que produz lacuna de controle exatamente no momento da migração.",
+      "opcoes": [
+        { "texto": "As informações e os dados que a organização armazena ou processa no serviço.", "correta": true },
+        { "texto": "As contas de usuário e as identidades utilizadas para acessar o serviço.", "correta": true },
+        { "texto": "Os dispositivos usados pelos funcionários para se conectar ao serviço.", "correta": true },
+        { "texto": "Os controles e a atualização do sistema operacional que executa a carga.", "correta": false },
+        { "texto": "A infraestrutura física e o hardware dos data centers que hospedam o serviço.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-07",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "SimNao",
+      "enunciado": "Uma empresa vai mover uma aplicação desenvolvida internamente de máquinas virtuais (IaaS) para um serviço de aplicação gerenciado (PaaS). O arquiteto registra a seguinte expectativa no documento de migração: com a mudança, a responsabilidade por corrigir falhas de segurança encontradas no código da própria aplicação passa a ser da Microsoft. A expectativa está correta?",
+      "explicacao": "Falso. PaaS transfere ao provedor a plataforma — sistema operacional, runtime e a infraestrutura sob eles —, mas o código escrito pela empresa continua sendo dela, assim como os dados e as identidades. Responder Verdadeiro é tratar PaaS como se fosse SaaS: só em SaaS a aplicação inteira é do fornecedor, e ainda assim porque o software é dele, não porque o cliente terceirizou o próprio código. A migração reduz o esforço operacional da equipe, não a responsabilidade sobre o que ela mesma desenvolveu.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-08",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma organização contratou um sistema de recursos humanos entregue como SaaS, acessado pelo navegador. A equipe de governança está mapeando o que precisa entrar no seu próprio programa de controles. Qual das opções NÃO é responsabilidade da organização nesse modelo de serviço?",
+      "explicacao": "Manter a disponibilidade e corrigir a aplicação de RH é do fornecedor: em SaaS, o software e a infraestrutura que o sustenta são dele (correta, por ser a única que não é da organização). Revisar periodicamente quem acessa registros de funcionários é gestão de identidades e acessos, sempre do cliente. Definir a política de classificação dos dados pessoais inseridos é responsabilidade sobre informações e dados, também sempre do cliente. Garantir a conformidade dos notebooks de acesso é a camada de dispositivos, igualmente do cliente em todos os modelos — inclusive em SaaS.",
+      "opcoes": [
+        { "texto": "Manter a disponibilidade do sistema de RH e corrigir defeitos encontrados na aplicação.", "correta": true },
+        { "texto": "Revisar periodicamente quem tem acesso aos registros de funcionários no sistema.", "correta": false },
+        { "texto": "Definir a política de classificação dos dados pessoais inseridos no sistema de RH.", "correta": false },
+        { "texto": "Garantir que os notebooks usados para acessar o sistema estejam em conformidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-resp-compartilhada-09",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora precisa demonstrar a um auditor que os dados de clientes mantidos em um serviço PaaS estão criptografados e com acesso restrito ao pessoal autorizado. A Microsoft disponibiliza relatórios de certificação da plataforma e dos data centers. Qual afirmação descreve corretamente a divisão de responsabilidades nesse caso?",
+      "explicacao": "A certificação do provedor cobre os controles da plataforma e das instalações; a seguradora continua responsável por classificar seus dados e restringir quem os acessa, e é isso que precisa evidenciar ao auditor (correta). Tratar a certificação do provedor como conformidade completa é o erro de achar que se herda conformidade por inteiro — herda-se a base, não os controles do cliente. Dizer que em PaaS o cliente responde pelos controles físicos inverte o modelo. Dizer que a responsabilidade sobre dados passa ao provedor em PaaS ignora que dados e identidades nunca mudam de lado, em nenhum modelo.",
+      "opcoes": [
+        { "texto": "A Microsoft comprova os controles da plataforma e do data center; a seguradora responde por classificar os dados e restringir o acesso.", "correta": true },
+        { "texto": "A certificação apresentada pelo provedor cobre integralmente a conformidade da seguradora, que não precisa de controles próprios.", "correta": false },
+        { "texto": "Em PaaS a seguradora responde inclusive pelos controles físicos do data center, por ser a titular dos dados de clientes.", "correta": false },
+        { "texto": "A responsabilidade sobre os dados só é do cliente em IaaS; em PaaS ela passa integralmente para o provedor do serviço.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-01",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco precisa manter o sistema central de contas em seu próprio data center, por exigência do regulador, mas quer executar no Azure o aplicativo de atendimento, que tem picos sazonais. Os dois ambientes precisam se comunicar de forma integrada. Qual modelo de nuvem descreve essa arquitetura?",
+      "explicacao": "Nuvem híbrida é a combinação de um ambiente privado ou on-premises com nuvem pública, operando de forma integrada — exatamente o cenário descrito (correta). Nuvem pública sozinha não atende, porque o sistema central precisa permanecer fora dela por exigência regulatória. Multi-cloud é o uso de dois ou mais provedores de nuvem pública e não pressupõe ambiente próprio, que aqui é o requisito central — confundir híbrida com multi-cloud é o erro mais frequente nesse tópico. Nuvem privada sozinha também não atende, porque o aplicativo de atendimento fica no Azure.",
+      "opcoes": [
+        { "texto": "Nuvem híbrida, com o ambiente próprio e a nuvem pública integrados e operando em conjunto.", "correta": true },
+        { "texto": "Multi-cloud, porque a solução envolve mais de um ambiente de execução simultaneamente.", "correta": false },
+        { "texto": "Nuvem pública, porque o aplicativo de atendimento é executado inteiramente no Azure.", "correta": false },
+        { "texto": "Nuvem privada, porque o sistema central permanece no data center do próprio banco.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-02",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa executa a plataforma de e-commerce em um provedor de nuvem pública e a plataforma de análise de dados em outro provedor de nuvem pública. Ela encerrou o data center próprio há dois anos e não mantém nenhum servidor em instalações da companhia. Como esse arranjo é classificado?",
+      "explicacao": "Usar dois ou mais provedores de nuvem pública caracteriza multi-cloud (correta). Não é híbrida porque não existe mais nenhum ambiente privado ou on-premises envolvido — híbrida exige a combinação de nuvem pública com infraestrutura privada, e supor que qualquer pluralidade de ambientes é híbrida é a confusão clássica. Não é nuvem privada, porque nenhum dos ambientes é dedicado exclusivamente à empresa. Também não é nuvem pública dedicada, arranjo em que recursos de hardware são reservados a um cliente dentro da nuvem pública, algo que o cenário não menciona.",
+      "opcoes": [
+        { "texto": "Multi-cloud, porque a empresa distribui cargas entre dois provedores de nuvem pública distintos.", "correta": true },
+        { "texto": "Nuvem híbrida, porque há mais de um ambiente de execução envolvido na mesma estratégia.", "correta": false },
+        { "texto": "Nuvem privada, porque cada plataforma de negócio tem seu próprio ambiente isolado.", "correta": false },
+        { "texto": "Nuvem pública dedicada, porque os recursos são reservados a uma única companhia.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-03",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma companhia tem servidores Windows em um data center próprio, máquinas virtuais no Azure e clusters Kubernetes em outro provedor de nuvem. A equipe de governança quer um inventário único de todos esses recursos e quer aplicar as mesmas políticas de configuração a todos, sem migrá-los. Qual solução do Azure atende?",
+      "explicacao": "Azure Arc projeta servidores, clusters Kubernetes e outros recursos de fora do Azure para dentro do Azure Resource Manager, permitindo inventário unificado e aplicação das mesmas políticas em ambientes híbridos e multi-cloud, sem mover as cargas (correta). Azure Migrate avalia e move cargas para o Azure, o que contraria o requisito de não migrar. Azure Site Recovery replica cargas para fins de continuidade, e não de governança. O Azure Resource Manager sozinho só governa recursos criados no Azure — achar que ele alcança recursos externos por conta própria é justamente a lacuna que o Arc preenche.",
+      "opcoes": [
+        { "texto": "Azure Arc, que projeta os recursos externos para o Azure e permite governá-los onde estão.", "correta": true },
+        { "texto": "Azure Migrate, que descobre as cargas existentes e as move para o ambiente do Azure.", "correta": false },
+        { "texto": "Azure Site Recovery, que replica as cargas entre os ambientes para garantir continuidade.", "correta": false },
+        { "texto": "Azure Resource Manager, que por si só já gerencia recursos hospedados em qualquer provedor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-04",
+      "topico": "Modelos de nuvem",
+      "tipo": "SimNao",
+      "enunciado": "Ao redigir a política de nuvem da companhia, um analista propõe a seguinte definição: uma nuvem privada é necessariamente aquela cujo hardware está fisicamente instalado nas dependências da própria organização, de modo que qualquer ambiente hospedado por um terceiro deixa de ser considerado nuvem privada. A definição está correta?",
+      "explicacao": "Falso. O que define nuvem privada é o uso exclusivo por uma única organização, não o endereço do hardware: um provedor terceiro pode operar uma nuvem privada dedicada a um cliente, e ela continua sendo privada. Responder Verdadeiro é confundir nuvem privada com on-premises, que descreve a localização e não o modelo de uso. A distinção importa na prática: adotar nuvem privada hospedada por terceiro preserva o requisito de exclusividade e ainda assim elimina a operação do data center próprio.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-05",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma startup de quatro pessoas, sem equipe de infraestrutura e sem data center, precisa publicar a primeira versão do produto em oito semanas e não sabe quantos usuários terá. Quais DUAS características da nuvem pública sustentam a escolha desse modelo em vez de uma nuvem privada? Selecione DUAS opções.",
+      "explicacao": "Na nuvem pública não há aquisição nem manutenção de hardware pela empresa, e a capacidade acompanha a demanda com cobrança por uso — as duas coisas que uma startup sem equipe e sem previsão de carga precisa (as duas corretas). Controle total sobre o hardware físico, recursos dedicados por padrão e a escolha de em qual servidor cada carga roda são características de nuvem privada: são vantagens reais, mas do outro modelo, e exigem justamente o investimento e a equipe que a startup não tem. Confundi-las com vantagens da nuvem pública é inverter a fronteira entre os dois modelos.",
+      "opcoes": [
+        { "texto": "A empresa não adquire nem mantém hardware, pois a infraestrutura é do provedor.", "correta": true },
+        { "texto": "A capacidade pode crescer ou diminuir conforme a demanda, pagando-se pelo uso.", "correta": true },
+        { "texto": "O controle total sobre o hardware físico permanece nas mãos da própria empresa.", "correta": false },
+        { "texto": "Os recursos de computação são dedicados exclusivamente à empresa por padrão.", "correta": false },
+        { "texto": "A empresa define em qual servidor físico cada carga de trabalho será executada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-06",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe precisa recriar os ambientes de desenvolvimento, homologação e produção várias vezes ao ano, garantindo que sejam idênticos entre si, que qualquer alteração passe por revisão do time e que o histórico de mudanças fique registrado junto com o código da aplicação. Qual abordagem atende ao requisito?",
+      "explicacao": "Infraestrutura como código descreve o ambiente em arquivos declarativos versionados, que passam por revisão como qualquer alteração de código e podem ser aplicados repetidamente com o mesmo resultado (correta). Documentar o passo a passo do portal é exatamente o processo manual que a IaC substitui: o manual não impede divergência entre ambientes. Clonar uma imagem de máquina virtual reproduz o conteúdo de um servidor, mas não a rede, as permissões e os demais recursos que formam o ambiente. Autoscale ajusta a quantidade de instâncias conforme a carga e não tem relação com padronizar a criação de ambientes.",
+      "opcoes": [
+        { "texto": "Infraestrutura como código: descrever o ambiente em arquivos declarativos versionados e aplicá-los de forma repetível.", "correta": true },
+        { "texto": "Documentar o passo a passo da criação pelo portal em um manual revisado a cada alteração do ambiente.", "correta": false },
+        { "texto": "Criar uma imagem de máquina virtual com tudo instalado e clonar essa imagem para cada um dos ambientes.", "correta": false },
+        { "texto": "Configurar escala automática para que os três ambientes cresçam sempre com a mesma quantidade de recursos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-07",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um órgão público está obrigado por norma a manter os registros de identificação de cidadãos em infraestrutura dedicada e sob seu controle direto. Ao mesmo tempo, quer usar serviços de análise da nuvem pública sobre um conjunto de dados anonimizado. Qual abordagem atende aos dois requisitos?",
+      "explicacao": "A nuvem híbrida permite manter o dado identificável no ambiente dedicado e enviar apenas o conjunto anonimizado para a nuvem pública, atendendo à norma sem abrir mão dos serviços de análise (correta). Criptografar e mover tudo para a nuvem pública não resolve, porque a exigência é sobre onde o dado reside e quem o controla, e não apenas sobre confidencialidade. Distribuir o dado sensível entre dois provedores públicos é multi-cloud e não cria infraestrutura dedicada — apenas espalha o mesmo problema. Restringir tudo à nuvem privada atende à norma, mas descarta desnecessariamente o uso permitido do dado anonimizado.",
+      "opcoes": [
+        { "texto": "Nuvem híbrida: o dado identificável fica no ambiente dedicado e só o conjunto anonimizado vai para a nuvem pública.", "correta": true },
+        { "texto": "Nuvem pública com criptografia dos registros, já que o dado criptografado deixa de ser considerado identificável.", "correta": false },
+        { "texto": "Multi-cloud: dividir os registros sensíveis entre dois provedores públicos, reduzindo a exposição em cada um deles.", "correta": false },
+        { "texto": "Nuvem privada exclusivamente, pois qualquer uso de nuvem pública descaracteriza o controle exigido pela norma.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-08",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa decide operar cargas equivalentes em dois provedores de nuvem pública diferentes, com o objetivo declarado de não ficar dependente de um único fornecedor. A diretoria pede que os riscos dessa decisão sejam apresentados junto com os benefícios. Qual é a principal contrapartida dessa estratégia?",
+      "explicacao": "A contrapartida real do multi-cloud é o aumento da complexidade operacional: cada provedor tem ferramentas, modelos de cobrança e serviços próprios, e as equipes precisam dominar todos (correta). O custo por recurso não cai automaticamente por haver concorrência — preço depende de contrato e volume, e volume dividido em dois costuma reduzir o poder de negociação. A disponibilidade da aplicação não passa a ser regida pelo maior SLA disponível; cada carga responde ao SLA do serviço onde roda. E multi-cloud não substitui plano de recuperação de desastre: ter dois provedores não replica dados nem define objetivos de retomada.",
+      "opcoes": [
+        { "texto": "A complexidade operacional aumenta, pois as equipes precisam dominar ferramentas e modelos de cada provedor.", "correta": true },
+        { "texto": "O custo por recurso diminui automaticamente, porque os dois provedores competem pelo mesmo contrato.", "correta": false },
+        { "texto": "A disponibilidade da aplicação passa a ser regida pelo maior SLA entre os provedores contratados.", "correta": false },
+        { "texto": "A empresa deixa de precisar de plano de recuperação de desastre, pois há dois provedores ativos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-modelos-09",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma indústria avalia encerrar sua nuvem privada e migrar tudo para a nuvem pública, mas o comitê pede que sejam listadas as situações em que manter o ambiente privado ainda se justifica. Quais DUAS situações justificam manter a nuvem privada? Selecione DUAS opções.",
+      "explicacao": "Exigência regulatória de residência dos dados em infraestrutura dedicada e sistema legado que depende de hardware específico não oferecido como serviço são motivos legítimos para manter a nuvem privada (as duas corretas): nos dois casos, a nuvem pública não consegue atender ao requisito. Reduzir investimento inicial em equipamentos, expandir capacidade em minutos durante picos e pagar apenas pelo que for consumido são argumentos a favor da nuvem pública — quem os marca aqui está invertendo o sentido da comparação, listando vantagens do modelo que se quer justificar abandonar.",
+      "opcoes": [
+        { "texto": "Exigência regulatória de que certos dados residam em infraestrutura dedicada e controlada pela indústria.", "correta": true },
+        { "texto": "Sistema legado que depende de hardware específico, não oferecido como serviço por provedores públicos.", "correta": true },
+        { "texto": "Necessidade de reduzir o investimento inicial em equipamentos e no espaço físico do data center.", "correta": false },
+        { "texto": "Necessidade de expandir a capacidade em poucos minutos durante picos de demanda imprevisíveis.", "correta": false },
+        { "texto": "Necessidade de pagar apenas pelos recursos efetivamente consumidos ao longo de cada mês.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-01",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Após migrar para a nuvem, o setor financeiro de uma empresa observa que a fatura mensal do provedor varia de um mês para o outro, ao contrário da depreciação constante que registrava antes com os servidores próprios. Qual característica do modelo baseado em consumo explica essa variação?",
+      "explicacao": "No modelo baseado em consumo, a cobrança acompanha o uso efetivo dos recursos, então meses com mais processamento, armazenamento ou tráfego geram fatura maior (correta). O provedor não reajusta o preço unitário todo mês conforme a demanda global; os preços são publicados e estáveis, e a variação vem da quantidade consumida. Custo fixo por contrato com variação apenas de impostos descreve um contrato de capacidade, que é o oposto do modelo de consumo. Depreciação de hardware alocado é raciocínio de CapEx: na nuvem a empresa não é proprietária do equipamento e por isso não o deprecia.",
+      "opcoes": [
+        { "texto": "A cobrança acompanha o uso real dos recursos, então o total muda conforme o consumo de cada mês.", "correta": true },
+        { "texto": "O provedor reajusta o preço unitário a cada mês conforme a demanda global pelos seus serviços.", "correta": false },
+        { "texto": "O valor é fixo por contrato, e a oscilação observada decorre apenas da variação de impostos.", "correta": false },
+        { "texto": "A fatura reflete a depreciação mensal do hardware alocado à empresa dentro do data center.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-02",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma varejista comprou quarenta servidores dimensionados para o pico da Black Friday. Durante os outros onze meses do ano, a utilização média desse parque fica em torno de 15%. A empresa avalia adotar um modelo baseado em consumo na nuvem. Qual afirmação descreve corretamente o impacto financeiro dessa mudança?",
+      "explicacao": "O ganho central do modelo de consumo nesse cenário é deixar de pagar pela capacidade ociosa fora do pico, já que os recursos podem ser reduzidos quando a demanda cai (correta). Pagar um valor fixo equivalente ao pico é contratar capacidade, o que reproduz na nuvem o mesmo desperdício que existe hoje. Manter o custo igual, apenas trocando o dono do hardware, descreve colocation, não modelo de consumo. Condicionar a economia a manter os recursos ligados 24 horas por dia inverte a lógica: é justamente desligar ou reduzir o que não está em uso que produz a economia.",
+      "opcoes": [
+        { "texto": "A varejista deixa de pagar pela capacidade ociosa, pois só paga os recursos que mantém provisionados.", "correta": true },
+        { "texto": "A varejista passa a pagar um valor fixo equivalente ao pico, ganhando previsibilidade total do gasto.", "correta": false },
+        { "texto": "A varejista mantém o mesmo custo de hoje, alterando apenas o fornecedor responsável pelo hardware.", "correta": false },
+        { "texto": "A varejista só reduz o custo se mantiver todos os recursos ligados 24 horas por dia, todos os dias.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-03",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "SimNao",
+      "enunciado": "Ao classificar os gastos de tecnologia do próximo exercício, um controller registra o seguinte entendimento: a compra antecipada de servidores para o data center próprio deve ser classificada como despesa operacional (OpEx), porque os equipamentos serão utilizados na operação diária da companhia ao longo dos anos seguintes. O entendimento está correto?",
+      "explicacao": "Falso. Comprar servidores antecipadamente é despesa de capital (CapEx): há desembolso inicial para adquirir um ativo, que depois é depreciado ao longo da vida útil. O uso na operação diária não muda a classificação — o que a define é a aquisição de um bem, não a finalidade dele. OpEx é o gasto recorrente de operação, categoria em que se encaixa o consumo de serviços de nuvem no modelo pay-as-you-go. Responder Verdadeiro é a inversão clássica entre CapEx e OpEx, e ela distorce toda a comparação financeira entre manter data center próprio e migrar para a nuvem.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-04",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A diretoria financeira de uma companhia avalia substituir o modelo CapEx de aquisição de servidores pelo modelo OpEx de consumo de serviços de nuvem e pede uma análise das consequências reais dessa troca. Quais DUAS afirmações sobre essa mudança estão corretas? Selecione DUAS opções.",
+      "explicacao": "Com OpEx, o gasto passa a ser reconhecido conforme o consumo, sem imobilizar capital, e o ciclo de aquisição deixa de limitar o início de um projeto, porque a capacidade é obtida sob demanda (as duas corretas). Dizer que o primeiro mês é mais caro por incluir a aquisição da plataforma é raciocínio de CapEx aplicado ao modelo errado: não há aquisição. Tornar-se proprietária do hardware ao fim do contrato descreve leasing, não nuvem. E a previsibilidade não aumenta automaticamente: o valor passa justamente a variar com o uso, e a previsão exige estimar consumo.",
+      "opcoes": [
+        { "texto": "O gasto passa a ser reconhecido conforme o consumo, sem imobilizar capital em equipamentos.", "correta": true },
+        { "texto": "O ciclo de aquisição deixa de limitar o início de um projeto, pois a capacidade vem sob demanda.", "correta": true },
+        { "texto": "O custo do primeiro mês tende a ser o maior de todos, por incluir a aquisição da plataforma.", "correta": false },
+        { "texto": "A companhia se torna proprietária do hardware utilizado ao final do período contratado.", "correta": false },
+        { "texto": "A previsibilidade do gasto mensal aumenta automaticamente, pois o valor passa a ser fixo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-05",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe mantém um ambiente de testes composto por máquinas virtuais que só é utilizado de segunda a sexta, das 9h às 18h. A liderança pede uma decisão de desenho que aproveite DIRETAMENTE o modelo baseado em consumo para reduzir o custo desse ambiente. Qual decisão atende?",
+      "explicacao": "Desalocar as máquinas virtuais fora do horário de uso interrompe a cobrança de computação nesse período, e é a aplicação mais direta do modelo baseado em consumo: não se paga pelo que não está provisionado (correta). Redimensionar para um tamanho maior acelera os testes, mas eleva o custo por hora e não trata das horas ociosas. Manter as máquinas ligadas para evitar o tempo de inicialização contraria frontalmente o modelo, pagando as quinze horas diárias de ociosidade. Criar uma segunda cópia em outra região é decisão de continuidade ou latência, e aqui apenas dobraria o custo.",
+      "opcoes": [
+        { "texto": "Desalocar as máquinas virtuais fora do horário de uso, para que não sejam cobradas nesse período.", "correta": true },
+        { "texto": "Redimensionar as máquinas virtuais para um tamanho maior, de modo que os testes terminem antes.", "correta": false },
+        { "texto": "Manter as máquinas virtuais ligadas o tempo todo, para evitar a espera de inicialização diária.", "correta": false },
+        { "texto": "Criar uma segunda cópia do ambiente em outra região, dividindo a carga de testes entre as duas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-06",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante a apresentação do plano de migração, um conselheiro questiona como é possível falar em previsibilidade de custo se a cobrança na nuvem é baseada em consumo e, portanto, variável. Qual afirmação responde corretamente ao questionamento?",
+      "explicacao": "A previsibilidade vem de o preço unitário de cada recurso ser conhecido e publicado: multiplicando-o pelo consumo estimado, projeta-se o gasto antes mesmo de provisionar (correta). Dizer que previsibilidade só existe em CapEx ignora que também lá o gasto operacional de energia, manutenção e reposição é estimado, e não fixo. Congelamento de preço unitário por doze meses em qualquer contrato não é característica do modelo. Desligar a escala automática fixa a capacidade, mas não o consumo de armazenamento, tráfego e demais serviços medidos — além de trocar previsibilidade por incapacidade de responder à carga.",
+      "opcoes": [
+        { "texto": "O preço unitário de cada recurso é conhecido, então o gasto pode ser projetado a partir do consumo estimado.", "correta": true },
+        { "texto": "A previsibilidade só é possível no modelo CapEx; no modelo de consumo o custo é imprevisível por natureza.", "correta": false },
+        { "texto": "A previsibilidade decorre de o provedor congelar o preço unitário por doze meses em qualquer contratação.", "correta": false },
+        { "texto": "A previsibilidade é obtida desligando a escala automática, o que fixa o consumo em um valor único no mês.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-07",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um serviço de streaming recebe audiência dez vezes maior às sextas-feiras à noite e usa escala automática para acompanhar essa variação, removendo as instâncias adicionais quando a audiência cai. A equipe financeira quer entender o efeito disso na fatura, no modelo baseado em consumo. Qual afirmação está correta?",
+      "explicacao": "No modelo baseado em consumo, o custo sobe enquanto as instâncias extras existem e volta a cair quando elas são removidas, acompanhando a curva de uso (correta). Dizer que o custo não muda porque a escala automática está incluída confunde o recurso de escala, que não é cobrado à parte, com as instâncias que ele cria, que são. Afirmar que o custo permanece no patamar do pico descreve reserva de capacidade, o contrário do modelo de consumo. E o preço unitário não cai durante o pico: descontos por volume ou compromisso existem, mas não são acionados pela hora de maior uso.",
+      "opcoes": [
+        { "texto": "O custo sobe durante o pico e volta a cair quando as instâncias adicionais são removidas.", "correta": true },
+        { "texto": "O custo permanece igual, pois a escala automática já está incluída no preço do serviço.", "correta": false },
+        { "texto": "O custo sobe no pico e se mantém nesse patamar, pois a capacidade máxima fica reservada.", "correta": false },
+        { "texto": "O custo cai durante o pico, pois o preço unitário diminui conforme o volume consumido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-consumo-08",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma companhia decidiu abandonar a compra de infraestrutura própria e passar a consumir serviços de nuvem no modelo pay-as-you-go. O time de planejamento está listando as consequências dessa decisão para o próximo exercício. Qual das opções NÃO é uma consequência do modelo baseado em consumo?",
+      "explicacao": "Tornar-se proprietária dos servidores não é consequência do modelo de consumo: na nuvem a companhia paga pelo uso da capacidade, e o hardware continua sendo do provedor (correta, por ser a única que não decorre do modelo). Deixar de imobilizar capital antes do projeto é a essência da troca de CapEx por OpEx. Criar e destruir ambientes temporários sem desperdício é possível justamente porque a cobrança cessa quando o recurso deixa de existir. E o custo variar conforme o uso real ao longo do mês é a definição operacional do modelo.",
+      "opcoes": [
+        { "texto": "A companhia passa a ser proprietária dos servidores físicos que executam as suas cargas.", "correta": true },
+        { "texto": "O gasto deixa de exigir imobilização de capital antes do início de cada novo projeto.", "correta": false },
+        { "texto": "Ambientes temporários podem ser criados e destruídos sem desperdício de capacidade.", "correta": false },
+        { "texto": "O custo passa a variar conforme o uso real dos recursos ao longo de cada mês.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-01",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma varejista define dois requisitos para a plataforma de pedidos. Primeiro: continuar atendendo mesmo que um servidor individual falhe, sem intervenção manual. Segundo: conseguir retomar a operação a partir de outra localidade caso a região inteira fique indisponível. A quais conceitos correspondem, respectivamente, esses dois requisitos?",
+      "explicacao": "Manter o serviço operando durante a falha de um componente é alta disponibilidade; retomar a operação em outra localidade após a perda de uma região inteira é recuperação de desastre (correta, nessa ordem). A alternativa que inverte os dois é o erro mais comum do tópico: alta disponibilidade atua dentro do ambiente e de forma contínua, enquanto a recuperação de desastre pressupõe um evento grave e um plano de retomada. Escalabilidade e elasticidade tratam de acompanhar variação de carga, não de tolerar falhas, e por isso não descrevem nenhum dos dois requisitos.",
+      "opcoes": [
+        { "texto": "Alta disponibilidade e recuperação de desastre.", "correta": true },
+        { "texto": "Recuperação de desastre e alta disponibilidade.", "correta": false },
+        { "texto": "Escalabilidade horizontal e elasticidade automática.", "correta": false },
+        { "texto": "Elasticidade automática e alta disponibilidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-02",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um relatório noturno demora seis horas para ser concluído. O processamento é monolítico e feito por um único processo que não pode ser dividido entre várias instâncias. A equipe quer reduzir o tempo de execução usando recursos do Azure, sem reescrever a aplicação. Qual abordagem é adequada?",
+      "explicacao": "Como a carga não é divisível, o único caminho é a escala vertical (scale up): aumentar CPU e memória da instância que executa o relatório (correta). Escala horizontal (scale out) adiciona instâncias e só ajuda quando o trabalho pode ser repartido, que é justamente o que o cenário exclui — confundir os dois é o erro central aqui. Escala automática por percentual de CPU é a forma automatizada de adicionar instâncias e esbarra na mesma limitação. Distribuir a carga entre zonas de disponibilidade aumenta a tolerância a falhas, mas não reduz o tempo de um processamento único.",
+      "opcoes": [
+        { "texto": "Escala vertical (scale up): aumentar CPU e memória da instância que executa o relatório.", "correta": true },
+        { "texto": "Escala horizontal (scale out): adicionar instâncias para dividir o processamento entre elas.", "correta": false },
+        { "texto": "Escala automática: configurar regras que criam novas instâncias conforme o uso de CPU.", "correta": false },
+        { "texto": "Alta disponibilidade: distribuir a execução entre várias zonas de disponibilidade da região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-03",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma solução foi configurada para adicionar instâncias sempre que o uso médio de CPU ultrapassar 70% e para removê-las quando cair abaixo de 30%, tudo sem intervenção humana. A liderança técnica quer nomear corretamente esse comportamento no documento de arquitetura. Qual conceito o descreve MELHOR?",
+      "explicacao": "Elasticidade é o ajuste automático dos recursos alocados conforme a demanda varia, que é exatamente o que as regras descrevem (correta). Escalabilidade é a capacidade de a solução crescer ou diminuir quando necessário, ainda que por decisão manual: é o conceito mais amplo, e chamar de escalabilidade o ajuste automático perde justamente o que distingue os dois. Alta disponibilidade trata de manter o serviço no ar durante falhas, e não de acompanhar carga. Agilidade é a rapidez para criar e descartar ambientes, que diz respeito ao provisionamento inicial e não ao ajuste contínuo.",
+      "opcoes": [
+        { "texto": "Elasticidade: os recursos alocados acompanham automaticamente a variação da demanda.", "correta": true },
+        { "texto": "Escalabilidade: a solução tem capacidade de crescer ou diminuir quando for necessário.", "correta": false },
+        { "texto": "Alta disponibilidade: o serviço continua atendendo mesmo se uma instância falhar.", "correta": false },
+        { "texto": "Agilidade: novos ambientes podem ser criados rapidamente, sem ciclo de aquisição.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-04",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um site de venda de ingressos recebe picos imprevisíveis quando um show popular é anunciado, e fica com carga baixa no restante do tempo. A empresa quer atender aos picos sem manter capacidade ociosa entre eles. Quais DUAS características da nuvem atendem diretamente a esse cenário? Selecione DUAS opções.",
+      "explicacao": "Elasticidade adiciona e remove instâncias conforme a carga sobe e desce, e o modelo baseado em consumo faz o custo acompanhar esse movimento em vez de fixá-lo no pico — juntas, elas atendem aos dois lados do requisito (as duas corretas). Recuperação de desastre trata de retomar a operação após uma falha grave, não de absorver demanda. Alta disponibilidade mantém o serviço no ar durante falhas de componentes, mas não acrescenta capacidade quando a carga cresce, e confundi-la com elasticidade é o erro típico. Governança padroniza a configuração dos recursos e não altera a capacidade disponível.",
+      "opcoes": [
+        { "texto": "Elasticidade, com adição e remoção automáticas de instâncias conforme a carga varia.", "correta": true },
+        { "texto": "Modelo baseado em consumo, que faz o custo acompanhar o pico em vez de mantê-lo fixo.", "correta": true },
+        { "texto": "Recuperação de desastre, que restaura o serviço em outra região após uma falha grave.", "correta": false },
+        { "texto": "Alta disponibilidade, que mantém o serviço no ar durante a falha de um componente.", "correta": false },
+        { "texto": "Governança, que padroniza a configuração dos recursos criados por todas as equipes.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-05",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Usuários na Ásia relatam lentidão em uma aplicação hospedada apenas na Europa. O monitoramento mostra o serviço disponível, sem erros e com uso de CPU baixo; o tempo perdido está no trajeto das requisições. Qual benefício da nuvem endereça diretamente esse problema?",
+      "explicacao": "A distribuição geográfica permite implantar o serviço em regiões próximas dos usuários, reduzindo a latência causada pela distância — que é exatamente o que o monitoramento aponta (correta). Aumentar o SLA na região atual trata de disponibilidade, e o serviço já está disponível. Aumentar CPU e memória das instâncias na Europa é escala vertical e não muda a distância percorrida pelas requisições, ainda mais com CPU baixa. Replicar o ambiente para uma segunda região como contingência é recuperação de desastre: a ação parece a mesma, mas o objetivo é sobreviver a uma falha, não atender usuários próximos.",
+      "opcoes": [
+        { "texto": "Distribuição geográfica: implantar o serviço em regiões próximas dos usuários para reduzir a latência.", "correta": true },
+        { "texto": "Alta disponibilidade: contratar um nível de serviço com SLA mais alto para a região atual da aplicação.", "correta": false },
+        { "texto": "Escala vertical: aumentar CPU e memória das instâncias que já atendem a aplicação na Europa.", "correta": false },
+        { "texto": "Recuperação de desastre: replicar o ambiente para uma segunda região e mantê-la como contingência.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-06",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de produto quer testar cinco variações de uma funcionalidade em quatro semanas, cada uma em seu próprio ambiente, descartando as que não apresentarem resultado. O volume de acessos de cada teste é pequeno e estável. Qual benefício da nuvem é o mais determinante para viabilizar esse plano?",
+      "explicacao": "Agilidade é a capacidade de criar e descartar ambientes rapidamente, sem ciclo de aquisição — é o que permite cinco experimentos em quatro semanas (correta). Elasticidade trata de ajustar automaticamente a capacidade à variação de carga, e o cenário diz expressamente que o volume de cada teste é pequeno e estável, o que remove a utilidade dela; essa é a confusão que a questão explora. Alta disponibilidade e confiabilidade tratam de sobreviver a falhas e se recuperar delas, atributos desejáveis mas irrelevantes para a velocidade de montar e desmontar ambientes de experimentação.",
+      "opcoes": [
+        { "texto": "Agilidade: ambientes são criados e descartados rapidamente, sem ciclo de aquisição de recursos.", "correta": true },
+        { "texto": "Elasticidade: os recursos de cada ambiente se ajustam sozinhos à variação de carga do teste.", "correta": false },
+        { "texto": "Alta disponibilidade: cada variação permanece no ar mesmo com a falha de um componente.", "correta": false },
+        { "texto": "Confiabilidade: o ambiente se recupera automaticamente de falhas durante o experimento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-07",
+      "topico": "Benefícios da nuvem",
+      "tipo": "SimNao",
+      "enunciado": "No plano de continuidade de uma empresa, o arquiteto registra a seguinte conclusão: distribuir as instâncias da aplicação entre várias zonas de disponibilidade dentro da mesma região constitui, por si só, uma estratégia completa de recuperação de desastre, dispensando qualquer providência adicional. A conclusão está correta?",
+      "explicacao": "Falso. Distribuir instâncias entre zonas de disponibilidade protege contra a falha de um data center dentro da região e é uma estratégia de alta disponibilidade. Recuperação de desastre pressupõe a indisponibilidade da região inteira e exige providências adicionais: cópia dos dados em outra região geográfica, plano de retomada com objetivos de tempo e de ponto de recuperação definidos e testes periódicos. Responder Verdadeiro é o erro de tratar alta disponibilidade e recuperação de desastre como sinônimos porque ambas envolvem redundância — o que muda é a abrangência do evento coberto.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-08",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Ao apresentar uma solução, uma arquiteta afirma que o desenho proposto oferece previsibilidade tanto de desempenho quanto de custo. Um conselheiro pede que ela indique quais decisões de desenho sustentam essa afirmação. Qual par de decisões corresponde ao que foi afirmado?",
+      "explicacao": "Previsibilidade de desempenho vem de escalar automaticamente para manter o tempo de resposta estável sob carga variável; previsibilidade de custo vem de projetar o gasto a partir do preço unitário e do consumo esperado (correta). Reservar capacidade máxima permanente com o SLA mais alto é superdimensionar, o que troca previsibilidade por desperdício. Distribuir instâncias entre zonas e replicar dados para outra região são decisões de alta disponibilidade e recuperação de desastre. Padronizar por modelos declarativos e restringir regiões são decisões de governança e infraestrutura como código.",
+      "opcoes": [
+        { "texto": "Escalar automaticamente para manter o tempo de resposta estável e projetar o gasto pelo consumo esperado.", "correta": true },
+        { "texto": "Reservar permanentemente a capacidade máxima prevista e contratar o SLA mais alto para cada recurso.", "correta": false },
+        { "texto": "Distribuir as instâncias entre zonas de disponibilidade e replicar os dados para uma segunda região.", "correta": false },
+        { "texto": "Padronizar a criação de recursos com modelos declarativos e restringir as regiões permitidas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-09",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe automatizou a criação de recursos a partir de modelos declarativos e configurou a solução para aumentar sozinha a quantidade de instâncias quando a carga cresce e reduzi-las quando ela diminui. Esses dois comportamentos ilustram qual aspecto da gerenciabilidade na nuvem?",
+      "explicacao": "Trata-se do gerenciamento da nuvem: o próprio ambiente provisiona, ajusta e recupera recursos automaticamente a partir de regras e modelos definidos previamente (correta). Gerenciamento na nuvem é o conjunto de ferramentas com que uma pessoa interage com o ambiente — portal, linha de comando, PowerShell e APIs — e descreve como o operador trabalha, não como o ambiente reage sozinho; distinguir os dois é justamente o ponto do tópico. Alta disponibilidade trata de sobreviver a falhas de componente. Redução de fatura quando a carga cai é efeito do modelo de consumo, não um aspecto de gerenciabilidade.",
+      "opcoes": [
+        { "texto": "Gerenciamento da nuvem: o ambiente provisiona e ajusta recursos sozinho, conforme regras e modelos.", "correta": true },
+        { "texto": "Gerenciamento na nuvem: uso de portal, linha de comando e APIs por um operador para administrar.", "correta": false },
+        { "texto": "Alta disponibilidade: capacidade de manter o serviço em operação durante falhas de componentes.", "correta": false },
+        { "texto": "Elasticidade de custo: redução automática do valor da fatura quando a carga do sistema diminui.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-10",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer garantir que nenhuma equipe crie recursos fora das regiões aprovadas pelo jurídico e que todos os ambientes sigam um padrão mínimo de configuração, com relatório do que está e do que não está em conformidade. Qual benefício da nuvem descreve essa capacidade?",
+      "explicacao": "Governança é a capacidade de definir regras que os recursos precisam obedecer, impedir o que as viola e auditar continuamente o que está em conformidade — exatamente o que a empresa descreve (correta). Escalabilidade trata de ajustar a capacidade dos recursos à demanda e não impõe regra alguma sobre onde ou como eles são criados. Agilidade trata do tempo entre solicitar e obter um ambiente. Alta disponibilidade trata de manter os recursos operando durante falhas. Todas as três são benefícios reais da nuvem, mas respondem a perguntas diferentes da que foi feita.",
+      "opcoes": [
+        { "texto": "Governança: definir e aplicar regras que os recursos devem obedecer, com auditoria da conformidade.", "correta": true },
+        { "texto": "Escalabilidade: ajustar a capacidade dos recursos conforme a necessidade de cada carga de trabalho.", "correta": false },
+        { "texto": "Agilidade: reduzir o tempo decorrido entre a solicitação e a entrega de um ambiente à equipe.", "correta": false },
+        { "texto": "Alta disponibilidade: manter os recursos em operação durante falhas de componentes isolados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-11",
+      "topico": "Benefícios da nuvem",
+      "tipo": "SimNao",
+      "enunciado": "Ao comparar estratégias de crescimento para uma aplicação, um analista registra a seguinte justificativa: a escala vertical é a forma de escala com maior limite prático, porque não existe teto para a quantidade de CPU e memória que se pode adicionar a uma única instância. A justificativa está correta?",
+      "explicacao": "Falso. A escala vertical esbarra no maior tamanho de instância oferecido pelo provedor: chegando lá, não há para onde crescer. É a escala horizontal, que adiciona instâncias trabalhando em paralelo, a que permite crescer muito além do limite de uma única máquina — e por isso é a base das aplicações de grande porte na nuvem. Responder Verdadeiro inverte a característica de cada estratégia. Isso não faz da escala vertical uma opção ruim: ela é a resposta certa quando a carga não pode ser dividida entre instâncias, mas o argumento do limite é o oposto do que foi registrado.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-beneficios-12",
+      "topico": "Benefícios da nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma transportadora precisa garantir que uma falha completa e prolongada no data center principal não interrompa a operação por mais do que algumas horas. O comitê pede que sejam apontadas as medidas que efetivamente atendem a esse requisito de recuperação de desastre. Quais DUAS medidas atendem? Selecione DUAS opções.",
+      "explicacao": "Replicar os dados para uma região geograficamente distante e manter um plano de retomada testado, com objetivos de tempo e de ponto de recuperação definidos, são medidas de recuperação de desastre e respondem à perda completa do ambiente principal (as duas corretas). Distribuir instâncias entre servidores do mesmo rack é redundância local, que morre junto com o data center. Aumentar CPU e memória dos servidores principais é escala vertical e não muda nada em caso de perda total. Adicionar instâncias no horário de pico é elasticidade, que trata de carga e não de falha.",
+      "opcoes": [
+        { "texto": "Replicar os dados da operação para uma segunda região geograficamente distante da principal.", "correta": true },
+        { "texto": "Manter e testar periodicamente um plano de retomada com objetivos de recuperação definidos.", "correta": true },
+        { "texto": "Distribuir as instâncias da aplicação entre servidores diferentes dentro do mesmo rack físico.", "correta": false },
+        { "texto": "Aumentar a quantidade de CPU e de memória dos servidores do data center principal atual.", "correta": false },
+        { "texto": "Configurar escala automática para adicionar instâncias durante o horário de maior movimento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-01",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe precisa executar na nuvem um software legado que exige uma versão específica do sistema operacional, drivers proprietários instalados no host e alterações no registro do sistema. O fornecedor do software não oferece versão como serviço. Qual modelo de serviço atende ao cenário?",
+      "explicacao": "IaaS entrega máquinas virtuais em que o cliente controla o sistema operacional convidado e pode instalar a versão exigida, os drivers e as alterações necessárias (correta). PaaS não expõe o sistema operacional: a plataforma é gerenciada pelo provedor, e supor que ela aceita drivers e escolha de versão do host é o mal-entendido mais comum sobre o modelo. SaaS entrega um software pronto do fornecedor, e o enunciado diz que ele não oferece essa modalidade. Afirmar que IaaS e PaaS expõem igualmente o sistema operacional apaga justamente a fronteira que separa os dois modelos.",
+      "opcoes": [
+        { "texto": "IaaS: as máquinas virtuais dão controle sobre o sistema operacional, permitindo instalar o que o legado exige.", "correta": true },
+        { "texto": "PaaS: a plataforma gerenciada permite instalar drivers e escolher a versão do sistema operacional do host.", "correta": false },
+        { "texto": "SaaS: o fornecedor entrega o software pronto e adapta o ambiente às exigências técnicas do cliente.", "correta": false },
+        { "texto": "IaaS ou PaaS indiferentemente, porque os dois modelos expõem o sistema operacional ao cliente final.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-02",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento vai publicar uma API web escrita internamente. Ela não quer administrar sistema operacional, aplicar patches nem configurar balanceamento de carga, mas precisa continuar controlando o código, as bibliotecas e a versão do runtime da aplicação. Qual modelo de serviço atende?",
+      "explicacao": "PaaS entrega a plataforma pronta — sistema operacional, patches e balanceamento sob responsabilidade do provedor — e deixa o código e as dependências sob controle da equipe (correta). IaaS daria controle total, mas devolveria à equipe exatamente a administração do sistema operacional que ela quer evitar. SaaS entrega uma aplicação pronta do fornecedor e não serve para publicar código próprio. Dizer que em IaaS as atualizações do sistema operacional passam a ser do provedor por causa de imagens gerenciadas é falso: em IaaS o sistema operacional convidado permanece com o cliente.",
+      "opcoes": [
+        { "texto": "PaaS: o provedor cuida do sistema operacional e do balanceamento, e a equipe mantém código e dependências.", "correta": true },
+        { "texto": "IaaS: o controle total sobre o ambiente de execução é a única forma de manter o código sob domínio da equipe.", "correta": false },
+        { "texto": "SaaS: o provedor entrega a aplicação pronta, eliminando toda a operação de infraestrutura da equipe.", "correta": false },
+        { "texto": "IaaS com imagens gerenciadas: assim as atualizações do sistema operacional passam a ser do provedor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-03",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe de operações registra o seguinte requisito para uma aplicação que será publicada em um serviço PaaS: os administradores se conectarão por área de trabalho remota ao servidor que executa a aplicação para instalar um agente de monitoramento próprio da companhia. O requisito é compatível com o modelo PaaS?",
+      "explicacao": "Falso. Em PaaS o sistema operacional é abstraído pelo provedor e o cliente não recebe acesso administrativo ao servidor subjacente, portanto não há como conectar-se por área de trabalho remota nem instalar agentes no host. Responder Verdadeiro é aplicar a PaaS uma capacidade que pertence a IaaS, onde a máquina virtual é do cliente. O requisito não é impossível de atender: ou se usa a instrumentação e as extensões que a própria plataforma oferece, ou a carga precisa ser executada em IaaS, com o custo operacional que isso implica.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-04",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa quer desativar seu servidor de e-mail próprio e passar a usar um serviço em que não precise administrar servidor, sistema operacional nem a própria aplicação de e-mail, acessando tudo pelo navegador. Quais DUAS afirmações sobre o modelo de serviço adequado estão corretas? Selecione DUAS opções.",
+      "explicacao": "O modelo é SaaS, em que o provedor opera desde a infraestrutura até a aplicação, e a empresa continua responsável pelas contas de usuário e pelos dados das caixas postais — dados e identidades nunca saem do lado do cliente (as duas corretas). Ter acesso ao sistema operacional dos servidores de e-mail contraria o modelo, que abstrai essa camada. Classificar a solução como IaaS porque envolve servidores confunde a existência de infraestrutura com a responsabilidade sobre ela. Deixar de definir políticas de retenção e acesso é falso: essas decisões são sobre os dados da empresa.",
+      "opcoes": [
+        { "texto": "O modelo adequado é SaaS, em que o provedor opera desde a infraestrutura até a aplicação.", "correta": true },
+        { "texto": "A empresa continua responsável pelas contas de usuário e pelos dados das caixas postais.", "correta": true },
+        { "texto": "A empresa passa a ter acesso ao sistema operacional dos servidores de e-mail do provedor.", "correta": false },
+        { "texto": "O modelo adequado é IaaS, pois o serviço de e-mail continua sendo executado em servidores.", "correta": false },
+        { "texto": "A empresa deixa de precisar definir políticas de retenção e de acesso às suas mensagens.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-05",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Ao apresentar as opções de migração à diretoria, uma arquiteta argumenta que escolher entre IaaS, PaaS e SaaS não é apenas uma decisão técnica, porque cada modelo redistribui o trabalho da equipe interna. Qual afirmação sustenta corretamente esse argumento?",
+      "explicacao": "Quanto mais controle o cliente mantém sobre as camadas do serviço, mais responsabilidades operacionais ele assume, e o inverso também vale — por isso a escolha do modelo redefine o tamanho e o foco da equipe (correta). A alternativa que diz que mais controle significa menos responsabilidade inverte exatamente essa relação. Afirmar que o nível de controle é idêntico nos três modelos elimina a própria distinção entre eles, deixando só a forma de cobrança. E dizer que SaaS oferece o maior controle inverte a ordem: SaaS é o modelo com menos controle e menos responsabilidade operacional.",
+      "opcoes": [
+        { "texto": "Quanto mais controle o cliente mantém sobre as camadas, mais responsabilidades operacionais ele assume.", "correta": true },
+        { "texto": "Quanto mais controle o cliente mantém sobre as camadas, menos responsabilidades operacionais ele assume.", "correta": false },
+        { "texto": "O nível de controle é praticamente idêntico nos três modelos; o que muda é apenas a forma de cobrança.", "correta": false },
+        { "texto": "Em SaaS o cliente detém o maior controle, pois define diretamente o comportamento da aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-06",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe adotou um serviço gerenciado de banco de dados (PaaS) para sustentar uma aplicação interna e está redigindo o documento que define suas próprias atribuições operacionais sobre esse serviço. Qual das opções NÃO é uma responsabilidade dessa equipe nesse modelo?",
+      "explicacao": "Aplicar correções de segurança no sistema operacional que hospeda o motor do banco é do provedor em PaaS, e é justamente essa camada que a equipe deixa de administrar ao escolher o serviço gerenciado (correta, por ser a única que não lhe cabe). Definir quais aplicações e usuários podem se conectar é gestão de acessos, sempre do cliente. Modelar tabelas e criar índices é trabalho sobre a aplicação e os dados. Classificar os dados e decidir quais exigem proteção adicional é responsabilidade sobre informações, que não muda de lado em nenhum modelo.",
+      "opcoes": [
+        { "texto": "Aplicar correções de segurança no sistema operacional que hospeda o motor do banco de dados.", "correta": true },
+        { "texto": "Definir quais aplicações e quais usuários podem se conectar ao banco e com qual permissão.", "correta": false },
+        { "texto": "Modelar as tabelas e criar os índices adequados às consultas executadas pela aplicação.", "correta": false },
+        { "texto": "Classificar os dados armazenados e decidir quais deles exigem proteção adicional.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-07",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma consultoria está classificando cargas de um cliente para decidir o modelo de serviço de cada uma: uma aplicação web desenvolvida internamente, um sistema de CRM contratado pronto e um servidor de arquivos legado. Quais TRÊS afirmações sobre essa classificação estão corretas? Selecione TRÊS opções.",
+      "explicacao": "A aplicação web própria, cujo código a equipe mantém mas sem querer administrar servidores, é candidata a PaaS; o CRM contratado pronto e usado pelo navegador é SaaS; e o servidor de arquivos legado, que exige controle do sistema operacional, é candidato a IaaS (as três corretas). Dizer que em SaaS o cliente configura o sistema operacional é falso, pois esse é o modelo que mais abstrai camadas. Dizer que em IaaS o provedor atualiza o sistema operacional convidado também é falso: essa é a responsabilidade que caracteriza o modelo como sendo do cliente.",
+      "opcoes": [
+        { "texto": "A aplicação web própria, mantida pela equipe mas sem administração de servidores, é candidata a PaaS.", "correta": true },
+        { "texto": "O sistema de CRM contratado pronto e usado pelo navegador é consumido no modelo SaaS.", "correta": true },
+        { "texto": "O servidor de arquivos legado, que exige controle do sistema operacional, é candidato a IaaS.", "correta": true },
+        { "texto": "Uma aplicação entregue em SaaS pode ter seu sistema operacional configurado pelo cliente.", "correta": false },
+        { "texto": "Em IaaS o provedor assume a atualização do sistema operacional convidado das máquinas virtuais.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-nuvem-servicos-08",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa usa uma suíte de produtividade entregue como SaaS. O fornecedor anunciou uma atualização de versão, e a equipe de TI quer adiá-la por três meses para testar a compatibilidade com um complemento interno. O que o modelo SaaS permite nesse caso?",
+      "explicacao": "Em SaaS o ciclo de atualização da aplicação é conduzido pelo fornecedor, e o cliente só dispõe das opções que o próprio fornecedor oferecer, como anéis de liberação ou janelas de adoção — não há controle irrestrito sobre o momento (correta). Congelar a versão indefinidamente é o que se poderia fazer com um software instalado em IaaS, e supor isso em SaaS é confundir os modelos. Aplicar a atualização manualmente nos servidores exige acesso que o modelo não concede. Manter duas versões em paralelo pressupõe uma instalação isolada por cliente, o que também não é como o serviço multilocatário funciona.",
+      "opcoes": [
+        { "texto": "Apenas o que o fornecedor oferecer, pois em SaaS o ciclo de atualização da aplicação é conduzido por ele.", "correta": true },
+        { "texto": "Congelar a versão atual por tempo indeterminado, já que é a empresa quem administra a aplicação.", "correta": false },
+        { "texto": "Aplicar a atualização manualmente nos servidores depois de validar a compatibilidade do complemento.", "correta": false },
+        { "texto": "Manter as duas versões em paralelo, pois em SaaS cada cliente possui a sua própria instalação isolada.", "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,458 @@
+{
+  "exameCode": "AZ-900",
+  "area": "governanca",
+  "questoes": [
+    {
+      "id": "az900-gov-policy-01",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de segurança precisa descobrir quais das centenas de storage accounts já existentes em uma subscription estão com acesso público de blob habilitado. A diretoria proibiu, neste momento, qualquer ação que possa interromper cargas de trabalho em produção. Qual configuração atende ao pedido?",
+      "explicacao": "O efeito de auditoria avalia os recursos existentes e os marca como não conformes em um relatório, sem alterar nem bloquear nada — exatamente o que se pede quando o objetivo é enxergar antes de agir. O efeito de negação atua sobre requisições de criação e atualização: ele não remove nem sinaliza o que já existe, e ainda passaria a barrar mudanças legítimas em produção. O resource lock ReadOnly protege o recurso contra alteração pelo plano de gerenciamento, mas não avalia propriedade nenhuma nem produz relatório de conformidade — confunde-se aqui proteger um recurso com auditar sua configuração. Remover atribuições de função é Azure RBAC, que controla QUEM pode agir sobre o recurso, e não QUAL propriedade o recurso tem; tirar a permissão de quem criou os storage accounts não muda a configuração deles.",
+      "opcoes": [
+        { "texto": "Atribuir uma política com efeito de auditoria, que registra os recursos não conformes sem alterá-los.", "correta": true },
+        { "texto": "Atribuir uma política com efeito de negação, que remove os recursos não conformes já existentes.", "correta": false },
+        { "texto": "Aplicar um resource lock do tipo ReadOnly em cada storage account existente na subscription.", "correta": false },
+        { "texto": "Remover as atribuições de função dos usuários que criaram os storage accounts não conformes.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-policy-02",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador precisa garantir duas coisas em uma subscription: que somente integrantes do time de infraestrutura possam criar máquinas virtuais e que qualquer máquina virtual criada use apenas tamanhos de uma lista aprovada. Qual combinação de ferramentas corresponde, respectivamente, a essas duas exigências?",
+      "explicacao": "São duas perguntas diferentes. QUEM pode executar uma operação é Azure RBAC, por meio de atribuições de função; QUAL propriedade o recurso pode ter é Azure Policy, avaliando o corpo da requisição e negando o que estiver fora da lista de tamanhos. Inverter os dois papéis é o erro mais comum do domínio: o Azure Policy não concede nem revoga permissão de usuário, e o RBAC não inspeciona o tamanho da máquina virtual solicitada. Resource lock não serve para nenhuma das duas exigências: ele impede exclusão ou alteração de um recurso já existente, valendo igualmente para todos os usuários, e não restringe quem cria nem que tamanho é permitido.",
+      "opcoes": [
+        { "texto": "Azure RBAC para definir quem pode criar e Azure Policy para restringir os tamanhos permitidos.", "correta": true },
+        { "texto": "Azure Policy para definir quem pode criar e Azure RBAC para restringir os tamanhos permitidos.", "correta": false },
+        { "texto": "Azure RBAC para definir quem pode criar e resource locks para restringir os tamanhos permitidos.", "correta": false },
+        { "texto": "Resource locks para definir quem pode criar e Azure Policy para restringir os tamanhos permitidos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-policy-03",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma organização tem 40 subscriptions organizadas sob um mesmo management group e precisa que um conjunto de quinze regras de conformidade valha para todas elas, com o mínimo de trabalho de atribuição e um único painel de conformidade. Quais afirmações descrevem corretamente a abordagem com Azure Policy? Selecione DUAS opções.",
+      "explicacao": "Uma iniciativa (conjunto de políticas) agrupa várias definições em um único objeto atribuível, o que reduz a atribuição a uma operação só e consolida o resultado em um painel de conformidade único. E a atribuição feita no management group é herdada por todas as subscriptions abaixo, junto com seus resource groups e recursos — herança de escopo é justamente o que evita repetir a atribuição quarenta vezes. Atribuir cada definição individualmente em cada subscription contraria o próprio motivo de existir da iniciativa, e a afirmação de que iniciativa só vale para resource group é falsa: iniciativas são atribuíveis em qualquer escopo. Resource lock não propaga regra de configuração alguma — ele protege recursos contra exclusão ou alteração, e não é mecanismo de conformidade. Função personalizada é Azure RBAC: descreve permissões, não propriedades exigidas dos recursos.",
+      "opcoes": [
+        { "texto": "Agrupar as quinze definições em uma iniciativa e atribuir essa iniciativa uma única vez.", "correta": true },
+        { "texto": "Atribuir a iniciativa no management group, de onde ela é herdada pelas subscriptions abaixo.", "correta": true },
+        { "texto": "Atribuir as quinze definições uma a uma em cada subscription, pois iniciativa só vale em resource group.", "correta": false },
+        { "texto": "Criar um resource lock no management group, que propaga as quinze regras para os recursos filhos.", "correta": false },
+        { "texto": "Criar uma função personalizada em cada subscription contendo as quinze regras de conformidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-policy-04",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa exige que toda máquina virtual tenha uma extensão de agente instalada. Há 300 máquinas virtuais e boa parte foi criada antes de a regra existir. A equipe quer que o próprio Azure Policy instale a extensão nas máquinas não conformes, em vez de abrir um chamado para cada dono de recurso. Qual recurso atende?",
+      "explicacao": "Efeitos de correção (remediação) existem exatamente para agir sobre o que já existe: o Azure Policy dispara uma tarefa de remediação que aplica a configuração faltante aos recursos não conformes, sem intervenção manual dono a dono. O efeito de auditoria apenas relata a não conformidade — ele enxerga o problema, mas nunca corrige. O efeito de negação age no momento da criação ou atualização, barrando a requisição; ele não reimplanta nem altera recurso já existente, e assumir isso é o mal-entendido clássico entre impedir e corrigir. Resource lock do tipo CanNotDelete apenas impede exclusão, sem instalar, alterar ou avaliar configuração alguma.",
+      "opcoes": [
+        { "texto": "Uma política com efeito de correção, que aplica a configuração faltante aos recursos existentes.", "correta": true },
+        { "texto": "Uma política com efeito de auditoria, que instala a extensão assim que detecta a não conformidade.", "correta": false },
+        { "texto": "Uma política com efeito de negação, que reimplanta as máquinas já criadas em conformidade.", "correta": false },
+        { "texto": "Um resource lock do tipo CanNotDelete, que força a reconfiguração das máquinas protegidas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-policy-05",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe está redigindo o desenho de governança de uma subscription e precisa separar com clareza o que cabe ao Azure Policy do que cabe a outros mecanismos de controle. Qual das opções NÃO é uma capacidade do Azure Policy?",
+      "explicacao": "Conceder ou remover a permissão de um usuário é atribuição de função, ou seja, Azure RBAC — o Azure Policy nunca decide QUEM pode agir, apenas avalia COMO o recurso está configurado; as duas ferramentas são complementares e costumam ser confundidas exatamente nesse ponto. As demais opções são capacidades reais: o Azure Policy avalia recursos já existentes e apresenta um relatório de conformidade (efeito de auditoria), impede a criação de recursos cujas propriedades violem a regra (efeito de negação) e permite agrupar várias definições em uma iniciativa atribuída de uma só vez, que é o mecanismo padrão para aplicar conjuntos grandes de regras em escopos amplos.",
+      "opcoes": [
+        { "texto": "Conceder ou remover a permissão de um usuário para criar recursos em um resource group.", "correta": true },
+        { "texto": "Avaliar os recursos já existentes no escopo e apresentar um relatório de conformidade.", "correta": false },
+        { "texto": "Impedir a criação de um recurso cuja propriedade viole a regra definida na atribuição.", "correta": false },
+        { "texto": "Agrupar várias definições em uma iniciativa que é atribuída ao escopo de uma só vez.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-policy-06",
+      "topico": "Azure Policy",
+      "tipo": "SimNao",
+      "enunciado": "Uma empresa atribui, no escopo de uma subscription, uma política que exige que toda conta de armazenamento tenha transferência segura habilitada. Semanas depois, outra equipe cria um novo resource group dentro dessa mesma subscription e tenta implantar ali uma conta de armazenamento sem a configuração exigida. A implantação será bloqueada pela atribuição feita no nível da subscription.",
+      "explicacao": "Sim. Atribuições de Azure Policy são herdadas por todos os escopos filhos: o que se atribui na subscription vale para os resource groups criados depois e para os recursos dentro deles, sem necessidade de reatribuir. Responder Não costuma vir de duas confusões: imaginar que a política só alcança o que existia no momento da atribuição — na verdade o efeito de negação é avaliado a cada requisição de criação ou atualização, inclusive de recursos futuros — ou tratar a atribuição como um objeto preso a um resource group específico, quando o escopo de atribuição define o topo da herança, e não um limite fechado.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-lock-01",
+      "topico": "Resource locks",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um resource group contém o gateway de rede que sustenta a produção. A equipe precisa continuar ajustando as configurações desse gateway no dia a dia, mas nenhum administrador, nem mesmo quem tem a função Owner, pode conseguir excluí-lo por engano. Qual medida atende às duas condições ao mesmo tempo?",
+      "explicacao": "O lock CanNotDelete bloqueia a exclusão do recurso e continua permitindo alterações de configuração, que é exatamente a combinação pedida; além disso vale para qualquer usuário, inclusive Owner, porque o lock é avaliado depois das permissões. O lock ReadOnly protegeria contra exclusão, mas também congelaria as configurações, impedindo o trabalho diário — é a confusão mais frequente entre os dois tipos. Remover a função Owner é Azure RBAC: reduziria o alcance de alguns usuários, mas alguém precisará manter permissão para operar o gateway e continuaria podendo excluí-lo. Uma política de auditoria apenas relata não conformidade e não impede operação nenhuma.",
+      "opcoes": [
+        { "texto": "Aplicar um resource lock do tipo CanNotDelete diretamente no recurso do gateway.", "correta": true },
+        { "texto": "Aplicar um resource lock do tipo ReadOnly diretamente no recurso do gateway.", "correta": false },
+        { "texto": "Remover a função Owner de todos os administradores que atuam nessa subscription.", "correta": false },
+        { "texto": "Atribuir uma política com efeito de auditoria sobre o resource group do gateway.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-lock-02",
+      "topico": "Resource locks",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma conta de armazenamento recebeu um resource lock do tipo ReadOnly. Um analista conclui que, com isso, ninguém mais consegue apagar os arquivos já gravados nos containers de blob dessa conta. Qual afirmação descreve corretamente o alcance desse lock?",
+      "explicacao": "Resource locks atuam no plano de gerenciamento, ou seja, sobre operações do Azure Resource Manager que criam, alteram ou excluem o recurso. Operações sobre o conteúdo — ler, gravar ou apagar blobs — pertencem ao plano de dados e continuam governadas por permissões de acesso aos dados, não pelo lock. Dizer que o lock impede apagar blobs é justamente o mal-entendido central entre o recurso e o conteúdo do recurso. A opção que fala em impedir somente a exclusão, permitindo alteração, descreve o tipo CanNotDelete, e não o ReadOnly. E dizer que o lock remove permissões de escrita confunde lock com Azure RBAC: o lock não altera atribuição de função alguma, ele se sobrepõe às permissões existentes.",
+      "opcoes": [
+        { "texto": "O lock impede alterações no recurso pelo plano de gerenciamento, mas não rege as operações sobre os dados.", "correta": true },
+        { "texto": "O lock impede tanto a alteração do recurso quanto a exclusão de qualquer blob gravado nos containers.", "correta": false },
+        { "texto": "O lock impede apenas a exclusão da conta de armazenamento, permitindo alterar suas configurações.", "correta": false },
+        { "texto": "O lock remove as permissões de escrita dos usuários sobre a conta de armazenamento e seus dados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-lock-03",
+      "topico": "Resource locks",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe de operações precisa proteger doze recursos de produção contra exclusão acidental e decide aplicar um único resource lock do tipo CanNotDelete no resource group que contém todos eles, em vez de configurar um lock em cada recurso individualmente. Com essa configuração, os doze recursos ficam protegidos contra exclusão.",
+      "explicacao": "Sim. Locks são herdados pelos escopos filhos: aplicado ao resource group, o lock CanNotDelete vale para todos os recursos contidos nele, inclusive os que forem criados depois, o que torna essa a forma mais econômica de proteger um ambiente inteiro. Responder Não normalmente vem de tratar o lock como uma atribuição de função, que precisaria ser concedida recurso a recurso, ou de confundir lock com Azure Policy: a política avalia propriedades de cada recurso, já o lock é uma trava de escopo que desce na hierarquia management group, subscription, resource group e recurso.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-lock-04",
+      "topico": "Resource locks",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um arquiteto já configurou o Azure RBAC corretamente em um ambiente de produção e agora quer reduzir o risco de erro humano cometido pelos próprios administradores legítimos. Quais afirmações sobre resource locks são verdadeiras nesse contexto? Selecione DUAS opções.",
+      "explicacao": "O lock é avaliado depois das permissões e vale para todos os usuários, inclusive para quem tem permissão de exclusão pelo RBAC — é por isso que ele protege contra o erro do administrador legítimo, algo que o RBAC sozinho não faz. E, como o lock não é uma simples confirmação, excluir um recurso protegido exige removê-lo antes, em uma operação separada e deliberada. Dizer que o lock só afeta quem não é Owner inverte o propósito da ferramenta. Dizer que o lock substitui o RBAC confunde dois controles complementares: o RBAC define quem pode agir, o lock impede uma operação independentemente de quem seja. E avaliar propriedades do recurso e bloquear as que fogem do padrão é a descrição do Azure Policy, não do lock.",
+      "opcoes": [
+        { "texto": "O lock vale para todos os usuários, inclusive para quem tem permissão de exclusão pelo RBAC.", "correta": true },
+        { "texto": "Para excluir um recurso protegido é preciso remover o lock antes, em uma operação separada.", "correta": true },
+        { "texto": "O lock só produz efeito sobre usuários que não possuem a função Owner na subscription.", "correta": false },
+        { "texto": "O lock substitui as atribuições de função, dispensando a configuração de RBAC no ambiente.", "correta": false },
+        { "texto": "O lock avalia as propriedades do recurso e bloqueia as que fogem do padrão definido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-purview-01",
+      "topico": "Microsoft Purview",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem dados espalhados entre Azure Blob Storage, Azure SQL Database e servidores de arquivos no próprio datacenter. O time jurídico pediu um catálogo único do que existe, com classificação automática do que for informação pessoal e visão de onde cada conjunto de dados se origina. Qual solução atende?",
+      "explicacao": "O Microsoft Purview é a solução de governança de dados: varre as fontes, monta um catálogo unificado que atravessa o Azure e ambientes locais, classifica automaticamente conteúdo sensível e registra a linhagem dos dados. O Azure Monitor coleta métricas e logs sobre o comportamento dos recursos — ele diz como um recurso está operando, não que dado está guardado dentro dele. O Service Trust Portal publica a documentação de conformidade da Microsoft; serve para comprovar como o provedor se comporta, não para catalogar os dados do cliente. O Azure Advisor gera recomendações de configuração para os recursos da subscription e não inspeciona conteúdo de dados em momento algum.",
+      "opcoes": [
+        { "texto": "Microsoft Purview, que cataloga, classifica e mapeia a linhagem dos dados da organização.", "correta": true },
+        { "texto": "Azure Monitor, que coleta métricas e logs dos recursos implantados na subscription.", "correta": false },
+        { "texto": "Service Trust Portal, que reúne relatórios de auditoria e documentos de conformidade.", "correta": false },
+        { "texto": "Azure Advisor, que analisa os recursos e gera recomendações personalizadas de melhoria.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-purview-02",
+      "topico": "Microsoft Purview",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma auditoria, uma empresa precisa apresentar dois artefatos distintos: o relatório de auditoria ISO 27001 referente aos datacenters do Azure e um inventário de onde os dados pessoais dos seus próprios clientes estão armazenados. Qual combinação atende, respectivamente, a cada um desses pedidos?",
+      "explicacao": "São lados opostos da mesma fronteira. O Service Trust Portal entrega documentação sobre a conformidade DA Microsoft — relatórios de auditoria, certificações e avaliações da infraestrutura do provedor. O Microsoft Purview governa os dados DA empresa, produzindo o inventário, a classificação e a linhagem do que ela mesma armazena. Inverter os dois é o erro clássico do tópico. Usar o Azure Advisor para o relatório da Microsoft não funciona: ele recomenda melhorias nos recursos da subscription e não emite certificação alguma; e o Azure Policy avalia conformidade técnica de recursos com regras internas, sem produzir inventário de dados. Por fim, o Service Trust Portal nunca publica catálogo de dados de cliente — ele não tem acesso ao conteúdo do cliente.",
+      "opcoes": [
+        { "texto": "Service Trust Portal para o relatório da Microsoft e Microsoft Purview para o inventário próprio.", "correta": true },
+        { "texto": "Microsoft Purview para o relatório da Microsoft e Service Trust Portal para o inventário próprio.", "correta": false },
+        { "texto": "Azure Advisor para o relatório da Microsoft e Azure Policy para o inventário próprio de dados.", "correta": false },
+        { "texto": "Service Trust Portal para os dois, pois ele também publica o catálogo de dados do cliente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-purview-03",
+      "topico": "Microsoft Purview",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe de dados encontrou uma divergência em um relatório de vendas e precisa descobrir de quais fontes o conjunto de dados veio e por quais transformações ele passou antes de chegar ao relatório final. O recurso de linhagem de dados do Microsoft Purview é adequado para responder a essa pergunta.",
+      "explicacao": "Sim. Linhagem de dados é justamente o mapa do percurso de um conjunto de dados entre origens, processos de transformação e destinos, e é um dos pilares do Microsoft Purview, ao lado do catálogo e da classificação. Responder Não geralmente vem de esperar essa resposta do Azure Monitor, que registra a execução dos recursos e não a genealogia do dado, ou do Service Trust Portal, que trata da conformidade da Microsoft e não tem qualquer visibilidade sobre os conjuntos de dados do cliente.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-service-trust-01",
+      "topico": "Service Trust Portal",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um cliente potencial do setor financeiro exige, antes de fechar contrato, provas de que a infraestrutura de nuvem utilizada pelo fornecedor atende a normas como SOC 2 e ISO 27001. O fornecedor precisa obter os relatórios de auditoria independentes e a documentação de conformidade da própria Microsoft. Onde esses documentos são publicados?",
+      "explicacao": "O Service Trust Portal é o repositório oficial de relatórios de auditoria independentes, certificações e documentos de conformidade da Microsoft, disponível para clientes que precisam comprovar a postura do provedor perante auditores e reguladores. O painel de conformidade do Azure Policy mostra se os recursos DO CLIENTE atendem às regras que ele mesmo definiu; ele não guarda certificado de datacenter. O Azure Advisor produz recomendações sobre a configuração dos recursos da subscription, inclusive de segurança, mas não emite nem hospeda documento de auditoria. O Microsoft Purview governa os dados do cliente e não certifica a infraestrutura do provedor.",
+      "opcoes": [
+        { "texto": "No Service Trust Portal, que publica relatórios de auditoria e documentos de conformidade da Microsoft.", "correta": true },
+        { "texto": "No painel de conformidade do Azure Policy, que reúne os certificados dos datacenters da Microsoft.", "correta": false },
+        { "texto": "No Azure Advisor, na categoria de recomendações de segurança e conformidade regulatória.", "correta": false },
+        { "texto": "No Microsoft Purview, que emite os certificados de auditoria da infraestrutura do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-ferramentas-01",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador precisa executar um script de provisionamento a partir de um notebook emprestado, no qual não tem privilégio para instalar software algum. Ele quer um ambiente de linha de comando já autenticado com a sua conta do Azure, acessível apenas pelo navegador. Qual opção atende a essa restrição?",
+      "explicacao": "O Azure Cloud Shell é um shell hospedado pelo Azure, aberto pelo navegador e já autenticado com a identidade de quem fez login no portal — nada precisa ser instalado na máquina local, que é exatamente a restrição do cenário. Azure CLI e Azure PowerShell são ótimas ferramentas de linha de comando, mas ambas exigem instalação local, o que o notebook emprestado não permite; a confusão aqui é entre a ferramenta e o lugar onde ela roda, já que o Cloud Shell oferece justamente essas duas experiências hospedadas. O Azure Arc serve para trazer servidores e clusters de fora do Azure para o plano de gerenciamento; ele não é um terminal de administração acessível pelo navegador.",
+      "opcoes": [
+        { "texto": "Azure Cloud Shell, acessível pelo navegador e já autenticado com a conta do administrador.", "correta": true },
+        { "texto": "Azure CLI, instalando o pacote da ferramenta no notebook emprestado antes de usar.", "correta": false },
+        { "texto": "Azure PowerShell, instalando o módulo Az na máquina emprestada antes de executar.", "correta": false },
+        { "texto": "Azure Arc, que expõe um terminal remoto de administração para máquinas fora do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-ferramentas-02",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe está avaliando o Azure Cloud Shell para padronizar a administração por linha de comando entre pessoas que usam Windows, Linux e macOS. Quais afirmações sobre o Cloud Shell são verdadeiras? Selecione DUAS opções.",
+      "explicacao": "O Cloud Shell oferece duas experiências no mesmo ambiente, Bash e PowerShell, e a pessoa escolhe qual usar sem trocar de ferramenta. E, para que arquivos e scripts sobrevivam ao fim da sessão, é preciso associar armazenamento no Azure, já que a sessão em si é efêmera. Dizer que só pode ser aberto de estações Windows com o módulo Az instalado contradiz a própria proposta do serviço, que é ser acessível pelo navegador em qualquer sistema operacional. Dizer que ele substitui o portal é falso: o Cloud Shell é acessado a partir do portal e convive com ele. E executar comandos apenas em recursos fora do Azure descreve mal o Azure Arc, que é outro serviço — o Cloud Shell administra normalmente os recursos hospedados no Azure.",
+      "opcoes": [
+        { "texto": "Oferece as experiências Bash e PowerShell dentro do mesmo ambiente hospedado.", "correta": true },
+        { "texto": "Para persistir arquivos entre sessões é preciso associar armazenamento no Azure.", "correta": true },
+        { "texto": "Só pode ser aberto em estações Windows que tenham o módulo Az já instalado.", "correta": false },
+        { "texto": "Substitui o portal do Azure, que deixa de ficar disponível para a subscription.", "correta": false },
+        { "texto": "Executa comandos apenas em recursos hospedados fora do Azure, via Azure Arc.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-ferramentas-03",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de plataforma trabalha em Linux e macOS e já mantém uma biblioteca grande de scripts em Bash para outros sistemas. Ela quer automatizar a criação de recursos do Azure reaproveitando esse conhecimento e encaixando os novos comandos nos scripts existentes. Qual ferramenta é a escolha mais direta?",
+      "explicacao": "A Azure CLI usa comandos em estilo de shell, como az vm create, que se encaixam diretamente em scripts Bash e na experiência que a equipe já tem. O Azure PowerShell também é multiplataforma e roda em Linux e macOS sobre o PowerShell — o distrator não é que ele seja exclusivo do Windows, e sim que ele exige aprender a sintaxe de cmdlets Verbo-Substantivo e o modelo de objetos do PowerShell, o que joga fora o conhecimento acumulado em Bash. O portal do Azure é uma interface gráfica e não serve para automação repetível. O Azure Monitor executa consultas sobre logs e métricas, e não provisiona recurso algum.",
+      "opcoes": [
+        { "texto": "Azure CLI, com comandos em estilo de shell que se encaixam nos scripts Bash existentes.", "correta": true },
+        { "texto": "Azure PowerShell, cujos cmdlets seguem o padrão Verbo-Substantivo e o modelo de objetos.", "correta": false },
+        { "texto": "Portal do Azure, percorrendo os formulários de criação de cada recurso necessário.", "correta": false },
+        { "texto": "Azure Monitor, executando consultas de log para provisionar os recursos desejados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-ferramentas-04",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um gerente sem experiência em linha de comando precisa, de forma pontual, navegar pelos recursos de uma subscription, conferir o estado de uma máquina virtual e abrir um chamado de suporte. Ele quer fazer tudo em uma única interface gráfica, sem instalar nada e sem escrever comandos. Qual ferramenta atende?",
+      "explicacao": "O portal do Azure é a interface gráfica unificada baseada em navegador: permite navegar pelo inventário, inspecionar o estado de cada recurso e abrir solicitações de suporte sem nenhum comando. Azure CLI e Azure PowerShell resolvem o mesmo tipo de tarefa, mas por linha de comando e com sintaxe própria, o que contraria a exigência explícita do cenário — a confusão aqui é supor que capacidade equivalente significa adequação equivalente ao usuário. Um modelo Bicep implantado por pipeline serve para provisionar infraestrutura de forma declarativa e repetível; ele não oferece navegação interativa nem canal de suporte.",
+      "opcoes": [
+        { "texto": "Portal do Azure, interface gráfica unificada acessada pelo navegador, sem instalação.", "correta": true },
+        { "texto": "Azure CLI, executando comandos em estilo de shell a partir do terminal local.", "correta": false },
+        { "texto": "Azure PowerShell, executando cmdlets do módulo Az a partir do terminal local.", "correta": false },
+        { "texto": "Um modelo Bicep implantado por pipeline, descrevendo o estado desejado do ambiente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-arc-01",
+      "topico": "Azure Arc",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa mantém 60 servidores Windows em um datacenter próprio e 20 máquinas virtuais hospedadas em outro provedor de nuvem. Ela quer ver todos eles no inventário do portal do Azure e aplicar a esses servidores as mesmas atribuições de Azure Policy usadas nos recursos hospedados no Azure. Qual serviço torna isso possível?",
+      "explicacao": "O Azure Arc projeta servidores, clusters Kubernetes e serviços de dados hospedados fora do Azure para dentro do Azure Resource Manager: eles passam a existir como recursos no portal e ficam sujeitos aos mesmos mecanismos de governança, incluindo Azure Policy. O Azure Migrate avalia e move cargas de trabalho locais para o Azure — a proposta ali é sair do datacenter, e não governar o que fica nele. O VPN Gateway estabelece conectividade de rede entre a rede local e uma rede virtual do Azure, o que é uma questão de tráfego e não de plano de gerenciamento. O Azure Monitor coleta métricas e logs, mas sozinho não traz os servidores externos para o inventário nem lhes aplica políticas.",
+      "opcoes": [
+        { "texto": "Azure Arc, que projeta servidores e clusters de fora do Azure no plano de gerenciamento.", "correta": true },
+        { "texto": "Azure Migrate, que avalia e move as cargas de trabalho locais para dentro do Azure.", "correta": false },
+        { "texto": "Azure VPN Gateway, que conecta a rede do datacenter local a uma rede virtual do Azure.", "correta": false },
+        { "texto": "Azure Monitor, que coleta métricas e logs dos recursos já hospedados na subscription.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-arc-02",
+      "topico": "Azure Arc",
+      "tipo": "SimNao",
+      "enunciado": "Uma empresa mantém um cluster Kubernetes hospedado em outro provedor de nuvem e o conecta ao Azure Arc. A equipe de governança quer aplicar a esse cluster as mesmas atribuições de Azure Policy que já usa nos clusters hospedados no Azure, acompanhando a conformidade dos dois ambientes no mesmo painel. Isso é possível depois da conexão.",
+      "explicacao": "Sim. Um cluster Kubernetes conectado ao Azure Arc passa a ser representado como recurso no Azure Resource Manager, o que permite alcançá-lo com atribuições de Azure Policy e consolidar a conformidade dele com a dos recursos nativos em um único painel — essa uniformidade de governança sobre ambientes híbridos e multinuvem é a razão de existir do Arc. Responder Não costuma vir de imaginar que o Azure Policy só avalia recursos fisicamente hospedados no Azure, ou de confundir o Arc com uma ferramenta de migração, como se governar um cluster externo exigisse antes movê-lo para o Azure.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-arc-03",
+      "topico": "Azure Arc",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe conectou ao Azure Arc um conjunto de servidores hospedados em um datacenter próprio e agora precisa alinhar as expectativas da diretoria sobre o que de fato muda. Quais consequências dessa conexão estão corretas? Selecione DUAS opções.",
+      "explicacao": "Ao serem conectados, os servidores passam a aparecer no portal do Azure como recursos gerenciáveis, e por isso mesmo podem ser alvo de atribuições de Azure Policy, com conformidade avaliada junto com a dos recursos nativos. O Azure Arc não move carga de trabalho: os servidores continuam executando no datacenter de origem, e supor o contrário é confundir o Arc com o Azure Migrate. A conectividade de rede com o Azure continua sendo necessária de forma contínua, pois é por ela que o agente reporta estado e recebe configuração. E a manutenção do hardware permanece com a empresa: no modelo de responsabilidade compartilhada, hardware instalado no datacenter do cliente não passa a ser responsabilidade do provedor só porque foi projetado no plano de gerenciamento.",
+      "opcoes": [
+        { "texto": "Os servidores passam a aparecer no portal do Azure como recursos gerenciáveis.", "correta": true },
+        { "texto": "É possível avaliar a conformidade desses servidores com atribuições de Azure Policy.", "correta": true },
+        { "texto": "A carga de trabalho passa a ser executada fisicamente em um datacenter do Azure.", "correta": false },
+        { "texto": "Os servidores deixam de precisar de conectividade com o Azure após o registro inicial.", "correta": false },
+        { "texto": "A manutenção do hardware desses servidores passa a ser responsabilidade da Microsoft.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-iac-01",
+      "topico": "Modelos ARM e Bicep",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe executa a implantação do mesmo modelo de infraestrutura três vezes seguidas no mesmo resource group, sem alterar uma linha do arquivo. Ao final, o ambiente contém um único conjunto de recursos, e não três cópias. Qual característica da implantação declarativa explica esse comportamento?",
+      "explicacao": "Idempotência é a propriedade de uma operação que, repetida, leva sempre ao mesmo estado final. Modelos ARM e Bicep são declarativos: descrevem o estado desejado, e o Azure Resource Manager cria o que falta e deixa como está o que já corresponde ao modelo. Elasticidade é a capacidade de acrescentar e devolver capacidade conforme a demanda, algo ligado à carga e não à repetição de uma implantação. Alta disponibilidade trata de manter o serviço funcionando diante de falhas, com recursos como zonas de disponibilidade, e nada tem a ver com implantações repetidas. Escalabilidade horizontal é adicionar instâncias ao conjunto — justamente o oposto do que ocorre aqui, onde reexecutar o modelo não duplica nada.",
+      "opcoes": [
+        { "texto": "Idempotência: o modelo descreve o estado final desejado e reexecutá-lo converge para ele.", "correta": true },
+        { "texto": "Elasticidade: os recursos duplicados são reduzidos automaticamente quando a demanda cai.", "correta": false },
+        { "texto": "Alta disponibilidade: as implantações repetidas são distribuídas entre zonas de disponibilidade.", "correta": false },
+        { "texto": "Escalabilidade horizontal: cada nova execução acrescenta réplicas ao conjunto já existente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-iac-02",
+      "topico": "Modelos ARM e Bicep",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe mantém modelos ARM em JSON e reclama da verbosidade dos arquivos e da dificuldade de lê-los durante a revisão de código. Ela quer uma linguagem mais concisa para infraestrutura como código no Azure, sem trocar o motor de implantação nem perder o comportamento declarativo. Qual opção é adequada?",
+      "explicacao": "O Bicep é uma linguagem específica de domínio com sintaxe mais enxuta que o JSON, transpilada para ARM e executada pelo mesmo Azure Resource Manager — a equipe ganha legibilidade sem trocar de motor nem abrir mão da natureza declarativa. A Azure CLI resolveria a criação de recursos, mas de forma imperativa, com uma sequência de comandos que descreve passos e não o estado final. O Azure Cloud Shell é um ambiente hospedado de linha de comando; ele executa ferramentas, não é uma linguagem de modelagem e não converte o portal em modelo. O Azure Policy descreve regras que os recursos devem cumprir e pode corrigir desvios, mas não é a ferramenta para definir e implantar um ambiente inteiro.",
+      "opcoes": [
+        { "texto": "Bicep, linguagem concisa transpilada para ARM e executada pelo mesmo Resource Manager.", "correta": true },
+        { "texto": "Azure CLI, substituindo o modelo por uma sequência de comandos imperativos de criação.", "correta": false },
+        { "texto": "Azure Cloud Shell, que converte a navegação feita no portal em modelos declarativos.", "correta": false },
+        { "texto": "Azure Policy, que descreve o estado desejado e implanta os recursos que estiverem faltando.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-iac-03",
+      "topico": "Modelos ARM e Bicep",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai padronizar a criação de ambientes de teste, hoje feita manualmente pelo portal, adotando modelos ARM ou Bicep versionados em um repositório de código. Quais benefícios são consequência direta dessa mudança? Selecione DUAS opções.",
+      "explicacao": "Como o modelo descreve o estado desejado e a implantação é idempotente, o mesmo arquivo recria ambientes idênticos quantas vezes for necessário, eliminando a divergência que aparece quando cada pessoa clica de um jeito no portal. E, ao viver em um repositório, cada mudança de infraestrutura passa por revisão de código e fica registrada no histórico, com autoria e possibilidade de reverter. Dizer que a implantação deixa de exigir permissões é falso e perigoso: o modelo é implantado por uma identidade que continua sujeita ao Azure RBAC. Proteção contra exclusão acidental vem de resource lock, que precisa ser configurado à parte. E detectar incidentes da plataforma e reagir a eles é papel do Azure Service Health somado a automação, não do modelo em si.",
+      "opcoes": [
+        { "texto": "Ambientes idênticos podem ser recriados a partir do mesmo arquivo, sem divergência manual.", "correta": true },
+        { "texto": "As mudanças passam por revisão de código e ficam registradas no histórico do repositório.", "correta": true },
+        { "texto": "A implantação deixa de exigir permissões, pois o modelo executa fora do controle do RBAC.", "correta": false },
+        { "texto": "Os recursos criados pelo modelo ficam automaticamente protegidos contra exclusão acidental.", "correta": false },
+        { "texto": "O modelo detecta incidentes da plataforma e reimplanta os recursos afetados em outra região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-advisor-01",
+      "topico": "Azure Advisor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de meses de crescimento desorganizado, a diretoria pediu uma lista priorizada de melhorias no ambiente do Azure, cobrindo confiabilidade, segurança, desempenho, excelência operacional e custo, com base na configuração real dos recursos que a empresa já tem. Qual serviço apresenta esse conjunto de recomendações?",
+      "explicacao": "O Azure Advisor analisa a configuração e o uso dos recursos da subscription e devolve recomendações personalizadas organizadas exatamente nessas categorias, com priorização por impacto. O Azure Service Health informa o estado da plataforma Azure — incidentes, manutenção planejada e avisos de integridade —, ou seja, fala do provedor e não da qualidade da configuração do cliente. O Azure Monitor coleta métricas e logs e permite investigar comportamento e disparar alertas, mas apresenta dados brutos e não um conjunto priorizado de recomendações. O Microsoft Purview atua sobre governança de dados, catalogando e classificando conteúdo, e não avalia a arquitetura dos recursos.",
+      "opcoes": [
+        { "texto": "Azure Advisor, que analisa os recursos e devolve recomendações priorizadas por categoria.", "correta": true },
+        { "texto": "Azure Service Health, que informa incidentes e manutenções planejadas da plataforma.", "correta": false },
+        { "texto": "Azure Monitor, que coleta métricas e logs dos recursos implantados na subscription.", "correta": false },
+        { "texto": "Microsoft Purview, que cataloga e classifica os dados armazenados pela organização.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-advisor-02",
+      "topico": "Azure Advisor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Três pedidos chegam à equipe de operações: primeiro, saber se a lentidão deste momento decorre de um incidente na região do Azure; segundo, obter uma sugestão de como aumentar a resiliência de uma máquina virtual isolada; terceiro, investigar o tempo de resposta da própria aplicação nas últimas 24 horas. Qual sequência de serviços atende aos pedidos, nessa ordem?",
+      "explicacao": "Cada pedido cai em uma fronteira diferente. Saber se há incidente na plataforma é Azure Service Health, que reporta o estado dos serviços do Azure filtrado pelos recursos da subscription. Receber sugestão de melhoria de resiliência sobre a configuração existente é Azure Advisor, que gera recomendações personalizadas. Investigar o tempo de resposta da aplicação é Azure Monitor, que reúne métricas, logs e telemetria daquilo que o cliente implantou. As demais sequências trocam esses papéis: pedir recomendação ao Monitor, diagnóstico de plataforma ao Advisor ou telemetria da aplicação ao Service Health confunde as três perguntas de fundo do domínio — o que a plataforma está fazendo, o que você deveria melhorar e como o seu recurso está se comportando.",
+      "opcoes": [
+        { "texto": "Azure Service Health, depois Azure Advisor e por fim Azure Monitor.", "correta": true },
+        { "texto": "Azure Advisor, depois Azure Monitor e por fim Azure Service Health.", "correta": false },
+        { "texto": "Azure Monitor, depois Azure Service Health e por fim Azure Advisor.", "correta": false },
+        { "texto": "Azure Service Health, depois Azure Monitor e por fim Azure Advisor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-advisor-03",
+      "topico": "Azure Advisor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe abre o Azure Advisor em duas subscriptions diferentes da mesma empresa e estranha que as listas de recomendações sejam bastante diferentes uma da outra. Antes de abrir um chamado de suporte, ela pede uma explicação para o comportamento. Qual explicação está correta?",
+      "explicacao": "O Advisor não publica um manual genérico: ele examina a configuração e o uso reais dos recursos de cada escopo e deriva dali recomendações personalizadas, então subscriptions com recursos diferentes produzem listas diferentes — o comportamento observado é o esperado. Dizer que o Advisor entrega o mesmo conjunto de boas práticas a todos inverte a natureza do serviço e levaria a um chamado desnecessário. Listar incidentes da plataforma é papel do Azure Service Health, não do Advisor. E o Advisor não depende de atribuição de Azure Policy para decidir o que mostrar: a política avalia conformidade com regras que a própria empresa definiu, enquanto o Advisor aplica boas práticas da Microsoft sobre o inventário existente.",
+      "opcoes": [
+        { "texto": "O Advisor analisa a configuração e o uso reais dos recursos de cada escopo, gerando listas distintas.", "correta": true },
+        { "texto": "O Advisor publica o mesmo conjunto de boas práticas a todos, logo a diferença indica falha de coleta.", "correta": false },
+        { "texto": "O Advisor lista incidentes da plataforma, que variam conforme a região usada em cada subscription.", "correta": false },
+        { "texto": "O Advisor exige uma atribuição de Azure Policy por subscription para decidir o que será exibido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-service-health-01",
+      "topico": "Azure Service Health",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer ser avisada com antecedência sobre janelas de manutenção planejada que afetem as máquinas virtuais da sua subscription em uma região específica e também quer receber comunicados sobre mudanças de serviço que exijam alguma ação antes de um prazo. Qual serviço fornece esses avisos?",
+      "explicacao": "O Azure Service Health é o serviço que comunica o estado da plataforma para uma subscription específica, incluindo manutenção planejada anunciada com antecedência e avisos de integridade sobre mudanças que exigem ação do cliente, com alertas configuráveis. O Azure Advisor gera recomendações de melhoria sobre a configuração dos recursos, inclusive de excelência operacional, mas não anuncia janela de manutenção da plataforma. O Azure Monitor coleta métricas de disponibilidade dos recursos e mostraria o efeito de uma manutenção depois que ela ocorresse, nunca o aviso prévio. O Azure Policy avalia a conformidade das propriedades dos recursos e nada tem a ver com o calendário operacional do provedor.",
+      "opcoes": [
+        { "texto": "Azure Service Health, com avisos de manutenção planejada e comunicados de integridade.", "correta": true },
+        { "texto": "Azure Advisor, com recomendações de excelência operacional sobre os recursos existentes.", "correta": false },
+        { "texto": "Azure Monitor, com métricas de disponibilidade coletadas de cada máquina virtual.", "correta": false },
+        { "texto": "Azure Policy, com avaliação de conformidade das máquinas virtuais da subscription.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-service-health-02",
+      "topico": "Azure Service Health",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma indisponibilidade, um administrador precisa saber se o problema atinge especificamente os serviços e as regiões que a sua subscription utiliza, e não apenas se existe algum incidente genérico em algum lugar do mundo. Qual recurso oferece essa visão filtrada pelo que a empresa de fato usa?",
+      "explicacao": "O Azure Service Health é personalizado por subscription: ele cruza os incidentes em andamento com os serviços e as regiões onde a empresa realmente tem recursos, além de permitir alertas sobre esse recorte. A página pública de status do Azure mostra o estado global de todos os serviços e regiões, útil como panorama, mas sem qualquer filtro pelo que a subscription usa — e é essa distinção entre visão global e visão personalizada que a questão cobra. O Azure Advisor gera recomendações de configuração e não classifica incidentes. O Application Insights registra telemetria da aplicação e pode mostrar o sintoma da indisponibilidade, mas não confirma nem descreve incidente da plataforma.",
+      "opcoes": [
+        { "texto": "Azure Service Health, que personaliza a visão de incidentes pelos recursos da subscription.", "correta": true },
+        { "texto": "A página pública de status do Azure, que lista o estado de todos os serviços e regiões.", "correta": false },
+        { "texto": "O Azure Advisor, que classifica os incidentes pelo impacto sobre a carga de trabalho.", "correta": false },
+        { "texto": "O Application Insights, que registra a telemetria de disponibilidade da aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-service-health-03",
+      "topico": "Azure Service Health",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de operações vai configurar alertas no Azure Service Health e precisa saber quais categorias de evento pode selecionar na regra de alerta. Quais tipos de evento são notificados por esse serviço? Selecione TRÊS opções.",
+      "explicacao": "O Azure Service Health notifica três categorias de evento da plataforma: problemas de serviço em andamento que afetam o Azure agora, manutenções planejadas que podem impactar a disponibilidade dos recursos e avisos de integridade sobre mudanças de serviço que exigem ação do cliente, como a descontinuação de uma versão. Recomendação de redimensionamento de máquina virtual subutilizada é uma recomendação do Azure Advisor sobre a configuração do cliente, e não um evento da plataforma. Consultas de log sobre exceções lançadas pelo código pertencem ao Azure Monitor, com Log Analytics e Application Insights — são telemetria do recurso do cliente. A fronteira cobrada aqui é entre monitorar a plataforma e monitorar aquilo que você implantou.",
+      "opcoes": [
+        { "texto": "Problemas de serviço em andamento que afetam a plataforma Azure neste momento.", "correta": true },
+        { "texto": "Manutenções planejadas que podem impactar a disponibilidade dos seus recursos.", "correta": true },
+        { "texto": "Avisos de integridade sobre mudanças de serviço que exigem ação do cliente.", "correta": true },
+        { "texto": "Recomendações de redimensionamento de máquinas virtuais que estão subutilizadas.", "correta": false },
+        { "texto": "Consultas de log sobre as exceções lançadas pelo código da sua aplicação web.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-monitor-01",
+      "topico": "Azure Monitor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento precisa medir o tempo de resposta de cada endpoint de uma aplicação web, ver o rastreamento das exceções com a pilha de chamadas e identificar dependências lentas, como as chamadas a banco de dados feitas pelo próprio código. Qual recurso atende a essa necessidade?",
+      "explicacao": "O Application Insights é o recurso de monitoramento de desempenho de aplicações dentro do Azure Monitor: instrumenta a aplicação e coleta requisições, exceções com pilha de chamadas, dependências e uso — exatamente a telemetria pedida. O Azure Service Health trata do estado dos serviços da plataforma Azure e nada sabe sobre o código da aplicação. O Azure Advisor gera recomendações sobre a configuração dos recursos, incluindo desempenho, mas com base no inventário, e não em telemetria de execução do código. O Azure Policy avalia propriedades dos recursos implantados, sem qualquer visão de tempo de resposta ou exceção. A fronteira em jogo é entre a plataforma, a configuração e o comportamento da aplicação.",
+      "opcoes": [
+        { "texto": "Application Insights, voltado à telemetria de desempenho e uso da própria aplicação.", "correta": true },
+        { "texto": "Azure Service Health, voltado ao estado dos serviços da plataforma Azure em uso.", "correta": false },
+        { "texto": "Azure Advisor, voltado a recomendações sobre a configuração dos recursos existentes.", "correta": false },
+        { "texto": "Azure Policy, voltado à avaliação das propriedades dos recursos já implantados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-monitor-02",
+      "topico": "Azure Monitor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um analista precisa correlacionar eventos de log coletados de 30 máquinas virtuais ao longo de duas semanas e escrever consultas que cruzem esses registros para encontrar um padrão de falha recorrente. Dentro do Azure Monitor, onde esses logs são armazenados e consultados?",
+      "explicacao": "Logs coletados pelo Azure Monitor são gravados em um Log Analytics workspace e consultados ali por meio de uma linguagem de consulta, que permite filtrar, agregar e cruzar registros de várias fontes ao longo do tempo — é o cenário típico de investigação retrospectiva. As métricas do Azure Monitor guardam séries numéricas de baixa latência, ótimas para alerta quase em tempo real, mas não suportam registros de estrutura variada nem correlação rica entre fontes. O Azure Service Health mantém a comunicação de incidentes da plataforma, e não os logs dos recursos do cliente. O Microsoft Purview cataloga e classifica dados de negócio, e não é repositório de log operacional.",
+      "opcoes": [
+        { "texto": "Em um Log Analytics workspace, consultado por meio de uma linguagem de consulta.", "correta": true },
+        { "texto": "Nas métricas do Azure Monitor, que guardam séries numéricas de baixa latência.", "correta": false },
+        { "texto": "No Azure Service Health, que mantém o histórico de incidentes da plataforma Azure.", "correta": false },
+        { "texto": "No Microsoft Purview, que cataloga e classifica os dados usados pela organização.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-monitor-03",
+      "topico": "Azure Monitor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer disparar um alerta sempre que o uso de CPU de uma máquina virtual passar de 80 por cento por cinco minutos consecutivos, com a menor latência possível entre o evento e a notificação. Qual tipo de dado do Azure Monitor é o adequado para sustentar essa regra?",
+      "explicacao": "Métricas são séries numéricas coletadas em intervalos regulares e disponibilizadas com latência baixa, o que as torna a base natural de regras de alerta sobre condições numéricas como uso de CPU. Logs armazenam registros de eventos com estruturas variadas e servem para investigação e correlação, com latência maior de ingestão — daí a confusão comum de tentar alertar sobre um contador numérico via consulta de log. Recomendações do Advisor são avaliações periódicas da configuração dos recursos e não acompanham um contador em tempo real. Avisos de integridade são comunicados do Azure Service Health sobre a plataforma, e não sobre o consumo de CPU de uma máquina específica.",
+      "opcoes": [
+        { "texto": "Métricas, séries numéricas coletadas em intervalos regulares e com baixa latência.", "correta": true },
+        { "texto": "Logs, registros de eventos com estrutura variada, voltados à consulta posterior.", "correta": false },
+        { "texto": "Recomendações do Advisor, avaliações periódicas da configuração dos recursos.", "correta": false },
+        { "texto": "Avisos de integridade, comunicados sobre mudanças de serviço da plataforma.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-monitor-04",
+      "topico": "Azure Monitor",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa quer que o time de plantão seja notificado automaticamente, por e-mail e SMS, sempre que o número de respostas HTTP 500 de uma API ultrapassar um limite definido. Quais afirmações descrevem corretamente como isso é configurado no Azure Monitor? Selecione DUAS opções.",
+      "explicacao": "No Azure Monitor, uma regra de alerta avalia um sinal do recurso, como uma métrica ou uma consulta de log, contra uma condição definida, e um action group descreve o que acontece quando ela dispara, incluindo destinatários de e-mail e SMS e ações automatizadas. Separar essas duas peças é o próprio desenho do serviço. O Azure Service Health não entra aqui: erro 500 vem da aplicação do cliente e não é incidente da plataforma — confundir isso é o erro mais comum do tópico. O Azure Advisor gera recomendações de configuração e não dispara notificação operacional por limiar. E o Azure Policy avalia propriedades de recursos no momento da implantação; ele não inspeciona nem bloqueia requisições HTTP em tempo de execução.",
+      "opcoes": [
+        { "texto": "Uma regra de alerta avalia um sinal do recurso contra a condição definida pela equipe.", "correta": true },
+        { "texto": "Um action group define os destinatários e as ações executadas quando o alerta dispara.", "correta": true },
+        { "texto": "O Azure Service Health dispara o alerta, pois erros da API são incidentes da plataforma.", "correta": false },
+        { "texto": "O Azure Advisor envia a notificação assim que gera a recomendação de desempenho.", "correta": false },
+        { "texto": "O Azure Policy nega as requisições que resultariam em erro, evitando o alerta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-gov-monitor-05",
+      "topico": "Azure Monitor",
+      "tipo": "SimNao",
+      "enunciado": "Uma aplicação hospedada no Azure ficou indisponível e a equipe suspeita de uma falha regional da plataforma, e não de um defeito no próprio código. Para obter a confirmação oficial de que existe um incidente em andamento no Azure afetando os serviços usados por aquela subscription, o Azure Monitor é a ferramenta indicada.",
+      "explicacao": "Não. O Azure Monitor observa os recursos que o cliente implantou: métricas, logs e telemetria de aplicação. Ele mostraria o sintoma — requisições falhando, latência subindo —, mas não declara nem confirma incidente da plataforma. Quem faz isso é o Azure Service Health, que comunica problemas de serviço, manutenção planejada e avisos de integridade filtrados pelos serviços e regiões daquela subscription. Responder Sim significa apagar a fronteira entre monitorar o SEU recurso e monitorar a plataforma do provedor, que é exatamente o que separa Azure Monitor de Azure Service Health; o Azure Advisor tampouco serviria, pois ele trata de recomendações de melhoria e não de eventos em andamento.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    }
+  ]
+}

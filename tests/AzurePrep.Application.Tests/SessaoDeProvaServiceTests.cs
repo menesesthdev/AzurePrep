@@ -14,11 +14,11 @@ public class SessaoDeProvaServiceTests
     private static Exame BuildExam()
     {
         var exam = new Exame("AZ-900", "Azure Fundamentals", timeLimitMinutes: 45, passingScorePercent: 70, totalQuestions: 4);
-        var area = exam.AdicionarAreaDeHabilidade("Conceitos de nuvem", 100m);
+        var area = exam.AdicionarAreaDeHabilidade("conceitos-de-nuvem", "Conceitos de nuvem", 100m);
 
         foreach (var i in Enumerable.Range(0, 4))
         {
-            var q = exam.AdicionarQuestao(area.Id, $"Questão {i}", TipoDeQuestao.EscolhaUnica, "Explicação.");
+            var q = exam.AdicionarQuestao(area.Id, $"questao-{i}", $"Questão {i}", TipoDeQuestao.EscolhaUnica, "Explicação.");
             q.AdicionarOpcao("Correta", true, 0);
             q.AdicionarOpcao("Errada", false, 1);
         }
@@ -37,9 +37,11 @@ public class SessaoDeProvaServiceTests
         var exam = BuildExam();
         var clock = new FixedClock(Iniciar);
         var usuario = new FakeUsuarioAtual();
+        var exames = new InMemoryExamRepository(exam);
         var service = new SessaoDeProvaService(
-            new InMemoryExamRepository(exam),
+            exames,
             new InMemoryExamAttemptRepository(),
+            new FakeSorteadorDeQuestoes(exames),
             new FakeUnitOfWork(),
             clock,
             usuario);

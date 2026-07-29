@@ -1,0 +1,458 @@
+{
+  "exameCode": "AZ-900",
+  "area": "arquitetura",
+  "questoes": [
+    {
+      "id": "az900-arqrede-subrede-01",
+      "topico": "Redes virtuais e sub-redes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação de três camadas está sendo implantada em uma única virtual network, com uma sub-rede para os servidores web e outra para o servidor de banco de dados. A equipe precisa garantir que o banco de dados aceite conexões originadas apenas da sub-rede web, bloqueando qualquer outra origem dentro da mesma rede virtual. Qual abordagem atende ao requisito?",
+      "explicacao": "Um network security group associado à sub-rede do banco filtra o tráfego que entra nela e permite regras baseadas em intervalos de endereços, que é exatamente o controle pedido. Confiar no isolamento padrão não funciona: dentro de uma mesma virtual network todas as sub-redes se enxergam por rotas de sistema criadas automaticamente — o isolamento por padrão existe entre virtual networks diferentes, não entre sub-redes da mesma rede. Peering é um recurso entre virtual networks, não entre sub-redes, e mesmo entre redes ele apenas conecta, não filtra tráfego. Remover endereços IP públicos só afeta a alcançabilidade a partir da internet; o tráfego interno continua usando endereços privados e seguiria passando normalmente.",
+      "opcoes": [
+        { "texto": "Remover os endereços IP públicos dos servidores de banco de dados, o que impede as conexões vindas das demais sub-redes.", "correta": false },
+        { "texto": "Criar um peering entre as duas sub-redes e definir nele quais fluxos de tráfego são permitidos entre as camadas.", "correta": false },
+        { "texto": "Associar um network security group à sub-rede do banco, liberando apenas o intervalo de endereços da sub-rede web.", "correta": true },
+        { "texto": "Confiar no isolamento padrão entre sub-redes da mesma virtual network, que já bloqueia todo o tráfego trocado entre elas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-subrede-02",
+      "topico": "Redes virtuais e sub-redes",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe implantou duas máquinas virtuais em sub-redes diferentes da mesma virtual network e não configurou nenhuma rota definida pelo usuário nem gateway. Avalie a afirmação: as duas máquinas virtuais conseguem se comunicar por endereço IP privado, porque o roteamento entre sub-redes da mesma virtual network é fornecido por padrão.",
+      "explicacao": "A afirmação é verdadeira. O Azure cria rotas de sistema que conectam todas as sub-redes de uma mesma virtual network, então a comunicação por endereço IP privado funciona sem rota personalizada, sem gateway e sem peering. Quem marca Falso normalmente confunde sub-rede com virtual network: o que exige peering, VPN ou ExpressRoute para se comunicar são virtual networks distintas. Também é comum confundir o comportamento padrão com a possibilidade de filtragem — bloquear o tráfego entre sub-redes é possível, mas é uma configuração adicional feita com network security group, e não o estado inicial.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": true },
+        { "texto": "Falso", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-enderecamento-03",
+      "topico": "Redes virtuais e sub-redes",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Duas virtual networks foram criadas por times diferentes, em momentos diferentes, e cada uma já possui várias sub-redes em uso. A empresa decidiu conectá-las por peering para que as aplicações passem a se comunicar por endereço IP privado, e pediu ao time de rede uma revisão do endereçamento antes da mudança. Quais DUAS restrições precisam ser respeitadas nesse planejamento? Selecione DUAS opções.",
+      "explicacao": "Dentro de uma virtual network, cada sub-rede consome uma faixa distinta do espaço de endereços da rede, portanto não pode haver sobreposição entre elas. E o peering exige espaços de endereço que não se sobreponham entre as duas redes, senão o roteamento seria ambíguo — é o erro de planejamento mais comum quando as duas redes foram criadas isoladamente com a mesma faixa padrão. Associar um network security group a cada sub-rede é uma boa prática de segurança, mas não é pré-requisito para criar recursos. Uma virtual network é um recurso regional e não se estende para outra região; conectar redes de regiões diferentes é justamente o papel do global peering, não uma condição prévia. E sub-redes da mesma rede já se alcançam por rotas de sistema, sem gateway próprio — gateway é necessário para conectividade híbrida, não para tráfego interno.",
+      "opcoes": [
+        { "texto": "As sub-redes de uma mesma virtual network não podem ter intervalos de endereços sobrepostos entre si.", "correta": true },
+        { "texto": "Cada virtual network precisa ser estendida para as duas regiões envolvidas antes de criar o peering.", "correta": false },
+        { "texto": "Os espaços de endereço das duas virtual networks não podem se sobrepor para que o peering funcione.", "correta": true },
+        { "texto": "Cada sub-rede precisa de um network security group associado antes de receber qualquer recurso.", "correta": false },
+        { "texto": "Cada sub-rede precisa de um gateway próprio para alcançar as demais sub-redes da mesma rede.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-nsg-04",
+      "topico": "Grupos de segurança de rede e isolamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "As máquinas virtuais de uma sub-rede não possuem endereço IP público, mas o time de segurança detectou que elas continuam iniciando conexões de saída para a internet. O requisito é impedir essa saída, preservando a comunicação entre as máquinas da própria virtual network. Qual ação atende ao requisito?",
+      "explicacao": "O tráfego de saída para a internet é permitido por padrão pelas regras de um network security group, e o modo de bloqueá-lo é criar uma regra de saída negando o destino correspondente à internet, mantendo permitida a comunicação interna da rede virtual. Verificar a ausência de endereço IP público não resolve porque IP público governa quem alcança a máquina de fora, não o que a máquina alcança a partir de dentro — é exatamente a confusão que o cenário descreve. Uma regra de entrada negando a internet trata do sentido oposto do fluxo e deixaria a saída intacta. Mover as máquinas para outra sub-rede da mesma virtual network não muda nada, porque o comportamento padrão de saída se repete em qualquer sub-rede.",
+      "opcoes": [
+        { "texto": "Mover as máquinas virtuais para uma nova sub-rede da mesma virtual network, isolando-as das demais.", "correta": false },
+        { "texto": "Criar no network security group da sub-rede uma regra de entrada que negue o tráfego vindo da internet.", "correta": false },
+        { "texto": "Criar no network security group da sub-rede uma regra de saída que negue o tráfego destinado à internet.", "correta": true },
+        { "texto": "Confirmar que nenhuma máquina virtual tem endereço IP público, o que já elimina o acesso de saída.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-peering-05",
+      "topico": "Peering de virtual networks",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Dois times mantêm virtual networks separadas na mesma região e agora precisam que as aplicações de uma alcancem as da outra por endereço IP privado, com a menor latência possível e sem implantar nenhum gateway. Qual solução atende ao requisito?",
+      "explicacao": "O virtual network peering conecta duas redes virtuais diretamente pela infraestrutura da Microsoft, mantém a comunicação por endereço IP privado e não exige gateway, o que preserva a latência baixa exigida. Uma VPN site-to-site entre as duas redes atenderia funcionalmente, mas exige um VPN Gateway em cada ponta e adiciona a sobrecarga do túnel criptografado — contraria as duas restrições do enunciado. ExpressRoute é uma solução de conectividade híbrida entre um ambiente local e o Azure por meio de um parceiro, cara e demorada de provisionar, e não é o caminho para ligar duas redes que já estão na mesma região. Publicar as aplicações em endpoints públicos abandonaria o requisito de comunicação por endereço IP privado, mesmo com filtragem por network security group.",
+      "opcoes": [
+        { "texto": "Publicar as aplicações em endpoints públicos e restringir o acesso por network security group.", "correta": false },
+        { "texto": "Contratar um circuito ExpressRoute e conectar as duas redes virtuais por meio dele.", "correta": false },
+        { "texto": "Implantar um VPN Gateway em cada rede e criar uma conexão site-to-site entre elas.", "correta": false },
+        { "texto": "Configurar virtual network peering entre as duas redes virtuais da mesma região.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-peering-06",
+      "topico": "Peering de virtual networks",
+      "tipo": "SimNao",
+      "enunciado": "Duas virtual networks de uma empresa, hospedadas na mesma região, foram conectadas por virtual network peering para que as aplicações de uma alcancem as da outra. Durante a revisão de segurança, o time de conformidade quer saber por onde esse tráfego passa. Avalie a afirmação: o tráfego trocado entre as duas redes percorre a rede de backbone da Microsoft e não é roteado pela internet pública.",
+      "explicacao": "A afirmação é verdadeira. No peering, o tráfego entre as redes permanece na infraestrutura da Microsoft e usa endereçamento privado, sem sair para a internet pública e sem depender de gateway. Quem marca Falso costuma confundir peering com a VPN site-to-site, que é justamente a opção em que o tráfego trafega criptografado sobre a internet pública para chegar ao Azure. Também vale separar do ExpressRoute: ele igualmente evita a internet pública, mas por meio de um circuito privado contratado junto a um parceiro de conectividade, com largura de banda dedicada — enquanto o peering é uma configuração entre redes que já estão no Azure.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": true },
+        { "texto": "Falso", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-dns-07",
+      "topico": "Azure DNS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa registrou um domínio em um registrador externo e quer que os registros DNS públicos desse domínio passem a ser hospedados no Azure, para serem gerenciados com as mesmas ferramentas, modelos e permissões usados nos demais recursos da assinatura. Qual solução atende ao requisito?",
+      "explicacao": "Uma zona DNS pública no Azure DNS hospeda os registros do domínio como um recurso do Azure, e a delegação é feita apontando os name servers da zona no painel do registrador atual. Uma zona do Azure Private DNS resolve nomes apenas dentro das virtual networks vinculadas, então não responderia às consultas vindas da internet, que é o caso de um domínio público. O Azure Traffic Manager usa DNS para distribuir tráfego entre destinos, mas não é o servidor autoritativo da zona do domínio — ele é referenciado a partir de uma zona, não a substitui. E transferir o registro do domínio para o Azure não é obrigatório: hospedar a zona e registrar o domínio são coisas separadas, e a delegação por name servers funciona com o registro mantido onde está.",
+      "opcoes": [
+        { "texto": "Transferir o registro do domínio para o Azure, condição obrigatória para hospedar os registros.", "correta": false },
+        { "texto": "Configurar o Azure Traffic Manager como servidor autoritativo do domínio registrado externamente.", "correta": false },
+        { "texto": "Criar uma zona no Azure Private DNS e vinculá-la às virtual networks utilizadas pela empresa.", "correta": false },
+        { "texto": "Criar uma zona DNS pública no Azure DNS e delegar o domínio apontando os name servers no registrador.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-expressroute-08",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma instituição financeira vai integrar o ERP hospedado em seu data center a serviços no Azure. Os requisitos são largura de banda alta e contratada, latência consistente e a garantia de que o tráfego entre os dois ambientes não seja roteado pela internet pública. Qual opção de conectividade atende?",
+      "explicacao": "O ExpressRoute estabelece um circuito privado por meio de um parceiro de conectividade, com largura de banda contratada e latência mais previsível, e o tráfego não passa pela internet pública — é a combinação exata dos três requisitos. A VPN site-to-site também liga o data center à virtual network, mas o túnel, ainda que criptografado, trafega sobre a internet pública e fica sujeito à variação de latência e banda dela, o que quebra dois dos requisitos. A VPN point-to-site é para dispositivos clientes individuais, não para integrar um data center inteiro. E o virtual network peering conecta redes virtuais que já estão no Azure entre si, não uma rede local ao Azure.",
+      "opcoes": [
+        { "texto": "VPN site-to-site, que cria um túnel criptografado entre o data center e o Azure.", "correta": false },
+        { "texto": "ExpressRoute, que usa um circuito privado fornecido por um parceiro de conectividade.", "correta": true },
+        { "texto": "VPN point-to-site, configurada individualmente em cada servidor do data center.", "correta": false },
+        { "texto": "Virtual network peering, configurado entre a rede local e a virtual network.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-vpn-09",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cinco desenvolvedores trabalham de casa e precisam alcançar por endereço IP privado as máquinas virtuais de um ambiente de testes no Azure. Não há escritório nem dispositivo VPN envolvido: as conexões partem dos notebooks de cada um, em redes domésticas diferentes e sem endereço fixo. Qual opção de conectividade é a adequada?",
+      "explicacao": "A VPN point-to-site foi desenhada exatamente para esse caso: um cliente VPN instalado no dispositivo cria um túnel individual até a virtual network, sem exigir infraestrutura na rede de origem nem endereço IP previsível. A VPN site-to-site pressupõe um dispositivo VPN na ponta local e um endereço público conhecido, o que não existe em residências comuns e não escala para redes domésticas distintas. O ExpressRoute é um circuito privado contratado com um parceiro para ligar um data center ao Azure, desproporcional e inviável para notebooks pessoais. E o virtual network peering conecta duas redes virtuais dentro do Azure — a rede doméstica de um notebook não é uma virtual network.",
+      "opcoes": [
+        { "texto": "VPN site-to-site, configurada entre cada rede doméstica e a virtual network do ambiente.", "correta": false },
+        { "texto": "VPN point-to-site, com o cliente VPN configurado em cada notebook dos desenvolvedores.", "correta": true },
+        { "texto": "ExpressRoute, contratado junto a um parceiro de conectividade para cada desenvolvedor.", "correta": false },
+        { "texto": "Virtual network peering, criado entre a rede de cada notebook e a virtual network.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-vpn-10",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai conectar seu data center ao Azure e a equipe de arquitetura montou um comparativo entre uma conexão VPN site-to-site e um circuito ExpressRoute, para apresentar à diretoria as diferenças de custo, prazo de implantação e caminho percorrido pelo tráfego. Quais DUAS afirmações descrevem corretamente a VPN site-to-site nessa comparação? Selecione DUAS opções.",
+      "explicacao": "A VPN site-to-site cria um túnel criptografado, mas esse túnel trafega sobre a internet pública — a criptografia protege o conteúdo, não substitui um caminho privado. E, por não depender de um circuito provisionado com um parceiro de conectividade, ela é implantada mais rapidamente e com custo inicial menor, que é justamente a razão pela qual muitas empresas começam por ela. Largura de banda dedicada e independente do congestionamento da internet é característica do ExpressRoute, não da VPN. Conectar um único dispositivo cliente por vez descreve a VPN point-to-site, não a site-to-site, que liga redes inteiras. E dispensar appliance local é falso: a site-to-site exige um dispositivo VPN compatível na ponta do data center — quem dispensa equipamento local é a point-to-site.",
+      "opcoes": [
+        { "texto": "Dispensa qualquer dispositivo ou appliance VPN instalado no data center local.", "correta": false },
+        { "texto": "Conecta apenas um dispositivo cliente por vez à virtual network de destino.", "correta": false },
+        { "texto": "Oferece largura de banda dedicada, independente do congestionamento da internet.", "correta": false },
+        { "texto": "O tráfego é criptografado, porém trafega sobre a internet pública até o Azure.", "correta": true },
+        { "texto": "É implantada mais rápido e com custo inicial menor, por dispensar circuito de parceiro.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-vpn-11",
+      "topico": "Conectividade híbrida",
+      "tipo": "SimNao",
+      "enunciado": "Uma pequena empresa configurou uma VPN point-to-site para que os notebooks da equipe alcancem uma virtual network no Azure. Avalie a afirmação: essa configuração exige que um dispositivo VPN dedicado seja instalado e configurado no escritório da empresa.",
+      "explicacao": "A afirmação é falsa. Na VPN point-to-site o túnel parte do próprio dispositivo, com um cliente VPN instalado nele, e por isso ela funciona de qualquer rede — inclusive de uma residência ou de um hotel — sem equipamento na ponta local. Quem marca Verdadeiro está descrevendo a VPN site-to-site, que liga uma rede inteira ao Azure e aí sim exige um dispositivo VPN compatível com endereço público conhecido no local. Exigir intermediação de terceiros é característica ainda mais forte do ExpressRoute, que depende de um parceiro de conectividade para provisionar o circuito privado.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-expressroute-12",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe redigiu as justificativas técnicas para adotar ExpressRoute na integração entre o data center da empresa e o Azure, e submeteu o documento à revisão do time de arquitetura. O revisor apontou que uma das justificativas descreve incorretamente o serviço e precisa ser removida antes da aprovação. Qual das justificativas a seguir NÃO procede?",
+      "explicacao": "O ExpressRoute não criptografa o tráfego por padrão: ele entrega um caminho privado, e a confidencialidade em trânsito continua sendo responsabilidade de quem desenha a solução, seja pelo protocolo da aplicação, seja por recursos adicionais de criptografia. Confundir privado com criptografado é o erro clássico aqui — quem criptografa por padrão é a VPN, exatamente porque ela trafega sobre a internet pública e não tem outra escolha. As demais justificativas procedem: o tráfego percorre um circuito privado e não a internet pública, a largura de banda é contratada e a latência tende a ser mais previsível que a de uma VPN, e o circuito é estabelecido por intermédio de um parceiro de conectividade, que é o que diferencia o provisionamento do ExpressRoute do de uma VPN Gateway.",
+      "opcoes": [
+        { "texto": "A conexão é estabelecida por meio de um parceiro de conectividade que provisiona o circuito.", "correta": false },
+        { "texto": "O ExpressRoute criptografa por padrão todo o tráfego trocado entre o data center e o Azure.", "correta": true },
+        { "texto": "O tráfego percorre um circuito privado e não é roteado pela internet pública até o Azure.", "correta": false },
+        { "texto": "A largura de banda é contratada e a latência tende a ser mais previsível que a de uma VPN.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-privateendpoint-13",
+      "topico": "Endpoints públicos e privados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma storage account guarda documentos confidenciais e não pode ser alcançável a partir da internet, nem mesmo com credencial válida. As máquinas virtuais de uma virtual network precisam continuar acessando esses documentos, usando um endereço IP da própria rede. Qual solução atende ao requisito?",
+      "explicacao": "Um private endpoint cria na sub-rede uma interface de rede com endereço IP privado que representa a storage account, e desabilitar o acesso de rede pública encerra o caminho pela internet — juntos, entregam exatamente o que o cenário pede. O service endpoint é o conceito mais confundido aqui: ele mantém o tráfego na rede da Microsoft e permite restringir a conta a determinadas sub-redes, mas o serviço continua sendo alcançado pelo seu endpoint público, sem ganhar endereço IP privado. Virtual network peering conecta redes virtuais entre si e não se aplica a um serviço PaaS, que não fica em uma rede do cliente. E manter o endpoint público com regras de network security group não elimina a exposição na internet, além de o network security group agir sobre a sub-rede, não sobre a conta.",
+      "opcoes": [
+        { "texto": "Criar um private endpoint para a conta em uma sub-rede e desabilitar o acesso de rede pública.", "correta": true },
+        { "texto": "Configurar um virtual network peering entre a virtual network e a rede que hospeda a conta.", "correta": false },
+        { "texto": "Manter o endpoint público da conta e criar regras de entrada em um network security group.", "correta": false },
+        { "texto": "Criar um service endpoint na sub-rede, o que atribui um endereço IP privado à storage account.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-serviceendpoint-14",
+      "topico": "Endpoints públicos e privados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer que o tráfego das máquinas virtuais de uma sub-rede até uma storage account permaneça na rede da Microsoft e que a conta só aceite requisições vindas dessa sub-rede. Não há exigência de que a conta receba endereço IP privado, nem de acesso a partir da rede local da empresa. Qual é a opção mais simples que atende?",
+      "explicacao": "O service endpoint de armazenamento estende a identidade da sub-rede até o serviço, mantém o tráfego na rede da Microsoft e permite que o firewall da conta libere apenas aquela sub-rede — sem recurso adicional para provisionar ou pagar. O private endpoint também atenderia, mas exige interface de rede dedicada, zona de DNS privada e o custo correspondente, o que só se justifica quando é necessário endereço IP privado ou acesso a partir da rede local, condições que o enunciado descarta. A VPN site-to-site é para conectividade híbrida entre data center e Azure, não entre uma sub-rede e um serviço PaaS. E virtual network peering conecta redes virtuais entre si, não uma sub-rede a um serviço gerenciado que não vive em uma rede do cliente.",
+      "opcoes": [
+        { "texto": "Habilitar um service endpoint de armazenamento na sub-rede e restringir a conta a essa sub-rede.", "correta": true },
+        { "texto": "Criar um private endpoint na sub-rede, com a zona de DNS privada correspondente à conta.", "correta": false },
+        { "texto": "Estabelecer uma conexão VPN site-to-site entre a sub-rede e a storage account de destino.", "correta": false },
+        { "texto": "Criar um virtual network peering entre a sub-rede e a região em que a conta foi criada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-privateendpoint-15",
+      "topico": "Endpoints públicos e privados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma API interna hospedada em um serviço PaaS trata dados de folha de pagamento e, por decisão do time de segurança, deve ficar acessível somente a partir das redes da própria empresa, sem qualquer superfície exposta na internet, ainda que protegida por credencial. Quais DUAS ações compõem essa configuração? Selecione DUAS opções.",
+      "explicacao": "As duas ações são complementares e nenhuma basta sozinha: o private endpoint dá ao serviço um endereço IP privado dentro da virtual network, e desabilitar o acesso de rede pública fecha o endpoint que continuaria respondendo na internet mesmo depois do private endpoint criado — esquecer a segunda parte é o erro mais comum. Atribuir um endereço IP público estático e divulgá-lo só internamente não é controle nenhum: o endereço segue alcançável por qualquer origem, e discrição não é isolamento. Liberar a internet na entrada de um network security group faz o contrário do requisito, além de o network security group atuar sobre sub-redes, não sobre o serviço PaaS. E peering conecta virtual networks do cliente entre si; não existe peering com a rede em que a Microsoft opera um serviço gerenciado.",
+      "opcoes": [
+        { "texto": "Atribuir ao serviço um endereço IP público estático e divulgá-lo apenas internamente.", "correta": false },
+        { "texto": "Criar uma regra de entrada liberando o tráfego da internet no network security group.", "correta": false },
+        { "texto": "Criar um private endpoint para o serviço em uma sub-rede da virtual network da empresa.", "correta": true },
+        { "texto": "Configurar um virtual network peering com a rede em que a Microsoft hospeda o serviço.", "correta": false },
+        { "texto": "Desabilitar o acesso de rede pública na configuração do próprio serviço PaaS.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-storageaccount-16",
+      "topico": "Contas de armazenamento e limites",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação de ingestão de dados passou a receber respostas de limitação (throttling) ao gravar em uma única storage account, mesmo com o serviço saudável na região. A equipe revisou o código e confirmou que o volume de requisições é legítimo e continuará crescendo. Qual abordagem resolve o problema de forma estrutural?",
+      "explicacao": "Os limites de escala do armazenamento — capacidade e taxa de requisições — são aplicados no nível da storage account, então distribuir a carga entre várias contas multiplica o teto disponível e é a correção estrutural para throttling causado por volume legítimo. Criar mais contêineres não ajuda porque contêiner é uma divisão lógica dentro da mesma conta e compartilha exatamente os mesmos limites. Trocar a redundância de LRS para GRS altera quantas cópias existem e onde ficam, ou seja, durabilidade e resiliência — não tem relação com taxa de requisições. E mudar de Cool para Hot muda o perfil de custo entre armazenamento e acesso, além da latência esperada, mas também não eleva os limites de escala da conta.",
+      "opcoes": [
+        { "texto": "Criar contêineres adicionais dentro da mesma storage account para dividir o volume de requisições.", "correta": false },
+        { "texto": "Alterar a redundância da conta de LRS para GRS, ampliando a capacidade de gravação disponível.", "correta": false },
+        { "texto": "Distribuir a carga entre várias storage accounts, já que os limites de escala são aplicados por conta.", "correta": true },
+        { "texto": "Mover os dados da camada Cool para a camada Hot, o que eleva os limites de escala da conta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-storageaccount-17",
+      "topico": "Contas de armazenamento e limites",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Ao criar uma storage account, uma equipe recebe a mensagem de que o nome escolhido já está em uso, embora não exista nenhuma conta com esse nome na assinatura, no resource group nem em qualquer outra assinatura da empresa. Qual é a explicação correta para o comportamento?",
+      "explicacao": "O nome da storage account compõe o endereço do endpoint de serviço da conta, que é resolvido por DNS público, e por isso precisa ser único em todo o Azure — outro cliente, em qualquer assinatura do mundo, pode ter tomado o nome antes. Unicidade dentro do resource group é o escopo válido para a maioria dos recursos do Azure, e aplicar essa regra à storage account é justamente a confusão que o cenário explora. Uma política de nomenclatura aplicada a grupo de gerenciamento pode bloquear um nome, mas a mensagem seria de violação de política, não de nome em uso. E não existe reserva de nome por região dentro da assinatura: o escopo do conflito é global, não regional.",
+      "opcoes": [
+        { "texto": "O nome foi reservado por uma política de nomenclatura aplicada ao grupo de gerenciamento.", "correta": false },
+        { "texto": "O nome da conta precisa ser único apenas dentro do resource group, que já contém um registro.", "correta": false },
+        { "texto": "O nome está reservado por outra região da mesma assinatura e precisa ser liberado antes.", "correta": false },
+        { "texto": "O nome da conta compõe o endpoint de serviço resolvido por DNS e precisa ser único globalmente.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-redundancia-18",
+      "topico": "Redundância de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora precisa que os arquivos de apólices sobrevivam à perda completa de um data center dentro da região onde estão hospedados. Uma exigência regulatória proíbe que qualquer cópia dos dados seja mantida fora do território dessa região. Qual opção de redundância atende aos dois requisitos ao mesmo tempo?",
+      "explicacao": "O ZRS replica os dados de forma síncrona entre zonas de disponibilidade diferentes da mesma região, o que cobre a perda de um data center inteiro sem que nenhum dado saia do território regional — é a única opção que satisfaz as duas restrições juntas. O LRS mantém três cópias, porém dentro de um único data center: atende à soberania, mas não sobrevive à perda desse data center. O GRS replica para uma segunda região emparelhada, o que resolveria a resiliência mas viola diretamente a exigência regulatória. E o RA-GRS agrava o mesmo problema do GRS, já que além de manter a cópia fora da região ainda a mantém disponível para leitura.",
+      "opcoes": [
+        { "texto": "GRS, que replica os dados para uma segunda região emparelhada, distante da região primária.", "correta": false },
+        { "texto": "RA-GRS, que replica para outra região e ainda mantém a cópia secundária disponível para leitura.", "correta": false },
+        { "texto": "ZRS, que replica os dados de forma síncrona entre zonas de disponibilidade da mesma região.", "correta": true },
+        { "texto": "LRS, que mantém três cópias dos dados dentro de um único data center da região escolhida.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-redundancia-19",
+      "topico": "Redundância de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um catálogo de produtos é consultado por uma aplicação com usuários em vários continentes. O requisito é que os dados sobrevivam à indisponibilidade da região inteira e que a aplicação consiga ler a cópia secundária a qualquer momento, inclusive em operação normal, sem depender de um failover executado pela Microsoft. Qual opção de redundância atende?",
+      "explicacao": "O RA-GRS replica os dados para a região secundária e, diferentemente das demais opções geográficas, mantém essa cópia acessível para leitura a qualquer momento — é exatamente o que o prefixo RA, de acesso de leitura, acrescenta. O GRS faz a mesma replicação geográfica, mas a cópia secundária permanece inacessível até que ocorra um failover, o que reprova no segundo requisito e é a confusão central do cenário. O ZRS protege contra a perda de uma zona dentro da região primária, mas não mantém cópia em outra região, então não cobre a indisponibilidade regional. E o LRS mantém as cópias em um único data center, ficando aquém dos dois requisitos.",
+      "opcoes": [
+        { "texto": "RA-GRS, que replica para a região secundária e mantém essa cópia disponível para leitura.", "correta": true },
+        { "texto": "ZRS, que replica de forma síncrona entre zonas de disponibilidade da região primária.", "correta": false },
+        { "texto": "GRS, que replica para a região secundária e mantém a cópia inacessível até haver failover.", "correta": false },
+        { "texto": "LRS, que mantém três cópias síncronas dentro de um único data center da região primária.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-redundancia-20",
+      "topico": "Redundância de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um pipeline de análise grava arquivos intermediários que podem ser gerados novamente em poucos minutos caso se percam, e que são descartados ao fim de cada execução. A equipe quer o menor custo de armazenamento possível e assume explicitamente o risco de perder esses arquivos em um incidente de maior alcance. Qual opção de redundância atende?",
+      "explicacao": "O LRS é a opção de menor custo justamente porque limita a replicação a um único data center, e esse compromisso é aceitável quando o dado é descartável e reproduzível, como descreve o cenário. O ZRS distribui cópias entre zonas de disponibilidade e cobra mais por essa proteção adicional, que aqui não traz benefício proporcional. O GRS acrescenta uma cópia assíncrona em outra região, elevando ainda mais o custo para proteger um dado que a própria equipe considera descartável. E o GZRS é a opção mais cara das quatro, por somar replicação entre zonas e replicação geográfica — escolher pela resiliência máxima quando o requisito declarado é custo mínimo é o erro que a questão explora.",
+      "opcoes": [
+        { "texto": "ZRS, que distribui as cópias entre zonas de disponibilidade da mesma região primária.", "correta": false },
+        { "texto": "GZRS, que combina replicação entre zonas com replicação para uma segunda região.", "correta": false },
+        { "texto": "GRS, que mantém uma cópia assíncrona adicional em uma segunda região emparelhada.", "correta": false },
+        { "texto": "LRS, a opção de menor custo, com replicação limitada a um único data center da região.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-redundancia-21",
+      "topico": "Redundância de armazenamento",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um sistema de prontuários eletrônicos exige que os dados continuem disponíveis tanto na falha de uma zona de disponibilidade da região primária quanto na indisponibilidade da região inteira. Quais DUAS opções de redundância atendem simultaneamente aos dois requisitos? Selecione DUAS opções.",
+      "explicacao": "GZRS e RA-GZRS são as duas opções que combinam replicação entre zonas de disponibilidade na região primária com replicação para uma região secundária, cobrindo os dois cenários de falha exigidos; a diferença entre elas é apenas o acesso de leitura à cópia secundária, que o requisito não menciona mas também não proíbe. O GRS replica para a região secundária, porém dentro da região primária ele usa replicação local em um único data center, então a falha de uma zona não está coberta — é o par mais confundido com o GZRS. O ZRS resolve a falha de zona, mas não mantém nada fora da região. E o LRS não cobre nenhum dos dois requisitos, já que suas cópias ficam todas em um único data center.",
+      "opcoes": [
+        { "texto": "GZRS, que replica entre zonas na região primária e ainda copia os dados para a região secundária.", "correta": true },
+        { "texto": "GRS, que copia para a região secundária mantendo as cópias primárias em um único data center.", "correta": false },
+        { "texto": "ZRS, que replica os dados de forma síncrona entre zonas de disponibilidade da região primária.", "correta": false },
+        { "texto": "LRS, que mantém três cópias síncronas dentro de um único data center da região primária.", "correta": false },
+        { "texto": "RA-GZRS, que faz o mesmo que o GZRS e ainda permite a leitura na região secundária.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-redundancia-22",
+      "topico": "Redundância de armazenamento",
+      "tipo": "SimNao",
+      "enunciado": "Uma storage account está configurada com redundância GRS e a equipe planeja direcionar relatórios pesados para a região secundária, com o objetivo de aliviar a carga sobre a região primária. Avalie a afirmação: com GRS, a aplicação pode ler os dados da região secundária a qualquer momento, sem que ocorra um failover.",
+      "explicacao": "A afirmação é falsa. No GRS a cópia secundária existe para recuperação de desastre e permanece inacessível à aplicação até que haja failover; ler a secundária em operação normal exige RA-GRS, ou RA-GZRS quando também se quer resiliência de zona — o prefixo RA é exatamente o que habilita esse acesso de leitura. Quem marca Verdadeiro confunde GRS com RA-GRS. Vale notar ainda que, mesmo com RA-GRS, a replicação é assíncrona, então a cópia secundária pode estar levemente atrasada em relação à primária, o que precisa ser considerado por qualquer relatório que a consulte.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": false },
+        { "texto": "Falso", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-camadas-23",
+      "topico": "Camadas de acesso do Blob Storage",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um contêiner guarda imagens de produtos servidas por um site de comércio eletrônico, com centenas de milhares de leituras por dia. Para reduzir custos, a equipe moveu os blobs da camada Hot para a camada Cool e, no mês seguinte, a fatura do armazenamento aumentou. Qual é a explicação do aumento e a correção adequada?",
+      "explicacao": "As camadas frias reduzem o preço por gigabyte armazenado, mas cobram mais por operação de acesso; com leitura muito frequente, o custo de transação supera a economia de armazenamento, e voltar para a camada Hot reduz a fatura. É o erro conceitual mais comum sobre camadas: menor custo de armazenamento não é o mesmo que menor custo total. A camada Cool mantém acesso em milissegundos, então não há degradação de latência a corrigir, e migrar para Cold apenas agravaria o custo de acesso. Não existe taxa de saída específica da camada Cool a ser desabilitada. E a camada de acesso é independente da opção de redundância, portanto trocar a redundância da conta não explica nem reverte o aumento observado.",
+      "opcoes": [
+        { "texto": "A camada Cool exige redundância geográfica; retornar a conta para LRS elimina o aumento de custo.", "correta": false },
+        { "texto": "A camada Cool cobra mais por operação de acesso; com leitura frequente, a camada Hot sai mais barata.", "correta": true },
+        { "texto": "A camada Cool aplica uma taxa de saída específica; desabilitar essa taxa reduz o valor da fatura.", "correta": false },
+        { "texto": "A camada Cool degrada a latência de leitura; migrar para a camada Cold restabelece o tempo anterior.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-camadas-24",
+      "topico": "Camadas de acesso do Blob Storage",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma clínica vai guardar imagens de exames que serão consultadas poucas vezes por trimestre, porém precisam ser abertas em milissegundos quando solicitadas por um médico. Os arquivos permanecerão armazenados por pelo menos um ano. A equipe quer o menor custo de armazenamento compatível com a exigência de acesso imediato. Qual camada de acesso é a adequada?",
+      "explicacao": "A camada Cold oferece custo de armazenamento menor que o da Cool preservando o acesso imediato, e sua permanência mínima de 90 dias é folgadamente atendida pelo horizonte de um ano — é a escolha que otimiza custo sem quebrar o requisito de latência. A camada Cool também entrega acesso imediato, mas cobra mais pelo armazenamento, então não é a mais econômica dentro da restrição. A camada Archive de fato tem o menor custo de armazenamento de todas, e é por isso que costuma ser escolhida por engano aqui: ela mantém o blob offline e exige reidratação, o que inviabiliza o acesso em milissegundos. A camada Hot tem o menor custo por operação, vantagem irrelevante para dados consultados poucas vezes por trimestre, e o maior custo de armazenamento.",
+      "opcoes": [
+        { "texto": "Hot, que apresenta o menor custo por operação de acesso entre todas as camadas disponíveis.", "correta": false },
+        { "texto": "Archive, que apresenta o menor custo de armazenamento entre todas as camadas disponíveis.", "correta": false },
+        { "texto": "Cold, que oferece acesso imediato com custo de armazenamento menor e permanência mínima de 90 dias.", "correta": true },
+        { "texto": "Cool, que também oferece acesso imediato, porém com custo de armazenamento maior que o da Cold.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-camadas-25",
+      "topico": "Camadas de acesso do Blob Storage",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma reunião que começa em quinze minutos, um auditor solicita sem aviso prévio um conjunto de arquivos que a equipe havia movido para a camada Archive meses antes. A equipe abre o portal para baixar os arquivos. Qual é a consequência técnica dessa solicitação?",
+      "explicacao": "Blobs na camada Archive ficam offline e não podem ser lidos diretamente: é preciso reidratá-los para Hot ou Cool, e essa operação pode levar horas, o que inviabiliza o prazo de quinze minutos. Esse é o compromisso que a camada Archive impõe em troca do menor custo de armazenamento, e ignorá-lo ao definir a política de dados é o erro que o cenário expõe. Leitura imediata mediante taxa adicional descreve o comportamento das camadas Cool e Cold, que continuam online. Não existe promoção automática para Hot na primeira leitura — a reidratação precisa ser solicitada explicitamente. E copiar para outra storage account não contorna nada, porque a origem continua sendo um blob offline que teria de ser reidratado antes.",
+      "opcoes": [
+        { "texto": "Os blobs precisam ser copiados para outra storage account, o que conclui em poucos segundos.", "correta": false },
+        { "texto": "Os blobs precisam ser reidratados para Hot ou Cool antes da leitura, o que pode levar horas.", "correta": true },
+        { "texto": "Os blobs são promovidos automaticamente para Hot na primeira leitura, sem atraso perceptível.", "correta": false },
+        { "texto": "Os blobs podem ser lidos de imediato, com a cobrança de uma taxa adicional por operação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-camadas-26",
+      "topico": "Camadas de acesso do Blob Storage",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe planeja mover relatórios antigos para a camada Archive e quer confirmar como será o acesso eventual a eles. Avalie a afirmação: para ler um blob armazenado na camada Archive, é necessário reidratá-lo antes para Hot ou Cool, operação que pode levar horas.",
+      "explicacao": "A afirmação é verdadeira. A camada Archive mantém o blob offline: os metadados continuam visíveis, mas o conteúdo só fica legível depois de uma reidratação explícita para Hot ou Cool, cujo tempo é medido em horas e varia conforme a prioridade escolhida. É esse compromisso de latência que justifica o menor custo de armazenamento entre as camadas. Quem marca Falso costuma tratar Archive como uma versão apenas mais barata das camadas Cool e Cold — estas sim permanecem online e entregam acesso em milissegundos, cobrando mais por operação em troca disso.",
+      "opcoes": [
+        { "texto": "Verdadeiro", "correta": true },
+        { "texto": "Falso", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-ciclodevida-27",
+      "topico": "Gerenciamento de ciclo de vida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer que os blobs de um contêiner passem automaticamente para a camada Cool após 30 dias sem modificação e para Archive após 180 dias, sem que ninguém precise executar tarefas manuais nem manter servidores dedicados a isso. Qual recurso atende ao requisito?",
+      "explicacao": "O lifecycle management é um recurso nativo da storage account: define-se uma política com condições baseadas em idade e o próprio serviço aplica as transições de camada, sem computação para provisionar nem custo operacional. Um runbook do Azure Automation executando AzCopy resolveria o problema com script, mas reintroduz manutenção, agendamento e tratamento de falhas justamente onde existe recurso gerenciado. Alterar a redundância da conta trata de quantas cópias existem e onde ficam, dimensão independente da camada de acesso, e não reclassifica blob nenhum por idade. E uma tarefa agendada em uma máquina virtual contraria de forma direta a exigência de não manter servidores para a tarefa.",
+      "opcoes": [
+        { "texto": "Uma tarefa agendada em uma máquina virtual que reescreve os blobs periodicamente.", "correta": false },
+        { "texto": "Uma política de lifecycle management configurada na própria storage account.", "correta": true },
+        { "texto": "Um runbook do Azure Automation executando o AzCopy diariamente no contêiner.", "correta": false },
+        { "texto": "Uma alteração da redundância da conta, que reclassifica os blobs conforme a idade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-ciclodevida-28",
+      "topico": "Gerenciamento de ciclo de vida",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe está desenhando as regras de lifecycle management de uma storage account que concentra logs e anexos de um sistema interno. Quais DUAS ações podem ser executadas automaticamente por essas regras? Selecione DUAS opções.",
+      "explicacao": "As regras de lifecycle management atuam sobre blobs dentro da conta, com condições baseadas em tempo, e as duas ações típicas são mover para uma camada mais fria e excluir depois de um número definido de dias — juntas, cobrem a maior parte das políticas de retenção. Alterar a redundância da conta é uma propriedade da conta inteira, não uma ação por blob, e nada tem a ver com camadas ou idade. Transferir blobs para uma conta em outra assinatura é movimentação de dados entre contas, trabalho de ferramentas como AzCopy, não do lifecycle management, que age dentro de uma única conta. E converter um contêiner de blobs em compartilhamento do Azure Files não existe: são serviços distintos, com protocolos e estruturas próprias.",
+      "opcoes": [
+        { "texto": "Transferir blobs automaticamente para uma storage account de outra assinatura.", "correta": false },
+        { "texto": "Converter um contêiner de blobs em um compartilhamento de arquivos do Azure Files.", "correta": false },
+        { "texto": "Excluir blobs automaticamente depois de um número definido de dias sem alteração.", "correta": true },
+        { "texto": "Mover blobs para uma camada mais fria com base no tempo desde a última modificação.", "correta": true },
+        { "texto": "Alterar a opção de redundância da storage account de LRS para GRS após certo prazo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-servicos-29",
+      "topico": "Serviços de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação legada será movida para o Azure sem alteração de código. Ela grava e lê arquivos em um caminho de rede montado como unidade por meio do protocolo SMB, e várias máquinas virtuais precisam acessar esse mesmo caminho simultaneamente. Qual serviço de armazenamento atende ao requisito?",
+      "explicacao": "O Azure Files oferece compartilhamentos de arquivos gerenciados acessíveis pelos protocolos SMB e NFS, que podem ser montados como unidade em várias máquinas ao mesmo tempo — é a única opção compatível com uma aplicação que espera um caminho de rede e não pode ser alterada. O Azure Blob Storage guarda objetos em contêineres acessados por HTTP e por SDK, sem semântica de sistema de arquivos nativa via SMB, o que exigiria reescrever a aplicação. Managed Disks são volumes de bloco anexados a uma máquina virtual por vez, o que quebra o requisito de acesso simultâneo. E o Queue Storage armazena mensagens para processamento assíncrono, não arquivos, sendo um serviço de finalidade completamente diferente.",
+      "opcoes": [
+        { "texto": "Azure Files, que oferece compartilhamentos de arquivos acessíveis por SMB e NFS.", "correta": true },
+        { "texto": "Azure Blob Storage, que organiza objetos em contêineres acessados por HTTP e por SDK.", "correta": false },
+        { "texto": "Azure Managed Disks, que fornecem volumes de bloco anexados a uma máquina virtual.", "correta": false },
+        { "texto": "Azure Queue Storage, que armazena mensagens destinadas a processamento assíncrono.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-servicos-30",
+      "topico": "Serviços de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um portal de pedidos sofre picos intensos de acesso durante campanhas promocionais, e o componente de faturamento não consegue processar tudo em tempo real. A equipe quer que os pedidos sejam acumulados de forma durável e consumidos no ritmo do faturamento, sem perder requisições nem derrubar o portal. Qual serviço de armazenamento atende?",
+      "explicacao": "O Azure Queue Storage armazena mensagens de forma durável para consumo posterior, que é precisamente o padrão de desacoplamento pedido: o portal enfileira e segue respondendo, enquanto o faturamento consome no ritmo que suporta. O Azure Table Storage guarda dados NoSQL semiestruturados indexados por chave e serve para consulta, não para intermediar produtor e consumidor — é o par mais confundido com Queue dentro da mesma conta de armazenamento. O Azure Blob Storage guarda objetos não estruturados e não oferece semântica de fila com entrega e remoção de mensagem. E Managed Disks são volumes de bloco anexados a máquinas virtuais, sem qualquer papel na comunicação entre componentes de uma aplicação.",
+      "opcoes": [
+        { "texto": "Azure Queue Storage, que enfileira mensagens de forma durável para consumo posterior.", "correta": true },
+        { "texto": "Azure Table Storage, que guarda dados NoSQL semiestruturados indexados por chave.", "correta": false },
+        { "texto": "Azure Blob Storage, que guarda objetos não estruturados em contêineres da conta.", "correta": false },
+        { "texto": "Azure Managed Disks, que fornecem volumes de bloco anexados a máquinas virtuais.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-servicos-31",
+      "topico": "Serviços de armazenamento",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe listou as cargas de trabalho de um sistema e quer decidir quais delas devem ficar no Azure Blob Storage. Quais DUAS cargas da lista NÃO são adequadas ao Azure Blob Storage? Selecione DUAS opções.",
+      "explicacao": "O disco do sistema operacional de uma máquina virtual é atendido por Managed Disks, que entregam volume de bloco anexado à máquina, e não por objetos em contêiner. Um compartilhamento montado como unidade de rede por SMB é papel do Azure Files, que fala esse protocolo nativamente; o Blob Storage é acessado por HTTP e por SDK, com semântica de objeto. As demais são cargas típicas de blob: vídeos e imagens servidos por HTTP a um site público, backups e arquivos de log retidos para análise posterior, e arquivos brutos armazenados para processamento analítico. O critério que separa os três serviços é a forma de acesso esperada — objeto, compartilhamento de arquivos ou disco de bloco — e não o tamanho ou a natureza do conteúdo.",
+      "opcoes": [
+        { "texto": "Vídeos e imagens estáticas servidos por HTTP aos visitantes de um site público.", "correta": false },
+        { "texto": "Um compartilhamento montado como unidade de rede por SMB em vários servidores.", "correta": true },
+        { "texto": "O disco do sistema operacional de uma máquina virtual Windows em produção.", "correta": true },
+        { "texto": "Arquivos brutos guardados para processamento analítico em lote noturno.", "correta": false },
+        { "texto": "Backups e arquivos de log retidos para análise posterior pela equipe.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-migracao-32",
+      "topico": "Migração e movimentação de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma emissora precisa mover 400 TB de arquivos de vídeo do seu data center para o Azure. O link de internet disponível é modesto e não pode ser ampliado a tempo; o cálculo indica que a transferência pela rede levaria vários meses. Qual solução atende ao requisito?",
+      "explicacao": "O Azure Data Box existe exatamente para esse caso: a Microsoft envia um dispositivo físico, os dados são copiados localmente e o equipamento retorna ao data center do Azure, contornando a limitação do link. O volume e a banda disponível são os fatores que decidem, e nesse cenário eles inviabilizam qualquer opção de rede. O AzCopy é um utilitário de linha de comando otimizado para transferir pela rede, então continuaria preso ao mesmo gargalo de meses. O Azure Storage Explorer também transfere pela rede, apenas com interface gráfica, sofrendo da mesma limitação. E o Azure File Sync sincroniza um servidor de arquivos Windows com o Azure Files de forma contínua, pela rede — não é uma ferramenta de carga inicial massiva.",
+      "opcoes": [
+        { "texto": "Azure File Sync, agente que sincroniza um servidor de arquivos local com o Azure.", "correta": false },
+        { "texto": "Azure Storage Explorer, aplicação gráfica que transfere os dados pela rede.", "correta": false },
+        { "texto": "AzCopy, utilitário de linha de comando otimizado para transferências pela rede.", "correta": false },
+        { "texto": "Azure Data Box, dispositivo físico enviado pela Microsoft para transferência offline.", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqrede-migracao-33",
+      "topico": "Migração e movimentação de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Antes de decidir a migração, uma empresa precisa levantar o inventário dos servidores do data center, avaliar quais deles estão prontos para rodar no Azure e estimar o custo mensal de um ambiente equivalente na nuvem. Qual serviço atende a essa etapa do projeto?",
+      "explicacao": "O Azure Migrate é o serviço dedicado à fase de descoberta e avaliação: monta o inventário do ambiente local, indica a prontidão de cada servidor para o Azure e produz estimativa de custo do ambiente equivalente, tudo antes de mover qualquer carga. O Azure Data Box atua depois dessa decisão, transportando grandes volumes de dados de forma offline, e não avalia servidor nenhum. O Azure Storage Explorer é uma ferramenta para navegar e mover dados entre contas de armazenamento, sem qualquer função de avaliação de infraestrutura. E o Azure File Sync centraliza compartilhamentos de arquivos locais no Azure Files, resolvendo um problema de arquivos e não de planejamento de migração de servidores.",
+      "opcoes": [
+        { "texto": "Azure Migrate, que faz descoberta, avaliação de prontidão e estimativa de custo.", "correta": true },
+        { "texto": "Azure Data Box, que transporta grandes volumes de dados de forma offline.", "correta": false },
+        { "texto": "Azure File Sync, que centraliza compartilhamentos de arquivos locais no Azure.", "correta": false },
+        { "texto": "Azure Storage Explorer, que navega e move dados entre contas de armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-migracao-34",
+      "topico": "Migração e movimentação de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede de lojas mantém um servidor de arquivos Windows em cada filial. A empresa quer centralizar todos os arquivos no Azure, mas exige que os documentos mais usados continuem sendo servidos localmente com a velocidade da rede da loja, sem que os funcionários mudem a forma de trabalhar. Qual solução atende?",
+      "explicacao": "O Azure File Sync transforma o servidor Windows de cada filial em um cache do compartilhamento no Azure Files: os arquivos ficam centralizados na nuvem, os mais usados permanecem locais e os funcionários continuam acessando o mesmo caminho de rede. O Azure Data Box serviria para uma carga inicial de volume muito grande, mas é uma transferência pontual e não mantém sincronização contínua nem cache local. Uma política de lifecycle management move blobs entre camadas de acesso dentro de uma storage account, o que trata de custo de armazenamento e não de acesso local rápido a compartilhamentos. E o AzCopy agendado copia dados pela rede em lote, sem cache, sem cliente de sincronização e sem manter as duas pontas consistentes.",
+      "opcoes": [
+        { "texto": "Azure Data Box, que transporta uma cópia dos arquivos de cada filial até o data center do Azure.", "correta": false },
+        { "texto": "AzCopy agendado em cada filial, que copia todo o conteúdo do servidor para o Azure a cada noite.", "correta": false },
+        { "texto": "Azure File Sync, que sincroniza o servidor local com o Azure Files e mantém os arquivos mais usados em cache.", "correta": true },
+        { "texto": "Uma política de lifecycle management, que move os arquivos entre camadas conforme a frequência de uso.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqrede-migracao-35",
+      "topico": "Migração e movimentação de dados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe precisa transferir alguns gigabytes de arquivos de um servidor local para contêineres do Azure Blob Storage, usando o link de internet já existente e sem provisionar nada novo. Quais DUAS ferramentas permitem executar essa transferência? Selecione DUAS opções.",
+      "explicacao": "O AzCopy é um utilitário de linha de comando feito para copiar dados de e para o armazenamento do Azure pela rede, e por ser executável em script atende bem a transferências repetíveis. O Azure Storage Explorer resolve o mesmo problema com interface gráfica, permitindo navegar pelos contêineres e arrastar arquivos. O Azure Data Box é o caminho oposto: dispositivo físico para volumes grandes demais para a rede disponível, desproporcional para poucos gigabytes. O Azure Migrate faz descoberta e avaliação de servidores a migrar, não cópia de arquivos avulsos para blob. E o Azure File Sync sincroniza servidores de arquivos com compartilhamentos do Azure Files, que é um serviço diferente dos contêineres de blob citados no cenário.",
+      "opcoes": [
+        { "texto": "Azure Data Box, dispositivo físico usado em transferências offline de grande volume.", "correta": false },
+        { "texto": "AzCopy, utilitário de linha de comando que pode ser usado em scripts automatizados.", "correta": true },
+        { "texto": "Azure Storage Explorer, aplicação gráfica para gerenciar dados de armazenamento.", "correta": true },
+        { "texto": "Azure Migrate, serviço de descoberta e avaliação dos servidores a serem migrados.", "correta": false },
+        { "texto": "Azure File Sync, agente que sincroniza servidores de arquivos com o Azure Files.", "correta": false }
+      ]
+    }
+  ]
+}

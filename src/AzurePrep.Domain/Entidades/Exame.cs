@@ -49,9 +49,9 @@ public class Exame : Entity
 
     public IReadOnlyCollection<Questao> Questions => _questions;
 
-    public AreaDeHabilidade AdicionarAreaDeHabilidade(string name, decimal weightPercent, Guid? id = null)
+    public AreaDeHabilidade AdicionarAreaDeHabilidade(string key, string name, decimal weightPercent, Guid? id = null)
     {
-        var skillArea = new AreaDeHabilidade(Id, name, weightPercent, id);
+        var skillArea = new AreaDeHabilidade(Id, key, name, weightPercent, id);
         _skillAreas.Add(skillArea);
         return skillArea;
     }
@@ -62,12 +62,14 @@ public class Exame : Entity
     /// </summary>
     public Questao AdicionarQuestao(
         Guid skillAreaId,
+        string externalId,
         string text,
         Enums.TipoDeQuestao type,
         string explanation,
+        string? topic = null,
         Guid? id = null)
     {
-        var question = new Questao(Id, skillAreaId, text, type, explanation, id);
+        var question = new Questao(Id, skillAreaId, externalId, text, type, explanation, topic, id);
         _questions.Add(question);
         return question;
     }

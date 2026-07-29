@@ -6,6 +6,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- O banco de questões viaja dentro do assembly: adicionar um lote é adicionar um JSON
+         aqui, sem tocar em código e sem depender de arquivo copiado junto no deploy. -->
+    <EmbeddedResource Include="Persistence\Seed\Questoes\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.10" />
     <!-- Sobrepõe a dependência transitiva vulnerável (NU1903, GHSA-2m69-gcr7-jv3q) do EF Core. -->
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />

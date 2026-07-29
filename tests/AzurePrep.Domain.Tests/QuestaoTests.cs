@@ -7,7 +7,7 @@ public class QuestaoTests
 {
     private static Questao BuildMultipleChoiceQuestion(out Guid correctA, out Guid correctB, out Guid wrong)
     {
-        var question = new Questao(Guid.NewGuid(), Guid.NewGuid(), "Selecione duas opções válidas.", TipoDeQuestao.EscolhaMultipla, "Explicação.");
+        var question = new Questao(Guid.NewGuid(), Guid.NewGuid(), "teste-multipla", "Selecione duas opções válidas.", TipoDeQuestao.EscolhaMultipla, "Explicação.");
         correctA = question.AdicionarOpcao("Correta A", isCorrect: true, orderIndex: 0).Id;
         correctB = question.AdicionarOpcao("Correta B", isCorrect: true, orderIndex: 1).Id;
         wrong = question.AdicionarOpcao("Errada", isCorrect: false, orderIndex: 2).Id;
@@ -66,7 +66,7 @@ public class QuestaoTests
     [Fact]
     public void Options_AreReturnedInOrderIndexOrder()
     {
-        var question = new Questao(Guid.NewGuid(), Guid.NewGuid(), "Pergunta", TipoDeQuestao.EscolhaUnica, "Explicação.");
+        var question = new Questao(Guid.NewGuid(), Guid.NewGuid(), "teste-ordem", "Pergunta", TipoDeQuestao.EscolhaUnica, "Explicação.");
         question.AdicionarOpcao("Terceira", isCorrect: false, orderIndex: 2);
         question.AdicionarOpcao("Primeira", isCorrect: true, orderIndex: 0);
         question.AdicionarOpcao("Segunda", isCorrect: false, orderIndex: 1);

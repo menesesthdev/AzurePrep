@@ -22,6 +22,7 @@ public class AzurePrepDbContext : DbContext, IUnitOfWork
     public DbSet<OpcaoDeResposta> AnswerOptions => Set<OpcaoDeResposta>();
     public DbSet<TentativaDeProva> ExamAttempts => Set<TentativaDeProva>();
     public DbSet<RespostaDaTentativa> ExamAttemptAnswers => Set<RespostaDaTentativa>();
+    public DbSet<QuestaoDaTentativa> ExamAttemptQuestions => Set<QuestaoDaTentativa>();
     public DbSet<Usuario> Users => Set<Usuario>();
     public DbSet<TokenDeRedefinicaoDeSenha> PasswordResetTokens => Set<TokenDeRedefinicaoDeSenha>();
 

@@ -16,11 +16,11 @@ public class HistoricoDeProvasServiceTests
     private static Exame BuildExam()
     {
         var exam = new Exame("AZ-900", "Azure Fundamentals", timeLimitMinutes: 45, passingScorePercent: 70, totalQuestions: 4);
-        var area = exam.AdicionarAreaDeHabilidade("Conceitos de nuvem", 100m);
+        var area = exam.AdicionarAreaDeHabilidade("conceitos-de-nuvem", "Conceitos de nuvem", 100m);
 
         foreach (var i in Enumerable.Range(0, 4))
         {
-            var q = exam.AdicionarQuestao(area.Id, $"Questão {i}", TipoDeQuestao.EscolhaUnica, "Explicação.");
+            var q = exam.AdicionarQuestao(area.Id, $"questao-{i}", $"Questão {i}", TipoDeQuestao.EscolhaUnica, "Explicação.");
             q.AdicionarOpcao("Correta", true, 0);
             q.AdicionarOpcao("Errada", false, 1);
         }
@@ -48,7 +48,7 @@ public class HistoricoDeProvasServiceTests
         var tentativas = new InMemoryExamAttemptRepository();
 
         return new Cenario(
-            new SessaoDeProvaService(exames, tentativas, new FakeUnitOfWork(), clock, usuario),
+            new SessaoDeProvaService(exames, tentativas, new FakeSorteadorDeQuestoes(exames), new FakeUnitOfWork(), clock, usuario),
             new HistoricoDeProvasService(tentativas, exames, usuario),
             exam,
             clock,

@@ -30,4 +30,14 @@ public class OpcaoDeResposta : Entity
 
     /// <summary>Ordem de exibição estável — evita depender da ordem de inserção no banco.</summary>
     public int OrderIndex { get; private set; }
+
+    /// <summary>
+    /// Reaplica o conteúdo vindo do arquivo de seed. Corrige texto e gabarito preservando o Id —
+    /// respostas já gravadas apontam para este Id, então recriar a alternativa as tornaria órfãs.
+    /// </summary>
+    public void Atualizar(string text, bool isCorrect)
+    {
+        Text = Guard.NotNullOrWhiteSpace(text, nameof(text));
+        IsCorrect = isCorrect;
+    }
 }

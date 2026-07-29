@@ -1,0 +1,394 @@
+{
+  "exameCode": "AZ-900",
+  "area": "governanca",
+  "questoes": [
+    {
+      "id": "az900-custo-transferencia-dados-01",
+      "topico": "Fatores que afetam custo — transferência de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa hospeda no Azure uma aplicação que recebe grandes volumes de arquivos enviados pelos clientes e também disponibiliza relatórios para download fora da nuvem. Ao revisar a fatura, a equipe financeira quer entender qual parte desse tráfego pesa no custo. Qual afirmação descreve corretamente a cobrança de transferência de dados no Azure?",
+      "explicacao": "O Azure cobra pela transferência de saída (egress) dos seus datacenters e, como regra geral, não cobra pela entrada (ingress) — é isso que torna barato colocar dados na nuvem e caro retirá-los em volume (correta). A alternativa que isenta a saída e cobra a entrada apenas inverte ingress e egress, confusão típica de quem memorizou que \"transferência é cobrada\" sem observar a direção. A que supõe a mesma tarifa nas duas direções ignora justamente essa assimetria, que é o ponto do modelo. A que afirma não haver custo algum ignora que a transferência de saída é uma linha própria da fatura, separada do preço de computação e de armazenamento do serviço.",
+      "opcoes": [
+        { "texto": "A entrada de dados no datacenter do Azure normalmente não é cobrada, enquanto a saída para fora dele é cobrada.", "correta": true },
+        { "texto": "A saída de dados normalmente não é cobrada, enquanto a entrada é cobrada por gigabyte transferido.", "correta": false },
+        { "texto": "Entrada e saída são cobradas pela mesma tarifa por gigabyte, pois ambas trafegam pela mesma rede.", "correta": false },
+        { "texto": "Nem a entrada nem a saída geram custo, pois a transferência já está incluída no preço do serviço.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-regiao-02",
+      "topico": "Fatores que afetam custo — região",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma carga de processamento em lote roda de madrugada, não é sensível a latência e não está sujeita a nenhuma exigência de residência de dados. O time de arquitetura quer reduzir o custo mensal alterando apenas onde a carga é implantada. Qual decisão atende ao objetivo?",
+      "explicacao": "O preço do mesmo serviço varia entre regiões do Azure, porque energia, impostos e custo de operação local variam; sem restrição de residência de dados nem de latência, escolher a região mais barata é uma economia legítima (correta). Distribuir a carga entre várias regiões confunde escala com desconto por volume: usar mais regiões aumenta a complexidade e o tráfego entre elas, não reduz a tarifa unitária. Escolher a região mais próxima do escritório confunde latência com preço — proximidade melhora o tempo de resposta, não a tarifa. E o par de regiões (region pair) é um mecanismo de recuperação de desastre e de atualização coordenada, não uma política de preços unificada.",
+      "opcoes": [
+        { "texto": "Implantar a carga na região cujo preço para os serviços usados seja mais baixo, já que o preço varia por região.", "correta": true },
+        { "texto": "Distribuir a carga entre várias regiões, porque o preço por unidade cai conforme o número de regiões usadas.", "correta": false },
+        { "texto": "Implantar a carga na região geograficamente mais próxima do escritório, porque a proximidade reduz a tarifa.", "correta": false },
+        { "texto": "Implantar a carga em um par de regiões emparelhadas, porque regiões emparelhadas compartilham uma tarifa única.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-assinatura-contrato-03",
+      "topico": "Fatores que afetam custo — tipo de assinatura e contrato",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Duas empresas executam exatamente o mesmo tamanho de máquina virtual, na mesma região do Azure e pelo mesmo número de horas no mês, e ainda assim pagam valores diferentes pelo recurso. Nenhuma das duas comprou reservas nem usa licenças próprias. Qual fator explica melhor essa diferença?",
+      "explicacao": "O tipo de assinatura e o contrato comercial firmado com a Microsoft — pagamento conforme o uso, contrato empresarial, revenda por parceiro, planos de não produção — alteram o preço praticado para o mesmo recurso (correta). A hierarquia de management groups organiza assinaturas para herança de governança e não concede desconto por volume por si só, confusão frequente entre estrutura organizacional e condição comercial. Tags identificam e agrupam recursos para relatório de custo, mas não entram no cálculo do preço nem no rateio automático da fatura. E o número de administradores com acesso é uma questão de controle de acesso (RBAC): o Azure não cobra tarifa de gerenciamento por usuário com permissão sobre o recurso.",
+      "opcoes": [
+        { "texto": "O tipo de assinatura e o contrato comercial com a Microsoft, que podem estabelecer preços negociados.", "correta": true },
+        { "texto": "A hierarquia de management groups, que aplica desconto por volume automaticamente às assinaturas filhas.", "correta": false },
+        { "texto": "A quantidade de tags aplicadas às máquinas virtuais, usada pelo Azure para calcular o rateio da fatura.", "correta": false },
+        { "texto": "O número de administradores com acesso à assinatura, que altera a tarifa de gerenciamento cobrada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-manutencao-04",
+      "topico": "Fatores que afetam custo — manutenção",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe pequena comparou apenas o preço por hora de duas opções para hospedar um banco de dados relacional: uma máquina virtual que ela mesma administraria e um serviço de banco de dados gerenciado. O gestor lembrou que alguém precisa aplicar patches, configurar backups e cuidar da alta disponibilidade. Qual consideração de custo essa observação acrescenta à comparação?",
+      "explicacao": "Manutenção é um dos fatores de custo: o gasto total inclui o esforço operacional, e no serviço gerenciado boa parte desse trabalho já está embutida no preço cobrado (correta). Dizer que manutenção é irrelevante porque só se cobra consumo confunde fatura com custo total — mão de obra não aparece na fatura do Azure, mas continua sendo dinheiro gasto. Afirmar que a máquina virtual elimina a manutenção porque a Microsoft aplica os patches erra a linha de responsabilidade compartilhada: em IaaS o sistema operacional convidado é do cliente. E dizer que o serviço gerenciado dispensa a licença troca o assunto para licenciamento, que é tratado por benefícios como o Azure Hybrid Benefit e não anula o esforço operacional.",
+      "opcoes": [
+        { "texto": "O custo de manutenção operacional integra o custo total, e no serviço gerenciado ele já está em boa parte embutido no preço.", "correta": true },
+        { "texto": "O custo de manutenção é irrelevante no Azure, porque a cobrança considera apenas computação e armazenamento consumidos.", "correta": false },
+        { "texto": "A máquina virtual elimina o custo de manutenção, porque a Microsoft aplica os patches do sistema operacional convidado.", "correta": false },
+        { "texto": "O serviço gerenciado dispensa a licença do banco de dados, o que torna a manutenção gratuita nas duas opções.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-fatores-fatura-05",
+      "topico": "Fatores que afetam custo — consumo e tipo de recurso",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de arquitetura revisa o que de fato altera o valor cobrado por uma máquina virtual do Azure ao final do mês, para orientar as próximas implantações da empresa. Nenhum desconto por compromisso de uso foi contratado. Quais elementos influenciam diretamente esse valor? Selecione DUAS opções.",
+      "explicacao": "A região escolhida altera o preço do mesmo serviço, e o tamanho e a série da máquina virtual definem a tarifa por hora de computação — os dois são fatores diretos de custo (corretas). O volume de dados que entram na máquina virtual é tráfego de entrada (ingress), que como regra não é cobrado; quem marca essa opção está tratando ingress e egress como se fossem cobrados igual. A quantidade de tags não influencia preço algum: tag organiza e agrupa custo em relatório, não muda tarifa. E o número de usuários com permissão de leitura é controle de acesso (RBAC), que não é faturado por atribuição.",
+      "opcoes": [
+        { "texto": "A região do Azure escolhida para a implantação do recurso.", "correta": true },
+        { "texto": "O tamanho e a série da máquina virtual provisionada.", "correta": true },
+        { "texto": "O volume de dados que entram na máquina virtual vindos da internet.", "correta": false },
+        { "texto": "A quantidade de tags de centro de custo aplicadas ao recurso.", "correta": false },
+        { "texto": "O número de usuários com permissão de leitura sobre o recurso.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-recursos-ociosos-06",
+      "topico": "Reduzir custo por desenho — desligar recursos ociosos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um ambiente de testes usa três máquinas virtuais necessárias apenas durante o horário comercial, mas que permanecem ligadas o dia inteiro. A equipe quer cortar o custo de computação sem excluir as máquinas e sem perder o conteúdo dos discos. Qual medida atende ao objetivo?",
+      "explicacao": "Desalocar a máquina virtual pelo Azure libera os recursos de computação e encerra a cobrança de computação, mantendo a definição da máquina e os discos gerenciados, que continuam sendo cobrados como armazenamento (correta). Desligar o sistema operacional por dentro deixa a máquina parada, porém ainda alocada: a capacidade continua reservada e a cobrança de computação continua — é o erro clássico do desligamento pelo console interno. O Azure Hybrid Benefit reaproveita licenças próprias de Windows Server ou SQL Server e não tem relação com horário de uso. E as máquinas virtuais Spot são interrompidas quando o Azure precisa da capacidade, o que não é o mesmo que um desligamento previsível fora do expediente.",
+      "opcoes": [
+        { "texto": "Desalocar as máquinas virtuais fora do horário de uso, o que encerra a cobrança de computação e preserva os discos.", "correta": true },
+        { "texto": "Desligar o sistema operacional por dentro da máquina virtual, mantendo-a alocada, o que encerra a cobrança de computação.", "correta": false },
+        { "texto": "Aplicar o Azure Hybrid Benefit às máquinas virtuais, o que suspende a cobrança fora do horário comercial.", "correta": false },
+        { "texto": "Converter as máquinas virtuais em instâncias Spot, para que sejam desligadas automaticamente à noite.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-pricing-calculator-07",
+      "topico": "Azure Pricing Calculator",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um arquiteto montou no Azure Pricing Calculator uma estimativa mensal para uma solução que ainda será implantada e enviou o resultado ao setor financeiro, que perguntou se aquele será exatamente o valor cobrado. Qual resposta descreve corretamente o que a ferramenta produz?",
+      "explicacao": "O Pricing Calculator devolve uma estimativa construída sobre as premissas que a pessoa informou — região, tamanho, horas, volume de armazenamento; o valor faturado dependerá do consumo real (correta). Tratar o número como valor contratado confunde a estimativa com um compromisso de compra, que é o que existe em uma reserva ou em um savings plan. Dizer que é o custo já realizado exportado da assinatura confunde a ferramenta com o Microsoft Cost Management, que trabalha com recursos existentes e consumo faturado. E apresentar o resultado como comparação entre datacenter próprio e Azure descreve o TCO Calculator, cuja pergunta é sobre migração, não sobre a estimativa de uma lista de serviços.",
+      "opcoes": [
+        { "texto": "É uma estimativa baseada nas premissas informadas; o valor cobrado dependerá do consumo efetivo dos recursos.", "correta": true },
+        { "texto": "É um valor contratado, e o Azure cobrará esse montante mesmo que o consumo real seja menor.", "correta": false },
+        { "texto": "É o custo já realizado dos recursos da assinatura, exportado a partir dos dados de faturamento.", "correta": false },
+        { "texto": "É a comparação entre manter a solução no datacenter próprio e movê-la para o Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tco-migracao-08",
+      "topico": "TCO Calculator",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria de uma empresa quer decidir se vale a pena encerrar o datacenter próprio e migrar para o Azure. Ela pede um estudo que confronte os dois cenários levando em conta servidores, licenças, eletricidade, refrigeração, espaço físico e equipe de operação. Qual ferramenta produz esse comparativo?",
+      "explicacao": "O TCO Calculator existe exatamente para comparar o custo total de propriedade de um ambiente local com o custo equivalente no Azure, incluindo itens que não aparecem na fatura de nuvem, como energia, instalações e mão de obra (correta). O Pricing Calculator estima o preço de serviços do Azure ainda não provisionados, mas não modela o datacenter atual nem calcula o que se deixa de gastar com ele. O Microsoft Cost Management analisa e orça o gasto de recursos que já existem no Azure, o que ainda não é o caso nesse cenário. E o Azure Advisor recomenda otimizações sobre recursos já implantados, não sustenta uma decisão de migração.",
+      "opcoes": [
+        { "texto": "TCO Calculator", "correta": true },
+        { "texto": "Azure Pricing Calculator", "correta": false },
+        { "texto": "Microsoft Cost Management", "correta": false },
+        { "texto": "Azure Advisor", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tco-insumos-09",
+      "topico": "TCO Calculator",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um analista precisa justificar à diretoria por que o estudo de migração foi feito no TCO Calculator, e não apenas com uma estimativa montada no Azure Pricing Calculator. Quais informações consideradas pelo TCO Calculator não são contempladas por essa estimativa? Selecione DUAS opções.",
+      "explicacao": "O diferencial do TCO Calculator é somar ao comparativo os custos do ambiente local que não têm equivalente em fatura de nuvem: eletricidade e refrigeração do datacenter e a mão de obra dedicada a administrar os servidores próprios (corretas). O preço por hora das máquinas virtuais do Azure na região escolhida está nas duas ferramentas — é a matéria-prima do Pricing Calculator, então não distingue uma da outra. O custo já faturado da assinatura no mês anterior é consumo realizado, terreno do Microsoft Cost Management, e nenhuma das duas calculadoras o utiliza. E tags de centro de custo servem para agrupar gasto existente em relatório, não alimentam estimativa nem comparativo de migração.",
+      "opcoes": [
+        { "texto": "O custo de eletricidade e refrigeração do datacenter atual.", "correta": true },
+        { "texto": "O custo de mão de obra dedicada à administração dos servidores locais.", "correta": true },
+        { "texto": "O preço por hora das máquinas virtuais do Azure na região escolhida.", "correta": false },
+        { "texto": "O valor já faturado da assinatura do Azure no mês anterior.", "correta": false },
+        { "texto": "As tags de centro de custo aplicadas aos recursos existentes no Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tco-escopo-10",
+      "topico": "TCO Calculator",
+      "tipo": "SimNao",
+      "enunciado": "Uma empresa concluiu a migração para o Azure e agora quer acompanhar, mês a mês, quanto cada resource group está gastando, recebendo avisos quando o gasto se aproximar do valor planejado. A equipe decidiu usar o TCO Calculator para essa tarefa. A decisão é adequada?",
+      "explicacao": "Não. O TCO Calculator é uma ferramenta de decisão, usada antes da migração para comparar o custo total de propriedade do ambiente local com o do Azure a partir de estimativas; ele não lê o consumo real da assinatura nem emite alerta. O acompanhamento contínuo do gasto por escopo, com orçamentos e notificações, é feito pelo Microsoft Cost Management. Responder \"Sim\" confunde a ferramenta usada uma única vez, antes de migrar, com a de operação diária depois de migrado. O Pricing Calculator também não resolveria: ele estima serviços que ainda não foram provisionados.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-custo-analise-de-gasto-11",
+      "topico": "Microsoft Cost Management — análise de custo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A fatura de uma assinatura cresceu de forma inesperada no último mês. A equipe precisa descobrir quais serviços e quais resource groups puxaram o aumento, com o gasto já realizado detalhado por período. Qual ferramenta responde diretamente a essa pergunta?",
+      "explicacao": "A análise de custo do Microsoft Cost Management trabalha sobre o consumo faturado de recursos existentes e permite fatiar o gasto por serviço, resource group, região, tag e intervalo de tempo (correta). O Pricing Calculator só estima serviços ainda não provisionados, portanto não conhece o que foi consumido. O TCO Calculator compara datacenter próprio com Azure em um cenário de migração e não olha para a assinatura em produção. O Azure Advisor até atua sobre recursos existentes, mas entrega recomendações de otimização, como redimensionar uma máquina virtual subutilizada — ele não explica onde o dinheiro do mês passado foi gasto.",
+      "opcoes": [
+        { "texto": "O Microsoft Cost Management", "correta": true },
+        { "texto": "O Azure Pricing Calculator", "correta": false },
+        { "texto": "O TCO Calculator", "correta": false },
+        { "texto": "O Azure Advisor", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-orcamento-alerta-12",
+      "topico": "Microsoft Cost Management — orçamentos e alertas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um gestor criou um budget no Microsoft Cost Management para o resource group de um projeto e comunicou à equipe que, ao atingir o valor definido, o Azure impedirá qualquer gasto adicional naquele escopo. Qual afirmação descreve corretamente o comportamento de um budget?",
+      "explicacao": "Um budget acompanha o gasto do escopo e dispara notificações quando percentuais definidos do valor são atingidos; ele não interrompe nada por conta própria, e parar o gasto exige uma ação automatizada configurada à parte, como um grupo de ações que dispare um fluxo de desligamento (correta). Dizer que o budget impede a criação de novos recursos atribui a ele um papel de imposição, que pertence a políticas de governança e ao controle de acesso, não à ferramenta de custo. Dizer que ele desliga os recursos do escopo inventa uma automação que não vem pronta. E converter recursos em instâncias reservadas é uma compra deliberada de reserva, não um efeito colateral de orçamento estourado.",
+      "opcoes": [
+        { "texto": "O budget dispara notificações ao atingir os limites definidos; interromper o gasto exige automação configurada à parte.", "correta": true },
+        { "texto": "O budget impede a criação de novos recursos no escopo assim que o valor definido é atingido no mês.", "correta": false },
+        { "texto": "O budget desliga automaticamente todos os recursos do escopo quando o valor definido é atingido.", "correta": false },
+        { "texto": "O budget converte os recursos do escopo em instâncias reservadas para que o gasto caiba no valor definido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-cost-management-recursos-13",
+      "topico": "Microsoft Cost Management — recursos da ferramenta",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de operações vai adotar o Microsoft Cost Management e precisa separar, na lista de pedidos que recebeu do setor financeiro, aquilo que a própria ferramenta resolve daquilo que dependerá de outro recurso do Azure. Quais ações a seguir o Microsoft Cost Management realiza? Selecione DUAS opções.",
+      "explicacao": "Definir orçamentos com notificação por e-mail em um escopo e exportar periodicamente os dados de custo para uma conta de armazenamento, alimentando análises externas, são funções próprias do Microsoft Cost Management (corretas). Estimar o custo de uma arquitetura ainda não implantada é atribuição do Azure Pricing Calculator, que trabalha com premissas e não com consumo faturado. Impedir a criação de máquinas virtuais acima de determinado tamanho é imposição de regra de governança, coisa de política de recursos e de controle de acesso, e não da ferramenta de custo. Comparar o custo do datacenter local com o do Azure é o propósito do TCO Calculator, usado na decisão de migração.",
+      "opcoes": [
+        { "texto": "Definir um orçamento com alertas por e-mail em um escopo de custo.", "correta": true },
+        { "texto": "Exportar periodicamente os dados de custo para uma conta de armazenamento.", "correta": true },
+        { "texto": "Estimar o custo de uma arquitetura que ainda não foi implantada.", "correta": false },
+        { "texto": "Impedir que usuários criem máquinas virtuais acima de determinado tamanho.", "correta": false },
+        { "texto": "Comparar o custo do datacenter local com o custo equivalente no Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-cost-management-limites-14",
+      "topico": "Microsoft Cost Management — limites da ferramenta",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante a definição da rotina de acompanhamento financeiro da nuvem, um analista precisa separar o que o Microsoft Cost Management entrega do que exige outro mecanismo. Qual das capacidades a seguir NÃO pertence ao Microsoft Cost Management?",
+      "explicacao": "Impedir tecnicamente a criação de um recurso é imposição de regra sobre o plano de controle do Azure e não é feita pela ferramenta de custo; o Cost Management observa, orça e alerta, mas não bloqueia (correta, por ser a que não pertence). Analisar o custo acumulado por tag e por resource group é o uso central da análise de custo. Definir orçamentos com alertas ao atingir percentuais do valor é justamente o recurso de budget. E exportar os dados de custo em uma programação recorrente, para tratamento em outra ferramenta, também é uma função nativa. Confundir observar gasto com barrar gasto é o erro mais comum nesse tema.",
+      "opcoes": [
+        { "texto": "Impedir tecnicamente a criação de recursos que ultrapassem um valor definido.", "correta": true },
+        { "texto": "Analisar o custo acumulado por tag, por serviço e por resource group.", "correta": false },
+        { "texto": "Definir orçamentos com alertas ao atingir percentuais do valor planejado.", "correta": false },
+        { "texto": "Exportar periodicamente os dados de custo para análise em outra ferramenta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tags-centro-de-custo-15",
+      "topico": "Tags de recursos — rateio de custo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma assinatura reúne cerca de duzentos recursos espalhados por vários resource groups, e recursos de um mesmo centro de custo aparecem em grupos diferentes. O financeiro quer um relatório mensal do gasto consolidado por centro de custo, sem reorganizar a estrutura existente. Qual abordagem atende ao pedido?",
+      "explicacao": "Aplicar uma tag de centro de custo aos recursos e agrupar o relatório por essa tag na análise de custo resolve exatamente o problema de agrupar itens que não estão juntos na hierarquia (correta). Renomear recursos com um prefixo e filtrar pelo nome é frágil: nome de recurso não é dimensão de rateio, muitos recursos não podem ser renomeados e qualquer divergência de padrão quebra o relatório. Criar um resource group por centro de custo e mover tudo reorganiza a estrutura, que é o que o pedido excluiu, e ainda amarra o rateio à hierarquia. E atribuir funções de leitura por RBAC controla quem enxerga o relatório, não como o gasto é agrupado.",
+      "opcoes": [
+        { "texto": "Aplicar uma tag de centro de custo aos recursos e agrupar o relatório de custo por essa tag.", "correta": true },
+        { "texto": "Renomear os recursos com o prefixo do centro de custo e filtrar o relatório de custo pelo nome.", "correta": false },
+        { "texto": "Criar um resource group por centro de custo e mover para ele todos os recursos correspondentes.", "correta": false },
+        { "texto": "Atribuir funções de leitura por centro de custo, para que cada gestor veja apenas o próprio gasto.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tags-nao-impoem-16",
+      "topico": "Tags de recursos — o que tags não fazem",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe aplicou a tag Ambiente=Desenvolvimento a todos os recursos de teste de uma assinatura e concluiu que, a partir disso, esses recursos passarão a ser desligados automaticamente fora do horário comercial e ficarão sujeitos a uma tarifa menor. A conclusão está correta?",
+      "explicacao": "Não. Uma tag é apenas um par de nome e valor anexado ao recurso: ela identifica, organiza e permite agrupar o gasto em relatório, mas não executa ação nenhuma nem altera preço. Para desligar recursos por horário é preciso uma automação que leia a tag e atue sobre eles; para pagar menos em ambiente de não produção é preciso um plano de assinatura dev/test ou outro mecanismo de economia. Responder \"Sim\" é a confusão clássica entre marcar e impor: quem impõe regra sobre recursos é a camada de política de governança, e quem age em resposta a uma marcação é a automação — a tag apenas informa a ambas.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-custo-tags-heranca-17",
+      "topico": "Tags de recursos — herança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe aplicou a tag Projeto=Atlas ao resource group que reúne os recursos de um projeto e, semanas depois, percebeu que o relatório de custo agrupado por essa tag não trouxe o gasto das máquinas virtuais do grupo. Qual explicação corresponde ao comportamento das tags no Azure?",
+      "explicacao": "Tags aplicadas a um resource group ou a uma assinatura não são herdadas automaticamente pelos recursos contidos neles; para que o recurso apareça agrupado por uma tag, a tag precisa estar no próprio recurso, aplicada manualmente ou por automação (correta). Afirmar que a tag do grupo é replicada para todos os recursos é justamente a expectativa equivocada que gerou o problema. Dizer que tags só existem em assinaturas e management groups é falso, pois a maioria dos recursos aceita tags diretamente. E limitar o recurso a uma única tag também não procede: um recurso aceita várias tags, o que permite agrupar por mais de um critério ao mesmo tempo.",
+      "opcoes": [
+        { "texto": "Tags de um resource group não são herdadas pelos recursos dentro dele; é preciso aplicá-las a cada recurso.", "correta": true },
+        { "texto": "Tags de um resource group são replicadas automaticamente para os recursos existentes e para os futuros.", "correta": false },
+        { "texto": "Tags só podem ser aplicadas a assinaturas e management groups, nunca a recursos individuais.", "correta": false },
+        { "texto": "Um recurso aceita apenas uma tag por vez, o que impede o agrupamento por mais de um critério.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-tags-usos-18",
+      "topico": "Tags de recursos — usos legítimos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Antes de padronizar o uso de tags na empresa, um arquiteto quer alinhar com a equipe o que essa marcação realmente permite fazer e o que exigiria outro mecanismo do Azure. Quais capacidades o uso de tags oferece? Selecione DUAS opções.",
+      "explicacao": "Tags permitem consolidar em um único relatório o custo de recursos de um mesmo projeto que estão espalhados por resource groups diferentes, e permitem localizar e filtrar recursos por critérios de negócio, como ambiente ou responsável (corretas). Impedir a criação de recursos sem determinada tag é imposição de regra: a tag em si não barra nada, quem barra é a camada de política de governança que pode exigir a tag. Aplicar desconto de reserva apenas a recursos marcados também não existe: o benefício de uma reserva é atribuído pelo escopo da compra e pelas características do recurso, nunca por tag. E mover recursos para outra região é uma migração, não um efeito de marcação.",
+      "opcoes": [
+        { "texto": "Agrupar em um relatório o custo de recursos de um mesmo projeto espalhados por resource groups diferentes.", "correta": true },
+        { "texto": "Localizar e filtrar no portal todos os recursos que pertencem a um determinado ambiente.", "correta": true },
+        { "texto": "Impedir que recursos sem a tag exigida sejam criados na assinatura.", "correta": false },
+        { "texto": "Fazer com que o desconto de uma reserva se aplique somente aos recursos marcados.", "correta": false },
+        { "texto": "Transferir automaticamente os recursos marcados para uma região mais barata.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-reservas-19",
+      "topico": "Opções de economia — Azure Reservations",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai comprar uma reserva de três anos para um conjunto de máquinas virtuais Windows Server que roda de forma contínua e previsível. A equipe listou os resultados que espera dessa compra. Qual das opções a seguir NÃO é um resultado esperado da compra de uma reserva?",
+      "explicacao": "A reserva reduz o custo de computação em troca de um compromisso de prazo, mas não cobre o licenciamento do Windows Server; quem reaproveita licença própria é o Azure Hybrid Benefit, e os dois são benefícios independentes que podem até ser combinados (correta, por ser a que não se espera). Redução do custo de computação em relação ao preço sob demanda é justamente a razão da compra. O compromisso de pagamento pelo período contratado, independentemente de o recurso ser usado, é a contrapartida do desconto. E a previsibilidade do gasto de computação ao longo da vigência é o benefício de planejamento que acompanha o compromisso.",
+      "opcoes": [
+        { "texto": "A licença do Windows Server das máquinas virtuais passa a ser incluída sem custo adicional.", "correta": true },
+        { "texto": "O custo de computação fica menor do que o preço pago sob demanda pelo mesmo recurso.", "correta": false },
+        { "texto": "Assume-se o compromisso de pagar pelo período contratado, mesmo com uso abaixo do previsto.", "correta": false },
+        { "texto": "O custo de computação daquela carga torna-se previsível ao longo da vigência da reserva.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-spot-20",
+      "topico": "Opções de economia — VMs Spot",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um estúdio processa renderização de vídeo em lotes que podem ser interrompidos e retomados do ponto anterior, sem prazo rígido de conclusão e sem necessidade de garantia de disponibilidade. O objetivo é pagar o mínimo possível pela capacidade de computação. Qual opção é a mais adequada?",
+      "explicacao": "Máquinas virtuais Spot usam capacidade ociosa do Azure com desconto expressivo e podem ser desalojadas quando essa capacidade for necessária, o que combina exatamente com uma carga interrompível e sem SLA (correta). Uma reserva de um ou três anos serve para carga contínua e previsível: ela dá desconto em troca de compromisso, e não é o que uma carga esporádica e tolerante a interrupção precisa. O savings plan também exige compromisso de valor por hora durante o prazo, portanto não é a opção mais barata para uso irregular. E o Azure Hybrid Benefit trata de licenças próprias de Windows Server ou SQL Server, tema diferente do preço da capacidade de computação.",
+      "opcoes": [
+        { "texto": "Executar os lotes em máquinas virtuais Spot", "correta": true },
+        { "texto": "Comprar uma reserva de máquinas virtuais de três anos", "correta": false },
+        { "texto": "Contratar um Azure savings plan for compute de um ano", "correta": false },
+        { "texto": "Aplicar o Azure Hybrid Benefit às máquinas virtuais", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-hybrid-benefit-21",
+      "topico": "Opções de economia — Azure Hybrid Benefit",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa possui licenças de Windows Server com Software Assurance vigente e vai migrar dezenas de servidores para máquinas virtuais no Azure. Ela quer evitar pagar novamente pela licença do sistema operacional dentro do preço das máquinas virtuais. Qual opção atende a essa necessidade?",
+      "explicacao": "O Azure Hybrid Benefit permite reaproveitar licenças de Windows Server ou SQL Server já adquiridas, de modo que a máquina virtual seja cobrada sem o componente de licença embutido (correta). Comprar uma reserva de três anos reduz o custo de computação por compromisso de prazo, mas não inclui a licença do sistema operacional — os dois benefícios são independentes e frequentemente confundidos. Migrar para máquinas virtuais Spot troca preço por risco de interrupção e não resolve licenciamento, além de ser inadequado para servidores de produção. E aplicar uma tag identificando a licença própria não altera cobrança alguma: tag organiza informação, não concede benefício.",
+      "opcoes": [
+        { "texto": "Ativar o Azure Hybrid Benefit nas máquinas virtuais migradas.", "correta": true },
+        { "texto": "Comprar uma reserva de três anos, que já inclui a licença do sistema operacional.", "correta": false },
+        { "texto": "Migrar os servidores para máquinas virtuais Spot, cujo preço não inclui licenciamento.", "correta": false },
+        { "texto": "Aplicar a tag Licenca=Propria aos recursos para que o desconto conste na fatura.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-savings-plan-22",
+      "topico": "Opções de economia — Azure savings plan for compute",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa gasta um valor mensal estável com computação, mas troca com frequência de família de máquina virtual e de região, e distribui as cargas entre máquinas virtuais e serviços de aplicação conforme os projetos mudam. Ela quer desconto por compromisso sem se prender a um recurso específico. Qual opção é a mais adequada?",
+      "explicacao": "O Azure savings plan for compute compromete um valor por hora de computação por um ou três anos e aplica o desconto automaticamente às cargas elegíveis, independentemente de tamanho, região ou serviço — é a opção pensada para gasto estável com uso variável (correta). Uma reserva rende desconto maior, mas é comprada para características definidas de recurso e região, ou seja, prende exatamente o que a empresa não quer prender. As máquinas virtuais Spot não envolvem compromisso e podem ser interrompidas, o que não atende a cargas de produção. E o Azure Hybrid Benefit trata de licenças próprias, não de compromisso de consumo.",
+      "opcoes": [
+        { "texto": "Contratar um Azure savings plan for compute", "correta": true },
+        { "texto": "Comprar reservas de máquinas virtuais de três anos", "correta": false },
+        { "texto": "Executar as cargas em máquinas virtuais Spot", "correta": false },
+        { "texto": "Ativar o Azure Hybrid Benefit nas assinaturas", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-spot-caracteristicas-23",
+      "topico": "Opções de economia — VMs Spot",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Antes de aprovar o uso de máquinas virtuais Spot em alguns ambientes, um comitê técnico quer registrar por escrito o que caracteriza esse tipo de instância e o que a diferencia das demais opções de economia do Azure. Quais afirmações descrevem as máquinas virtuais Spot? Selecione DUAS opções.",
+      "explicacao": "Instâncias Spot aproveitam capacidade ociosa e podem ser desalojadas quando o Azure precisar dessa capacidade de volta, o que as torna indicadas para cargas tolerantes a interrupção, como processamento em lote e testes (corretas). Garantir a mesma disponibilidade das instâncias sob demanda é o oposto do modelo: abrir mão dessa garantia é o que justifica o preço menor. Exigir compromisso de um ou três anos descreve uma reserva ou um savings plan, que trocam prazo por desconto, e não capacidade ociosa por risco. E restringir Spot a assinaturas dev/test confunde dois mecanismos distintos de economia: o plano de assinatura de não produção e o modelo de capacidade interrompível.",
+      "opcoes": [
+        { "texto": "Podem ser desalojadas quando o Azure precisar da capacidade de volta.", "correta": true },
+        { "texto": "São indicadas para cargas tolerantes a interrupção, como processamento em lote.", "correta": true },
+        { "texto": "Garantem o mesmo nível de disponibilidade das instâncias sob demanda.", "correta": false },
+        { "texto": "Exigem compromisso de uso de um ou três anos no momento da criação.", "correta": false },
+        { "texto": "Só podem ser criadas em assinaturas do tipo desenvolvimento e teste.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-savings-plan-flexibilidade-24",
+      "topico": "Opções de economia — savings plan × reserva",
+      "tipo": "SimNao",
+      "enunciado": "Uma empresa com gasto de computação estável em valor, mas que troca de família de máquina virtual e de região conforme os projetos evoluem, contratou um Azure savings plan for compute. Um analista afirma que o desconto só valerá enquanto ela mantiver exatamente o mesmo tamanho de máquina virtual e a mesma região da contratação. A afirmação está correta?",
+      "explicacao": "Não. No savings plan o compromisso é um valor por hora de computação durante um ou três anos, e o desconto é aplicado automaticamente às cargas elegíveis até esse valor, independentemente de tamanho de instância, região ou serviço — é justamente a opção flexível. Quem responde \"Sim\" está descrevendo uma reserva (Azure Reservations), comprada para características definidas de recurso e região e que oferece desconto maior exatamente por ser menos flexível. Nem as instâncias Spot nem o Azure Hybrid Benefit envolvem compromisso de valor por hora, então também não descrevem o mecanismo em questão.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-custo-nao-producao-25",
+      "topico": "Opções de economia — assinaturas dev/test",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer reduzir o custo dos seus ambientes de desenvolvimento e teste, que não exigem garantia de disponibilidade de produção e são criados e destruídos com frequência conforme os projetos começam e terminam. Qual das medidas a seguir NÃO é adequada para esse objetivo?",
+      "explicacao": "Comprar reservas de três anos para ambientes efêmeros é inadequado: a reserva pressupõe carga contínua e previsível durante toda a vigência e cobra o compromisso mesmo quando o recurso deixa de existir, então ambientes criados e destruídos o tempo todo pagariam por capacidade que não usam (correta, por ser a inadequada). Planos de assinatura dev/test existem exatamente para oferecer tarifas menores em carga de não produção. Desligar e desalocar as máquinas fora do expediente encerra a cobrança de computação nesse intervalo. E executar cargas tolerantes a interrupção em instâncias Spot é um encaixe natural para ambientes sem exigência de disponibilidade.",
+      "opcoes": [
+        { "texto": "Comprar reservas de três anos para as máquinas virtuais desses ambientes.", "correta": true },
+        { "texto": "Usar planos de assinatura dev/test, com tarifas reduzidas para cargas de não produção.", "correta": false },
+        { "texto": "Desligar e desalocar as máquinas virtuais fora do horário de trabalho da equipe.", "correta": false },
+        { "texto": "Executar as cargas tolerantes a interrupção desses ambientes em instâncias Spot.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-economia-frota-26",
+      "topico": "Opções de economia — combinação de mecanismos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa opera em produção uma frota de máquinas virtuais Windows Server com carga contínua e previsível, e possui licenças próprias com Software Assurance vigente. Parte das máquinas trabalha consistentemente muito abaixo da capacidade contratada. Quais medidas reduzem o custo dessa frota? Selecione TRÊS opções.",
+      "explicacao": "Comprar reservas de um ou três anos troca compromisso de prazo por desconto e é o encaixe certo para carga contínua e previsível; ativar o Azure Hybrid Benefit reaproveita as licenças já pagas, removendo o custo de licença do preço da máquina virtual; e redimensionar as instâncias que operam muito abaixo da capacidade elimina o pagamento por recurso que nunca é usado (corretas). Converter máquinas de produção em instâncias Spot é impróprio: Spot pode ser desalojado a qualquer momento e não oferece a garantia que produção exige. Aplicar tags de centro de custo apenas organiza o relatório de gasto — tag não altera tarifa nem concede desconto.",
+      "opcoes": [
+        { "texto": "Comprar reservas de máquinas virtuais de um ou três anos para a frota.", "correta": true },
+        { "texto": "Ativar o Azure Hybrid Benefit nas máquinas virtuais Windows Server.", "correta": true },
+        { "texto": "Redimensionar as máquinas que operam muito abaixo da capacidade contratada.", "correta": true },
+        { "texto": "Converter as máquinas virtuais de produção em instâncias Spot.", "correta": false },
+        { "texto": "Aplicar tags de centro de custo às máquinas virtuais da frota.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-autoescala-27",
+      "topico": "Reduzir custo por desenho — autoescala",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação web tem pico de acesso entre nove e onze da manhã e fica praticamente ociosa à noite, mas hoje mantém o número de instâncias dimensionado para o pico durante as vinte e quatro horas. A empresa quer pagar por capacidade próxima da demanda real, sem degradar o atendimento no pico. Qual abordagem atende ao objetivo?",
+      "explicacao": "Configurar autoescala para ajustar o número de instâncias conforme a demanda faz a empresa pagar pelo pico apenas quando ele existe e reduz a capacidade nos períodos ociosos, sem sacrificar o atendimento no horário crítico (correta). Comprar reserva para o número de instâncias de pico congela o custo do pico durante todo o prazo, ou seja, paga-se a capacidade máxima o tempo inteiro. Migrar a aplicação para instâncias Spot expõe um serviço de produção a interrupções por falta de capacidade. E ativar o Azure Hybrid Benefit trata de licença própria, o que pode reduzir o custo por instância, mas não corrige o dimensionamento excessivo, que é a causa do desperdício.",
+      "opcoes": [
+        { "texto": "Configurar autoescala para ajustar o número de instâncias conforme a demanda ao longo do dia.", "correta": true },
+        { "texto": "Comprar uma reserva de três anos para o número de instâncias necessário no horário de pico.", "correta": false },
+        { "texto": "Migrar a aplicação para instâncias Spot, que custam menos que as instâncias sob demanda.", "correta": false },
+        { "texto": "Ativar o Azure Hybrid Benefit, que ajusta a capacidade da aplicação conforme o acesso.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-camadas-armazenamento-28",
+      "topico": "Reduzir custo por desenho — camadas de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma conta de armazenamento acumula arquivos muito acessados no primeiro mês de vida e quase nunca depois, mas que precisam ser mantidos por cinco anos por decisão interna. O custo cresce todo mês. A empresa quer reduzir esse custo mantendo os arquivos recuperáveis quando forem necessários. Qual abordagem atende ao objetivo?",
+      "explicacao": "Uma regra de ciclo de vida move os blobs para camadas de acesso mais frias conforme envelhecem, e camadas mais frias têm custo de armazenamento menor em troca de custo e latência maiores no acesso — perfil que combina com dados raramente lidos (correta). Excluir os arquivos antigos descumpre a retenção de cinco anos, que é o requisito do cenário. Aplicar uma tag de retenção não muda camada nem preço, porque tag apenas identifica o recurso e não dispara ação. E trocar a redundância para uma opção geográfica aumenta o custo por gigabyte, já que passa a manter cópias em outra região — redundância protege contra perda, não é mecanismo de economia.",
+      "opcoes": [
+        { "texto": "Configurar uma regra de ciclo de vida que mova os blobs para camadas mais frias conforme envelhecem.", "correta": true },
+        { "texto": "Excluir os arquivos com mais de um mês e recriá-los sob demanda a partir do sistema de origem.", "correta": false },
+        { "texto": "Aplicar a tag Retencao=5anos aos blobs para que o Azure ajuste a camada automaticamente.", "correta": false },
+        { "texto": "Alterar a redundância da conta para uma opção geográfica, que reduz o custo por gigabyte.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-recursos-orfaos-29",
+      "topico": "Reduzir custo por desenho — recursos ociosos e órfãos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de excluir várias máquinas virtuais de um projeto encerrado, a equipe percebeu que a fatura do resource group continuou apresentando custo de armazenamento e de rede referente àquele projeto. Nenhuma máquina virtual aparece mais na lista de recursos. Qual é a explicação mais provável?",
+      "explicacao": "Discos gerenciados, endereços IP públicos e outros recursos associados não são necessariamente removidos junto com a máquina virtual: eles continuam existindo como recursos independentes e continuam sendo cobrados até que alguém os identifique e exclua (correta). Não existe cobrança que se prolongue até o fim de um ciclo anual após a exclusão, nem taxa de manutenção sobre recurso excluído — as duas alternativas inventam regras de faturamento que não existem no modelo de consumo. E dizer que as máquinas foram apenas desalocadas não explicaria custo de computação: máquina desalocada não gera cobrança de computação, e nesse caso o custo remanescente é de armazenamento e de rede.",
+      "opcoes": [
+        { "texto": "Discos gerenciados e endereços IP públicos das máquinas continuam existindo e sendo cobrados.", "correta": true },
+        { "texto": "A cobrança das máquinas virtuais excluídas prossegue até o fim do ciclo anual de faturamento.", "correta": false },
+        { "texto": "O Azure cobra uma taxa de manutenção por recurso excluído durante os trinta dias seguintes.", "correta": false },
+        { "texto": "As máquinas foram apenas desalocadas, e máquinas desalocadas mantêm a cobrança de computação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-custo-advisor-30",
+      "topico": "Recomendações de otimização — Azure Advisor",
+      "tipo": "SimNao",
+      "enunciado": "Após reduzir a equipe de infraestrutura, uma empresa quer receber recomendações automáticas que apontem, por exemplo, máquinas virtuais subutilizadas que poderiam ser redimensionadas ou desligadas, com base no comportamento real dos recursos já implantados. Um analista sugere consultar a categoria de custo do Azure Advisor. A sugestão é adequada?",
+      "explicacao": "Sim. O Azure Advisor analisa a configuração e a telemetria dos recursos existentes e emite recomendações organizadas em categorias, entre elas custo, sugerindo ações como redimensionar ou desligar instâncias subutilizadas e aproveitar compromissos de consumo. Responder \"Não\" costuma vir de atribuir essa função ao Microsoft Cost Management, que mostra e orça o gasto, mas não gera recomendação de otimização de recurso, ou ao Azure Pricing Calculator, que só estima serviços ainda não provisionados. A diferença é justamente essa: uma ferramenta relata quanto se gastou, a outra sugere o que mudar no que já está em execução.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    }
+  ]
+}

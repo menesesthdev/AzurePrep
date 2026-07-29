@@ -2,6 +2,8 @@ using AzurePrep.Application.Autenticacao;
 using AzurePrep.Application.Exames;
 using AzurePrep.Application.Historico;
 using AzurePrep.Application.Sessoes;
+using AzurePrep.Application.Sorteios;
+using AzurePrep.Domain.Sorteio;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AzurePrep.Application;
@@ -13,6 +15,11 @@ public static class DependencyInjection
     {
         services.AddScoped<ICatalogoDeExamesService, CatalogoDeExamesService>();
         services.AddScoped<ISessaoDeProvaService, SessaoDeProvaService>();
+
+        // A política do sorteio é registrada como serviço para poder ser ajustada em um só lugar
+        // (e sobrescrita em teste) sem virar string de configuração.
+        services.AddSingleton(PoliticaDeSorteio.Padrao);
+        services.AddScoped<ISorteadorDeQuestoes, SorteadorDeQuestoesService>();
         services.AddScoped<IHistoricoDeProvasService, HistoricoDeProvasService>();
         services.AddScoped<IAutenticacaoService, AutenticacaoService>();
 

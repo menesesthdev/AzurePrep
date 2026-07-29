@@ -1,3 +1,4 @@
+using AzurePrep.Application.Contracts;
 using AzurePrep.Domain.Entidades;
 
 namespace AzurePrep.Application.Abstractions;
@@ -30,5 +31,20 @@ public interface ITentativaDeProvaRepository
     /// </remarks>
     Task<IReadOnlyList<TentativaDeProva>> ObterDoUsuarioAsync(
         Guid userId,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Questões que caíram para o usuário nas <paramref name="maxTentativas"/> tentativas mais
+    /// recentes deste exame, com o que ele marcou em cada uma. Alimenta o anti-repetição do sorteio.
+    /// </summary>
+    /// <remarks>
+    /// Considera as questões APRESENTADAS, não só as respondidas: pular a questão não a torna
+    /// inédita na próxima prova. Tentativas anteriores ao sorteio (que não têm composição gravada)
+    /// entram pelas respostas dadas, que é tudo o que se sabe delas.
+    /// </remarks>
+    Task<IReadOnlyList<QuestaoVistaDto>> ObterQuestoesVistasAsync(
+        Guid userId,
+        Guid examId,
+        int maxTentativas,
         CancellationToken cancellationToken = default);
 }

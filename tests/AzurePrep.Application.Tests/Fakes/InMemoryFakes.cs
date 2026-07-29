@@ -1,6 +1,9 @@
 using AzurePrep.Application.Abstractions;
+using AzurePrep.Application.Contracts;
+using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
 using AzurePrep.Domain.Enums;
+using AzurePrep.Domain.Sorteio;
 
 namespace AzurePrep.Application.Tests.Fakes;
 
@@ -129,6 +132,66 @@ public sealed class InMemoryExamRepository : IExameRepository
     // Em memória o objeto já traz skill areas, questões e opções carregadas.
     public Task<Exame?> ObterComConteudoAsync(Guid id, CancellationToken cancellationToken = default)
         => Task.FromResult(_exams.GetValueOrDefault(id));
+
+    public Task<Exame?> ObterComAreasAsync(Guid id, CancellationToken cancellationToken = default)
+        => Task.FromResult(_exams.GetValueOrDefault(id));
+
+    public Task<IReadOnlyList<QuestaoSorteavel>> ObterPoolAsync(
+        Guid examId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<QuestaoSorteavel>>(
+            _exams.TryGetValue(examId, out var exam)
+                ? exam.Questions.Select(q => new QuestaoSorteavel(q.Id, q.SkillAreaId)).ToList()
+                : new List<QuestaoSorteavel>());
+
+    public Task<IReadOnlyList<Questao>> ObterQuestoesAsync(
+        IReadOnlyCollection<Guid> questionIds,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<Questao>>(_exams.Values
+            .SelectMany(e => e.Questions)
+            .Where(q => questionIds.Contains(q.Id))
+            .ToList());
+
+    public Task<IReadOnlyDictionary<Guid, IReadOnlyList<Guid>>> ObterOpcoesCorretasAsync(
+        IReadOnlyCollection<Guid> questionIds,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyDictionary<Guid, IReadOnlyList<Guid>>>(_exams.Values
+            .SelectMany(e => e.Questions)
+            .Where(q => questionIds.Contains(q.Id))
+            .ToDictionary(q => q.Id, q => (IReadOnlyList<Guid>)q.CorrectOptionIds.ToList()));
+}
+
+/// <summary>
+/// Sorteio previsível: entrega as questões do exame na ordem em que foram cadastradas, até o
+/// limite de <c>TotalQuestions</c>. Os testes de sessão querem verificar navegação, correção e
+/// posse — não o sorteio, que tem suíte própria em <c>SorteioDeQuestoesTests</c>.
+/// </summary>
+public sealed class FakeSorteadorDeQuestoes : ISorteadorDeQuestoes
+{
+    private readonly IExameRepository _exames;
+
+    public FakeSorteadorDeQuestoes(IExameRepository exames) => _exames = exames;
+
+    public async Task<IReadOnlyList<Guid>> SortearAsync(
+        Guid examId,
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var exam = await _exames.ObterComConteudoAsync(examId, cancellationToken);
+        return exam is null
+            ? Array.Empty<Guid>()
+            : exam.Questions.Take(exam.TotalQuestions).Select(q => q.Id).ToList();
+    }
+}
+
+/// <summary>Aleatoriedade com semente fixa — mesma prova a cada execução do teste.</summary>
+public sealed class FakeGeradorDeAleatoriedade : IGeradorDeAleatoriedade
+{
+    private readonly int _semente;
+
+    public FakeGeradorDeAleatoriedade(int semente = 12345) => _semente = semente;
+
+    public Random Criar() => new(_semente);
 }
 
 public sealed class InMemoryExamAttemptRepository : ITentativaDeProvaRepository
@@ -157,4 +220,40 @@ public sealed class InMemoryExamAttemptRepository : ITentativaDeProvaRepository
             .Where(a => a.UserId == userId)
             .OrderByDescending(a => a.StartedAt)
             .ToList());
+
+    // Mesma semântica do repositório real: conta o que foi APRESENTADO na tentativa, respondido
+    // ou não, e a distância é a posição da tentativa na ordem decrescente por data.
+    public Task<IReadOnlyList<QuestaoVistaDto>> ObterQuestoesVistasAsync(
+        Guid userId,
+        Guid examId,
+        int maxTentativas,
+        CancellationToken cancellationToken = default)
+    {
+        var recentes = _attempts.Values
+            .Where(a => a.UserId == userId && a.ExamId == examId)
+            .OrderByDescending(a => a.StartedAt)
+            .Take(maxTentativas)
+            .ToList();
+
+        var vistas = new List<QuestaoVistaDto>();
+        for (var i = 0; i < recentes.Count; i++)
+        {
+            var attempt = recentes[i];
+            var respostas = attempt.Answers.ToDictionary(r => r.QuestionId);
+
+            var questoes = attempt.Questions.Count > 0
+                ? attempt.Questions.Select(q => q.QuestionId)
+                : attempt.Answers.Select(r => r.QuestionId);
+
+            vistas.AddRange(questoes.Select(questaoId => new QuestaoVistaDto(
+                questaoId,
+                i + 1,
+                respostas.TryGetValue(questaoId, out var resposta)
+                    ? resposta.SelectedOptionIds
+                    : Array.Empty<Guid>(),
+                attempt.IsFinished)));
+        }
+
+        return Task.FromResult<IReadOnlyList<QuestaoVistaDto>>(vistas);
+    }
 }

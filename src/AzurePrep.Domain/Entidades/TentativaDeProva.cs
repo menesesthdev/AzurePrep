@@ -9,6 +9,7 @@ namespace AzurePrep.Domain.Entidades;
 public class TentativaDeProva : Entity
 {
     private readonly List<RespostaDaTentativa> _answers = new();
+    private readonly List<QuestaoDaTentativa> _questions = new();
 
     // Construtor exigido pelo EF Core.
     private TentativaDeProva()
@@ -38,7 +39,40 @@ public class TentativaDeProva : Entity
 
     public IReadOnlyCollection<RespostaDaTentativa> Answers => _answers;
 
+    /// <summary>As questões sorteadas para esta tentativa, na ordem de apresentação.</summary>
+    public IReadOnlyList<QuestaoDaTentativa> Questions
+        => _questions.OrderBy(q => q.OrderIndex).ToList();
+
     public bool IsFinished => FinishedAt is not null;
+
+    /// <summary>
+    /// Fixa a composição da prova. Chamado uma única vez, no início da tentativa, com o resultado
+    /// do sorteio. Depois disso a prova é imutável: mudar as questões no meio significaria
+    /// corrigir o candidato por itens que ele não viu.
+    /// </summary>
+    public IReadOnlyList<QuestaoDaTentativa> DefinirQuestoes(IEnumerable<Guid> questionIds)
+    {
+        ArgumentNullException.ThrowIfNull(questionIds);
+        GarantirNaoConcluida();
+
+        if (_questions.Count > 0)
+        {
+            throw new InvalidOperationException("As questões desta tentativa já foram definidas.");
+        }
+
+        var index = 0;
+        foreach (var questionId in questionIds.Distinct())
+        {
+            _questions.Add(new QuestaoDaTentativa(Id, questionId, index++));
+        }
+
+        if (_questions.Count == 0)
+        {
+            throw new ArgumentException("Uma tentativa precisa de ao menos uma questão.", nameof(questionIds));
+        }
+
+        return _questions;
+    }
 
     /// <summary>
     /// Cria ou atualiza a resposta de uma questão. Idempotente por questão — refletir a

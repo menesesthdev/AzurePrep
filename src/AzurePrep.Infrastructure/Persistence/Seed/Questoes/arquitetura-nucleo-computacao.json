@@ -1,0 +1,458 @@
+{
+  "exameCode": "AZ-900",
+  "area": "arquitetura",
+  "questoes": [
+    {
+      "id": "az900-arqcore-regioes-01",
+      "topico": "Regiões do Azure",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa brasileira vai implantar um aplicativo interno usado exclusivamente por funcionários que ficam em São Paulo. Ao levantar as opções, a equipe percebeu que o mesmo serviço tem preços diferentes em regiões distintas e que alguns serviços ainda não estão disponíveis em todas elas. Qual conjunto de fatores deve orientar a escolha da região do Azure para essa implantação?",
+      "explicacao": "A escolha de região no Azure é guiada por proximidade dos usuários (latência), disponibilidade do serviço naquela região e preço, que varia por região — os três fatores citados na opção correta. Quantidade de resource groups não tem relação com região: resource group é escopo de organização e ciclo de vida, não uma fronteira geográfica; quem marca essa opção confunde escopo administrativo com localização física. Tipo de assinatura e grupo de gerenciamento também são escopos da hierarquia de gerenciamento, usados para cobrança e herança de configuração, e não determinam onde o recurso roda. Por fim, uma assinatura não opera em uma única região: a mesma assinatura pode conter recursos em quantas regiões forem necessárias, então contar assinaturas não ajuda a escolher região.",
+      "opcoes": [
+        { "texto": "Proximidade dos usuários finais, disponibilidade do serviço na região e preço praticado nela.", "correta": true },
+        { "texto": "Quantidade de zonas de disponibilidade e número de resource groups já criados na assinatura.", "correta": false },
+        { "texto": "Tipo de assinatura contratada e grupo de gerenciamento em que essa assinatura está posicionada.", "correta": false },
+        { "texto": "Quantidade de assinaturas da empresa, já que cada assinatura opera em uma única região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-pares-02",
+      "topico": "Pares de regiões",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora precisa garantir que, se uma região inteira do Azure ficar indisponível por um desastre natural prolongado, exista uma cópia dos dados em outra região suficientemente distante para não ser atingida pelo mesmo evento. A equipe também quer a garantia de que as atualizações planejadas da plataforma nunca sejam aplicadas às duas regiões ao mesmo tempo. Qual característica do Azure atende diretamente a esses requisitos?",
+      "explicacao": "O par de regiões (region pair) é a resposta: cada região é associada pela Microsoft a outra região com separação física relevante, e as atualizações planejadas da plataforma são aplicadas a uma região do par por vez, além de haver prioridade de recuperação para uma delas em caso de interrupção ampla. Availability Zones separam data centers dentro de uma mesma região e protegem contra a falha de um data center, não contra a perda da região inteira — é a confusão mais comum aqui. Availability Set opera em escala ainda menor, distribuindo VMs entre racks (domínios de falha) e lotes de manutenção (domínios de atualização) dentro de um único data center. Grupo de gerenciamento é escopo administrativo da hierarquia: reúne assinaturas para herança de configuração e não replica dado nenhum nem influencia a ordem de manutenção da plataforma.",
+      "opcoes": [
+        { "texto": "O par de regiões, que associa cada região a outra distante e recebe atualizações de forma sequencial.", "correta": true },
+        { "texto": "As zonas de disponibilidade, que separam fisicamente os data centers dentro de uma mesma região.", "correta": false },
+        { "texto": "O Availability Set, que distribui as VMs entre domínios de falha e domínios de atualização.", "correta": false },
+        { "texto": "O grupo de gerenciamento, que reúne assinaturas de regiões diferentes sob a mesma hierarquia.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-soberanas-03",
+      "topico": "Regiões soberanas",
+      "tipo": "SimNao",
+      "enunciado": "Uma agência do governo dos Estados Unidos precisa executar cargas de trabalho em uma instância do Azure fisicamente isolada da nuvem pública, operada por pessoal norte-americano submetido a verificação de antecedentes e sujeita a controles de conformidade específicos do setor público federal. Um consultor afirma que basta implantar os recursos em uma região pública do Azure localizada em território norte-americano para atender a esse requisito. A afirmação está correta?",
+      "explicacao": "A resposta correta é Não. Nuvens soberanas, como o Azure Government, são instâncias separadas do Azure: têm rede própria, portal e endpoints distintos, operação por pessoal triado e conformidade voltada ao setor público — não são apenas regiões da nuvem pública com outro nome. Uma região pública situada nos Estados Unidos continua fazendo parte da mesma instância global do Azure, compartilhando plano de controle e operação com o restante da nuvem pública; ela resolve residência geográfica dos dados, mas não entrega o isolamento nem a triagem de pessoal exigidos. Quem responde Sim confunde localização física do data center com isolamento da instância de nuvem, que são requisitos diferentes.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqcore-soberanas-04",
+      "topico": "Regiões soberanas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um órgão público precisa executar cargas de trabalho classificadas em um ambiente do Azure separado da nuvem pública global, com rede independente, endpoints próprios e operação restrita a pessoal submetido a verificação de antecedentes. A equipe de arquitetura levanta as alternativas disponíveis na plataforma. Qual opção atende a esse requisito?",
+      "explicacao": "A opção correta é usar uma nuvem soberana, como o Azure Government, que é uma instância do Azure separada da nuvem pública, com infraestrutura de rede, plano de controle e operação dedicados ao setor público. Replicar entre duas regiões públicas emparelhadas resolve continuidade diante da perda de uma região, mas ambas continuam na mesma instância pública — é a confusão entre resiliência e isolamento. Availability Zones resolvem disponibilidade dentro de uma região, protegendo contra a falha de um data center, e não alteram quem opera a plataforma. Um grupo de gerenciamento dedicado organiza assinaturas para herança de configuração dentro da nuvem pública: é controle administrativo, não separação física nem operacional da instância.",
+      "opcoes": [
+        { "texto": "Utilizar uma nuvem soberana, como o Azure Government, separada da nuvem pública global.", "correta": true },
+        { "texto": "Utilizar duas regiões públicas emparelhadas e replicar as cargas de trabalho entre elas.", "correta": false },
+        { "texto": "Utilizar zonas de disponibilidade em uma região pública próxima às instalações do órgão.", "correta": false },
+        { "texto": "Utilizar um grupo de gerenciamento dedicado para as assinaturas do órgão na nuvem pública.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-regioes-05",
+      "topico": "Regiões, geographies e pares de regiões",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma arquiteta revisa os conceitos de infraestrutura global do Azure antes de desenhar uma solução distribuída em mais de uma região, e precisa separar o que é região, o que é geography e o que é par de regiões. Quais afirmações descrevem corretamente esses conceitos? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) um geography é uma área de mercado que normalmente agrupa duas ou mais regiões e serve para preservar requisitos de residência e conformidade de dados dentro dela; e (2) uma região é um conjunto de data centers implantado dentro de um perímetro de latência definida e interligado por rede dedicada. As demais estão erradas. Dizer que um par de regiões são dois data centers vizinhos dentro da mesma região descreve, na verdade, zonas de disponibilidade — o par de regiões liga duas regiões distintas e distantes. Afirmar que todas as regiões oferecem o mesmo catálogo e o mesmo preço ignora que disponibilidade de serviço e preço variam por região, o que é justamente um dos critérios de escolha. E dizer que uma nuvem soberana é só uma região da nuvem pública com preço diferente confunde região com instância de nuvem separada: o Azure Government tem rede, endpoints e operação próprios.",
+      "opcoes": [
+        { "texto": "Um geography agrupa duas ou mais regiões e preserva os requisitos de residência de dados dentro dele.", "correta": true },
+        { "texto": "Uma região é um conjunto de data centers dentro de um perímetro de latência definida e rede dedicada.", "correta": true },
+        { "texto": "Um par de regiões são dois data centers vizinhos dentro da mesma região, ligados por baixa latência.", "correta": false },
+        { "texto": "Toda região do Azure oferece exatamente o mesmo catálogo de serviços e os mesmos preços de consumo.", "correta": false },
+        { "texto": "Uma nuvem soberana é apenas uma região da nuvem pública global com tabela de preços diferenciada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-zonas-06",
+      "topico": "Serviços zonais e zona-redundantes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe vai implantar um serviço em uma região que oferece zonas de disponibilidade. A arquiteta quer que a própria plataforma distribua as réplicas do serviço entre as zonas e mantenha a carga em operação caso uma zona falhe, sem que a equipe precise escolher e fixar cada instância em uma zona específica. Qual modelo de implantação atende a esse objetivo?",
+      "explicacao": "A implantação zona-redundante (zone-redundant) é a correta: a plataforma replica o serviço entre as zonas da região automaticamente e mantém a operação se uma zona ficar indisponível, sem que a equipe administre a colocação. A implantação zonal faz o oposto do que o cenário pede — a instância é fixada em uma zona escolhida por quem implanta, o que é útil para latência mas concentra o risco naquela zona. O Availability Set atua dentro de um único data center, separando as VMs por rack e por lote de manutenção; ele não conhece zonas e não protege contra a perda de um data center. O par de regiões trata de continuidade entre regiões distintas e nada tem a ver com a distribuição automática entre zonas de uma mesma região.",
+      "opcoes": [
+        { "texto": "Serviço zona-redundante, em que a plataforma replica o serviço entre as zonas automaticamente.", "correta": true },
+        { "texto": "Serviço zonal, em que cada instância é fixada em uma zona escolhida por quem implanta.", "correta": false },
+        { "texto": "Availability Set, que separa as instâncias em domínios de falha dentro do mesmo data center.", "correta": false },
+        { "texto": "Par de regiões, em que a plataforma replica o serviço para a região emparelhada de forma contínua.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-zonas-07",
+      "topico": "Serviços zonais e zona-redundantes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema de negociação financeira exige que a máquina virtual de processamento e o disco gerenciado que ela usa fiquem no mesmo local físico dentro da região, para reduzir ao máximo a latência entre computação e armazenamento. A equipe aceita concentrar o risco nesse local e tratar a resiliência em outra camada da arquitetura. Qual abordagem corresponde a esse requisito?",
+      "explicacao": "A abordagem correta é a implantação zonal: os recursos são fixados explicitamente na mesma zona de disponibilidade, o que coloca VM e disco no mesmo agrupamento de data centers e minimiza a latência entre eles — em troca de concentrar o risco naquela zona, que é exatamente o custo que o cenário aceita. A implantação zona-redundante espalha os recursos entre zonas para ganhar resiliência, mas introduz a latência entre zonas que o cenário quer evitar. O Availability Set com domínios de atualização trata de manutenção planejada e falha de rack; ele não permite fixar a colocação relativa de VM e disco em uma zona. Distribuir os recursos entre regiões emparelhadas aumenta muito a distância física e, portanto, a latência — o oposto do objetivo declarado.",
+      "opcoes": [
+        { "texto": "Implantar os recursos como zonais, fixando VM e disco na mesma zona de disponibilidade.", "correta": true },
+        { "texto": "Implantar os recursos como zona-redundantes, deixando a plataforma espalhá-los pelas zonas.", "correta": false },
+        { "texto": "Colocar a VM e o disco em um Availability Set com dois domínios de atualização configurados.", "correta": false },
+        { "texto": "Implantar a VM e o disco em regiões emparelhadas, o que reduz a latência entre os dois recursos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-zonas-08",
+      "topico": "Zonas de disponibilidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Antes de aprovar o desenho de alta disponibilidade de uma aplicação, uma equipe precisa alinhar o que uma zona de disponibilidade realmente delimita e contra qual escopo de falha ela protege. Quais afirmações sobre zonas de disponibilidade no Azure estão corretas? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) cada zona é composta por um ou mais data centers com energia, refrigeração e rede independentes, que é justamente o que torna a falha de uma zona isolada das demais; e (2) as zonas de uma mesma região são interligadas por rede de alta velocidade, com latência baixa o bastante para replicação síncrona entre elas. Dizer que zonas protegem contra a indisponibilidade da região inteira é o erro clássico: se a região cai, todas as suas zonas caem juntas — proteção nesse escopo exige uma segunda região, tipicamente a região par. Afirmar que zonas existem em todas as regiões também é falso: nem toda região oferece zonas de disponibilidade, e isso precisa ser verificado ao escolher a região. Por fim, zona e domínio de falha não são o mesmo mecanismo: domínio de falha separa racks dentro de um data center, enquanto a zona separa data centers dentro da região.",
+      "opcoes": [
+        { "texto": "Cada zona é formada por um ou mais data centers com energia, refrigeração e rede independentes.", "correta": true },
+        { "texto": "As zonas de uma região são ligadas por rede rápida, com latência que permite replicação síncrona.", "correta": true },
+        { "texto": "As zonas de disponibilidade protegem a carga de trabalho contra a indisponibilidade da região inteira.", "correta": false },
+        { "texto": "As zonas de disponibilidade estão disponíveis em todas as regiões oferecidas pelo Azure atualmente.", "correta": false },
+        { "texto": "Zona de disponibilidade e domínio de falha de um Availability Set são o mesmo mecanismo com nomes distintos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-zonas-09",
+      "topico": "Zonas de disponibilidade",
+      "tipo": "SimNao",
+      "enunciado": "Um administrador implantou duas máquinas virtuais de um mesmo aplicativo na zona de disponibilidade 1 de uma região que oferece três zonas. Em seguida, informou à liderança que, por estarem em uma zona de disponibilidade, as máquinas estão protegidas contra a falha de um data center inteiro. Considerando o que a zona de disponibilidade delimita, a afirmação está correta?",
+      "explicacao": "A resposta correta é Não. Uma zona de disponibilidade é composta por um ou mais data centers com infraestrutura independente, mas duas VMs colocadas na mesma zona compartilham essa infraestrutura: se a zona falhar, as duas caem juntas. A proteção vem de distribuir as instâncias por zonas diferentes da região, não de simplesmente usar uma zona. Quem responde Sim costuma confundir dois pontos: acha que declarar a zona já é redundância, e às vezes também troca zona por domínio de falha do Availability Set, que separa racks dentro de um único data center e protege contra um escopo de falha ainda menor. Para proteção acima do escopo da região seria necessário implantar em outra região, tipicamente a região par.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqcore-availset-10",
+      "topico": "Availability Sets: domínios de atualização",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma manutenção planejada da plataforma, o administrador de um Availability Set com seis máquinas virtuais observou que elas não foram reiniciadas todas ao mesmo tempo: o Azure reiniciou grupos de VMs em momentos distintos, e o aplicativo permaneceu disponível durante toda a janela. Qual mecanismo do Availability Set explica esse comportamento?",
+      "explicacao": "O comportamento descrito vem dos domínios de atualização (update domains): o Azure organiza as VMs do conjunto em grupos e reinicia um grupo por vez durante manutenção planejada, de modo que sempre reste capacidade em operação. Domínios de falha resolvem outro problema — agrupam as VMs por rack, com fonte de energia e switch de rede próprios, protegendo contra falha não planejada de hardware; eles não determinam a ordem dos reinícios. Zonas de disponibilidade separam data centers dentro da região e não são o mecanismo em uso dentro de um Availability Set, que opera em um único data center. O par de regiões escalona atualizações entre regiões distintas, não entre VMs de um mesmo conjunto de disponibilidade.",
+      "opcoes": [
+        { "texto": "Os domínios de atualização, reiniciados em grupos separados durante a manutenção planejada.", "correta": true },
+        { "texto": "Os domínios de falha, que agrupam as VMs por rack, fonte de energia e switch de rede.", "correta": false },
+        { "texto": "As zonas de disponibilidade, que aplicam manutenção a uma zona por vez dentro da região.", "correta": false },
+        { "texto": "O par de regiões, que aplica atualizações da plataforma a uma região do par por vez.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-availset-11",
+      "topico": "Availability Set × Availability Zone",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe questiona por que ainda usaria Availability Set em uma região que já oferece zonas de disponibilidade. A arquiteta explica que o Availability Set opera dentro de um único data center e, por isso, cobre um escopo de falha menor. Contra qual tipo de falha um Availability Set efetivamente protege as máquinas virtuais?",
+      "explicacao": "O Availability Set protege contra falhas dentro de um data center: os domínios de falha separam as VMs em racks distintos, com fonte de energia e switch de rede próprios, e os domínios de atualização evitam que a manutenção planejada reinicie todas as instâncias ao mesmo tempo. Ele não protege contra a perda de um data center inteiro — esse é o escopo das zonas de disponibilidade, e é a confusão mais frequente entre os dois recursos. Também não cobre a falha simultânea de todas as zonas da região, nem a perda da região inteira, escopo que exige uma segunda região (tipicamente a região par); e o Availability Set não realiza failover automático para região nenhuma.",
+      "opcoes": [
+        { "texto": "Falha de um rack, como switch de rede ou fonte de energia, e reinícios de manutenção planejada.", "correta": true },
+        { "texto": "Falha de um data center inteiro dentro da região em que o Availability Set foi criado.", "correta": false },
+        { "texto": "Falha simultânea de todas as zonas de disponibilidade oferecidas naquela região do Azure.", "correta": false },
+        { "texto": "Falha da região inteira, com failover automático das VMs para a região emparelhada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-availset-12",
+      "topico": "Availability Set × Virtual Machine Scale Set",
+      "tipo": "SimNao",
+      "enunciado": "Ao revisar a arquitetura de um aplicativo web, um analista afirma que Availability Set e Virtual Machine Scale Set resolvem o mesmo problema, já que ambos envolvem um conjunto de máquinas virtuais. Segundo ele, colocar as VMs em um Availability Set faz com que o Azure aumente o número de instâncias automaticamente quando o uso de CPU sobe. Considerando a função de cada recurso, a afirmação está correta?",
+      "explicacao": "A resposta correta é Não. O Availability Set é um agrupamento lógico voltado à disponibilidade: ele distribui as VMs entre domínios de falha e domínios de atualização, mas a quantidade de instâncias é definida por quem cria — o conjunto não adiciona nem remove VMs em função de carga. Quem cria e remove instâncias idênticas conforme regras de autoescala é o Virtual Machine Scale Set. A confusão está entre disponibilidade (tolerar falha do que já existe) e elasticidade (ajustar a capacidade à demanda), que são objetivos diferentes e podem ser combinados. Vale notar que o próprio scale set também oferece garantias de distribuição das instâncias, inclusive entre zonas de disponibilidade, o que costuma torná-lo a escolha mais completa para cargas web escaláveis.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqcore-availset-13",
+      "topico": "Availability Sets: domínios de falha",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe implantou quatro máquinas virtuais de um mesmo aplicativo em um Availability Set e quer entender por que o Azure as distribuiu entre agrupamentos distintos de hardware físico no data center. A arquiteta pede que expliquem, especificamente, o efeito prático dos domínios de falha nessa implantação. Qual opção descreve esse efeito?",
+      "explicacao": "Os domínios de falha colocam as VMs em racks distintos, cada um com fonte de energia e switch de rede próprios, de modo que a perda de um rack não derruba todas as instâncias do aplicativo. Dizer que as VMs ficam em data centers distintos descreve zonas de disponibilidade, não domínios de falha — o Availability Set inteiro reside em um único data center. Dizer que as VMs são reiniciadas em lotes distintos durante a manutenção descreve corretamente os domínios de atualização, que existem no mesmo recurso mas resolvem manutenção planejada, e não falha de hardware. Já a replicação para a região emparelhada é característica do par de regiões e não é feita por um Availability Set, que não atua fora da região onde foi criado.",
+      "opcoes": [
+        { "texto": "As VMs ficam em racks distintos, de modo que a perda de energia de um rack não derruba todas.", "correta": true },
+        { "texto": "As VMs ficam em data centers distintos, de modo que a perda de um data center não derruba todas.", "correta": false },
+        { "texto": "As VMs são reiniciadas em lotes distintos durante a manutenção planejada aplicada pela plataforma.", "correta": false },
+        { "texto": "As VMs são replicadas para a região emparelhada, de modo que a perda da região não derruba todas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-14",
+      "topico": "Grupos de gerenciamento e herança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem doze assinaturas do Azure e precisa que uma restrição corporativa de implantação valha para todas elas, inclusive para as assinaturas que forem criadas nos próximos meses, sem que alguém precise repetir a configuração assinatura por assinatura a cada nova criação. Em qual escopo da hierarquia de gerenciamento essa configuração deve ser aplicada?",
+      "explicacao": "A configuração deve ser aplicada no grupo de gerenciamento que contém as assinaturas: escopos superiores da hierarquia são herdados pelos escopos abaixo, então toda assinatura já existente e toda assinatura movida para dentro desse grupo passa a valer a mesma restrição, sem trabalho adicional. Aplicar em cada resource group inverte o sentido da herança — a configuração flui de cima para baixo, do grupo de gerenciamento para a assinatura e dela para os resource groups e recursos, nunca de baixo para cima. Aplicar em uma assinatura afeta apenas o conteúdo dela: assinaturas não herdam configuração umas das outras, apenas do grupo de gerenciamento acima. Aplicar diretamente em cada recurso funciona pontualmente, mas é justamente o trabalho repetitivo que o cenário quer evitar, e não alcança recursos criados depois.",
+      "opcoes": [
+        { "texto": "No grupo de gerenciamento que contém as assinaturas, cuja configuração é herdada por todas elas.", "correta": true },
+        { "texto": "Em cada resource group, que propaga a configuração para a assinatura posicionada acima dele.", "correta": false },
+        { "texto": "Em uma das assinaturas, que propaga a configuração para as demais assinaturas do mesmo nível.", "correta": false },
+        { "texto": "Diretamente em cada recurso, que é o único escopo em que a configuração passa a ter efeito.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-15",
+      "topico": "Resource groups e ciclo de vida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma consultoria vai encerrar um piloto de três meses executado na mesma assinatura que atende a outros projetos em produção. Ao final do prazo, todos os recursos criados para o piloto — máquinas virtuais, discos e plano de aplicativo — devem ser removidos de uma só vez, sem qualquer risco de excluir recursos dos demais projetos. Qual abordagem atende de forma mais direta a esse requisito?",
+      "explicacao": "A abordagem correta é criar todos os recursos do piloto em um resource group exclusivo: o resource group é justamente o contêiner lógico para recursos que compartilham o mesmo ciclo de vida, e excluí-lo remove tudo o que está dentro dele em uma única operação, sem tocar em nada fora. Criar um grupo de gerenciamento exclusivo não funciona: grupo de gerenciamento agrupa assinaturas para herança de configuração, e excluí-lo não exclui recurso nenhum — é a confusão entre escopo administrativo e contêiner de recursos. Usar apenas tags e excluir os recursos um a um é possível, mas mantém o risco manual que o cenário quer eliminar. Manter tudo em um resource group compartilhado e filtrar por tipo na exclusão é o pior caminho: o filtro alcançaria recursos do mesmo tipo pertencentes a outros projetos.",
+      "opcoes": [
+        { "texto": "Criar todos os recursos do piloto em um resource group exclusivo e excluir o grupo ao final.", "correta": true },
+        { "texto": "Criar um grupo de gerenciamento exclusivo para o piloto e excluí-lo ao final do período.", "correta": false },
+        { "texto": "Marcar os recursos com uma tag de projeto e excluí-los um a um ao final do período.", "correta": false },
+        { "texto": "Manter os recursos no resource group dos outros projetos e filtrar por tipo na exclusão.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-16",
+      "topico": "Relação entre recurso e resource group",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um analista precisa reorganizar o ambiente e pergunta se pode registrar a mesma máquina virtual em dois resource groups ao mesmo tempo, de modo que ela apareça nos relatórios de dois times diferentes. Ele também quer saber se a decisão tomada na criação é definitiva. Qual afirmação descreve corretamente a relação entre um recurso e o resource group no Azure?",
+      "explicacao": "A afirmação correta é que cada recurso pertence a exatamente um resource group por vez, mas pode ser movido para outro grupo depois de criado — a associação é exclusiva, porém não é permanente. Dizer que um recurso pode pertencer a vários resource groups simultaneamente é o erro central do cenário: o resource group não é um rótulo de classificação múltipla, e a visibilidade compartilhada entre times se resolve com tags ou com permissões, não com pertencimento duplo. Dizer que a associação é imutável confunde a exclusividade com irreversibilidade: a movimentação entre grupos é uma operação prevista na plataforma. E condicionar o pertencimento à região confunde o local dos metadados do grupo com o local do recurso: um recurso pode estar em região diferente da do seu resource group.",
+      "opcoes": [
+        { "texto": "Cada recurso pertence a exatamente um resource group por vez, mas pode ser movido para outro depois.", "correta": true },
+        { "texto": "Um recurso pode pertencer a vários resource groups ao mesmo tempo, desde que na mesma assinatura.", "correta": false },
+        { "texto": "Cada recurso pertence a exatamente um resource group e não pode ser movido depois de criado.", "correta": false },
+        { "texto": "Um recurso pertence a um resource group somente quando ambos estão na mesma região do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-17",
+      "topico": "Região do resource group",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe criou um resource group na região East US e precisa implantar nele uma máquina virtual que deve ficar em Brazil South, por causa da latência para os usuários no Brasil. Um colega afirma que isso é impossível, porque todos os recursos de um resource group precisam estar obrigatoriamente na mesma região do grupo que os contém. A afirmação está correta?",
+      "explicacao": "A resposta correta é Não. A região informada ao criar um resource group define apenas onde ficam armazenados os metadados do grupo; os recursos contidos nele podem estar em regiões diferentes da do grupo e diferentes entre si. Quem responde Sim confunde o local dos metadados com o local em que a carga de trabalho efetivamente roda. A região do grupo não é irrelevante — se ela ficar indisponível, operações de gerenciamento sobre os metadados podem ser afetadas, mesmo que os recursos em outras regiões continuem executando —, mas isso é diferente de exigir que tudo esteja na mesma região. Portanto, a VM pode ser criada em Brazil South dentro de um resource group cujos metadados estão em East US.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-18",
+      "topico": "Assinaturas como escopo",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai separar completamente os ambientes de produção e de desenvolvimento e avalia usar uma assinatura distinta para cada um, em vez de apenas resource groups separados na mesma assinatura. Quais características da assinatura do Azure sustentam essa decisão? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) a assinatura é uma fronteira de cobrança, gerando faturamento próprio, o que separa naturalmente os custos de produção e de desenvolvimento; e (2) a assinatura é uma fronteira de escala, porque diversos limites de recursos do Azure são aplicados por assinatura — assim, um consumo excessivo em desenvolvimento não esgota a cota de produção. As demais estão erradas. A assinatura não obriga seus recursos a ficarem em uma única região: a mesma assinatura pode conter recursos em várias regiões. O menor escopo para agrupar recursos com o mesmo ciclo de vida é o resource group, não a assinatura — quem marca essa opção troca os dois escopos. E cada assinatura pertence a um único grupo de gerenciamento por vez; ela não fica em vários simultaneamente, justamente para que a herança de configuração seja inequívoca.",
+      "opcoes": [
+        { "texto": "É uma fronteira de cobrança: cada assinatura gera seu próprio faturamento, separando os custos.", "correta": true },
+        { "texto": "É uma fronteira de escala: vários limites de recursos são aplicados por assinatura, isolando os ambientes.", "correta": true },
+        { "texto": "Obriga todos os seus recursos a ficarem em uma única região, separando os ambientes geograficamente.", "correta": false },
+        { "texto": "É o menor escopo disponível para agrupar recursos que compartilham o mesmo ciclo de vida.", "correta": false },
+        { "texto": "Pertence a vários grupos de gerenciamento ao mesmo tempo, permitindo configurações distintas por ambiente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-19",
+      "topico": "Hierarquia de gerenciamento do Azure",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de plataforma desenha a estrutura de escopos que a organização vai adotar no Azure, definindo em qual nível cada configuração corporativa será aplicada. Antes de fechar o desenho, ela precisa validar como grupos de gerenciamento, assinaturas, resource groups e recursos se relacionam entre si e como a configuração se propaga. Quais afirmações sobre essa hierarquia estão corretas? Selecione TRÊS opções.",
+      "explicacao": "Estão corretas: (1) grupos de gerenciamento podem conter outros grupos de gerenciamento, formando vários níveis de organização; (2) configurações aplicadas em um escopo são herdadas pelos escopos abaixo dele, que é o princípio que torna a hierarquia útil; e (3) uma assinatura pode conter vários resource groups, enquanto cada resource group pertence a uma única assinatura. As duas erradas invertem regras da estrutura: resource groups não podem ser aninhados uns dentro dos outros — eles são contêineres simples de recursos, e quem imagina o contrário aplica a regra dos grupos de gerenciamento no escopo errado. E dizer que um recurso só recebe configuração do resource group nega a própria herança: o recurso recebe o que vem da assinatura e do grupo de gerenciamento acima dele também.",
+      "opcoes": [
+        { "texto": "Grupos de gerenciamento podem conter outros grupos de gerenciamento, formando vários níveis.", "correta": true },
+        { "texto": "Configurações aplicadas em um escopo são herdadas pelos escopos posicionados abaixo dele.", "correta": true },
+        { "texto": "Uma assinatura contém vários resource groups, e cada resource group pertence a uma única assinatura.", "correta": true },
+        { "texto": "Um resource group pode conter outros resource groups, formando uma hierarquia aninhada de grupos.", "correta": false },
+        { "texto": "Um recurso recebe configuração apenas do resource group, nunca da assinatura ou do grupo acima.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hierarquia-20",
+      "topico": "Hierarquia: cobrança e regras corporativas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria de uma empresa pede duas coisas ao time de plataforma: que os custos de cada unidade de negócio cheguem em faturas separadas e que todas as unidades permaneçam sujeitas às mesmas regras corporativas de implantação, aplicadas em um único lugar. Qual desenho da hierarquia de gerenciamento atende aos dois pedidos ao mesmo tempo?",
+      "explicacao": "O desenho correto é uma assinatura por unidade de negócio, todas posicionadas sob um mesmo grupo de gerenciamento que carrega as regras corporativas: a assinatura entrega a separação de faturamento e o grupo de gerenciamento entrega a herança das regras em um ponto único. Uma única assinatura com um resource group por unidade não separa faturas, já que a cobrança é consolidada na assinatura. Colocar um grupo de gerenciamento por unidade dentro de uma assinatura inverte a hierarquia: grupos de gerenciamento ficam acima das assinaturas, nunca dentro delas. E vincular resource groups diretamente a grupos de gerenciamento também não existe: resource groups pertencem a assinaturas, e é a assinatura que se associa ao grupo de gerenciamento.",
+      "opcoes": [
+        { "texto": "Uma assinatura por unidade, todas sob um mesmo grupo de gerenciamento com as regras corporativas.", "correta": true },
+        { "texto": "Uma única assinatura para toda a empresa, com um resource group dedicado a cada unidade de negócio.", "correta": false },
+        { "texto": "Um grupo de gerenciamento por unidade de negócio, todos criados dentro de uma assinatura corporativa.", "correta": false },
+        { "texto": "Um resource group por unidade de negócio, cada um vinculado diretamente a um grupo de gerenciamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-vm-21",
+      "topico": "Máquinas virtuais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa precisa migrar para o Azure um sistema legado que exige uma versão específica do sistema operacional, drivers proprietários instalados manualmente e acesso administrativo ao servidor para rodar agentes de terceiros. A equipe quer fazer a migração alterando o mínimo possível do software existente. Qual opção de computação atende a esse conjunto de exigências?",
+      "explicacao": "A máquina virtual do Azure é a opção correta: como serviço de infraestrutura, ela dá controle total sobre o sistema operacional, permitindo escolher a versão, instalar drivers e agentes e manter acesso administrativo — exatamente o que uma migração sem alteração de software exige. O Azure App Service é uma plataforma gerenciada em que o Azure administra o sistema operacional e o runtime; a equipe não tem acesso administrativo para instalar drivers proprietários. O Azure Functions executa trechos de código curtos disparados por gatilhos, um modelo que exigiria reescrever a aplicação inteira em vez de migrá-la. O Azure Container Instances exige empacotar a aplicação em container e não entrega controle sobre o host, além de ser voltado a cargas isoladas e de curta duração.",
+      "opcoes": [
+        { "texto": "Máquina virtual do Azure, com controle total sobre o sistema operacional e o software instalado.", "correta": true },
+        { "texto": "Azure App Service, que hospeda a aplicação sobre uma plataforma administrada pelo próprio Azure.", "correta": false },
+        { "texto": "Azure Functions, que executa trechos curtos de código disparados por gatilhos de eventos.", "correta": false },
+        { "texto": "Azure Container Instances, que executa a aplicação empacotada em um container isolado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-vmss-22",
+      "topico": "Virtual Machine Scale Sets",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um site de comércio eletrônico concentra a maior parte do tráfego em datas promocionais e fica com capacidade ociosa no restante do mês. A aplicação já roda em máquinas virtuais idênticas atrás de um balanceador de carga, e a equipe não quer manter, fora dos picos, o mesmo número de servidores ligados. Qual recurso do Azure permite criar e remover instâncias automaticamente conforme a demanda?",
+      "explicacao": "O Virtual Machine Scale Set é a resposta: ele administra um conjunto de VMs idênticas a partir de uma configuração comum e ajusta a quantidade de instâncias automaticamente, seguindo regras de métrica ou de agenda — é o recurso que traz elasticidade para cargas em IaaS. O Availability Set agrupa VMs em domínios de falha e de atualização para aumentar a disponibilidade dentro do data center, mas nunca altera o número de instâncias; é a confusão mais comum aqui, entre disponibilidade e elasticidade. As zonas de disponibilidade distribuem instâncias entre data centers da região, o que também é disponibilidade, e não escala. O par de regiões trata de continuidade entre regiões distintas e não cria capacidade adicional durante picos de tráfego.",
+      "opcoes": [
+        { "texto": "Virtual Machine Scale Sets, que administra VMs idênticas e ajusta a quantidade automaticamente.", "correta": true },
+        { "texto": "Availability Set, que agrupa as VMs em domínios de falha e de atualização no data center.", "correta": false },
+        { "texto": "Zonas de disponibilidade, que distribuem as VMs entre data centers distintos da mesma região.", "correta": false },
+        { "texto": "Par de regiões, que replica as máquinas virtuais para a região emparelhada durante os picos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-autoescala-23",
+      "topico": "Autoescala",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe está configurando a autoescala de um Virtual Machine Scale Set e discute exatamente o que esse recurso faz e o que ele não faz, para não criar expectativas erradas junto à área de negócio. Quais afirmações sobre escala e autoescala no Azure estão corretas? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) a autoescala adiciona e remove instâncias com base em métricas, como uso de CPU, ou em uma agenda previamente definida; e (2) escalar horizontalmente significa mudar a quantidade de instâncias, enquanto escalar verticalmente significa mudar o tamanho (CPU e memória) de cada instância. As erradas trocam conceitos próximos: dizer que a autoescala aumenta CPU e memória de uma VM em execução sem reiniciá-la descreve uma escala vertical idealizada, que não é o que a autoescala do scale set faz — ela atua horizontalmente. Dizer que a autoescala substitui a distribuição entre zonas mistura elasticidade com resiliência: aumentar instâncias não protege contra a falha de uma zona se todas estiverem na mesma. E afirmar que a autoescala só é acionada manualmente contradiz o próprio nome do recurso, que existe justamente para dispensar a intervenção humana.",
+      "opcoes": [
+        { "texto": "A autoescala adiciona e remove instâncias conforme métricas como uso de CPU ou uma agenda definida.", "correta": true },
+        { "texto": "Escalar horizontalmente muda a quantidade de instâncias; escalar verticalmente muda o tamanho de cada uma.", "correta": true },
+        { "texto": "A autoescala aumenta a CPU e a memória de uma VM já em execução, sem precisar reiniciá-la.", "correta": false },
+        { "texto": "A autoescala dispensa distribuir instâncias entre zonas, pois já garante tolerância a falhas por si só.", "correta": false },
+        { "texto": "A autoescala só pode ser acionada manualmente por um administrador quando o tráfego aumenta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-vmss-24",
+      "topico": "Virtual Machine Scale Sets e zonas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma arquiteta precisa de uma solução que, além de ajustar o número de servidores web conforme a carga, distribua essas instâncias entre zonas de disponibilidade de uma mesma região. Hoje a equipe mantém máquinas virtuais criadas manualmente, uma a uma, dentro de um Availability Set. Qual mudança atende aos dois requisitos ao mesmo tempo?",
+      "explicacao": "Substituir a configuração atual por um Virtual Machine Scale Set com distribuição entre zonas atende aos dois requisitos: o scale set entrega a elasticidade (criar e remover instâncias conforme a carga) e, quando configurado para múltiplas zonas, também espalha as instâncias entre data centers distintos da região. Aumentar os domínios de falha do Availability Set melhora apenas a separação de racks dentro de um único data center e não resolve nem a escala nem a distribuição entre zonas. Copiar as VMs manualmente para a região par trata de continuidade entre regiões, não de carga nem de zonas, e mantém o trabalho manual. Criar um Availability Set em cada zona com instâncias manuais até tocaria na distribuição, mas continua sem qualquer ajuste automático de capacidade.",
+      "opcoes": [
+        { "texto": "Substituir por um Virtual Machine Scale Set configurado para distribuir instâncias entre as zonas.", "correta": true },
+        { "texto": "Manter o Availability Set atual e aumentar o número de domínios de falha configurados nele.", "correta": false },
+        { "texto": "Manter as VMs individuais e criar uma cópia manual de cada uma delas na região emparelhada.", "correta": false },
+        { "texto": "Criar um Availability Set em cada zona e continuar provisionando as instâncias manualmente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-avd-25",
+      "topico": "Azure Virtual Desktop",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa contratou duzentos profissionais temporários que usarão os próprios notebooks e tablets, incluindo dispositivos que não rodam Windows. Eles precisam acessar um conjunto de aplicativos Windows corporativos, com a área de trabalho e os dados permanecendo no Azure e nada sendo instalado nos aparelhos pessoais. Qual serviço atende a esse cenário?",
+      "explicacao": "O Azure Virtual Desktop é a resposta: ele entrega áreas de trabalho e aplicativos Windows executados no Azure e acessados remotamente de praticamente qualquer dispositivo, mantendo dados e aplicativos fora do aparelho pessoal — exatamente o que o cenário exige. O Azure App Service hospeda aplicativos web acessados pelo navegador e não executa aplicativos Windows de desktop. Provisionar uma máquina virtual por profissional resolveria o acesso remoto, mas exigiria administrar duzentas máquinas individualmente e perderia os recursos de host pool, balanceamento de sessões e multissessão que o Azure Virtual Desktop oferece — é a confusão entre IaaS puro e o serviço de virtualização de desktops. O Azure Container Apps executa aplicações em container com escala automática, um modelo voltado a serviços, não a áreas de trabalho de usuário.",
+      "opcoes": [
+        { "texto": "Azure Virtual Desktop, que entrega áreas de trabalho e aplicativos Windows a partir do Azure.", "correta": true },
+        { "texto": "Azure App Service, que hospeda aplicativos web corporativos acessados pelo navegador.", "correta": false },
+        { "texto": "Uma máquina virtual do Azure por profissional, administrada individualmente pela equipe de TI.", "correta": false },
+        { "texto": "Azure Container Apps, que executa aplicações em container com escala automática por demanda.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-avd-26",
+      "topico": "Azure Virtual Desktop",
+      "tipo": "SimNao",
+      "enunciado": "Ao avaliar o custo de adotar o Azure Virtual Desktop para uma equipe de atendimento, uma analista afirma que várias pessoas podem compartilhar simultaneamente o mesmo host de sessão, cada uma com sua própria sessão isolada, o que reduz o custo em relação a manter uma máquina virtual dedicada para cada usuário. Considerando os recursos do serviço, a afirmação está correta?",
+      "explicacao": "A resposta correta é Sim. O Azure Virtual Desktop suporta Windows em modo multissessão, permitindo que vários usuários trabalhem ao mesmo tempo no mesmo host de sessão, cada um em uma sessão isolada das demais. É justamente esse recurso que reduz o custo por usuário, já que a capacidade de um host é compartilhada em vez de replicada. Quem responde Não normalmente projeta sobre o Azure Virtual Desktop o modelo de IaaS puro, em que cada pessoa precisaria de uma máquina virtual dedicada — modelo válido, mas mais caro e sem o balanceamento de sessões e o gerenciamento de host pool que o serviço oferece.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-containers-27",
+      "topico": "Azure Kubernetes Service",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa executa quarenta microsserviços em containers que dependem de descoberta de serviço entre si, atualização gradual sem interrupção, reinício automático de instâncias com falha e escala independente por serviço. A organização tem uma equipe de plataforma dedicada e aceita administrar os nós do cluster. Qual serviço do Azure atende melhor a esse conjunto de necessidades?",
+      "explicacao": "O Azure Kubernetes Service é a escolha correta: ele entrega orquestração de containers baseada em Kubernetes, com descoberta de serviço, atualização gradual, autorrecuperação e escala por serviço, sendo o plano de controle gerenciado pelo Azure enquanto a organização administra os nós — condição que o cenário aceita explicitamente. O Azure Container Instances executa containers isolados sob demanda e não oferece orquestração: não há descoberta de serviço nem atualização gradual entre quarenta microsserviços. O Azure App Service hospeda aplicações web em plataforma gerenciada e não é um orquestrador de containers com esse nível de coordenação entre serviços. Instalar Docker em máquinas virtuais e configurar tudo manualmente devolveria à equipe todo o trabalho que o serviço gerenciado já resolve, sem ganho correspondente.",
+      "opcoes": [
+        { "texto": "Azure Kubernetes Service, que entrega orquestração de containers com Kubernetes gerenciado.", "correta": true },
+        { "texto": "Azure Container Instances, que executa containers isolados sob demanda, sem orquestração.", "correta": false },
+        { "texto": "Azure App Service, que hospeda aplicações web sobre uma plataforma totalmente gerenciada.", "correta": false },
+        { "texto": "Máquinas virtuais com Docker instalado e configurado manualmente pela equipe de plataforma.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-containers-28",
+      "topico": "Azure Container Apps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup quer executar um conjunto de microsserviços em containers com escala automática dirigida pelo tráfego, chegando a zero instâncias quando não há requisições. A equipe é pequena e não tem ninguém disponível para operar nós, aplicar atualizações de cluster ou cuidar de um plano de controle do Kubernetes. Qual serviço atende a esse cenário?",
+      "explicacao": "O Azure Container Apps é a resposta: ele executa containers com escala automática dirigida por eventos e tráfego, incluindo redução a zero quando não há demanda, e abstrai completamente a administração do cluster — não há nós nem plano de controle expostos à equipe. O Azure Kubernetes Service resolveria a orquestração, mas entrega um cluster cujos nós e atualizações a organização precisa administrar, exatamente o que o cenário descarta. O Azure Container Instances também dispensa administrar servidores, porém é voltado a containers avulsos e cargas de curta duração, sem escala automática orientada a tráfego nem o modelo de aplicação com revisões e ingresso do Container Apps. Um Virtual Machine Scale Set com runtime de containers instalado devolve à equipe a administração do sistema operacional das VMs.",
+      "opcoes": [
+        { "texto": "Azure Container Apps, que escala containers automaticamente sem expor a administração do cluster.", "correta": true },
+        { "texto": "Azure Kubernetes Service, que entrega um cluster Kubernetes cujos nós a equipe precisa administrar.", "correta": false },
+        { "texto": "Azure Container Instances, que executa containers avulsos sem escala automática por tráfego.", "correta": false },
+        { "texto": "Virtual Machine Scale Set com o runtime de containers instalado e mantido pela própria equipe.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-containers-29",
+      "topico": "Azure Container Instances",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe avalia o Azure Container Instances para executar tarefas de processamento em lote que rodam por alguns minutos, produzem um arquivo de saída e então terminam. Antes de decidir, ela precisa confirmar o que o serviço oferece e o que não oferece. Quais afirmações sobre o Azure Container Instances estão corretas? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) o serviço executa containers sob demanda sem que a equipe provisione ou administre máquinas virtuais; e (2) ele é adequado a cargas curtas e isoladas, como tarefas em lote, e não a aplicações que dependem de orquestração completa. As erradas trocam o serviço por vizinhos próximos: fornecer plano de controle do Kubernetes com atualização gradual e descoberta de serviço descreve o Azure Kubernetes Service, não o Container Instances. Exigir a criação prévia de cluster e pool de nós também descreve o AKS — o Container Instances dispensa qualquer infraestrutura preexistente, e é essa a sua principal característica. E a cobrança por instância de máquina virtual reservada mensalmente contraria o modelo do serviço, que cobra pelos recursos consumidos durante o tempo em que o container está em execução.",
+      "opcoes": [
+        { "texto": "Executa containers sob demanda sem que a equipe provisione ou administre máquinas virtuais.", "correta": true },
+        { "texto": "É adequado a cargas curtas e isoladas, e não a aplicações que exigem orquestração completa.", "correta": true },
+        { "texto": "Fornece um plano de controle do Kubernetes com atualização gradual e descoberta de serviço.", "correta": false },
+        { "texto": "Exige a criação prévia de um cluster e de um pool de nós antes de executar o primeiro container.", "correta": false },
+        { "texto": "É cobrado por instância de máquina virtual reservada por mês, independentemente do tempo de execução.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-containers-30",
+      "topico": "Comparação entre serviços de container",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um time de arquitetura compara as formas de executar containers no Azure e quer identificar em qual delas a própria organização é responsável por dimensionar, atualizar e pagar pelos nós de trabalho que hospedam as cargas, mesmo que o plano de controle seja mantido pela Microsoft. Qual opção corresponde a essa descrição?",
+      "explicacao": "O Azure Kubernetes Service corresponde à descrição: a Microsoft mantém o plano de controle do Kubernetes, mas os nós de trabalho ficam na assinatura da organização, que decide o tamanho e a quantidade, aplica atualizações e paga por essa capacidade. No Azure Container Instances a plataforma aloca o container diretamente, sem que exista nó visível ou administrável pela organização, e a cobrança acompanha o tempo de execução. No Azure Container Apps a infraestrutura subjacente é abstraída e administrada pela plataforma, o que é justamente o que diferencia o serviço do AKS na hora de escolher. O Azure Functions vai além nessa abstração: executa código sob demanda sem qualquer infraestrutura visível, e sequer é um serviço de container no sentido do cenário.",
+      "opcoes": [
+        { "texto": "Azure Kubernetes Service, em que os nós de trabalho ficam na assinatura da própria organização.", "correta": true },
+        { "texto": "Azure Container Instances, em que a plataforma aloca o container sem nós visíveis à organização.", "correta": false },
+        { "texto": "Azure Container Apps, em que a infraestrutura subjacente é abstraída e administrada pela plataforma.", "correta": false },
+        { "texto": "Azure Functions, em que o código é executado sob demanda sem infraestrutura visível à organização.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-functions-31",
+      "topico": "Azure Functions e gatilhos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa precisa executar uma rotina de poucos segundos sempre que um arquivo novo é gravado em um repositório de dados. A frequência é bastante irregular: em alguns períodos chegam centenas de arquivos por hora e em outros não chega nenhum durante o dia inteiro. A equipe quer pagar apenas pelo processamento efetivamente realizado. Qual opção de computação atende melhor a esse requisito?",
+      "explicacao": "O Azure Functions atende ao cenário: a execução é disparada por um gatilho associado à gravação do arquivo e a cobrança acompanha as execuções e os recursos consumidos por elas, de modo que períodos sem arquivo tendem a não gerar custo de computação. Manter uma máquina virtual dimensionada para o pico resolve o processamento, mas cobra pela VM ligada mesmo nos períodos sem nenhum arquivo — o oposto do requisito de custo. Um Virtual Machine Scale Set com autoescala reduz o desperdício, mas ainda cobra por instância provisionada e reage com menos granularidade do que um gatilho por evento. O Azure App Service em plano dedicado cobra pelo plano reservado continuamente e, no desenho descrito, ainda dependeria de verificar o repositório em vez de ser acionado por evento.",
+      "opcoes": [
+        { "texto": "Azure Functions, disparado por gatilho e cobrado conforme as execuções e os recursos consumidos.", "correta": true },
+        { "texto": "Uma máquina virtual dimensionada para o pico e mantida ligada para atender às chegadas de arquivo.", "correta": false },
+        { "texto": "Um Virtual Machine Scale Set com autoescala, ajustando o número de VMs conforme a carga do dia.", "correta": false },
+        { "texto": "Azure App Service em plano dedicado, hospedando um serviço que verifica o repositório de dados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-functions-32",
+      "topico": "Limites do modelo serverless",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer migrar para o Azure Functions um processo que roda por várias horas seguidas sem interrupção, mantém uma grande estrutura de dados em memória durante toda a execução e depende dessa estrutura permanecer entre as etapas do processamento. A liderança pede uma avaliação técnica antes da decisão. Qual avaliação descreve corretamente a adequação do serviço a esse processo?",
+      "explicacao": "A avaliação correta é que o Azure Functions é inadequado nesse caso: o modelo serverless é orientado a execuções curtas e sem estado, disparadas por gatilhos, e não a processos longos que dependem de manter estado em memória entre etapas — cargas assim se ajustam melhor a uma VM, a um serviço de aplicação em plano dedicado ou a um orquestrador de containers. Dizer que o serviço foi projetado para processos longos com estado inverte a característica central do modelo. Dizer que o plano de consumo garante execução ilimitada também está errado: o plano de consumo é justamente o mais restritivo quanto à duração da execução. E afirmar que Functions só é acionado por temporizador ignora que o serviço oferece diversos tipos de gatilho, inclusive de eventos, mensagens e requisições HTTP.",
+      "opcoes": [
+        { "texto": "É inadequado, pois o modelo serverless é voltado a execuções curtas e sem estado por gatilho.", "correta": true },
+        { "texto": "É adequado, pois o serviço foi projetado para processos longos que mantêm estado em memória.", "correta": false },
+        { "texto": "É adequado, pois o plano de consumo garante tempo de execução ilimitado para qualquer função.", "correta": false },
+        { "texto": "É inadequado, pois o serviço só pode ser disparado por temporizador, e não por outros eventos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-functions-33",
+      "topico": "Computação serverless",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma arquiteta apresenta ao time as características do modelo de computação serverless no Azure antes de aprovar o uso do Azure Functions em um novo componente do sistema. Ela pede que o time identifique o que de fato muda em relação a hospedar o mesmo código em uma máquina virtual. Quais afirmações sobre esse modelo estão corretas? Selecione DUAS opções.",
+      "explicacao": "Estão corretas: (1) a organização não provisiona nem administra os servidores que executam o código, pois a plataforma aloca capacidade sob demanda; e (2) a cobrança acompanha o consumo gerado pelas execuções, de modo que períodos sem execução tendem a não gerar custo de computação. As erradas confundem serverless com hospedagem dedicada: dizer que o código fica permanentemente em execução descreve um serviço sempre ligado, e é o oposto do modelo por gatilho — inclusive é por isso que pode haver latência inicial quando uma função é acionada após um período ocioso. Escolher tamanho e sistema operacional das máquinas virtuais é característica de IaaS, não de serverless, em que essa camada não é exposta. E o modelo não elimina a necessidade de escrever e manter o código da aplicação: o que ele elimina é a administração da infraestrutura.",
+      "opcoes": [
+        { "texto": "A organização não provisiona nem administra os servidores; a plataforma aloca capacidade sob demanda.", "correta": true },
+        { "texto": "A cobrança acompanha o consumo das execuções, e períodos ociosos tendem a não gerar custo de computação.", "correta": true },
+        { "texto": "O código permanece em execução continuamente, o que garante resposta imediata a qualquer requisição.", "correta": false },
+        { "texto": "A equipe escolhe o tamanho e o sistema operacional das máquinas virtuais que executam o código.", "correta": false },
+        { "texto": "O modelo elimina a necessidade de escrever e manter o código da aplicação hospedada na nuvem.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hosting-34",
+      "topico": "Opções de hospedagem de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento quer publicar uma API web com implantação contínua a partir do repositório, escala integrada e certificados gerenciados pela plataforma. A empresa não tem administradores de servidor disponíveis e não quer se responsabilizar por aplicar correções ao sistema operacional nem por manter o runtime instalado. Qual opção de hospedagem atende a esses requisitos com o menor esforço de administração?",
+      "explicacao": "O Azure App Service é a resposta: é uma plataforma gerenciada para aplicações web e APIs, em que o Azure cuida do sistema operacional, das correções e do runtime, e a equipe entrega o código, contando com implantação contínua, escala integrada e gestão de certificados. Uma máquina virtual com servidor web instalado pela equipe entrega controle total, mas transfere para ela toda a manutenção que o cenário quer evitar. Um Virtual Machine Scale Set com imagem personalizada resolve a escala, porém a imagem e as correções continuam sendo responsabilidade da equipe. O Azure Kubernetes Service exigiria empacotar a API em container e ainda administrar nós e atualizações do cluster, o maior esforço operacional entre as opções apresentadas.",
+      "opcoes": [
+        { "texto": "Azure App Service, plataforma gerenciada para hospedar aplicações web e APIs a partir do código.", "correta": true },
+        { "texto": "Uma máquina virtual do Azure com o servidor web e o runtime instalados e mantidos pela equipe.", "correta": false },
+        { "texto": "Um Virtual Machine Scale Set baseado em uma imagem personalizada mantida pela própria equipe.", "correta": false },
+        { "texto": "Azure Kubernetes Service, com a API empacotada em container e implantada no cluster da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-arqcore-hosting-35",
+      "topico": "Controle × gerenciamento nas opções de hospedagem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma organização compara opções de hospedagem no Azure segundo o equilíbrio entre controle sobre o ambiente e esforço de administração, e decide avaliar o que muda ao escolher máquinas virtuais em vez do Azure App Service para hospedar a mesma aplicação web. Qual das opções NÃO é uma consequência dessa escolha?",
+      "explicacao": "A opção que NÃO é consequência é a de que o Azure passaria a aplicar automaticamente as correções do sistema operacional: isso descreve o Azure App Service, plataforma gerenciada em que o sistema operacional é responsabilidade da Microsoft. Ao mover a aplicação para máquinas virtuais, a organização assume esse trabalho, e não o contrário — é a inversão que o item testa. As demais são consequências reais de escolher IaaS: a equipe passa a instalar e atualizar o runtime e o servidor web, ganha acesso administrativo ao sistema operacional e pode instalar o software que quiser, e passa a configurar por conta própria a escala e o balanceamento entre instâncias, tipicamente com um Virtual Machine Scale Set e um balanceador, em vez de usar a escala já integrada ao App Service.",
+      "opcoes": [
+        { "texto": "O Azure passa a aplicar automaticamente as correções do sistema operacional que hospeda a aplicação.", "correta": true },
+        { "texto": "A equipe passa a ser responsável por instalar e atualizar o runtime e o servidor web da aplicação.", "correta": false },
+        { "texto": "A equipe ganha acesso administrativo ao sistema operacional e pode instalar o software que precisar.", "correta": false },
+        { "texto": "A equipe passa a ser responsável por configurar a escala e o balanceamento entre as instâncias.", "correta": false }
+      ]
+    }
+  ]
+}

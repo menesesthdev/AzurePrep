@@ -3,6 +3,7 @@ using System;
 using AzurePrep.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AzurePrep.Infrastructure.Migrations
 {
     [DbContext(typeof(AzurePrepDbContext))]
-    partial class AzurePrepDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260726014835_SorteioDeQuestoes")]
+    partial class SorteioDeQuestoes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
@@ -127,11 +130,6 @@ namespace AzurePrep.Infrastructure.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
                     b.Property<Guid>("SkillAreaId")
                         .HasColumnType("TEXT");
 
@@ -154,7 +152,7 @@ namespace AzurePrep.Infrastructure.Migrations
 
                     b.HasIndex("SkillAreaId");
 
-                    b.HasIndex("ExamId", "IsActive", "SkillAreaId");
+                    b.HasIndex("ExamId", "SkillAreaId");
 
                     b.ToTable("Questions", (string)null);
                 });
