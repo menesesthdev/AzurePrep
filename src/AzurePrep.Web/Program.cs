@@ -15,6 +15,11 @@ Directory.CreateDirectory(diretorioDeChaves);
 
 // Camadas da aplicação (Clean Architecture).
 builder.Services.AddControllersWithViews();
+
+// A tela de prova grava resposta e encerra por fetch, sem formulário — então o token antiforgery
+// precisa poder chegar por cabeçalho. O nome é o convencionado pelo ASP.NET Core; o validador
+// continua aceitando o campo de formulário, que é o que as telas de conta usam.
+builder.Services.AddAntiforgery(options => options.HeaderName = "RequestVerificationToken");
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacaoSocial(builder.Configuration);

@@ -131,6 +131,13 @@
         </div>
     </div>
 
+    @*
+        Token antiforgery para as chamadas AJAX de gravar resposta e encerrar. Fica fora do JSON
+        de dados de propósito: o token não é dado da prova, e o campo oculto é a forma que o
+        próprio ASP.NET Core gera e valida.
+    *@
+    @Html.AntiForgeryToken()
+
     <script id="exam-data" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(initialData))</script>
     <script src="~/js/exam.js" asp-append-version="true"></script>
 </body>

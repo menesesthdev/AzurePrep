@@ -137,15 +137,47 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             SelecoesExigidas(question));
     }
 
-    public async Task SalvarRespostaAsync(SalvarRespostaRequest request, CancellationToken cancellationToken = default)
+    public async Task<ResultadoDeSalvarResposta> SalvarRespostaAsync(
+        SalvarRespostaRequest request,
+        CancellationToken cancellationToken = default)
     {
-        var attempt = await ObterTentativaDoUsuarioAsync(request.AttemptId, cancellationToken)
-                      ?? throw new InvalidOperationException($"Tentativa {request.AttemptId} não encontrada.");
+        ArgumentNullException.ThrowIfNull(request);
 
+        var contexto = await CarregarContextoAsync(request.AttemptId, cancellationToken)
+                       ?? throw new InvalidOperationException($"Tentativa {request.AttemptId} não encontrada.");
+
+        var (attempt, exam, questions) = contexto;
+
+        // Pode ter sido encerrada agora mesmo, pelo próprio CarregarContextoAsync, se o prazo
+        // venceu entre a última navegação e este envio.
         if (attempt.IsFinished)
         {
-            return;
+            return ResultadoDeSalvarResposta.TentativaEncerrada;
         }
+
+        // A questão tem de estar na composição SORTEADA desta tentativa, e cada alternativa tem
+        // de pertencer à questão. Sem essa checagem, um POST direto grava resposta para um Guid
+        // inventado: a nota não muda (a correção percorre a composição, não as respostas), mas
+        // fica uma linha órfã — e QuestionId não tem foreign key nesta tabela, então o banco não
+        // barra. Como cada Guid novo é uma linha nova, era o único caminho por onde um usuário
+        // autenticado conseguia escrever sem limite.
+        var question = questions.FirstOrDefault(q => q.Id == request.QuestionId) ?? questions[0];
+        if (question is null)
+        {
+            return ResultadoDeSalvarResposta.RespostaInvalida;
+        }
+
+        var selecao = (request.SelectedOptionIds ?? Array.Empty<Guid>()).Distinct().ToList();
+        var opcoesDaQuestao = question.Options.Select(o => o.Id).ToHashSet();
+        if (selecao.Exists(id => !opcoesDaQuestao.Contains(id)))
+        {
+            return ResultadoDeSalvarResposta.RespostaInvalida;
+        }
+
+        // Teto no tempo informado pelo cliente: nenhum item pode ter consumido mais que a prova
+        // inteira. O valor é acumulado a cada gravação, então sem teto a soma de envios forjados
+        // estoura o int em silêncio (a aritmética é unchecked).
+        var tempoGasto = Math.Clamp(request.TimeSpentSeconds, 0, exam.TimeLimitMinutes * 60);
 
         // Detecta se é a primeira resposta desta questão ANTES de mutar o agregado — respostas
         // novas precisam de Add explícito (chave gerada no domínio); atualizações o EF já rastreia.
@@ -153,9 +185,9 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
         var answer = attempt.DefinirResposta(
             request.QuestionId,
-            request.SelectedOptionIds,
+            selecao,
             request.IsFlaggedForReview,
-            request.TimeSpentSeconds);
+            tempoGasto);
 
         if (isNewAnswer)
         {
@@ -163,6 +195,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return ResultadoDeSalvarResposta.Gravada;
     }
 
     public async Task<ResultadoDaProvaDto?> FinalizarTentativaAsync(Guid attemptId, CancellationToken cancellationToken = default)
@@ -201,6 +235,10 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
     /// Tudo que qualquer operação da sessão precisa: a tentativa (já validada como do usuário),
     /// o exame com seus domínios e as questões DAQUELA prova, na ordem sorteada.
     /// </summary>
+    /// <remarks>
+    /// É também onde o fim do tempo é aplicado, pelo mesmo motivo da checagem de posse: nenhum
+    /// chamador tem como esquecer, porque não é ele quem checa.
+    /// </remarks>
     private async Task<(TentativaDeProva Attempt, Exame Exam, IReadOnlyList<Questao> Questions)?> CarregarContextoAsync(
         Guid attemptId,
         CancellationToken cancellationToken)
@@ -217,7 +255,39 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             return null;
         }
 
-        return (attempt, exam, await CarregarQuestoesAsync(attempt, cancellationToken));
+        var questions = await CarregarQuestoesAsync(attempt, cancellationToken);
+        await EncerrarSePrazoEsgotadoAsync(attempt, exam, questions, cancellationToken);
+
+        return (attempt, exam, questions);
+    }
+
+    /// <summary>
+    /// Aplica "timer zerado = submissão automática" no SERVIDOR.
+    /// </summary>
+    /// <remarks>
+    /// O timer da tela é conveniência, não controle: quem desliga o JavaScript ou edita o
+    /// contador no navegador simplesmente deixa de receber o encerramento automático. Enquanto a
+    /// regra existia só no cliente, o limite de tempo — que é o centro da fidelidade à prova
+    /// real — era opcional para quem quisesse contorná-lo.
+    /// </remarks>
+    private async Task EncerrarSePrazoEsgotadoAsync(
+        TentativaDeProva attempt,
+        Exame exam,
+        IReadOnlyList<Questao> questions,
+        CancellationToken cancellationToken)
+    {
+        if (attempt.IsFinished || CalcularSegundosRestantes(exam, attempt) > 0)
+        {
+            return;
+        }
+
+        // Fecha no instante do VENCIMENTO, não em "agora": quem só reabre a página dias depois
+        // não deve ver uma duração de dois dias no histórico. O tempo acabou quando acabou.
+        var vencimento = attempt.StartedAt.AddMinutes(exam.TimeLimitMinutes);
+        var score = CorretorDeProva.Corrigir(exam, questions, attempt.Answers);
+
+        attempt.Concluir(score.ScorePercent, score.Passed, vencimento);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
     }
 
     /// <summary>

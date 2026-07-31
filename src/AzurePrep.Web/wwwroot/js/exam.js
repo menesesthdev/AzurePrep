@@ -46,12 +46,20 @@
     const markToggleEl = flagToggle.closest(".mark-toggle");
 
     // ---- Helpers de rede -------------------------------------------------
+
+    // Token antiforgery do documento. Vai por cabeçalho porque estas chamadas não têm
+    // formulário; sem ele o servidor recusa gravar resposta e encerrar a prova.
+    const antiforgeryToken = document.querySelector("input[name='__RequestVerificationToken']").value;
+
     function questionUrl(n) { return data.urls.question.replace("{n}", n); }
 
     async function postAnswer(payload) {
         await fetch(data.urls.answer, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": antiforgeryToken
+            },
             credentials: "same-origin",
             body: JSON.stringify(payload)
         });
@@ -255,6 +263,7 @@
         }
         const resp = await fetch(data.urls.finish, {
             method: "POST",
+            headers: { "RequestVerificationToken": antiforgeryToken },
             credentials: "same-origin"
         });
         const json = await resp.json();

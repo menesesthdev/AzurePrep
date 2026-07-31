@@ -34,18 +34,30 @@ public class SessaoDeProvaServiceTests
 
     private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario) BuildServiceComUsuario()
     {
+        var (service, exam, clock, usuario, _) = BuildServiceCompleto();
+        return (service, exam, clock, usuario);
+    }
+
+    /// <summary>
+    /// Igual aos outros, mas devolve também o repositório de tentativas: os testes de validação
+    /// precisam afirmar que uma resposta recusada não deixou linha nenhuma para trás, e isso não
+    /// aparece em nenhum DTO (o estado só enumera a composição sorteada).
+    /// </summary>
+    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario, InMemoryExamAttemptRepository tentativas) BuildServiceCompleto()
+    {
         var exam = BuildExam();
         var clock = new FixedClock(Iniciar);
         var usuario = new FakeUsuarioAtual();
         var exames = new InMemoryExamRepository(exam);
+        var tentativas = new InMemoryExamAttemptRepository();
         var service = new SessaoDeProvaService(
             exames,
-            new InMemoryExamAttemptRepository(),
+            tentativas,
             new FakeSorteadorDeQuestoes(exames),
             new FakeUnitOfWork(),
             clock,
             usuario);
-        return (service, exam, clock, usuario);
+        return (service, exam, clock, usuario, tentativas);
     }
 
     private static Guid CorrectOption(QuestaoDto q) => q.Options.First().Id; // OrderIndex 0 = correta neste seed de teste
@@ -233,5 +245,130 @@ public class SessaoDeProvaServiceTests
         usuario.Id = null;
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.IniciarTentativaAsync(exam.Id));
+    }
+
+    // ---- Fim do tempo imposto pelo servidor ------------------------------
+    // O timer da tela é conveniência. Se o limite valesse só no JavaScript, bastaria desligá-lo
+    // (ou editar o contador no navegador) para ter tempo infinito — e o limite de tempo é o
+    // centro da fidelidade à prova real.
+
+    [Fact]
+    public async Task PrazoEsgotado_EncerraATentativaMesmoSemOClientePedir()
+    {
+        var (service, exam, clock) = BuildService();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        clock.Advance(TimeSpan.FromMinutes(46)); // o limite do exame é 45
+
+        var state = await service.ObterEstadoAsync(attemptId);
+
+        Assert.True(state!.IsFinished);
+        Assert.Equal(0, state.RemainingSeconds);
+    }
+
+    [Fact]
+    public async Task PrazoEsgotado_CorrigeOQueFoiRespondidoEEntregaOResultado()
+    {
+        var (service, exam, clock) = BuildService();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        for (var n = 1; n <= 4; n++)
+        {
+            var q = await service.ObterQuestaoAsync(attemptId, n);
+            await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+                attemptId, q!.Id, new[] { CorrectOption(q) }, false, 10));
+        }
+
+        clock.Advance(TimeSpan.FromMinutes(46));
+
+        // Ninguém chamou Finalizar: o resultado existe porque o servidor fechou a prova sozinho.
+        var result = await service.ObterResultadoAsync(attemptId);
+
+        Assert.NotNull(result);
+        Assert.Equal(100m, result!.ScorePercent);
+        Assert.True(result.Passed);
+    }
+
+    [Fact]
+    public async Task PrazoEsgotado_RegistraOVencimentoComoTermino_NaoOMomentoDaVolta()
+    {
+        var (service, exam, clock) = BuildService();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        // Quem fecha o navegador e volta dois dias depois não deve aparecer no histórico com
+        // uma prova de dois dias de duração.
+        clock.Advance(TimeSpan.FromDays(2));
+
+        var result = await service.FinalizarTentativaAsync(attemptId);
+
+        Assert.Equal(Iniciar.AddMinutes(45), result!.FinishedAt);
+    }
+
+    [Fact]
+    public async Task SalvarResposta_ComPrazoEsgotado_NaoContaParaANota()
+    {
+        var (service, exam, clock) = BuildService();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+        var q1 = await service.ObterQuestaoAsync(attemptId, 1);
+
+        clock.Advance(TimeSpan.FromMinutes(46));
+
+        var resultado = await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+            attemptId, q1!.Id, new[] { CorrectOption(q1) }, false, 10));
+
+        Assert.Equal(ResultadoDeSalvarResposta.TentativaEncerrada, resultado);
+        Assert.Equal(0m, (await service.ObterResultadoAsync(attemptId))!.ScorePercent);
+    }
+
+    // ---- Validação do que o cliente envia -------------------------------
+    // A questão tem de estar na composição sorteada, e a alternativa tem de ser da questão.
+    // QuestionId não tem foreign key na tabela de respostas, então sem esta checagem um POST
+    // direto grava linha órfã — e uma por Guid inventado, sem limite.
+
+    [Fact]
+    public async Task SalvarResposta_ComQuestaoForaDaComposicao_EhRecusadaENaoPersisteNada()
+    {
+        var (service, exam, _, _, tentativas) = BuildServiceCompleto();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        var resultado = await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+            attemptId, Guid.NewGuid(), new[] { Guid.NewGuid() }, false, 10));
+
+        Assert.Equal(ResultadoDeSalvarResposta.RespostaInvalida, resultado);
+        Assert.Empty((await tentativas.ObterPorIdAsync(attemptId))!.Answers);
+    }
+
+    [Fact]
+    public async Task SalvarResposta_ComAlternativaDeOutraQuestao_EhRecusada()
+    {
+        var (service, exam, _, _, tentativas) = BuildServiceCompleto();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+        var q1 = await service.ObterQuestaoAsync(attemptId, 1);
+        var q2 = await service.ObterQuestaoAsync(attemptId, 2);
+
+        // Questão válida, alternativa que pertence a outra questão da mesma prova.
+        var resultado = await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+            attemptId, q1!.Id, new[] { CorrectOption(q2!) }, false, 10));
+
+        Assert.Equal(ResultadoDeSalvarResposta.RespostaInvalida, resultado);
+        Assert.Empty((await tentativas.ObterPorIdAsync(attemptId))!.Answers);
+    }
+
+    [Fact]
+    public async Task SalvarResposta_TempoInformadoPeloCliente_NaoPassaDoTempoDaProva()
+    {
+        var (service, exam, _, _, tentativas) = BuildServiceCompleto();
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+        var q1 = await service.ObterQuestaoAsync(attemptId, 1);
+
+        // O tempo é acumulado a cada gravação: sem teto, envios forjados estouram o int em
+        // silêncio, porque a aritmética é unchecked.
+        var resultado = await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+            attemptId, q1!.Id, new[] { CorrectOption(q1) }, false, int.MaxValue));
+
+        Assert.Equal(ResultadoDeSalvarResposta.Gravada, resultado);
+
+        var answer = Assert.Single((await tentativas.ObterPorIdAsync(attemptId))!.Answers);
+        Assert.Equal(45 * 60, answer.TimeSpentSeconds);
     }
 }

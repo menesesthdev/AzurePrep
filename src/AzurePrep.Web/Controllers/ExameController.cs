@@ -70,8 +70,14 @@ public class ExameController : Controller
     }
 
     // Grava/atualiza a resposta de uma questão (AJAX).
-    // NOTA: sem antiforgery por ora — não há autenticação no escopo atual. Endurecer ao evoluir.
+    //
+    // O antiforgery vem por cabeçalho (ver AddAntiforgery em Program.cs), porque aqui não há
+    // formulário: o exam.js lê o token do documento e o envia junto. Não depender do
+    // Content-Type para isso é deliberado — o `[FromBody]` já obriga application/json, o que
+    // por acidente bloqueia formulário cross-site, mas acidente não é defesa: bastaria alguém
+    // trocar o binding no futuro para o endpoint ficar aberto sem ninguém notar.
     [HttpPost("{attemptId:guid}/answer")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SalvarResposta(Guid attemptId, [FromBody] SalvarRespostaInput input, CancellationToken cancellationToken)
     {
         if (input is null)
@@ -79,7 +85,7 @@ public class ExameController : Controller
             return BadRequest();
         }
 
-        await _session.SalvarRespostaAsync(
+        var resultado = await _session.SalvarRespostaAsync(
             new SalvarRespostaRequest(
                 attemptId,
                 input.QuestionId,
@@ -88,11 +94,23 @@ public class ExameController : Controller
                 input.TimeSpentSeconds),
             cancellationToken);
 
-        return Ok();
+        return resultado switch
+        {
+            ResultadoDeSalvarResposta.Gravada => Ok(),
+
+            // 409 e não 400: o pedido estava correto, só chegou depois de a prova fechar (caso
+            // normal quando o tempo vence entre uma navegação e o envio).
+            ResultadoDeSalvarResposta.TentativaEncerrada => Conflict(),
+
+            _ => BadRequest()
+        };
     }
 
     // Finaliza e corrige. Retorna a URL do resultado para o front-end navegar
     // (funciona tanto no "Finalizar prova" manual quanto na submissão automática por tempo).
+    //
+    // Antiforgery é obrigatório aqui: a ação não recebe corpo, então sem o token um formulário
+    // em site de terceiro encerraria a prova de quem está logado — e encerrar é irreversível.
     [HttpPost("{attemptId:guid}/finish")]
     public async Task<IActionResult> Finalizar(Guid attemptId, CancellationToken cancellationToken)
     {

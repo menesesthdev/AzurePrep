@@ -17,8 +17,13 @@ public interface ISessaoDeProvaService
     /// <summary>Uma questão específica pela posição (1-based) para renderização.</summary>
     Task<QuestaoDto?> ObterQuestaoAsync(Guid attemptId, int number, CancellationToken cancellationToken = default);
 
-    /// <summary>Grava/atualiza a resposta de uma questão.</summary>
-    Task SalvarRespostaAsync(SalvarRespostaRequest request, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Grava/atualiza a resposta de uma questão. Devolve o desfecho para o Web traduzir em
+    /// status HTTP — em especial, recusa questão ou alternativa que não pertençam a esta prova.
+    /// </summary>
+    Task<ResultadoDeSalvarResposta> SalvarRespostaAsync(
+        SalvarRespostaRequest request,
+        CancellationToken cancellationToken = default);
 
     /// <summary>Finaliza a tentativa, corrige e devolve o resultado. Idempotente.</summary>
     Task<ResultadoDaProvaDto?> FinalizarTentativaAsync(Guid attemptId, CancellationToken cancellationToken = default);
