@@ -2,7 +2,14 @@ using AzurePrep.Domain.Enums;
 
 namespace AzurePrep.Application.Contracts;
 
-/// <summary>Uma opção de resposta como exibida ao candidato (sem revelar se é correta).</summary>
+/// <summary>
+/// Uma opção de resposta como exibida ao candidato (sem revelar se é correta).
+/// </summary>
+/// <remarks>
+/// <paramref name="OrderIndex"/> é a posição NESTA tentativa, não a posição no banco de questões:
+/// a ordem das alternativas é embaralhada por tentativa (ver <c>OrdemDasOpcoes</c>). Expor o índice
+/// do arquivo aqui entregaria o gabarito, já que o seed escreve a alternativa correta primeiro.
+/// </remarks>
 public sealed record OpcaoDeQuestaoDto(Guid Id, string Text, int OrderIndex);
 
 /// <summary>

@@ -43,9 +43,9 @@ public class SessaoDeProvaServiceTests
     /// precisam afirmar que uma resposta recusada não deixou linha nenhuma para trás, e isso não
     /// aparece em nenhum DTO (o estado só enumera a composição sorteada).
     /// </summary>
-    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario, InMemoryExamAttemptRepository tentativas) BuildServiceCompleto()
+    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario, InMemoryExamAttemptRepository tentativas) BuildServiceCompleto(Exame? exame = null)
     {
-        var exam = BuildExam();
+        var exam = exame ?? BuildExam();
         var clock = new FixedClock(Iniciar);
         var usuario = new FakeUsuarioAtual();
         var exames = new InMemoryExamRepository(exam);
@@ -60,7 +60,11 @@ public class SessaoDeProvaServiceTests
         return (service, exam, clock, usuario, tentativas);
     }
 
-    private static Guid CorrectOption(QuestaoDto q) => q.Options.First().Id; // OrderIndex 0 = correta neste seed de teste
+    // Pelo TEXTO, nunca pela posição: a ordem das alternativas é embaralhada por tentativa
+    // (OrdemDasOpcoes), então "a primeira é a correta" deixou de valer — inclusive na tela.
+    private static Guid CorrectOption(QuestaoDto q) => q.Options.Single(o => o.Text == "Correta").Id;
+
+    private static Guid WrongOption(QuestaoDto q) => q.Options.Single(o => o.Text == "Errada").Id;
 
     [Fact]
     public async Task StartAttempt_CreatesAttemptWithFreshState()
@@ -150,8 +154,8 @@ public class SessaoDeProvaServiceTests
         {
             var q = await service.ObterQuestaoAsync(attemptId, n);
             // Alterna correta/errada: 2 certas, 2 erradas => 50%.
-            var optionId = n % 2 == 1 ? q!.Options.First().Id : q!.Options.Last().Id;
-            await service.SalvarRespostaAsync(new SalvarRespostaRequest(attemptId, q.Id, new[] { optionId }, false, 10));
+            var optionId = n % 2 == 1 ? CorrectOption(q!) : WrongOption(q!);
+            await service.SalvarRespostaAsync(new SalvarRespostaRequest(attemptId, q!.Id, new[] { optionId }, false, 10));
         }
 
         var result = await service.FinalizarTentativaAsync(attemptId);
@@ -352,6 +356,82 @@ public class SessaoDeProvaServiceTests
 
         Assert.Equal(ResultadoDeSalvarResposta.RespostaInvalida, resultado);
         Assert.Empty((await tentativas.ObterPorIdAsync(attemptId))!.Answers);
+    }
+
+    // ---- Ordem das alternativas -----------------------------------------
+    // O banco de questões escreve a correta em primeiro (formato dos arquivos de seed). Entregar
+    // nessa ordem ensinava a marcar a de cima: o candidato acertava sem entender o conceito, que é
+    // exatamente o contrário do que o simulado se propõe a treinar.
+
+    /// <summary>Exame de 1 questão com 4 alternativas — a correta em primeiro, como no seed.</summary>
+    private static Exame ExameDeQuatroAlternativas()
+    {
+        var exam = new Exame("AZ-900", "Azure Fundamentals", 45, 70, totalQuestions: 1);
+        var area = exam.AdicionarAreaDeHabilidade("conceitos-de-nuvem", "Conceitos de nuvem", 100m);
+        var q = exam.AdicionarQuestao(area.Id, "questao-4-opcoes", "Questão", TipoDeQuestao.EscolhaUnica, "Explicação.");
+
+        foreach (var (texto, correta) in new[] { ("A", true), ("B", false), ("C", false), ("D", false) })
+        {
+            q.AdicionarOpcao(texto, correta, q.Options.Count);
+        }
+
+        return exam;
+    }
+
+    [Fact]
+    public async Task Alternativas_MudamDePosicaoEntreTentativas()
+    {
+        var exam = ExameDeQuatroAlternativas();
+        var posicoesDaCorreta = new HashSet<int>();
+
+        for (var i = 0; i < 40; i++)
+        {
+            var (service, _, _, _, _) = BuildServiceCompleto(exam);
+            var attemptId = await service.IniciarTentativaAsync(exam.Id);
+            var questao = await service.ObterQuestaoAsync(attemptId, 1);
+
+            posicoesDaCorreta.Add(questao!.Options.ToList().FindIndex(o => o.Text == "A"));
+        }
+
+        // Antes disso o conjunto era { 0 } em qualquer número de tentativas.
+        Assert.Equal(4, posicoesDaCorreta.Count);
+    }
+
+    [Fact]
+    public async Task Alternativas_NaoTrocamDeLugarDentroDaMesmaTentativa()
+    {
+        var exam = ExameDeQuatroAlternativas();
+        var (service, _, _, _, _) = BuildServiceCompleto(exam);
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        var primeira = (await service.ObterQuestaoAsync(attemptId, 1))!.Options.Select(o => o.Id).ToList();
+        var segunda = (await service.ObterQuestaoAsync(attemptId, 1))!.Options.Select(o => o.Id).ToList();
+
+        // Navegar para frente e voltar recarrega a questão: se a ordem mudasse, a alternativa
+        // marcada apareceria em outro lugar da lista.
+        Assert.Equal(primeira, segunda);
+
+        await service.SalvarRespostaAsync(new SalvarRespostaRequest(
+            attemptId, (await service.ObterQuestaoAsync(attemptId, 1))!.Id, new[] { primeira[0] }, false, 10));
+        var resultado = await service.FinalizarTentativaAsync(attemptId);
+
+        // O gabarito é releitura do que aconteceu: mesma ordem que estava na tela durante a prova.
+        Assert.Equal(
+            (await service.ObterQuestaoAsync(attemptId, 1))!.Options.Select(o => o.Text),
+            resultado!.Questions.Single().Options.Select(o => o.Text));
+    }
+
+    [Fact]
+    public async Task OrderIndexDaAlternativa_EhAPosicaoNaTela_NaoADoBanco()
+    {
+        var exam = ExameDeQuatroAlternativas();
+        var (service, _, _, _, _) = BuildServiceCompleto(exam);
+        var attemptId = await service.IniciarTentativaAsync(exam.Id);
+
+        var opcoes = (await service.ObterQuestaoAsync(attemptId, 1))!.Options;
+
+        // Expor o índice do arquivo aqui entregaria o gabarito para quem lesse o HTML.
+        Assert.Equal(Enumerable.Range(0, 4), opcoes.Select(o => o.OrderIndex));
     }
 
     [Fact]

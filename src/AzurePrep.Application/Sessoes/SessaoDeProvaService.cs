@@ -3,6 +3,7 @@ using AzurePrep.Application.Contracts;
 using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
 using AzurePrep.Domain.Correcao;
+using AzurePrep.Domain.Sorteio;
 
 namespace AzurePrep.Application.Sessoes;
 
@@ -121,8 +122,9 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         var question = questions[number - 1];
         var answer = attempt.Answers.FirstOrDefault(a => a.QuestionId == question.Id);
 
-        var options = question.Options
-            .Select(o => new OpcaoDeQuestaoDto(o.Id, o.Text, o.OrderIndex))
+        // A ordem das alternativas é a da TENTATIVA, não a do banco de questões — ver OrdemDasOpcoes.
+        var options = OrdemDasOpcoes.Para(question, attempt.Id)
+            .Select((o, i) => new OpcaoDeQuestaoDto(o.Id, o.Text, i))
             .ToList();
 
         return new QuestaoDto(
@@ -363,7 +365,10 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             answersByQuestion.TryGetValue(question.Id, out var answer);
             var selected = answer?.SelectedOptionIds.ToHashSet() ?? new HashSet<Guid>();
 
-            var options = question.Options
+            // Mesma ordem que o candidato viu durante a prova: a revisão é releitura do que
+            // aconteceu, e alternativa que troca de lugar depois atrapalha justamente quem está
+            // tentando entender por que marcou o que marcou.
+            var options = OrdemDasOpcoes.Para(question, attempt.Id)
                 .Select(o => new RevisaoDeOpcaoDto(o.Text, o.IsCorrect, selected.Contains(o.Id)))
                 .ToList();
 

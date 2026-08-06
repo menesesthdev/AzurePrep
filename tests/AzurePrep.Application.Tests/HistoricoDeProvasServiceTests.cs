@@ -63,10 +63,8 @@ public class HistoricoDeProvasServiceTests
         for (var numero = 1; numero <= 4; numero++)
         {
             var questao = await c.Sessao.ObterQuestaoAsync(attemptId, numero);
-            // OrderIndex 0 é a correta neste seed; a segunda opção é a errada.
-            var opcao = numero <= acertos
-                ? questao!.Options.First().Id
-                : questao!.Options.Last().Id;
+            // Pelo texto, não pela posição: a ordem das alternativas é embaralhada por tentativa.
+            var opcao = questao!.Options.Single(o => o.Text == (numero <= acertos ? "Correta" : "Errada")).Id;
 
             await c.Sessao.SalvarRespostaAsync(
                 new SalvarRespostaRequest(attemptId, questao.Id, [opcao], false, 0));
@@ -128,7 +126,7 @@ public class HistoricoDeProvasServiceTests
         var attemptId = await c.Sessao.IniciarTentativaAsync(c.Exame.Id);
         var questao = await c.Sessao.ObterQuestaoAsync(attemptId, 1);
         await c.Sessao.SalvarRespostaAsync(
-            new SalvarRespostaRequest(attemptId, questao!.Id, [questao.Options.First().Id], false, 0));
+            new SalvarRespostaRequest(attemptId, questao!.Id, [questao.Options.Single(o => o.Text == "Correta").Id], false, 0));
 
         var historico = await c.Historico.ObterHistoricoAsync();
 
