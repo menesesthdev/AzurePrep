@@ -16,6 +16,12 @@
     <PackageReference Include="QRCoder" Version="1.8.0" />
     <!-- Sobrepõe a dependência transitiva vulnerável (NU1903, GHSA-2m69-gcr7-jv3q) do EF Core. -->
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12" />
+
+    <!-- Observabilidade. Nenhum pacote de vendor aqui de propósito: o Meter vem da BCL
+         (System.Diagnostics.Metrics, já no framework) e quem exporta para o Prometheus é o
+         OpenTelemetry, montado no Web. Este pacote entra só pelo BackgroundService que
+         reconta o banco. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.10" />
   </ItemGroup>
 
   <PropertyGroup>

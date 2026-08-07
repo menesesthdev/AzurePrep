@@ -1,0 +1,25 @@
+# Fonte de dados provisionada por arquivo, e não pela interface: assim um Grafana recriado do
+# zero (volume apagado, máquina nova) já sobe conectado, sem ninguém repetir cliques que não estão
+# escritos em lugar nenhum.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+
+    # O uid é fixo porque é ele que os JSONs dos dashboards referenciam. Deixar o Grafana sortear
+    # um faria cada painel apontar para uma fonte inexistente depois de recriar o container.
+    uid: azureprep-prometheus
+
+    # proxy: o navegador fala com o Grafana, que fala com o Prometheus pela rede interna. Com
+    # `direct` o navegador precisaria alcançar http://prometheus:9090, nome que só existe dentro
+    # do Docker.
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+
+    jsonData:
+      # Igual ao scrape_interval — é o que o Grafana usa como passo mínimo ao montar consultas de
+      # taxa. Menor que o intervalo real produziria degraus falsos no gráfico.
+      timeInterval: 15s

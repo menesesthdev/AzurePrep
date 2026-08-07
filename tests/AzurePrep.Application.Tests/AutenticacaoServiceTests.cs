@@ -30,12 +30,8 @@ public class AutenticacaoServiceTests
         FakeHasherDeSenha hasher,
         FakeGeradorDeTokenSeguro tokens) BuildCompleto()
     {
-        var repo = new InMemoryUsuarioRepository();
-        var clock = new FixedClock(Agora);
-        var hasher = new FakeHasherDeSenha();
-        var tokens = new FakeGeradorDeTokenSeguro();
-
-        return (new AutenticacaoService(repo, new FakeUnitOfWork(), clock, hasher, tokens), repo, clock, hasher, tokens);
+        var h = AutenticacaoServiceHarness.Novo(Agora);
+        return (h.Service, h.Repo, h.Clock, h.Hasher, h.Tokens);
     }
 
     private static LoginExternoRequest Login(

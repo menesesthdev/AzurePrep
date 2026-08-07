@@ -9,6 +9,10 @@ services:
 
     ports:
       # host:container — a aplicação escuta na 8080 por rodar sem privilégio.
+      #
+      # ⚠️ A porta 9464 (métricas) NÃO entra aqui de propósito. Ela existe dentro da rede do
+      # compose, onde o Prometheus a alcança, e não no host — é o que impede que /metrics, que
+      # não pede autenticação nenhuma, publique os números do produto para qualquer visitante.
       - "8080:8080"
 
     # Credenciais (OAuth, SMTP) vêm daqui. `dotnet user-secrets` NÃO existe dentro do container:
@@ -22,8 +26,84 @@ services:
       # novas — todo usuário cadastrado perdido e todo cookie invalidado.
       - dados:/app/App_Data
 
+  # ---- Observabilidade ------------------------------------------------------
+  # Dois serviços com papéis distintos, e vale saber qual é qual antes de mexer: o Prometheus
+  # COLETA e ARMAZENA as séries; o Grafana só DESENHA o que pergunta a ele. Painel vazio quase
+  # sempre é problema do primeiro, não do segundo.
+
+  prometheus:
+    image: prom/prometheus:v3.13.2
+    container_name: azureprep-prometheus
+    restart: unless-stopped
+
+    ports:
+      # Preso a 127.0.0.1: a interface do Prometheus não tem login nenhum e responde qualquer
+      # consulta a quem alcançá-la. Sem o prefixo, `ports` abriria a porta em TODAS as interfaces
+      # da máquina — inclusive a pública, se houver, e furando o firewall do host, porque o
+      # Docker escreve as próprias regras de iptables.
+      - "127.0.0.1:9090:9090"
+
+    volumes:
+      - ./observabilidade/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # Sem este volume o histórico morre a cada restart e todo gráfico recomeça do zero.
+      - prometheus-dados:/prometheus
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      # 90 dias cobre a pergunta que este projeto faz ("como está crescendo?") sem deixar o disco
+      # crescer indefinidamente num volume que ninguém está monitorando.
+      - "--storage.tsdb.retention.time=90d"
+
+    depends_on:
+      - web
+
+  grafana:
+    image: grafana/grafana:13.1.2
+    container_name: azureprep-grafana
+    restart: unless-stopped
+
+    ports:
+      # Mesma razão do Prometheus: exposto só no host. Para acessar de outra máquina, o caminho
+      # certo é um túnel SSH ou um proxy com TLS na frente — não trocar por "0.0.0.0".
+      - "127.0.0.1:3000:3000"
+
+    environment:
+      # Senha do usuário `admin`. Vem do .env (não versionado); o padrão só existe para o primeiro
+      # `docker compose up` funcionar. Como a porta é local, o risco é baixo — mas se o Grafana um
+      # dia sair do localhost, esta é a primeira variável a mudar.
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USUARIO:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_SENHA:-admin}
+
+      # Ninguém se cadastra sozinho e ninguém entra sem login: as métricas do produto não são
+      # públicas, e a página do Grafana é a única porta de entrada para elas.
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+
+      # Sem telemetria para fora e sem checagem de versão: a página de métricas de um projeto de
+      # certificação não precisa conversar com servidor de terceiro nenhum.
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+
+    volumes:
+      # Fonte de dados e dashboards vêm de arquivo versionado — ver o comentário em
+      # provisioning/dashboards/azureprep.yml sobre por que editar pela interface está desligado.
+      - ./observabilidade/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observabilidade/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      # Guarda usuários, sessões e preferências. Sem ele, cada restart pede a troca de senha inicial.
+      - grafana-dados:/var/lib/grafana
+
+    depends_on:
+      - prometheus
+
 volumes:
   # Volume nomeado, não bind mount: o dono do diretório vem da imagem (usuário `app`), então a
   # aplicação escreve sem ajuste de permissão no host. Bind mount de pasta do host entraria com
   # o UID do host e o processo sem privilégio não conseguiria gravar.
   dados:
+
+  # Mesma razão para os dois abaixo — Prometheus e Grafana também rodam sem privilégio nas
+  # imagens oficiais. O histórico de métricas é descartável (apagar só perde os gráficos
+  # antigos, não afeta a aplicação), mas não gratuitamente.
+  prometheus-dados:
+  grafana-dados:

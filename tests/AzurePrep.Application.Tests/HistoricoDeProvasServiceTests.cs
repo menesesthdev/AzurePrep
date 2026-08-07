@@ -1,5 +1,6 @@
 using AzurePrep.Application.Contracts;
 using AzurePrep.Application.Historico;
+using AzurePrep.Application.Observabilidade;
 using AzurePrep.Application.Sessoes;
 using AzurePrep.Application.Tests.Fakes;
 using AzurePrep.Domain.Correcao;
@@ -48,7 +49,14 @@ public class HistoricoDeProvasServiceTests
         var tentativas = new InMemoryExamAttemptRepository();
 
         return new Cenario(
-            new SessaoDeProvaService(exames, tentativas, new FakeSorteadorDeQuestoes(exames), new FakeUnitOfWork(), clock, usuario),
+            new SessaoDeProvaService(
+                exames,
+                tentativas,
+                new FakeSorteadorDeQuestoes(exames),
+                new FakeUnitOfWork(),
+                clock,
+                usuario,
+                MetricasDeNegocioSilenciosas.Instancia),
             new HistoricoDeProvasService(tentativas, exames, usuario),
             exam,
             clock,

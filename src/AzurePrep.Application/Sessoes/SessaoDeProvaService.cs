@@ -15,6 +15,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IClock _clock;
     private readonly IUsuarioAtual _usuarioAtual;
+    private readonly IMetricasDeNegocio _metricas;
 
     public SessaoDeProvaService(
         IExameRepository examRepository,
@@ -22,7 +23,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         ISorteadorDeQuestoes sorteador,
         IUnitOfWork unitOfWork,
         IClock clock,
-        IUsuarioAtual usuarioAtual)
+        IUsuarioAtual usuarioAtual,
+        IMetricasDeNegocio metricas)
     {
         _examRepository = examRepository;
         _attemptRepository = attemptRepository;
@@ -30,6 +32,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         _unitOfWork = unitOfWork;
         _clock = clock;
         _usuarioAtual = usuarioAtual;
+        _metricas = metricas;
     }
 
     public async Task<Guid> IniciarTentativaAsync(Guid examId, CancellationToken cancellationToken = default)
@@ -50,6 +53,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
         await _attemptRepository.AdicionarAsync(attempt, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.ProvaIniciada(exam.Code);
 
         return attempt.Id;
     }
@@ -216,6 +221,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             var score = CorretorDeProva.Corrigir(exam, questions, attempt.Answers);
             attempt.Concluir(score.ScorePercent, score.Passed, _clock.UtcNow);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            RegistrarConclusao(exam, attempt, score, MotivoDeEncerramento.Manual);
         }
 
         return MontarResultado(exam, questions, attempt);
@@ -290,7 +297,31 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
         attempt.Concluir(score.ScorePercent, score.Passed, vencimento);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        RegistrarConclusao(exam, attempt, score, MotivoDeEncerramento.TempoEsgotado);
     }
+
+    /// <summary>
+    /// Publica o desfecho da prova nas métricas. Chamado nos DOIS caminhos de encerramento — o
+    /// manual e o automático por tempo —, que é a razão de ser um método só: contar em apenas um
+    /// deles daria um painel onde metade das provas some, e a metade que some é justamente a de
+    /// quem não terminou a tempo.
+    /// </summary>
+    private void RegistrarConclusao(
+        Exame exam,
+        TentativaDeProva attempt,
+        PlacarDaProva score,
+        MotivoDeEncerramento motivo)
+        => _metricas.ProvaConcluida(
+            exam.Code,
+            score.Passed,
+            score.ScaledScore,
+
+            // A duração vem do que ficou GRAVADO na tentativa, não de "agora": no encerramento por
+            // tempo o fim é o instante do vencimento, e quem só reabriu a página dias depois não
+            // deve aparecer no histograma como uma prova de dois dias.
+            (attempt.FinishedAt ?? attempt.StartedAt) - attempt.StartedAt,
+            motivo);
 
     /// <summary>
     /// As questões da tentativa, na ordem em que foram sorteadas.

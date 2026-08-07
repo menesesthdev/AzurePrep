@@ -142,12 +142,16 @@ SQLite via EF Core Migrations. Arquivo em `src/AzurePrep.Web/App_Data/azureprep.
 
 ## Docker
 
-`Dockerfile` (multi-stage: SDK 10 compila, `aspnet:10.0` roda) + `docker-compose.yml`. A imagem roda como usuário sem privilégio (`USER $APP_UID`), escuta na **8080** e se auto-inicializa: as migrations e o seed rodam no startup, então subir com volume vazio já cria o banco.
+`Dockerfile` (multi-stage: SDK 10 compila, `aspnet:10.0` roda) + `docker-compose.yml`. A imagem roda como usuário sem privilégio (`USER $APP_UID`), escuta na **8080** (e na **9464**, só métricas — ver Observabilidade) e se auto-inicializa: as migrations e o seed rodam no startup, então subir com volume vazio já cria o banco.
+
+O compose sobe **três** serviços: a aplicação, o Prometheus e o Grafana.
 
 ```bash
 cp .env.exemplo .env          # credenciais de OAuth/SMTP; funciona vazio
 docker compose up --build
-# http://localhost:8080
+# http://localhost:8080       aplicação
+# http://localhost:3000       Grafana (admin/admin por padrão)
+# http://localhost:9090       Prometheus
 ```
 
 - **`App_Data` é o único estado que precisa sobreviver** e é onde o volume nomeado `dados` monta: banco SQLite **e** chaves de Data Protection. Container tem disco efêmero — que é exatamente o gatilho de migração para PostgreSQL citado acima; o volume neutraliza o gatilho enquanto for **uma instância só**. Escalar réplicas continua sendo o momento de trocar de banco (e o limitador de tentativas, que é em memória, tem o mesmo limite).
@@ -160,6 +164,47 @@ docker compose up --build
 - O aviso `Failed to determine the https port for redirect` também é esperado: o container serve HTTP e o TLS termina no proxy à frente. ⚠️ **Quando entrar um reverse proxy, é obrigatório configurar `UseForwardedHeaders`** — sem isso o ASP.NET monta os `redirect_uri` do OAuth com `http://` e os provedores recusam. Não está feito porque depende de saber qual é o proxy (`KnownProxies`), e middleware meio configurado aqui é risco de spoofing de IP — que também afetaria o limitador por IP.
 - A imagem **não roda os testes** no build. `dotnet test` fica no fluxo local/CI, para o build da imagem não pagar esse tempo a cada deploy.
 
+## Observabilidade (Prometheus + Grafana)
+
+Responde "o que está acontecendo no projeto": quantas contas existem, quanta gente ainda volta, quantas provas rodam e como o processo está de saúde. Tudo versionado em `observabilidade/` — datasource e dashboards são **arquivos**, não desenhos guardados dentro do Grafana, então um container recriado do zero sobe já configurado.
+
+**A cadeia inteira, do evento ao painel:**
+
+1. O caso de uso chama `IMetricasDeNegocio` (Application) — nunca o controller. Mesma disciplina da posse da tentativa: o controller não tem como esquecer de contar o que não é ele quem conta.
+2. `MetricasDoAzurePrep` (Infrastructure) implementa a porta com um `Meter` da **BCL** (`System.Diagnostics.Metrics`). Nenhum pacote de vendor nessa camada.
+3. `ObservabilidadeSetup` (Web) liga o OpenTelemetry ao meter e publica `/metrics` no formato do Prometheus.
+4. O Prometheus busca (`scrape`) esse endpoint a cada 15s; o Grafana só desenha o que pergunta a ele. **Painel vazio quase sempre é problema do Prometheus, não do Grafana.**
+
+**Estoque x movimento — a distinção que organiza tudo.** Evento (login, prova encerrada) vira **contador**, e se pergunta por taxa: `rate()`, `increase()`. Contador zera quando o processo reinicia, então nunca serve de total histórico. Estoque (contas cadastradas, provas realizadas) vira **medidor**, recontado no banco pelo `ColetorDeMetricasDoBanco` a cada 30s — é isso que sobrevive a todo deploy.
+
+- **O medidor não lê o banco na hora do scrape.** A leitura de um instrumento observável é síncrona e roda dentro da coleta: consultar o SQLite ali deixaria o Prometheus preso em I/O e, com o banco travado, faria a coleta inteira expirar. O preço de recontar em segundo plano é o painel enxergar o banco com até um intervalo de atraso — irrelevante para "quantas contas existem".
+- **`azureprep_coleta_idade_seconds` existe para denunciar coletor morto.** Se ele parasse em silêncio, todos os medidores congelariam mostrando o último valor conhecido com cara de valor atual. Uma exceção no coletor é registrada e engolida de propósito: a partir do .NET 6 ela derrubaria o processo, e derrubar o site porque a *contagem* de usuários falhou seria trocar um painel defasado por uma aplicação fora do ar.
+- **Antes da primeira coleta os medidores não publicam nada**, em vez de publicar zero. Lacuna no gráfico é "ainda não sei"; zero seria "não há nenhuma conta cadastrada" dito com toda a confiança.
+
+**As métricas de login distinguem o que a tela não distingue** — e é esse o ponto. `azureprep_logins_total{resultado}` separa `conta_inexistente`, `senha_incorreta`, `conta_bloqueada` e `pedido_invalido`, enquanto a tela devolve a mesma mensagem para todos, porque diferenciar ali viraria oráculo para descobrir quem tem conta. O painel é interno, o rótulo é um enum fechado sem e-mail nem id, e contar custa microssegundos contra os ~200ms do PBKDF2 — não abre canal de tempo. Sem essa separação, força bruta apareceria como uma linha genérica de "falhas". Mesma lógica em `azureprep_redefinicoes_senha_total`: a distância entre `solicitada` e `link_emitido` é alguém varrendo e-mails à procura de quem tem cadastro.
+
+- ⚠️ **Nada que identifique uma pessoa pode virar rótulo.** E-mail, nome ou id de usuário criariam uma série temporal por pessoa: estoura a memória do Prometheus (alta cardinalidade) e transforma o painel num cadastro exposto. Por isso a porta só aceita enums e código de exame. Vale igual para as métricas de HTTP, que rotulam pelo **template** da rota (`exam/{attemptId}/answer`) e não pela URL concreta.
+
+**`/metrics` fica numa porta separada (9464), que o compose não publica no host.** O endpoint é anônimo por obrigação — o Prometheus não sabe fazer login — e o que ele devolve não é inócuo. A defesa é de rede: a porta existe só dentro da rede do Docker. Um token seria pior, porque o arquivo de configuração do Prometheus **não interpola variável de ambiente** e o segredo acabaria versionado em texto para não quebrar o `docker compose up`.
+
+- Na porta pública, `/metrics` não casa com endpoint nenhum e cai na política padrão de autenticação: responde um redirect para o login, **byte a byte igual ao de qualquer caminho inexistente**. Nem os números vazam, nem se confirma que o endpoint existe em algum lugar.
+- A porta precisa estar em `ASPNETCORE_HTTP_PORTS` (`8080;9464` no Dockerfile) **e** em `Observabilidade:PortaDeMetricas`. Se discordarem, a aplicação sobe normalmente e **avisa no log** — sem esse aviso a falha seria muda: `/metrics` sem responder em lugar nenhum, alvo "down" no Prometheus e Grafana vazio, sem pista de onde olhar.
+- Em desenvolvimento `PortaDeMetricas` é **0**: serve na porta da aplicação, porque `dotnet run` abre só as portas do launchSettings e não há rede interna para isolar. `http://localhost:5090/metrics` mostra a saída crua.
+- ⚠️ **Quem colocar um proxy reverso na frente tem de manter a 9464 fora dele** — é o mesmo cuidado já registrado para `UseForwardedHeaders`.
+- Grafana e Prometheus são publicados **só em `127.0.0.1`**. Sem esse prefixo o Docker escreveria regras de iptables abrindo as portas em todas as interfaces, furando o firewall do host — e nenhum dos dois tem autenticação que sirva para internet aberta.
+
+**⚠️ `metric_name_validation_scheme: legacy` no `prometheus.yml` não é detalhe.** O OpenTelemetry nomeia instrumentos com ponto (`azureprep.usuarios.cadastrados`) e o Prometheus 3 passou a aceitar UTF-8: sem essa configuração ele guarda o nome **com ponto**, e `sum(azureprep_usuarios_cadastrados)` não encontra nada — a série existe com outro nome, e a consulta exigiria a sintaxe entre aspas (`sum({"azureprep.usuarios.cadastrados"})`), que praticamente nenhum exemplo ou dashboard da internet usa. Voltando ao esquema clássico, o exportador entrega tudo já traduzido para underscore.
+
+**Métrica é testada porque falha calada.** Um contador que deixa de ser chamado não quebra nada, não lança nada e não aparece em log nenhum — só produz um painel plano, idêntico a um dia sem movimento. Nome de instrumento e valor de rótulo são contrato com os dashboards que o compilador não vê, então os testes os afirmam como **literais** (`"conta_inexistente"`, e não derivado do enum). O caso que mais justifica a suíte é o encerramento por tempo esgotado: acontece num caminho separado do "Encerrar prova", e instrumentar só o clique perderia justamente as provas de quem não terminou a tempo — sobrando um número que *parece* certo, com a taxa de aprovação inflada e nenhum sinal de que faltava metade dos dados.
+
+- Marca é palavra só: `LinkedIn` vira `linkedin`, não `linked_in`. A regra geral de rótulo separa por maiúscula do meio (para `SenhaIncorreta` virar `senha_incorreta`) e precisa da exceção.
+- O `Meter` declara `scope: this`. Em produção não muda nada (a assinatura e o Prometheus enxergam só o nome); existe porque o `MetricCollector` filtra por escopo, e sem ele duas instâncias em paralelo — xUnit roda classes de teste concorrentemente — alimentariam o mesmo coletor, com falha intermitente e sem explicação.
+- `LeitorDoRetratoDoBanco` é testado contra **SQLite real**: o risco ali é de tradução, e um `GroupBy` que o provider não converte compila, sobe e só estoura em tempo de execução — dentro do serviço em segundo plano, cuja exceção é engolida. A falha apareceria como painel vazio, não como teste vermelho.
+
+**O que já vem de graça, sem instrumentar nada.** Como os instrumentos são `System.Diagnostics.Metrics`, o ASP.NET Core e o runtime .NET entram na mesma coleta: `http_server_request_duration_seconds` (latência, status e rota), `aspnetcore_rate_limiting_requests_total` (o limitador de tentativas por IP, com `acquired` x `rejected`), `kestrel_*` e `dotnet_gc_*` / `dotnet_process_*`. É metade do dashboard "Aplicação". O scrape do próprio `/metrics` é excluído com `DisableHttpMetrics()` — senão, num projeto com pouco movimento, a coleta seria a rota mais acessada do painel.
+
+**Custo do log.** Recontar o banco a cada 30s gera seis consultas por volta, e o EF Core registra cada comando SQL em nível Information. Daí `Microsoft.EntityFrameworkCore.Database.Command: Warning` no `appsettings.json` — sem isso o log vira uma esteira infinita de `SELECT COUNT(*)` e o que importa afunda no meio. O `appsettings.Development.json` devolve o nível Information, porque em desenvolvimento ver o SQL é justamente o que se quer.
+
 ## Comandos úteis
 
 ```bash
@@ -168,6 +213,19 @@ dotnet run --project src/AzurePrep.Web
 dotnet ef migrations add NomeDaMigration --project src/AzurePrep.Infrastructure --startup-project src/AzurePrep.Web
 dotnet ef database update --project src/AzurePrep.Infrastructure --startup-project src/AzurePrep.Web
 dotnet test
+
+# Observabilidade — ver o que a aplicação está publicando, sem passar por Prometheus nem Grafana.
+# Em desenvolvimento (PortaDeMetricas = 0) o endpoint responde na porta da própria aplicação:
+curl -s http://localhost:5090/metrics | grep '^azureprep'
+
+# No container a porta é outra e não é publicada no host — só a rede do compose a alcança:
+docker compose exec prometheus wget -qO- http://web:9464/metrics | grep '^azureprep'
+
+# Os alvos que o Prometheus está coletando (health "up"/"down" e o último erro de cada um):
+curl -s 'http://localhost:9090/api/v1/targets?state=active' | python3 -m json.tool
+
+# Rodar uma consulta PromQL direto, para saber se o painel está vazio por falta de dado:
+curl -s --get http://localhost:9090/api/v1/query --data-urlencode 'query=sum(azureprep_usuarios_cadastrados)'
 
 # Credenciais OAuth (nunca commitar — ficam fora do repositório)
 cd src/AzurePrep.Web
@@ -248,3 +306,5 @@ Callback a cadastrar em cada provedor (ajuste host/porta): `/signin-google`, `/s
 
 - Deploy em nuvem (a imagem Docker existe e roda local; publicar num provedor é outro passo)
 - Outros exames além do AZ-900 (mas o modelo de dados já deve suportar)
+- **Alertas** (`alerting_rules` no Prometheus, Alertmanager, notificação do Grafana). A infraestrutura já suporta — `azureprep_coleta_idade_seconds` e a taxa de 5xx são os dois candidatos naturais —, mas alerta sem destino combinado e sem alguém de plantão é só mais um painel vermelho que ninguém vê.
+- **Logs e traces centralizados** (Loki, Tempo, OTLP). O `AddOpenTelemetry` já está montado e trocar o exportador é mudança de uma linha, mas isso dobraria a stack do compose para responder perguntas que hoje `docker compose logs` responde.

@@ -1,4 +1,6 @@
+using AzurePrep.Application.Abstractions;
 using AzurePrep.Application.Contracts;
+using AzurePrep.Application.Observabilidade;
 using AzurePrep.Application.Sessoes;
 using AzurePrep.Application.Tests.Fakes;
 using AzurePrep.Domain.Entidades;
@@ -43,7 +45,14 @@ public class SessaoDeProvaServiceTests
     /// precisam afirmar que uma resposta recusada não deixou linha nenhuma para trás, e isso não
     /// aparece em nenhum DTO (o estado só enumera a composição sorteada).
     /// </summary>
-    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario, InMemoryExamAttemptRepository tentativas) BuildServiceCompleto(Exame? exame = null)
+    /// <param name="metricas">
+    /// Opcional porque quase nenhum teste daqui se importa com instrumentação — o padrão
+    /// silencioso evita que todos tenham de montar um coletor só para ignorá-lo. Quem afirma
+    /// sobre métrica passa o próprio.
+    /// </param>
+    private static (SessaoDeProvaService service, Exame exam, FixedClock clock, FakeUsuarioAtual usuario, InMemoryExamAttemptRepository tentativas) BuildServiceCompleto(
+        Exame? exame = null,
+        IMetricasDeNegocio? metricas = null)
     {
         var exam = exame ?? BuildExam();
         var clock = new FixedClock(Iniciar);
@@ -56,7 +65,8 @@ public class SessaoDeProvaServiceTests
             new FakeSorteadorDeQuestoes(exames),
             new FakeUnitOfWork(),
             clock,
-            usuario);
+            usuario,
+            metricas ?? MetricasDeNegocioSilenciosas.Instancia);
         return (service, exam, clock, usuario, tentativas);
     }
 

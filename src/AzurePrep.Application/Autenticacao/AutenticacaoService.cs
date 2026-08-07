@@ -13,6 +13,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
     private readonly IClock _clock;
     private readonly IHasherDeSenha _hasher;
     private readonly IGeradorDeTokenSeguro _tokens;
+    private readonly IMetricasDeNegocio _metricas;
 
     /// <summary>
     /// Hash descartável usado quando o e-mail não existe. Sem ele, "e-mail inexistente"
@@ -26,13 +27,15 @@ public sealed class AutenticacaoService : IAutenticacaoService
         IUnitOfWork unitOfWork,
         IClock clock,
         IHasherDeSenha hasher,
-        IGeradorDeTokenSeguro tokens)
+        IGeradorDeTokenSeguro tokens,
+        IMetricasDeNegocio metricas)
     {
         _usuarios = usuarios;
         _unitOfWork = unitOfWork;
         _clock = clock;
         _hasher = hasher;
         _tokens = tokens;
+        _metricas = metricas;
         _hashDeReferencia = new Lazy<string>(() => _hasher.Hash("senha-de-referencia-sem-uso"));
     }
 
@@ -44,6 +47,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
 
         var now = _clock.UtcNow;
         var usuario = await _usuarios.ObterPorProvedorAsync(request.Provider, request.ProviderKey, cancellationToken);
+        var contaNova = usuario is null;
 
         if (usuario is null)
         {
@@ -68,6 +72,17 @@ public sealed class AutenticacaoService : IAutenticacaoService
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Só depois do SaveChanges: contar antes registraria como cadastro o que uma violação de
+        // índice único ainda pode desfazer.
+        if (contaNova)
+        {
+            _metricas.ContaCriada(request.Provider);
+        }
+
+        // No login externo não existe "senha errada": ou o provedor autenticou, ou o fluxo nem
+        // chega aqui (o callback devolve para a tela de login).
+        _metricas.LoginRegistrado(request.Provider, ResultadoDeLogin.Sucesso);
+
         return Mapear(usuario);
     }
 
@@ -81,11 +96,13 @@ public sealed class AutenticacaoService : IAutenticacaoService
         // sem passar pelo formulário, de criar conta com senha de dois caracteres.
         if (!PoliticaDeSenha.EhAceitavel(request.Password))
         {
+            _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.SenhaInaceitavel);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.SenhaInaceitavel);
         }
 
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Name))
         {
+            _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.DadosIncompletos);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
@@ -98,6 +115,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
         var existente = await _usuarios.ObterPorProvedorAsync(ProvedorDeLogin.Local, email, cancellationToken);
         if (existente is not null)
         {
+            _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.EmailJaCadastrado);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.EmailJaCadastrado);
         }
 
@@ -113,6 +131,8 @@ public sealed class AutenticacaoService : IAutenticacaoService
         await _usuarios.AdicionarAsync(usuario, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        _metricas.ContaCriada(ProvedorDeLogin.Local);
+
         return ResultadoDeAutenticacao.Sucesso(Mapear(usuario));
     }
 
@@ -122,8 +142,14 @@ public sealed class AutenticacaoService : IAutenticacaoService
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        // ⚠️ A métrica registrada em cada saída abaixo distingue casos que a TELA nunca distingue
+        // (e-mail sem conta, senha errada, conta bloqueada) — é essa distinção que permite ver um
+        // ataque de força bruta no painel. Não vaza nada: o rótulo é um enum de quatro valores,
+        // sem e-mail nem id, e o painel é interno. O custo de contar é de microssegundos contra os
+        // ~200ms do PBKDF2, então também não abre canal de tempo.
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
         {
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.PedidoInvalido);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
@@ -132,6 +158,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
         // PBKDF2 sobre um payload gigante enviado de propósito.
         if (request.Password.Length > PoliticaDeSenha.TamanhoMaximo)
         {
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.PedidoInvalido);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
@@ -145,6 +172,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
         if (usuario?.PasswordHash is null)
         {
             _hasher.Verificar(request.Password, _hashDeReferencia.Value);
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.ContaInexistente);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
@@ -154,6 +182,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
         if (usuario.EstaBloqueada(agora))
         {
             _hasher.Verificar(request.Password, _hashDeReferencia.Value);
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.ContaBloqueada);
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
@@ -162,6 +191,8 @@ public sealed class AutenticacaoService : IAutenticacaoService
             usuario.RegistrarFalhaDeLogin(agora);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.SenhaIncorreta);
+
             // Mesma falha do caso bloqueado: a tela não diferencia "senha errada" de "conta
             // travada", senão o bloqueio viraria confirmação de que o e-mail tem conta.
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
@@ -169,6 +200,8 @@ public sealed class AutenticacaoService : IAutenticacaoService
 
         usuario.RegistrarLoginLocal(agora);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.Sucesso);
 
         return ResultadoDeAutenticacao.Sucesso(Mapear(usuario));
     }
@@ -181,6 +214,10 @@ public sealed class AutenticacaoService : IAutenticacaoService
         {
             return null;
         }
+
+        // Contado ANTES de saber se existe conta: a diferença entre "pedidos" e "links emitidos"
+        // é justamente o que mostra alguém varrendo e-mails à procura de quem tem cadastro aqui.
+        _metricas.RedefinicaoDeSenha(EtapaDeRedefinicao.Solicitada);
 
         var agora = _clock.UtcNow;
         var normalizado = Usuario.NormalizarEmail(email);
@@ -207,6 +244,8 @@ public sealed class AutenticacaoService : IAutenticacaoService
             cancellationToken);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.RedefinicaoDeSenha(EtapaDeRedefinicao.LinkEmitido);
 
         // O token em texto sai daqui e não volta: o Web monta o link, manda o e-mail e
         // esquece. No banco ficou só o hash.
@@ -273,6 +312,8 @@ public sealed class AutenticacaoService : IAutenticacaoService
         }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.RedefinicaoDeSenha(EtapaDeRedefinicao.Concluida);
 
         return ResultadoDeAutenticacao.Sucesso(Mapear(usuario));
     }

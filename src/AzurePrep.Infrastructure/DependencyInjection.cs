@@ -3,6 +3,7 @@ using AzurePrep.Application.Abstractions;
 using AzurePrep.Infrastructure.Aleatoriedade;
 using AzurePrep.Infrastructure.Doacao;
 using AzurePrep.Infrastructure.Email;
+using AzurePrep.Infrastructure.Observabilidade;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Repositories;
 using AzurePrep.Infrastructure.Seguranca;
@@ -42,8 +43,39 @@ public static class DependencyInjection
 
         AdicionarEnvioDeEmail(services, configuration);
         AdicionarDoacao(services, configuration);
+        AdicionarObservabilidade(services, configuration);
 
         return services;
+    }
+
+    /// <summary>
+    /// Registra o medidor de negócio e o coletor que reconta o banco. O que NÃO está aqui é o
+    /// exportador: transformar isso em <c>/metrics</c> é papel do Web, que é quem tem pipeline
+    /// HTTP — a Infrastructure não deve saber que Prometheus existe.
+    /// </summary>
+    private static void AdicionarObservabilidade(IServiceCollection services, IConfiguration configuration)
+    {
+        var secao = configuration.GetSection(OpcoesDeObservabilidade.Secao);
+        var opcoes = new OpcoesDeObservabilidade
+        {
+            PortaDeMetricas = int.TryParse(secao["PortaDeMetricas"], out var porta) ? porta : 9464,
+
+            // Piso de 5s: um intervalo minúsculo (ou zero, digitado por engano) transformaria o
+            // coletor num laço de consultas ao SQLite disputando o banco com quem está em prova.
+            IntervaloDeColeta = int.TryParse(secao["IntervaloDeColetaSegundos"], out var segundos) && segundos > 0
+                ? TimeSpan.FromSeconds(Math.Max(5, segundos))
+                : TimeSpan.FromSeconds(30)
+        };
+
+        services.AddSingleton(opcoes);
+
+        // Singleton obrigatório: é o Meter que o OpenTelemetry assina uma única vez no startup.
+        services.AddSingleton<MetricasDoAzurePrep>();
+        services.AddSingleton<IMetricasDeNegocio>(sp => sp.GetRequiredService<MetricasDoAzurePrep>());
+
+        // Scoped porque depende do DbContext, que é scoped — o coletor abre um escopo por volta.
+        services.AddScoped<LeitorDoRetratoDoBanco>();
+        services.AddHostedService<ColetorDeMetricasDoBanco>();
     }
 
     /// <summary>

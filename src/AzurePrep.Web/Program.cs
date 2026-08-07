@@ -2,6 +2,7 @@ using AzurePrep.Application;
 using AzurePrep.Infrastructure;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Web.Autenticacao;
+using AzurePrep.Web.Observabilidade;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,10 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddAutenticacaoSocial(builder.Configuration);
 builder.Services.AddLimiteDeTentativas();
+
+// Coleta e exportação de métricas. O medidor de negócio e o coletor que reconta o banco já vieram
+// de AddInfrastructure — aqui entra só o que precisa do pipeline HTTP.
+builder.Services.AddObservabilidade();
 
 // As chaves do Data Protection cifram o cookie de autenticação e os tokens antiforgery. O padrão
 // as guarda numa pasta do perfil do usuário — que num container é disco efêmero: a cada restart
@@ -76,6 +81,9 @@ app.MapStaticAssets().AllowAnonymous();
 // Sinal de vida para orquestrador/proxy: responde sem tocar no banco e sem exigir login (a
 // política padrão exige autenticação, então precisa de AllowAnonymous explícito).
 app.MapGet("/health", () => Results.Ok("ok")).AllowAnonymous();
+
+// /metrics para o Prometheus — por padrão numa porta que o compose não publica no host.
+app.MapMetricas();
 
 app.MapControllerRoute(
     name: "default",

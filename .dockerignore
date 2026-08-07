@@ -25,6 +25,9 @@ tests/
 docs/
 assets/
 tools/
+# Configuração do Prometheus/Grafana: o compose monta esses arquivos nos contêineres deles,
+# não na imagem da aplicação.
+observabilidade/
 *.md
 Dockerfile
 .dockerignore

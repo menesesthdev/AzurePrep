@@ -1,4 +1,5 @@
 using AzurePrep.Application.Abstractions;
+using AzurePrep.Application.Autenticacao;
 using AzurePrep.Application.Contracts;
 using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
@@ -93,6 +94,93 @@ public sealed class FakeHasherDeSenha : IHasherDeSenha
     {
         ChamadasDeVerificacao++;
         return hash == $"fake:{senha}";
+    }
+}
+
+/// <summary>
+/// Guarda tudo que foi medido, para o teste afirmar sobre a instrumentação como afirma sobre
+/// qualquer outro efeito do caso de uso.
+/// </summary>
+/// <remarks>
+/// Vale a pena testar métrica porque ela falha calada: um contador que deixa de ser chamado não
+/// quebra nada, não lança nada e não aparece em nenhum log — só produz um painel plano, que é
+/// exatamente o que se espera ver quando não está acontecendo nada.
+/// </remarks>
+public sealed class FakeMetricasDeNegocio : IMetricasDeNegocio
+{
+    public List<ProvedorDeLogin> ContasCriadas { get; } = new();
+
+    public List<MotivoDeRecusaDeCadastro> CadastrosRecusados { get; } = new();
+
+    public List<(ProvedorDeLogin Provedor, ResultadoDeLogin Resultado)> Logins { get; } = new();
+
+    public List<EtapaDeRedefinicao> Redefinicoes { get; } = new();
+
+    public List<string> ProvasIniciadas { get; } = new();
+
+    public List<(string Exame, bool Aprovado, int Nota, TimeSpan Duracao, MotivoDeEncerramento Motivo)> ProvasConcluidas { get; } = new();
+
+    public void ContaCriada(ProvedorDeLogin provedor) => ContasCriadas.Add(provedor);
+
+    public void CadastroRecusado(MotivoDeRecusaDeCadastro motivo) => CadastrosRecusados.Add(motivo);
+
+    public void LoginRegistrado(ProvedorDeLogin provedor, ResultadoDeLogin resultado)
+        => Logins.Add((provedor, resultado));
+
+    public void RedefinicaoDeSenha(EtapaDeRedefinicao etapa) => Redefinicoes.Add(etapa);
+
+    public void ProvaIniciada(string codigoDoExame) => ProvasIniciadas.Add(codigoDoExame);
+
+    public void ProvaConcluida(
+        string codigoDoExame,
+        bool aprovado,
+        int notaEscalada,
+        TimeSpan duracao,
+        MotivoDeEncerramento motivo)
+        => ProvasConcluidas.Add((codigoDoExame, aprovado, notaEscalada, duracao, motivo));
+
+    /// <summary>
+    /// Esquece o que foi medido até aqui. Serve para separar a PREPARAÇÃO do cenário do que o
+    /// teste realmente quer afirmar — criar a conta antes de testar o login também mede coisas.
+    /// </summary>
+    public void Limpar()
+    {
+        ContasCriadas.Clear();
+        CadastrosRecusados.Clear();
+        Logins.Clear();
+        Redefinicoes.Clear();
+        ProvasIniciadas.Clear();
+        ProvasConcluidas.Clear();
+    }
+}
+
+/// <summary>
+/// Um <see cref="AutenticacaoService"/> montado com todos os dublês, com as peças que os testes
+/// precisam inspecionar à mão.
+/// </summary>
+public sealed record AutenticacaoServiceHarness(
+    AutenticacaoService Service,
+    InMemoryUsuarioRepository Repo,
+    FixedClock Clock,
+    FakeHasherDeSenha Hasher,
+    FakeGeradorDeTokenSeguro Tokens,
+    FakeMetricasDeNegocio Metricas)
+{
+    public static AutenticacaoServiceHarness Novo(DateTime? agora = null)
+    {
+        var repo = new InMemoryUsuarioRepository();
+        var clock = new FixedClock(agora ?? new DateTime(2026, 3, 1, 9, 0, 0, DateTimeKind.Utc));
+        var hasher = new FakeHasherDeSenha();
+        var tokens = new FakeGeradorDeTokenSeguro();
+        var metricas = new FakeMetricasDeNegocio();
+
+        return new AutenticacaoServiceHarness(
+            new AutenticacaoService(repo, new FakeUnitOfWork(), clock, hasher, tokens, metricas),
+            repo,
+            clock,
+            hasher,
+            tokens,
+            metricas);
     }
 }
 

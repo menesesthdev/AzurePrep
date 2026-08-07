@@ -1,5 +1,6 @@
 using AzurePrep.Application.Abstractions;
 using AzurePrep.Application.Contracts;
+using AzurePrep.Application.Observabilidade;
 using AzurePrep.Application.Sessoes;
 using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
@@ -64,7 +65,8 @@ public sealed class SessaoDeProvaPersistenceTests : IDisposable
             new SorteadorDeQuestoesService(exames, tentativas, new SementeFixa()),
             ctx,
             _clock,
-            _usuario), ctx);
+            _usuario,
+            MetricasDeNegocioSilenciosas.Instancia), ctx);
     }
 
     private sealed class FixedUsuarioAtual(Guid id) : IUsuarioAtual

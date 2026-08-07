@@ -29,7 +29,16 @@ WORKDIR /app
 
 # 8080 e não 80: a imagem roda como usuário sem privilégio, e porta abaixo de 1024 exigiria root.
 # É o padrão das imagens .NET desde a 8.
-ENV ASPNETCORE_HTTP_PORTS=8080
+#
+# A segunda porta é só para /metrics (9464 é a convenção do OpenTelemetry). Duas portas, e não
+# uma, porque o endpoint de métricas não pede autenticação — o Prometheus não sabe fazer login — e
+# expõe números do produto. Separando, basta o compose publicar a 8080 no host para que /metrics
+# exista apenas dentro da rede do Docker. É defesa de rede, e não de senha, e é sólida enquanto a
+# 9464 não for publicada nem exposta por um proxy reverso.
+#
+# ⚠️ Esta lista e Observabilidade:PortaDeMetricas precisam concordar. Se discordarem, a aplicação
+# sobe igual e avisa no log — /metrics respondendo 404 é a falha esperada.
+ENV ASPNETCORE_HTTP_PORTS="8080;9464"
 
 COPY --from=build /app/publish .
 
@@ -48,6 +57,7 @@ RUN mkdir -p /app/App_Data \
 USER $APP_UID
 
 EXPOSE 8080
+EXPOSE 9464
 
 # Sem HEALTHCHECK aqui de propósito: a imagem de runtime não traz curl nem wget, e instalar um
 # só para isso engordaria a imagem. O endpoint /health existe — quem orquestrar (compose com
