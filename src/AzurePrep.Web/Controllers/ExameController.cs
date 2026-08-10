@@ -112,6 +112,7 @@ public class ExameController : Controller
     // Antiforgery é obrigatório aqui: a ação não recebe corpo, então sem o token um formulário
     // em site de terceiro encerraria a prova de quem está logado — e encerrar é irreversível.
     [HttpPost("{attemptId:guid}/finish")]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Finalizar(Guid attemptId, CancellationToken cancellationToken)
     {
         await _session.FinalizarTentativaAsync(attemptId, cancellationToken);
