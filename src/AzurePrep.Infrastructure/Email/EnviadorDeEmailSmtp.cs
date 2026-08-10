@@ -59,8 +59,22 @@ public sealed class EnviadorDeEmailSmtp : IEnviadorDeEmail
         {
             await cliente.SendMailAsync(mensagem, cancellationToken);
         }
-        catch (Exception ex) when (ex is SmtpException or InvalidOperationException or IOException)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            // Requisição abortada por quem chamou (pessoa fechou a aba). Não é falha de envio e
+            // não vira erro no log — é a lista curta de ERRO que faz alguém olhar para ela. A
+            // guarda no token importa: o timeout do SmtpClient também chega como cancelamento,
+            // e esse SIM é falha de envio, então cai no catch de baixo.
+            throw;
+        }
+        catch (Exception ex)
+        {
+            // ⚠️ Captura ampla de propósito, e não a lista de tipos que estava aqui antes. O que
+            // escapava dela era justamente o que acontece contra servidor real: AuthenticationException
+            // no handshake TLS, SocketException com host errado, TaskCanceledException no timeout do
+            // SmtpClient. Qualquer uma subiria até o controller e estouraria a página SÓ no caminho em
+            // que a conta existe — e aí a tela de "esqueci minha senha", que responde igual para todo
+            // mundo justamente para não dizer quem tem cadastro, passaria a dizer.
             _logger.LogError(ex, "Falha ao enviar e-mail por SMTP para {Destinatario}.", destinatario);
         }
     }
