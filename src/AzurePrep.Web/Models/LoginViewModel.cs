@@ -27,4 +27,15 @@ public sealed class LoginViewModel
     [Required(ErrorMessage = "Informe sua senha.")]
     [StringLength(PoliticaDeSenha.TamanhoMaximo)]
     public string? Senha { get; init; }
+
+    /// <summary>
+    /// Credenciais certas, mas o e-mail nunca foi confirmado. Fica fora do ModelState (ao
+    /// contrário de "e-mail ou senha incorretos") porque a mensagem precisa carregar um LINK de
+    /// reenvio, e mensagem de validação é texto puro.
+    /// </summary>
+    /// <remarks>
+    /// Só chega aqui quem acertou a senha — ver <c>FalhaDeAutenticacao.EmailNaoConfirmado</c>.
+    /// Por isso esta tela pode ser específica sem virar consulta de quem tem cadastro.
+    /// </remarks>
+    public bool EmailNaoConfirmado { get; init; }
 }

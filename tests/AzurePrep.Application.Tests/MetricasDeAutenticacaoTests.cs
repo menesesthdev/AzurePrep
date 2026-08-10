@@ -30,10 +30,16 @@ public class MetricasDeAutenticacaoTests
     private const string Email = "ana@example.com";
     private const string Senha = "senha-que-serve";
 
+    /// <summary>
+    /// Conta local pronta para uso: cadastrada E com o e-mail confirmado. A confirmação faz
+    /// parte do cenário-base porque, sem ela, todo login destes testes bateria em
+    /// <see cref="ResultadoDeLogin.EmailNaoConfirmado"/> antes de chegar ao desfecho medido.
+    /// </summary>
     private static async Task<(AutenticacaoServiceHarness harness, FakeMetricasDeNegocio metricas)> ComContaLocalAsync()
     {
         var harness = AutenticacaoServiceHarness.Novo();
-        await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+        var cadastro = await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+        await harness.Service.ConfirmarEmailAsync(cadastro.Confirmacao!.Token);
         harness.Metricas.Limpar();
         return (harness, harness.Metricas);
     }
@@ -174,5 +180,85 @@ public class MetricasDeAutenticacaoTests
 
         Assert.True(resultado.Autenticou);
         Assert.Equal([EtapaDeRedefinicao.Concluida], metricas.Redefinicoes);
+    }
+
+    // ---- Confirmação de e-mail -------------------------------------------
+
+    [Fact]
+    public async Task Cadastro_RegistraOLinkDeConfirmacaoEmitido()
+    {
+        var harness = AutenticacaoServiceHarness.Novo();
+
+        await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+
+        Assert.Equal([EtapaDeConfirmacaoDeEmail.LinkEmitido], harness.Metricas.Confirmacoes);
+    }
+
+    /// <summary>
+    /// A distância entre link emitido e confirmação concluída é a ÚNICA medida que existe de
+    /// quantas contas nascem inalcançáveis — e-mail digitado errado, ou mensagem barrada pelo
+    /// filtro de spam do destino. Sem esses dois pontos, uma queda na entrega apareceria só
+    /// como "menos gente usando", que não aponta para lugar nenhum.
+    /// </summary>
+    [Fact]
+    public async Task Confirmacao_RegistraAConclusao()
+    {
+        var harness = AutenticacaoServiceHarness.Novo();
+        var cadastro = await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+        harness.Metricas.Limpar();
+
+        await harness.Service.ConfirmarEmailAsync(cadastro.Confirmacao!.Token);
+
+        Assert.Equal([EtapaDeConfirmacaoDeEmail.Concluida], harness.Metricas.Confirmacoes);
+    }
+
+    [Fact]
+    public async Task ConfirmacaoComTokenInvalido_RegistraRecusa()
+    {
+        var harness = AutenticacaoServiceHarness.Novo();
+
+        await harness.Service.ConfirmarEmailAsync("token-que-nao-existe");
+
+        Assert.Equal([EtapaDeConfirmacaoDeEmail.TokenRecusado], harness.Metricas.Confirmacoes);
+    }
+
+    /// <summary>
+    /// Mesma lógica de <c>EsqueciSenha_SeparaOPedidoDaEmissaoDoLink</c>: a tela responde igual
+    /// exista ou não conta pendente, então a diferença entre pedido e emissão é o que denuncia
+    /// alguém varrendo endereços por aqui.
+    /// </summary>
+    [Fact]
+    public async Task Reenvio_SeparaOPedidoDaEmissaoDoLink()
+    {
+        var harness = AutenticacaoServiceHarness.Novo();
+        await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+        harness.Metricas.Limpar();
+
+        await harness.Service.ReenviarConfirmacaoDeEmailAsync("ninguem@example.com");
+        Assert.Equal([EtapaDeConfirmacaoDeEmail.ReenvioSolicitado], harness.Metricas.Confirmacoes);
+
+        harness.Metricas.Limpar();
+
+        await harness.Service.ReenviarConfirmacaoDeEmailAsync(Email);
+        Assert.Equal(
+            [EtapaDeConfirmacaoDeEmail.ReenvioSolicitado, EtapaDeConfirmacaoDeEmail.LinkEmitido],
+            harness.Metricas.Confirmacoes);
+    }
+
+    /// <summary>
+    /// Senha certa em conta não confirmada tem desfecho PRÓPRIO na métrica. Sem separá-lo, essa
+    /// tentativa cairia junto com "senha incorreta" e uma quebra no envio de e-mail — dezenas de
+    /// pessoas presas na porta — apareceria no painel com a cara de um ataque de força bruta.
+    /// </summary>
+    [Fact]
+    public async Task LoginSemConfirmar_RegistraEmailNaoConfirmado()
+    {
+        var harness = AutenticacaoServiceHarness.Novo();
+        await harness.Service.CadastrarComSenhaAsync(new CadastroLocalRequest("Ana", Email, Senha));
+        harness.Metricas.Limpar();
+
+        await harness.Service.AutenticarComSenhaAsync(new LoginLocalRequest(Email, Senha));
+
+        Assert.Equal([(ProvedorDeLogin.Local, ResultadoDeLogin.EmailNaoConfirmado)], harness.Metricas.Logins);
     }
 }

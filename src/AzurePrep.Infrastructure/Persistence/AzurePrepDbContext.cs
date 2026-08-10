@@ -25,6 +25,7 @@ public class AzurePrepDbContext : DbContext, IUnitOfWork
     public DbSet<QuestaoDaTentativa> ExamAttemptQuestions => Set<QuestaoDaTentativa>();
     public DbSet<Usuario> Users => Set<Usuario>();
     public DbSet<TokenDeRedefinicaoDeSenha> PasswordResetTokens => Set<TokenDeRedefinicaoDeSenha>();
+    public DbSet<TokenDeConfirmacaoDeEmail> EmailConfirmationTokens => Set<TokenDeConfirmacaoDeEmail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -86,7 +86,7 @@ public sealed class AutenticacaoService : IAutenticacaoService
         return Mapear(usuario);
     }
 
-    public async Task<ResultadoDeAutenticacao> CadastrarComSenhaAsync(
+    public async Task<ResultadoDeCadastro> CadastrarComSenhaAsync(
         CadastroLocalRequest request,
         CancellationToken cancellationToken = default)
     {
@@ -97,13 +97,13 @@ public sealed class AutenticacaoService : IAutenticacaoService
         if (!PoliticaDeSenha.EhAceitavel(request.Password))
         {
             _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.SenhaInaceitavel);
-            return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.SenhaInaceitavel);
+            return ResultadoDeCadastro.Recusado(FalhaDeAutenticacao.SenhaInaceitavel);
         }
 
         if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Name))
         {
             _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.DadosIncompletos);
-            return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
+            return ResultadoDeCadastro.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
         var email = Usuario.NormalizarEmail(request.Email);
@@ -116,24 +116,39 @@ public sealed class AutenticacaoService : IAutenticacaoService
         if (existente is not null)
         {
             _metricas.CadastroRecusado(MotivoDeRecusaDeCadastro.EmailJaCadastrado);
-            return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.EmailJaCadastrado);
+            return ResultadoDeCadastro.Recusado(FalhaDeAutenticacao.EmailJaCadastrado);
         }
 
+        var agora = _clock.UtcNow;
         var usuario = Usuario.CriarComSenha(
             request.Name,
             email,
             _hasher.Hash(request.Password),
-            _clock.UtcNow);
+            agora);
+
+        // Conta e link nascem na MESMA transação. Gravar a conta primeiro e o token depois abriria
+        // a janela em que uma falha deixa a pessoa cadastrada, sem acesso e sem link nenhum para
+        // abrir — e sem poder cadastrar de novo, porque o e-mail já estaria ocupado.
+        var token = _tokens.Gerar();
+
+        await _usuarios.AdicionarAsync(usuario, cancellationToken);
+        await _usuarios.AdicionarTokenDeConfirmacaoAsync(
+            new TokenDeConfirmacaoDeEmail(usuario.Id, _tokens.Hash(token), agora),
+            cancellationToken);
 
         // Em corrida (dois cadastros simultâneos do mesmo e-mail) a checagem acima passa nas
         // duas e quem garante unicidade é o índice único do banco, que faz o SaveChanges
         // falhar. A checagem existe pela mensagem decente, não pela integridade.
-        await _usuarios.AdicionarAsync(usuario, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _metricas.ContaCriada(ProvedorDeLogin.Local);
+        _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.LinkEmitido);
 
-        return ResultadoDeAutenticacao.Sucesso(Mapear(usuario));
+        // O e-mail informado (não o do usuário) seria idêntico aqui, mas usamos o normalizado
+        // que ficou gravado — é para ele que a confirmação tem de ir.
+        return ResultadoDeCadastro.Sucesso(
+            Mapear(usuario),
+            new TokenDeConfirmacaoDto(token, usuario.Email!, usuario.Name));
     }
 
     public async Task<ResultadoDeAutenticacao> AutenticarComSenhaAsync(
@@ -198,12 +213,121 @@ public sealed class AutenticacaoService : IAutenticacaoService
             return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.CredenciaisInvalidas);
         }
 
+        // ⚠️ ORDEM: a confirmação é conferida DEPOIS do hash, e isso é a regra, não acaso. Quem
+        // chega até aqui já provou saber a senha, então dizer "confirme seu e-mail" não revela
+        // nada que essa pessoa não soubesse. Movida para antes da verificação, esta mesma
+        // checagem viraria um oráculo: bastaria enviar qualquer senha para descobrir se o
+        // endereço tem cadastro — exatamente o que CredenciaisInvalidas existe para impedir.
+        if (!usuario.EmailConfirmado)
+        {
+            // Sem RegistrarLoginLocal: a senha estava certa, mas não houve login. Carimbar o
+            // acesso aqui contaria como "usuário ativo" quem nunca conseguiu entrar.
+            _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.EmailNaoConfirmado);
+            return ResultadoDeAutenticacao.Recusado(FalhaDeAutenticacao.EmailNaoConfirmado);
+        }
+
         usuario.RegistrarLoginLocal(agora);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         _metricas.LoginRegistrado(ProvedorDeLogin.Local, ResultadoDeLogin.Sucesso);
 
         return ResultadoDeAutenticacao.Sucesso(Mapear(usuario));
+    }
+
+    public async Task<TokenDeConfirmacaoDto?> ReenviarConfirmacaoDeEmailAsync(
+        string email,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return null;
+        }
+
+        // Contado ANTES da busca, como em SolicitarRedefinicaoDeSenhaAsync: a distância entre
+        // este número e LinkEmitido é o que denuncia alguém varrendo endereços por aqui.
+        _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.ReenvioSolicitado);
+
+        var agora = _clock.UtcNow;
+        var normalizado = Usuario.NormalizarEmail(email);
+        var usuario = await _usuarios.ObterPorProvedorAsync(ProvedorDeLogin.Local, normalizado, cancellationToken);
+
+        // Três casos caem no mesmo null: não há conta local, a conta já está confirmada (não há
+        // o que reenviar), ou é conta social (que nasce confirmada). O Web responde igual aos
+        // três e ao caso de sucesso — reenviar link para quem já confirmou seria, além de inútil,
+        // uma forma de confirmar cadastro alheio a quem só sabe digitar e-mails.
+        if (usuario is null || usuario.EmailConfirmado || usuario.Email is null)
+        {
+            return null;
+        }
+
+        // Um link novo mata o anterior. Dois links vivos ao mesmo tempo não ajudam ninguém e
+        // ainda deixam a pessoa clicando no e-mail antigo, que é o que ela vê primeiro na caixa.
+        foreach (var anterior in await _usuarios.ObterTokensDeConfirmacaoAtivosDoUsuarioAsync(usuario.Id, cancellationToken))
+        {
+            anterior.Invalidar(agora);
+        }
+
+        var token = _tokens.Gerar();
+        await _usuarios.AdicionarTokenDeConfirmacaoAsync(
+            new TokenDeConfirmacaoDeEmail(usuario.Id, _tokens.Hash(token), agora),
+            cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.LinkEmitido);
+
+        return new TokenDeConfirmacaoDto(token, usuario.Email, usuario.Name);
+    }
+
+    public async Task<ResultadoDeConfirmacao> ConfirmarEmailAsync(
+        string token,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.TokenRecusado);
+            return ResultadoDeConfirmacao.TokenInvalido;
+        }
+
+        var agora = _clock.UtcNow;
+        var registro = await _usuarios.ObterTokenDeConfirmacaoAsync(_tokens.Hash(token), cancellationToken);
+
+        if (registro is null)
+        {
+            _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.TokenRecusado);
+            return ResultadoDeConfirmacao.TokenInvalido;
+        }
+
+        var usuario = await _usuarios.ObterPorIdParaAtualizacaoAsync(registro.UserId, cancellationToken);
+        if (usuario is null || !usuario.EhContaLocal)
+        {
+            _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.TokenRecusado);
+            return ResultadoDeConfirmacao.TokenInvalido;
+        }
+
+        // Conta já confirmada é sucesso, não erro — e é o caso mais comum de "link inválido"
+        // que não deveria ser: clique duplo, o "abrir de novo" do cliente de e-mail, ou o
+        // varredor de links do provedor de destino, que abre a URL antes da pessoa. Tratar isso
+        // como falha mandaria de volta para a tela de erro quem já está pronto para entrar.
+        if (usuario.EmailConfirmado)
+        {
+            return ResultadoDeConfirmacao.JaConfirmado;
+        }
+
+        if (!registro.EstaUtilizavel(agora))
+        {
+            _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.TokenRecusado);
+            return ResultadoDeConfirmacao.TokenInvalido;
+        }
+
+        usuario.ConfirmarEmail(agora);
+        registro.Consumir(agora);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        _metricas.ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail.Concluida);
+
+        return ResultadoDeConfirmacao.Confirmado;
     }
 
     public async Task<TokenDeRedefinicaoDto?> SolicitarRedefinicaoDeSenhaAsync(

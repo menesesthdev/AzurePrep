@@ -72,6 +72,14 @@ public class ContaController : Controller
             new LoginLocalRequest(model.Email!, model.Senha!),
             cancellationToken);
 
+        if (resultado.Falha == FalhaDeAutenticacao.EmailNaoConfirmado)
+        {
+            // Única falha de login que a tela nomeia. Só é segura porque a senha já foi
+            // conferida antes lá no serviço: quem lê esta mensagem não descobriu que a conta
+            // existe — ele já sabia a senha dela.
+            return await ReexibirLoginAsync(model, emailNaoConfirmado: true);
+        }
+
         if (!resultado.Autenticou)
         {
             // Mensagem única para e-mail inexistente, senha errada e conta que só existe num
@@ -116,7 +124,7 @@ public class ContaController : Controller
             new CadastroLocalRequest(model.Nome!, model.Email!, model.Senha!),
             cancellationToken);
 
-        if (!resultado.Autenticou)
+        if (!resultado.Cadastrou)
         {
             switch (resultado.Falha)
             {
@@ -143,10 +151,90 @@ public class ContaController : Controller
             return View(model);
         }
 
-        // Cadastro já entra: pedir para logar em seguida com a senha que a pessoa acabou de
-        // digitar é atrito sem ganho nenhum de segurança.
-        await EntrarNaAplicacaoAsync(resultado.Usuario!);
-        return RedirectToLocal(model.ReturnUrl);
+        // O cadastro NÃO autentica mais. A conta existe, mas não entra até o link ser aberto —
+        // é isso que impede um endereço digitado errado (o "gmai.com" no lugar de "gmail.com")
+        // de virar conta sem dono alcançável, cujo dono só descobre o problema quando precisa
+        // recuperar a senha e o link não chega em lugar nenhum.
+        await EnviarConfirmacaoAsync(resultado.Confirmacao!, cancellationToken);
+
+        // Redirect, e não View: um F5 na tela de confirmação não pode reenviar o formulário de
+        // cadastro. O e-mail vai na URL só para a frase "enviamos para …".
+        return RedirectToAction(nameof(ConfirmeSeuEmail), new { email = resultado.Confirmacao!.Email });
+    }
+
+    // ---- Confirmação de e-mail -------------------------------------------
+
+    /// <summary>Tela de espera pós-cadastro. Não decide nada: só explica o que fazer agora.</summary>
+    [AllowAnonymous]
+    [HttpGet("confirme-seu-email")]
+    public IActionResult ConfirmeSeuEmail(string? email = null, bool reenviado = false)
+        => View(new ConfirmeSeuEmailViewModel { Email = email, Reenviado = reenviado });
+
+    /// <summary>
+    /// Consome o link do e-mail e libera o acesso da conta.
+    /// </summary>
+    /// <remarks>
+    /// É GET, e é o único caminho de mudança de estado do projeto que aceita ser um: link de
+    /// e-mail não tem como ser POST sem uma página intermediária com botão, e essa página não
+    /// protegeria de nada aqui. O risco real do GET é o varredor de links do provedor de destino
+    /// abrir a URL antes da pessoa — e é por isso que confirmar NÃO autentica ninguém. O
+    /// varredor, no pior caso, confirma o endereço, que é justamente o desfecho desejado; sessão
+    /// nenhuma nasce de um clique que talvez não tenha sido humano. Quem confirma cai no login.
+    /// </remarks>
+    [AllowAnonymous]
+    [HttpGet("confirmar-email")]
+    public async Task<IActionResult> ConfirmarEmail(string? token, CancellationToken cancellationToken)
+    {
+        var resultado = await _autenticacao.ConfirmarEmailAsync(token ?? string.Empty, cancellationToken);
+
+        return resultado switch
+        {
+            // Já confirmado é sucesso: clique duplo e "abrir de novo" do cliente de e-mail são
+            // comuns demais para mandarem a pessoa a uma tela de erro quando já pode entrar.
+            ResultadoDeConfirmacao.Confirmado or ResultadoDeConfirmacao.JaConfirmado
+                => RedirectToAction(nameof(Login), new { emailConfirmado = true }),
+
+            _ => View("ConfirmacaoInvalida")
+        };
+    }
+
+    [AllowAnonymous]
+    [HttpGet("reenviar-confirmacao")]
+    public IActionResult ReenviarConfirmacao(string? email = null)
+        => View(new ReenviarConfirmacaoViewModel { Email = email });
+
+    /// <summary>
+    /// Emite um link novo. Responde SEMPRE igual — exista conta pendente, já confirmada, social
+    /// ou nenhuma. Sem isso a tela responderia a pergunta "quem tem cadastro aqui?", que é a
+    /// mesma que <c>/conta/esqueci-senha</c> se recusa a responder.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpPost("reenviar-confirmacao")]
+    [ValidateAntiForgeryToken]
+    [EnableRateLimiting(LimiteDeTentativasSetup.PoliticaDeAutenticacao)]
+    public async Task<IActionResult> ReenviarConfirmacao(
+        ReenviarConfirmacaoViewModel model,
+        CancellationToken cancellationToken)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var emitido = await _autenticacao.ReenviarConfirmacaoDeEmailAsync(model.Email!, cancellationToken);
+
+        if (emitido is not null)
+        {
+            await EnviarConfirmacaoAsync(emitido, cancellationToken);
+        }
+        else
+        {
+            // Registrado porque a tela não distingue os casos — sem esta linha, "pedi o reenvio
+            // e não veio nada" não teria onde ser investigado.
+            _logger.LogInformation("Reenvio de confirmação pedido para e-mail sem conta local pendente.");
+        }
+
+        return View(new ReenviarConfirmacaoViewModel { Email = model.Email, Enviado = true });
     }
 
     // ---- Esqueci minha senha ---------------------------------------------
@@ -346,17 +434,64 @@ public class ContaController : Controller
     /// recarregados porque vêm do servidor, não do formulário — sem isso os botões sociais
     /// desapareceriam justamente na tentativa que falhou.
     /// </summary>
-    private async Task<IActionResult> ReexibirLoginAsync(LoginViewModel model)
+    private async Task<IActionResult> ReexibirLoginAsync(LoginViewModel model, bool emailNaoConfirmado = false)
     {
         var recarregado = new LoginViewModel
         {
             Provedores = await ProvedoresDisponiveisAsync(),
             ReturnUrl = model.ReturnUrl,
-            Email = model.Email
+            Email = model.Email,
+            EmailNaoConfirmado = emailNaoConfirmado
             // Senha fica de fora: campo de senha não se repopula.
         };
 
         return View(nameof(Login), recarregado);
+    }
+
+    /// <summary>
+    /// Monta o link de confirmação e o despacha. O token em texto existe nesta requisição e no
+    /// e-mail — no banco ficou só o hash.
+    /// </summary>
+    private Task EnviarConfirmacaoAsync(TokenDeConfirmacaoDto emitido, CancellationToken cancellationToken)
+    {
+        var link = Url.Action(
+            nameof(ConfirmarEmail),
+            "Conta",
+            new { token = emitido.Token },
+            Request.Scheme)!;
+
+        return _email.EnviarAsync(
+            emitido.Email,
+            "Confirme seu e-mail · AzurePrep",
+            MontarEmailDeConfirmacao(emitido.Nome, link),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Corpo do e-mail de confirmação. Texto puro, pelas mesmas razões da redefinição: passa em
+    /// qualquer cliente, não depende de imagem remota e não parece phishing por causa de HTML
+    /// enfeitado — o que importa mais ainda aqui, que é a PRIMEIRA mensagem que a pessoa recebe
+    /// de um remetente que ela ainda não conhece.
+    /// </summary>
+    private static string MontarEmailDeConfirmacao(string nome, string link)
+    {
+        var horas = (int)PoliticaDeConfirmacaoDeEmail.Validade.TotalHours;
+
+        return $"""
+            Olá, {nome}.
+
+            Sua conta no AzurePrep foi criada. Falta um passo: confirme que este endereço é seu
+            abrindo o link abaixo.
+
+            {link}
+
+            O link vale por {horas} horas. Enquanto ele não for aberto, a conta não entra.
+
+            Se não foi você que se cadastrou, ignore esta mensagem — sem a confirmação, a conta
+            não é ativada.
+
+            AzurePrep
+            """;
     }
 
     /// <summary>

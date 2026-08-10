@@ -38,6 +38,14 @@ public interface IMetricasDeNegocio
     /// <summary>Um passo do fluxo de "esqueci minha senha".</summary>
     void RedefinicaoDeSenha(EtapaDeRedefinicao etapa);
 
+    /// <summary>
+    /// Um passo do fluxo de confirmação de e-mail. A distância entre <c>LinkEmitido</c> e
+    /// <c>Concluida</c> é a única medida que existe de quantas contas nascem inalcançáveis —
+    /// e-mail digitado errado ou mensagem que não passou pelo filtro de spam do destino. Sem
+    /// isso, uma queda na entrega apareceria só como "menos gente usando".
+    /// </summary>
+    void ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail etapa);
+
     /// <summary>Simulado iniciado.</summary>
     void ProvaIniciada(string codigoDoExame);
 
@@ -72,7 +80,14 @@ public enum ResultadoDeLogin
     ContaBloqueada = 4,
 
     /// <summary>Pedido malformado: campo vazio ou senha acima do teto da política.</summary>
-    PedidoInvalido = 5
+    PedidoInvalido = 5,
+
+    /// <summary>
+    /// Senha certa, mas o e-mail nunca foi confirmado. Vale a pena separar: esta linha subindo
+    /// é gente tentando entrar numa conta que criou e não conseguiu ativar — sinal de e-mail
+    /// que não está chegando, não de ataque.
+    /// </summary>
+    EmailNaoConfirmado = 6
 }
 
 public enum MotivoDeRecusaDeCadastro
@@ -92,6 +107,25 @@ public enum EtapaDeRedefinicao
 
     /// <summary>Senha trocada com sucesso.</summary>
     Concluida = 3
+}
+
+public enum EtapaDeConfirmacaoDeEmail
+{
+    /// <summary>Link emitido — no cadastro ou num reenvio.</summary>
+    LinkEmitido = 1,
+
+    /// <summary>Link aberto e endereço confirmado. A conta passa a entrar a partir daqui.</summary>
+    Concluida = 2,
+
+    /// <summary>
+    /// Reenvio pedido, exista ou não conta pendente com aquele e-mail. Contado antes da busca,
+    /// pela mesma razão de <see cref="EtapaDeRedefinicao.Solicitada"/>: a diferença entre este
+    /// número e <see cref="LinkEmitido"/> mostra alguém varrendo endereços.
+    /// </summary>
+    ReenvioSolicitado = 3,
+
+    /// <summary>Link aberto depois de vencido, já usado, ou simplesmente inexistente.</summary>
+    TokenRecusado = 4
 }
 
 public enum MotivoDeEncerramento

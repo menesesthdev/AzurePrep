@@ -55,4 +55,23 @@ public sealed class UsuarioRepository : IUsuarioRepository
         => await _db.PasswordResetTokens
             .Where(t => t.UserId == userId && t.UsedAt == null)
             .ToListAsync(cancellationToken);
+
+    public async Task AdicionarTokenDeConfirmacaoAsync(
+        TokenDeConfirmacaoDeEmail token,
+        CancellationToken cancellationToken = default)
+        => await _db.EmailConfirmationTokens.AddAsync(token, cancellationToken);
+
+    // Rastreado: quem abre o link o consome em seguida.
+    public async Task<TokenDeConfirmacaoDeEmail?> ObterTokenDeConfirmacaoAsync(
+        string tokenHash,
+        CancellationToken cancellationToken = default)
+        => await _db.EmailConfirmationTokens
+            .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
+
+    public async Task<IReadOnlyList<TokenDeConfirmacaoDeEmail>> ObterTokensDeConfirmacaoAtivosDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+        => await _db.EmailConfirmationTokens
+            .Where(t => t.UserId == userId && t.UsedAt == null)
+            .ToListAsync(cancellationToken);
 }

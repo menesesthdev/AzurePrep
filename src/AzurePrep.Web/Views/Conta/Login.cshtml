@@ -3,6 +3,7 @@
     Layout = null;
     var erro = Context.Request.Query.ContainsKey("erro");
     var senhaAlterada = Context.Request.Query.ContainsKey("senhaAlterada");
+    var emailConfirmado = Context.Request.Query.ContainsKey("emailConfirmado");
 
     // Chega por redirect do limitador de requisições (OnRejected), não por ação do controller.
     var limiteAtingido = Context.Request.Query.ContainsKey("limite");
@@ -55,6 +56,23 @@
             {
                 <p class="login__sucesso" role="status">
                     Senha alterada. Entre com a nova senha.
+                </p>
+            }
+
+            @if (emailConfirmado)
+            {
+                <p class="login__sucesso" role="status">
+                    E-mail confirmado. Agora é só entrar.
+                </p>
+            }
+
+            @if (Model.EmailNaoConfirmado)
+            {
+                @* Único erro de login que nomeia a causa. Chega aqui só quem acertou a senha,
+                   então não revela cadastro a ninguém — ver FalhaDeAutenticacao.EmailNaoConfirmado. *@
+                <p class="login__error" role="alert">
+                    Falta confirmar seu e-mail. Abra o link que enviamos para entrar.
+                    <a asp-action="ReenviarConfirmacao" asp-route-email="@Model.Email">Reenviar o link</a>
                 </p>
             }
 

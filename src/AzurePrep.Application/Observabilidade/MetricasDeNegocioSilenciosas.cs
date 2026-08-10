@@ -28,6 +28,10 @@ public sealed class MetricasDeNegocioSilenciosas : IMetricasDeNegocio
     {
     }
 
+    public void ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail etapa)
+    {
+    }
+
     public void ProvaIniciada(string codigoDoExame)
     {
     }

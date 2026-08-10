@@ -1,0 +1,84 @@
+@model ReenviarConfirmacaoViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reenviar confirmação · AzurePrep</title>
+    <partial name="_Favicon" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-body">
+    <main class="login">
+        <div class="login__card">
+            <div class="login__brand">
+                <span class="login__logo">
+                    <img src="~/img/logo-azureprep.png" asp-append-version="true"
+                         width="180" height="180" decoding="async"
+                         alt="AzurePrep — simulados para exames Azure" />
+                </span>
+            </div>
+
+            @if (Model.Enviado)
+            {
+                @* Confirmação idêntica exista ou não conta pendente com esse e-mail — mesma
+                   razão da tela de "esqueci minha senha": a diferença viraria consulta de
+                   quem está cadastrado aqui. *@
+                <h1 class="login__title">Verifique seu e-mail</h1>
+                <p class="login__lead">
+                    Se existe uma conta aguardando confirmação para <strong>@Model.Email</strong>,
+                    enviamos um link novo. O anterior deixou de valer.
+                </p>
+                <p class="login__hint">
+                    Não recebeu? Confira a caixa de spam. Contas criadas com Google, LinkedIn ou
+                    GitHub não precisam de confirmação — nesse caso, entre pelo botão do provedor.
+                </p>
+
+                <p class="login__alt">
+                    <a asp-action="Login">Voltar para o login</a>
+                </p>
+            }
+            else
+            {
+                <h1 class="login__title">Reenviar confirmação</h1>
+                <p class="login__lead">
+                    Informe o e-mail do cadastro. Enviaremos um link novo para confirmar o
+                    endereço e liberar o acesso.
+                </p>
+
+                <form class="auth-form" asp-action="ReenviarConfirmacao" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="field">
+                        <label class="field__label" asp-for="Email"></label>
+                        <input class="field__input" asp-for="Email" type="email"
+                               autocomplete="email" autocapitalize="none" spellcheck="false"
+                               placeholder="voce@exemplo.com" />
+                        <span class="field__error" asp-validation-for="Email"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary auth-form__submit">Enviar link</button>
+                </form>
+
+                <p class="login__hint">
+                    Errou o e-mail no cadastro? Não dá para reenviar para um endereço diferente
+                    daquele que foi usado — nesse caso, crie a conta de novo com o e-mail certo.
+                </p>
+
+                <p class="login__alt">
+                    Já confirmou?
+                    <a asp-action="Login">Entrar</a>
+                </p>
+            }
+        </div>
+
+        <p class="login__footnote">
+            Questões 100% originais, escritas a partir do Skills Measured outline oficial.
+            Este simulado não reproduz conteúdo real de provas.
+        </p>
+    </main>
+</body>
+</html>

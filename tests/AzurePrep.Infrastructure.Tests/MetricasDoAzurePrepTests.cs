@@ -71,6 +71,7 @@ public sealed class MetricasDoAzurePrepTests : IDisposable
     [InlineData(ResultadoDeLogin.SenhaIncorreta, "senha_incorreta")]
     [InlineData(ResultadoDeLogin.ContaBloqueada, "conta_bloqueada")]
     [InlineData(ResultadoDeLogin.PedidoInvalido, "pedido_invalido")]
+    [InlineData(ResultadoDeLogin.EmailNaoConfirmado, "email_nao_confirmado")]
     public void DesfechoDoLogin_ViraRotuloEmSnakeCase(ResultadoDeLogin resultado, string esperado)
     {
         using var coletor = Coletar<long>("azureprep.logins");
@@ -80,6 +81,20 @@ public sealed class MetricasDoAzurePrepTests : IDisposable
         var medida = Assert.Single(coletor.GetMeasurementSnapshot());
         Assert.Equal(esperado, medida.Tags["resultado"]);
         Assert.Equal("local", medida.Tags["provedor"]);
+    }
+
+    [Theory]
+    [InlineData(EtapaDeConfirmacaoDeEmail.LinkEmitido, "link_emitido")]
+    [InlineData(EtapaDeConfirmacaoDeEmail.Concluida, "concluida")]
+    [InlineData(EtapaDeConfirmacaoDeEmail.ReenvioSolicitado, "reenvio_solicitado")]
+    [InlineData(EtapaDeConfirmacaoDeEmail.TokenRecusado, "token_recusado")]
+    public void EtapaDaConfirmacao_ViraRotuloEmSnakeCase(EtapaDeConfirmacaoDeEmail etapa, string esperado)
+    {
+        using var coletor = Coletar<long>("azureprep.confirmacoes.email");
+
+        _metricas.ConfirmacaoDeEmail(etapa);
+
+        Assert.Equal(esperado, Assert.Single(coletor.GetMeasurementSnapshot()).Tags["etapa"]);
     }
 
     [Fact]

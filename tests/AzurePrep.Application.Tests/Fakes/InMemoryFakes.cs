@@ -19,10 +19,13 @@ public sealed class InMemoryUsuarioRepository : IUsuarioRepository
 {
     private readonly List<Usuario> _usuarios = new();
     private readonly List<TokenDeRedefinicaoDeSenha> _tokens = new();
+    private readonly List<TokenDeConfirmacaoDeEmail> _confirmacoes = new();
 
     public IReadOnlyList<Usuario> Todos => _usuarios;
 
     public IReadOnlyList<TokenDeRedefinicaoDeSenha> Tokens => _tokens;
+
+    public IReadOnlyList<TokenDeConfirmacaoDeEmail> Confirmacoes => _confirmacoes;
 
     public Task<Usuario?> ObterPorProvedorAsync(
         ProvedorDeLogin provider,
@@ -61,6 +64,25 @@ public sealed class InMemoryUsuarioRepository : IUsuarioRepository
         CancellationToken cancellationToken = default)
         => Task.FromResult<IReadOnlyList<TokenDeRedefinicaoDeSenha>>(
             _tokens.Where(t => t.UserId == userId && t.UsedAt is null).ToList());
+
+    public Task AdicionarTokenDeConfirmacaoAsync(
+        TokenDeConfirmacaoDeEmail token,
+        CancellationToken cancellationToken = default)
+    {
+        _confirmacoes.Add(token);
+        return Task.CompletedTask;
+    }
+
+    public Task<TokenDeConfirmacaoDeEmail?> ObterTokenDeConfirmacaoAsync(
+        string tokenHash,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(_confirmacoes.FirstOrDefault(t => t.TokenHash == tokenHash));
+
+    public Task<IReadOnlyList<TokenDeConfirmacaoDeEmail>> ObterTokensDeConfirmacaoAtivosDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+        => Task.FromResult<IReadOnlyList<TokenDeConfirmacaoDeEmail>>(
+            _confirmacoes.Where(t => t.UserId == userId && t.UsedAt is null).ToList());
 }
 
 /// <summary>
@@ -116,6 +138,8 @@ public sealed class FakeMetricasDeNegocio : IMetricasDeNegocio
 
     public List<EtapaDeRedefinicao> Redefinicoes { get; } = new();
 
+    public List<EtapaDeConfirmacaoDeEmail> Confirmacoes { get; } = new();
+
     public List<string> ProvasIniciadas { get; } = new();
 
     public List<(string Exame, bool Aprovado, int Nota, TimeSpan Duracao, MotivoDeEncerramento Motivo)> ProvasConcluidas { get; } = new();
@@ -128,6 +152,8 @@ public sealed class FakeMetricasDeNegocio : IMetricasDeNegocio
         => Logins.Add((provedor, resultado));
 
     public void RedefinicaoDeSenha(EtapaDeRedefinicao etapa) => Redefinicoes.Add(etapa);
+
+    public void ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail etapa) => Confirmacoes.Add(etapa);
 
     public void ProvaIniciada(string codigoDoExame) => ProvasIniciadas.Add(codigoDoExame);
 
@@ -149,6 +175,7 @@ public sealed class FakeMetricasDeNegocio : IMetricasDeNegocio
         CadastrosRecusados.Clear();
         Logins.Clear();
         Redefinicoes.Clear();
+        Confirmacoes.Clear();
         ProvasIniciadas.Clear();
         ProvasConcluidas.Clear();
     }

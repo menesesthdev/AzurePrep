@@ -42,4 +42,25 @@ public interface IUsuarioRepository
     Task<IReadOnlyList<TokenDeRedefinicaoDeSenha>> ObterTokensAtivosDoUsuarioAsync(
         Guid userId,
         CancellationToken cancellationToken = default);
+
+    // ---- Tokens de confirmação de e-mail ---------------------------------
+    // Mesma justificativa dos de redefinição: são estado do agregado Usuario, criados e
+    // consumidos junto com ele, então não ganham repositório próprio.
+
+    Task AdicionarTokenDeConfirmacaoAsync(
+        TokenDeConfirmacaoDeEmail token,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>Busca pelo hash do token — o valor original nunca chega ao banco.</summary>
+    Task<TokenDeConfirmacaoDeEmail?> ObterTokenDeConfirmacaoAsync(
+        string tokenHash,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Links de confirmação ainda não usados de um usuário, para invalidá-los quando um
+    /// reenvio emitir outro.
+    /// </summary>
+    Task<IReadOnlyList<TokenDeConfirmacaoDeEmail>> ObterTokensDeConfirmacaoAtivosDoUsuarioAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
 }

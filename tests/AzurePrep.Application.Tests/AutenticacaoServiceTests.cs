@@ -137,18 +137,45 @@ public class AutenticacaoServiceTests
         string senha = "senha-longa-o-suficiente")
         => new(nome, email, senha);
 
+    /// <summary>
+    /// Cadastra e já abre o link de confirmação — o estado em que quase todo teste de login e de
+    /// redefinição quer começar, porque é o estado de uma conta normal em uso.
+    /// </summary>
+    /// <remarks>
+    /// Fica como helper explícito do teste, e não escondido dentro do serviço, justamente porque
+    /// vários testes precisam do estado OPOSTO: cadastrada e ainda não confirmada.
+    /// </remarks>
+    private static async Task<ResultadoDeCadastro> CadastrarConfirmadoAsync(
+        AutenticacaoService service,
+        CadastroLocalRequest request)
+    {
+        var resultado = await service.CadastrarComSenhaAsync(request);
+
+        if (resultado.Cadastrou)
+        {
+            await service.ConfirmarEmailAsync(resultado.Confirmacao!.Token);
+        }
+
+        return resultado;
+    }
+
     [Fact]
-    public async Task Cadastro_CriaContaLocalEJaAutentica()
+    public async Task Cadastro_CriaContaLocalPendenteDeConfirmacao()
     {
         var (service, repo, _, _) = BuildComHasher();
 
         var resultado = await service.CadastrarComSenhaAsync(Cadastro());
 
-        Assert.True(resultado.Autenticou);
+        Assert.True(resultado.Cadastrou);
         Assert.Equal("Ana", resultado.Usuario!.Name);
         Assert.Equal(ProvedorDeLogin.Local, resultado.Usuario.Provider);
         Assert.Single(repo.Todos);
         Assert.True(repo.Todos[0].EhContaLocal);
+
+        // A conta nasce SEM acesso: é este falso que impede um endereço digitado errado de
+        // virar conta que ninguém alcança.
+        Assert.False(repo.Todos[0].EmailConfirmado);
+        Assert.NotNull(resultado.Confirmacao);
     }
 
     // O que nunca pode acontecer: a senha digitada ir direto para o campo persistido. O fake
@@ -188,7 +215,7 @@ public class AutenticacaoServiceTests
         // Caixa diferente é o mesmo e-mail — a duplicata tem de ser barrada aqui também.
         var resultado = await service.CadastrarComSenhaAsync(Cadastro(email: "ANA@example.com"));
 
-        Assert.False(resultado.Autenticou);
+        Assert.False(resultado.Cadastrou);
         Assert.Equal(FalhaDeAutenticacao.EmailJaCadastrado, resultado.Falha);
         Assert.Single(repo.Todos);
     }
@@ -228,7 +255,7 @@ public class AutenticacaoServiceTests
 
         var resultado = await service.CadastrarComSenhaAsync(Cadastro(email: "ana@example.com"));
 
-        Assert.True(resultado.Autenticou);
+        Assert.True(resultado.Cadastrou);
         Assert.Equal(2, repo.Todos.Count);
     }
 
@@ -238,7 +265,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_ComSenhaCorreta_Autentica()
     {
         var (service, repo, clock, _) = BuildComHasher();
-        var cadastro = await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        var cadastro = await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         clock.Advance(TimeSpan.FromDays(2));
         var resultado = await service.AutenticarComSenhaAsync(
@@ -253,7 +280,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_IgnoraCaixaDoEmail()
     {
         var (service, _, _, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(email: "ana@example.com", senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(email: "ana@example.com", senha: "senha-correta-1"));
 
         var resultado = await service.AutenticarComSenhaAsync(
             new LoginLocalRequest("ANA@Example.com", "senha-correta-1"));
@@ -265,7 +292,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_ComSenhaErrada_Recusa()
     {
         var (service, _, _, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         var resultado = await service.AutenticarComSenhaAsync(
             new LoginLocalRequest("ana@example.com", "senha-errada-1"));
@@ -309,7 +336,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_ComSenhaAcimaDoTeto_RecusaSemHashear()
     {
         var (service, _, _, hasher) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         var resultado = await service.AutenticarComSenhaAsync(
             new LoginLocalRequest("ana@example.com", new string('x', PoliticaDeSenha.TamanhoMaximo + 1)));
@@ -324,7 +351,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_ComCampoVazio_Recusa(string email, string senha)
     {
         var (service, _, _, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         var resultado = await service.AutenticarComSenhaAsync(new LoginLocalRequest(email, senha));
 
@@ -345,7 +372,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_ContaFalhas_ESoBloqueiaNoLimite()
     {
         var (service, repo, _, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         await ErrarSenha(service, PoliticaDeTentativasDeLogin.MaximoDeFalhas - 1);
 
@@ -359,7 +386,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_AoAtingirOLimite_BloqueiaAteAJanelaPassar()
     {
         var (service, repo, clock, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         await ErrarSenha(service, PoliticaDeTentativasDeLogin.MaximoDeFalhas);
 
@@ -383,7 +410,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_AcertoZeraOContadorDeFalhas()
     {
         var (service, repo, _, _) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
 
         await ErrarSenha(service, PoliticaDeTentativasDeLogin.MaximoDeFalhas - 1);
         await service.AutenticarComSenhaAsync(new LoginLocalRequest("ana@example.com", "senha-correta-1"));
@@ -398,7 +425,7 @@ public class AutenticacaoServiceTests
     public async Task LoginLocal_DuranteBloqueio_NaoConfereOHashRealMasGastaOTempo()
     {
         var (service, _, _, hasher) = BuildComHasher();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-correta-1"));
         await ErrarSenha(service, PoliticaDeTentativasDeLogin.MaximoDeFalhas);
 
         var antes = hasher.ChamadasDeVerificacao;
@@ -413,7 +440,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_ComTokenValido_TrocaASenha()
     {
         var (service, _, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-antiga-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-antiga-1"));
 
         var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
         Assert.NotNull(emitido);
@@ -433,7 +460,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_GuardaApenasOHashDoToken()
     {
         var (service, repo, _, _, tokens) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro());
+        await CadastrarConfirmadoAsync(service, Cadastro());
 
         var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
 
@@ -447,7 +474,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_TokenServeUmaVezSo()
     {
         var (service, _, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro());
+        await CadastrarConfirmadoAsync(service, Cadastro());
         var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
 
         await service.RedefinirSenhaAsync(new RedefinicaoDeSenhaRequest(emitido!.Token, "senha-nova-123"));
@@ -463,7 +490,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_TokenVencido_NaoServe()
     {
         var (service, _, clock, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro());
+        await CadastrarConfirmadoAsync(service, Cadastro());
         var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
 
         clock.Advance(PoliticaDeRedefinicaoDeSenha.Validade + TimeSpan.FromMinutes(1));
@@ -480,7 +507,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_NovoPedidoInvalidaOLinkAnterior()
     {
         var (service, _, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro());
+        await CadastrarConfirmadoAsync(service, Cadastro());
 
         var primeiro = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
         var segundo = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
@@ -493,7 +520,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_ComSenhaCurta_RecusaESeguraOToken()
     {
         var (service, _, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-antiga-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-antiga-1"));
         var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
 
         var resultado = await service.RedefinirSenhaAsync(
@@ -524,7 +551,7 @@ public class AutenticacaoServiceTests
     public async Task Redefinicao_LiberaContaBloqueada()
     {
         var (service, repo, clock, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-antiga-1"));
+        await CadastrarConfirmadoAsync(service, Cadastro(senha: "senha-antiga-1"));
         await ErrarSenha(service, PoliticaDeTentativasDeLogin.MaximoDeFalhas);
         Assert.True(repo.Todos[0].EstaBloqueada(clock.UtcNow));
 
@@ -544,7 +571,7 @@ public class AutenticacaoServiceTests
     public async Task Solicitacao_ParaEmailSemContaLocal_NaoEmiteToken(string email)
     {
         var (service, repo, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro(email: "ana@example.com"));
+        await CadastrarConfirmadoAsync(service, Cadastro(email: "ana@example.com"));
 
         Assert.Null(await service.SolicitarRedefinicaoDeSenhaAsync(email));
         Assert.Empty(repo.Tokens);
@@ -564,8 +591,191 @@ public class AutenticacaoServiceTests
     public async Task Solicitacao_IgnoraCaixaDoEmail()
     {
         var (service, _, _, _, _) = BuildCompleto();
-        await service.CadastrarComSenhaAsync(Cadastro(email: "ana@example.com"));
+        await CadastrarConfirmadoAsync(service, Cadastro(email: "ana@example.com"));
 
         Assert.NotNull(await service.SolicitarRedefinicaoDeSenhaAsync("ANA@Example.com"));
+    }
+
+    // ---- Confirmação de e-mail -------------------------------------------
+
+    // O teste que define a funcionalidade: senha certa e conta existente NÃO bastam.
+    [Fact]
+    public async Task LoginLocal_SemConfirmarOEmail_Recusa()
+    {
+        var (service, repo, _, _) = BuildComHasher();
+        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+
+        var resultado = await service.AutenticarComSenhaAsync(
+            new LoginLocalRequest("ana@example.com", "senha-correta-1"));
+
+        Assert.False(resultado.Autenticou);
+        Assert.Equal(FalhaDeAutenticacao.EmailNaoConfirmado, resultado.Falha);
+
+        // E não conta como acesso: quem nunca entrou não pode aparecer como usuário ativo.
+        Assert.Equal(Agora, repo.Todos[0].LastLoginAt);
+    }
+
+    // ⚠️ O teste que protege a ORDEM das checagens. EmailNaoConfirmado é a única falha de login
+    // que a tela nomeia, e só é segura porque vem DEPOIS do hash. Se alguém trocar a ordem, o
+    // login vira um oráculo de "este e-mail tem cadastro" — e nada mais quebraria para avisar.
+    [Fact]
+    public async Task LoginLocal_SemConfirmarMasComSenhaErrada_NaoRevelaQueAContaExiste()
+    {
+        var (service, _, _, _) = BuildComHasher();
+        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+
+        var resultado = await service.AutenticarComSenhaAsync(
+            new LoginLocalRequest("ana@example.com", "senha-errada-999"));
+
+        // Idêntico ao que um e-mail inexistente devolve.
+        Assert.Equal(FalhaDeAutenticacao.CredenciaisInvalidas, resultado.Falha);
+    }
+
+    [Fact]
+    public async Task Confirmacao_ComTokenValido_LiberaOLogin()
+    {
+        var (service, repo, _, _) = BuildComHasher();
+        var cadastro = await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+
+        var resultado = await service.ConfirmarEmailAsync(cadastro.Confirmacao!.Token);
+
+        Assert.Equal(ResultadoDeConfirmacao.Confirmado, resultado);
+        Assert.True(repo.Todos[0].EmailConfirmado);
+        Assert.True((await service.AutenticarComSenhaAsync(
+            new LoginLocalRequest("ana@example.com", "senha-correta-1"))).Autenticou);
+    }
+
+    // O que viaja no e-mail não pode estar no banco — mesma regra do token de redefinição.
+    [Fact]
+    public async Task Confirmacao_GuardaApenasOHashDoToken()
+    {
+        var (service, repo, _, _, tokens) = BuildCompleto();
+
+        var cadastro = await service.CadastrarComSenhaAsync(Cadastro());
+
+        Assert.Single(repo.Confirmacoes);
+        Assert.NotEqual(cadastro.Confirmacao!.Token, repo.Confirmacoes[0].TokenHash);
+        Assert.Equal(tokens.Hash(cadastro.Confirmacao.Token), repo.Confirmacoes[0].TokenHash);
+    }
+
+    // Clique duplo e varredor de links do provedor de destino abrem a mesma URL duas vezes. O
+    // segundo acesso não pode mandar para a tela de erro quem já está pronto para entrar.
+    [Fact]
+    public async Task Confirmacao_RepetidaEhSucesso_NaoErro()
+    {
+        var (service, _, _, _) = BuildComHasher();
+        var cadastro = await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-correta-1"));
+        await service.ConfirmarEmailAsync(cadastro.Confirmacao!.Token);
+
+        var segunda = await service.ConfirmarEmailAsync(cadastro.Confirmacao.Token);
+
+        Assert.Equal(ResultadoDeConfirmacao.JaConfirmado, segunda);
+        Assert.True((await service.AutenticarComSenhaAsync(
+            new LoginLocalRequest("ana@example.com", "senha-correta-1"))).Autenticou);
+    }
+
+    [Fact]
+    public async Task Confirmacao_ComTokenVencido_Recusa()
+    {
+        var (service, repo, clock, _) = BuildComHasher();
+        var cadastro = await service.CadastrarComSenhaAsync(Cadastro());
+
+        clock.Advance(PoliticaDeConfirmacaoDeEmail.Validade + TimeSpan.FromMinutes(1));
+        var resultado = await service.ConfirmarEmailAsync(cadastro.Confirmacao!.Token);
+
+        Assert.Equal(ResultadoDeConfirmacao.TokenInvalido, resultado);
+        Assert.False(repo.Todos[0].EmailConfirmado);
+    }
+
+    [Theory]
+    [InlineData("token-que-nao-existe")]
+    [InlineData("")]
+    public async Task Confirmacao_ComTokenDesconhecido_Recusa(string token)
+    {
+        var (service, _, _, _) = BuildComHasher();
+
+        Assert.Equal(ResultadoDeConfirmacao.TokenInvalido, await service.ConfirmarEmailAsync(token));
+    }
+
+    [Fact]
+    public async Task Reenvio_EmiteLinkNovoEInvalidaOAnterior()
+    {
+        var (service, repo, _, _) = BuildComHasher();
+        var cadastro = await service.CadastrarComSenhaAsync(Cadastro());
+
+        var reenviado = await service.ReenviarConfirmacaoDeEmailAsync("ana@example.com");
+
+        Assert.NotNull(reenviado);
+        Assert.NotEqual(cadastro.Confirmacao!.Token, reenviado!.Token);
+
+        // O link antigo morre: quem abre o e-mail mais velho da caixa não confirma nada.
+        Assert.Equal(
+            ResultadoDeConfirmacao.TokenInvalido,
+            await service.ConfirmarEmailAsync(cadastro.Confirmacao.Token));
+
+        Assert.Equal(ResultadoDeConfirmacao.Confirmado, await service.ConfirmarEmailAsync(reenviado.Token));
+        Assert.True(repo.Todos[0].EmailConfirmado);
+    }
+
+    // Reenviar para quem já confirmou não tem efeito nenhum — e, mais importante, não pode ter
+    // efeito VISÍVEL, senão a tela distinguiria "conta pendente" de "conta pronta".
+    [Theory]
+    [InlineData("ana@example.com", true)]   // já confirmada
+    [InlineData("ninguem@example.com", false)]
+    [InlineData("", false)]
+    public async Task Reenvio_SemContaPendente_NaoEmiteNada(string email, bool confirmarAntes)
+    {
+        var (service, repo, _, _) = BuildComHasher();
+
+        if (confirmarAntes)
+        {
+            await CadastrarConfirmadoAsync(service, Cadastro(email: "ana@example.com"));
+        }
+
+        var antes = repo.Confirmacoes.Count;
+
+        Assert.Null(await service.ReenviarConfirmacaoDeEmailAsync(email));
+        Assert.Equal(antes, repo.Confirmacoes.Count);
+    }
+
+    [Fact]
+    public async Task Reenvio_ParaContaSocial_NaoEmiteNada()
+    {
+        var (service, repo, _, _) = BuildComHasher();
+        await service.ObterOuCriarAsync(Login(email: "ana@example.com"));
+
+        Assert.Null(await service.ReenviarConfirmacaoDeEmailAsync("ana@example.com"));
+        Assert.Empty(repo.Confirmacoes);
+    }
+
+    // Conta social entra sem nunca passar por confirmação: o provedor já verificou o endereço, e
+    // o GitHub pode não devolver e-mail nenhum — exigir confirmação ali travaria o login por um
+    // dado que jamais vai chegar.
+    [Fact]
+    public async Task ContaSocial_NasceConfirmada()
+    {
+        var (service, repo, _, _) = BuildComHasher();
+
+        await service.ObterOuCriarAsync(Login(email: null));
+
+        Assert.True(repo.Todos[0].EmailConfirmado);
+    }
+
+    // Quem recebeu o link de redefinição PROVOU controlar a caixa de entrada — que é exatamente
+    // a prova que a confirmação pede. Sem isto, quem perdeu o e-mail de confirmação e recuperou
+    // a senha continuaria barrado depois de provar a mesma coisa duas vezes.
+    [Fact]
+    public async Task Redefinicao_TambemConfirmaOEmail()
+    {
+        var (service, repo, _, _, _) = BuildCompleto();
+        await service.CadastrarComSenhaAsync(Cadastro(senha: "senha-antiga-1"));
+        Assert.False(repo.Todos[0].EmailConfirmado);
+
+        var emitido = await service.SolicitarRedefinicaoDeSenhaAsync("ana@example.com");
+        await service.RedefinirSenhaAsync(new RedefinicaoDeSenhaRequest(emitido!.Token, "senha-nova-123"));
+
+        Assert.True(repo.Todos[0].EmailConfirmado);
+        Assert.True((await service.AutenticarComSenhaAsync(
+            new LoginLocalRequest("ana@example.com", "senha-nova-123"))).Autenticou);
     }
 }

@@ -37,6 +37,7 @@ public sealed class MetricasDoAzurePrep : IMetricasDeNegocio, IDisposable
     private readonly Counter<long> _cadastrosRecusados;
     private readonly Counter<long> _logins;
     private readonly Counter<long> _redefinicoesDeSenha;
+    private readonly Counter<long> _confirmacoesDeEmail;
     private readonly Counter<long> _provasIniciadas;
     private readonly Counter<long> _provasConcluidas;
     private readonly Histogram<int> _notas;
@@ -77,6 +78,11 @@ public sealed class MetricasDoAzurePrep : IMetricasDeNegocio, IDisposable
             "azureprep.redefinicoes.senha",
             unit: "{evento}",
             description: "Passos do fluxo de redefinição de senha.");
+
+        _confirmacoesDeEmail = _meter.CreateCounter<long>(
+            "azureprep.confirmacoes.email",
+            unit: "{evento}",
+            description: "Passos da confirmação de e-mail. A diferença entre link_emitido e concluida é quanta gente cadastra e nunca recebe (ou nunca abre) a mensagem.");
 
         _provasIniciadas = _meter.CreateCounter<long>(
             "azureprep.provas.iniciadas",
@@ -150,6 +156,9 @@ public sealed class MetricasDoAzurePrep : IMetricasDeNegocio, IDisposable
 
     public void RedefinicaoDeSenha(EtapaDeRedefinicao etapa)
         => _redefinicoesDeSenha.Add(1, new KeyValuePair<string, object?>("etapa", Rotulo(etapa)));
+
+    public void ConfirmacaoDeEmail(EtapaDeConfirmacaoDeEmail etapa)
+        => _confirmacoesDeEmail.Add(1, new KeyValuePair<string, object?>("etapa", Rotulo(etapa)));
 
     public void ProvaIniciada(string codigoDoExame)
         => _provasIniciadas.Add(1, new KeyValuePair<string, object?>("exame", codigoDoExame));

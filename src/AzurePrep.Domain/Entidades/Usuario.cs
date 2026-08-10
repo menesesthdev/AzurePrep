@@ -49,6 +49,12 @@ public class Usuario : Entity
         AvatarUrl = avatarUrl;
         CreatedAt = createdAt;
         LastLoginAt = createdAt;
+
+        // Conta social já nasce confirmada: o provedor verificou o endereço antes de nos
+        // entregar, e pedir confirmação de novo seria atrito sem ganho. Não é um detalhe de
+        // conveniência — o GitHub pode devolver Email nulo, e exigir confirmação de um endereço
+        // que não temos trancaria o login por um dado que nunca vai chegar.
+        EmailConfirmedAt = createdAt;
     }
 
     /// <summary>
@@ -77,6 +83,9 @@ public class Usuario : Entity
         PasswordHash = Guard.NotNullOrWhiteSpace(passwordHash, nameof(passwordHash));
         CreatedAt = createdAt;
         LastLoginAt = createdAt;
+
+        // EmailConfirmedAt fica nulo: aqui o endereço é só o que a pessoa digitou, e ninguém
+        // provou nada ainda. É esse nulo que impede o login até o link do e-mail ser aberto.
     }
 
     /// <summary>
@@ -120,8 +129,21 @@ public class Usuario : Entity
     /// </summary>
     public DateTime? LockoutEndsAt { get; private set; }
 
+    /// <summary>
+    /// Quando a posse do endereço foi provada. <c>null</c> em conta local ainda não confirmada;
+    /// em conta social, o próprio instante da criação.
+    /// </summary>
+    public DateTime? EmailConfirmedAt { get; private set; }
+
     /// <summary>Conta com senha nossa, em oposição às que dependem de provedor externo.</summary>
     public bool EhContaLocal => Provider == ProvedorDeLogin.Local;
+
+    /// <summary>
+    /// O endereço já foi provado. Enquanto for <c>false</c> a conta existe mas não entra —
+    /// é o que impede um e-mail digitado errado de virar conta sem dono alcançável, com a
+    /// pessoa descobrindo o problema só na hora de recuperar a senha, quando já é tarde.
+    /// </summary>
+    public bool EmailConfirmado => EmailConfirmedAt is not null;
 
     public bool EstaBloqueada(DateTime agora) => LockoutEndsAt is { } fim && agora < fim;
 
@@ -183,6 +205,23 @@ public class Usuario : Entity
     }
 
     /// <summary>
+    /// Registra que o endereço foi provado, ao abrir o link enviado por e-mail. Idempotente:
+    /// confirmar de novo não reescreve a data, porque o que interessa é quando a posse foi
+    /// provada pela primeira vez.
+    /// </summary>
+    public void ConfirmarEmail(DateTime at)
+    {
+        if (!EhContaLocal)
+        {
+            // Conta social já nasce confirmada; chegar aqui significa que o token de confirmação
+            // foi emitido no caminho errado, e seguir em frente esconderia o defeito.
+            throw new InvalidOperationException("Conta de provedor externo já tem o e-mail verificado na origem.");
+        }
+
+        EmailConfirmedAt ??= at;
+    }
+
+    /// <summary>
     /// Troca a senha (redefinição por link) e devolve a conta ao estado limpo — inclusive
     /// liberando bloqueio, porque quem provou controlar o e-mail é o dono e não deve ficar
     /// preso pelas tentativas de quem o atacou.
@@ -201,5 +240,11 @@ public class Usuario : Entity
         FailedLoginAttempts = 0;
         LockoutEndsAt = null;
         LastLoginAt = at;
+
+        // Redefinir a senha também confirma o endereço, e não é atalho: o link de redefinição
+        // chegou naquela caixa de entrada, que é exatamente a prova que a confirmação pede. Sem
+        // isto, quem se cadastrou, perdeu o e-mail de confirmação e recuperou a senha entraria
+        // no ciclo absurdo de provar o endereço duas vezes e continuar barrado.
+        EmailConfirmedAt ??= at;
     }
 }
