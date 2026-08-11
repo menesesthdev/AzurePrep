@@ -9,19 +9,42 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Por padrão o MSBuild deixa seus processos VIVOS depois de terminar, para o build seguinte
+# reaproveitá-los. Num estágio de build que é descartado isso nunca acontece: o nó fica residente
+# ocupando memória à espera de uma invocação que não vem. Desligar é ganho puro em container.
+ENV MSBUILDDISABLENODEREUSE=1 \
+    DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    NUGET_XMLDOC_MODE=skip
+
+# Argumentos extras para restore/publish. Vazio por padrão de propósito: em máquina normal o
+# comportamento do SDK (um processo por núcleo + servidor de compilação do Roslyn) é o mais
+# rápido, e não há razão para penalizar o build de CI ou de quem tem RAM sobrando.
+#
+# Numa máquina apertada, passar "-m:1 -p:UseSharedCompilation=false" serializa a compilação e
+# mantém o Roslyn dentro do próprio processo do MSBuild em vez de um servidor separado: o build
+# fica mais lento, e o pico de memória cai de ~1 GB para algo em torno de 400 MB.
+#
+#   docker compose build --build-arg MSBUILD_ARGS="-m:1 -p:UseSharedCompilation=false"
+#
+# ⚠️ Este ARG é o ÚNICO ponto de controle de memória do build. `mem_limit` no compose vale só para
+# o container em execução — a etapa de build não tem knob nenhum, nem no compose nem no BuildKit.
+# Sem isto, numa VM de 1 GB o build vai para o swap e leva dezenas de minutos (ou é morto).
+ARG MSBUILD_ARGS=""
+
 # Os .csproj entram ANTES do resto do código de propósito: o restore só reexecuta quando uma
 # dependência muda, e não a cada linha editada. Sem isso, todo build baixaria os pacotes de novo.
 COPY src/AzurePrep.Domain/AzurePrep.Domain.csproj                 src/AzurePrep.Domain/
 COPY src/AzurePrep.Application/AzurePrep.Application.csproj       src/AzurePrep.Application/
 COPY src/AzurePrep.Infrastructure/AzurePrep.Infrastructure.csproj src/AzurePrep.Infrastructure/
 COPY src/AzurePrep.Web/AzurePrep.Web.csproj                       src/AzurePrep.Web/
-RUN dotnet restore src/AzurePrep.Web/AzurePrep.Web.csproj
+RUN dotnet restore src/AzurePrep.Web/AzurePrep.Web.csproj $MSBUILD_ARGS
 
 COPY src/ src/
 RUN dotnet publish src/AzurePrep.Web/AzurePrep.Web.csproj \
         --configuration Release \
         --no-restore \
-        --output /app/publish
+        --output /app/publish \
+        $MSBUILD_ARGS
 
 # ---- Imagem final -----------------------------------------------------------
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final

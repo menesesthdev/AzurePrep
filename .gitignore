@@ -22,6 +22,11 @@ src/AzurePrep.Web/App_Data/dp-keys/
 # Credenciais do container (OAuth, SMTP) — o modelo versionado é o .env.exemplo
 .env
 
+# Ajustes de compose específicos da máquina (limites de memória/CPU, perfis). O compose carrega
+# este arquivo automaticamente, então versioná-lo aplicaria os limites de uma VM pequena em
+# qualquer clone — inclusive num servidor grande, onde só atrapalhariam.
+docker-compose.override.yml
+
 # IDE / usuário
 .vs/
 .vscode/

@@ -151,7 +151,7 @@ SQLite via EF Core Migrations. Arquivo em `src/AzurePrep.Web/App_Data/azureprep.
 
 `Dockerfile` (multi-stage: SDK 10 compila, `aspnet:10.0` roda) + `docker-compose.yml`. A imagem roda como usuário sem privilégio (`USER $APP_UID`), escuta na **8080** (e na **9464**, só métricas — ver Observabilidade) e se auto-inicializa: as migrations e o seed rodam no startup, então subir com volume vazio já cria o banco.
 
-O compose sobe **três** serviços: a aplicação, o Prometheus e o Grafana.
+O compose sobe **três** serviços: a aplicação, o Prometheus e o Grafana. (Numa máquina apertada os dois últimos podem ficar sob demanda — ver "Rodar em máquina pequena" no fim desta seção.)
 
 ```bash
 cp .env.exemplo .env          # credenciais de OAuth/SMTP; funciona vazio
@@ -170,6 +170,22 @@ docker compose up --build
 - `/health` responde `200 ok` sem tocar no banco e sem exigir login. Não há `HEALTHCHECK` no Dockerfile porque a imagem de runtime não traz curl/wget — quem orquestrar aponta para o endpoint.
 - O aviso `Failed to determine the https port for redirect` também é esperado: o container serve HTTP e o TLS termina no proxy à frente. ⚠️ **Quando entrar um reverse proxy, é obrigatório configurar `UseForwardedHeaders`** — sem isso o ASP.NET monta os `redirect_uri` do OAuth com `http://` e os provedores recusam. Não está feito porque depende de saber qual é o proxy (`KnownProxies`), e middleware meio configurado aqui é risco de spoofing de IP — que também afetaria o limitador por IP.
 - A imagem **não roda os testes** no build. `dotnet test` fica no fluxo local/CI, para o build da imagem não pagar esse tempo a cada deploy.
+
+### Rodar em máquina pequena (VM de ~1 GB)
+
+O ajuste de máquina apertada mora em **`docker-compose.override.yml`**, que é **gitignored**: ele descreve uma máquina, não o projeto. Versionado, aplicaria teto de memória em qualquer clone — inclusive num servidor grande, onde só atrapalharia. O `docker-compose.yml` continua sendo o padrão neutro.
+
+- ⚠️ **O nome do arquivo é a única coisa que faz o mecanismo funcionar.** `docker compose` soma `docker-compose.override.yml` automaticamente, sem `-f`. Qualquer variação (`docker-compose-override.yml`) é **ignorada em silêncio**: a stack sobe sem nenhum ajuste e nada avisa.
+- **O build é a etapa mais pesada, e nenhum limite do compose o alcança.** `mem_limit` vale para o container em execução; a etapa de build não tem knob de memória, nem no compose nem no BuildKit. Por isso o Dockerfile expõe **`ARG MSBUILD_ARGS`** (vazio por padrão, para não penalizar CI nem máquina com RAM sobrando) — passar `-m:1 -p:UseSharedCompilation=false` serializa os projetos e mantém o Roslyn dentro do MSBuild em vez de um servidor à parte, derrubando o pico de ~1 GB para ~400 MB. É o único ponto de controle que existe.
+- **`MSBUILDDISABLENODEREUSE=1` no estágio de build** é ganho puro em container: o MSBuild deixa processos vivos para o build seguinte reaproveitar, e num estágio descartado esse "seguinte" nunca chega — o nó só fica residente ocupando memória.
+- **Limite de memória não acelera nada; ele contém.** Sem limite, quando a RAM acaba quem escolhe a vítima é o OOM killer do kernel, por score — e o processo mais gordo da máquina pode ser o `sshd` ou o editor. Perde-se a sessão em vez do serviço. Com limite, o estouro é do container e o `restart: unless-stopped` o traz de volta.
+- ⚠️ **Não igualar `memswap_limit` a `mem_limit`** — isso desliga o swap do container, e é o reflexo errado aqui. O swap é o amortecedor que transforma pico em lentidão passageira em vez de processo morto.
+- **Server GC é o padrão do SDK Web e é a premissa errada em VM pequena**: ele aloca um heap por núcleo e coleta preguiçosamente, porque assume servidor dedicado. `DOTNET_gcServer=0` + `DOTNET_GCConserveMemory=9` troca vazão (irrelevante com um usuário) por RSS, tipicamente pela metade. Com `mem_limit` presente não é preciso configurar teto de heap: o .NET **lê o cgroup** e define ~75% dele sozinho.
+- **Observabilidade sob demanda via `profiles`** é o maior ganho, e não é limite de memória: Prometheus e Grafana juntos custam mais RAM que a aplicação, para algo que se faz de vez em quando — olhar um gráfico. Como a coleta é **pull**, a aplicação não percebe a ausência deles. O preço é buraco no histórico enquanto o perfil fica desligado; se o histórico contínuo passar a importar, o lugar dele não é uma VM de 1 GB.
+- ⚠️ **`command` é lista, e lista de override SUBSTITUI a original — não é somada.** Ao acrescentar flag ao Prometheus, os argumentos originais têm de ser repetidos; esquecer o `--config.file` faz o serviço subir sem coletar nada, e o sintoma (Grafana vazio) aponta para o lugar errado.
+- **Retenção do Prometheus é disco, não RAM.** Ele mantém em memória o bloco corrente (~2h), não os 90 dias; quem determina a memória é a **quantidade de séries**. Reduzir retenção "para economizar RAM" é otimização de fachada. O teto de memória que importa é **`--query.max-samples`**: o padrão de 50M amostras deixa uma consulta larga alocar vários GB e derrubar a máquina antes de qualquer limite reagir.
+- **`GOMEMLIMIT` abaixo do `mem_limit`** nos dois serviços em Go (Prometheus e Grafana): é o runtime se ajustando — ao aproximar-se do teto passa a coletar mais agressivamente — em vez do kernel matando o processo. Ficar lento em vez de morrer.
+- ⚠️ **`docker compose config` imprime o `.env` em texto puro**, credenciais de OAuth e senha de SMTP inclusive. É o comando natural para conferir um merge de override, e a saída é fácil de colar num issue sem perceber.
 
 ## Observabilidade (Prometheus + Grafana)
 
