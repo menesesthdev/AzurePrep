@@ -135,6 +135,7 @@
 
         currentNumber = n;
         questionEnteredAt = Date.now();
+        pickedItem = null; // item pendente de arrastar não atravessa a navegação
 
         // Sincroniza "required" com o que o servidor devolveu para este item.
         const el = currentQuestionEl();
@@ -299,6 +300,114 @@
         commentsModal.hidden = false;
         commentsText.focus();
     }
+
+    // ---- Arrastar e soltar (questões de associação) -----------------------
+    //
+    // A resposta continua sendo os checkboxes ocultos que o servidor renderizou: um por par
+    // candidato (alvo × item). Arrastar, clicar ou usar o teclado são só três formas de marcar a
+    // caixa certa — por isso nada abaixo fala com a rede, e saveCurrent/collectSelection seguem
+    // sem saber que este tipo existe.
+    //
+    // Tudo é delegado no container porque o HTML da questão é substituído a cada navegação:
+    // handler preso ao elemento morreria junto com ele, silenciosamente, a partir do item 2.
+
+    const PLACEHOLDER = "Solte um item aqui";
+    let pickedItem = null;
+
+    function pairInputs() {
+        const el = currentQuestionEl();
+        return el ? Array.from(el.querySelectorAll(".dnd__pairs .option__input")) : [];
+    }
+
+    function slotFor(target) {
+        const el = currentQuestionEl();
+        if (!el) return null;
+        return Array.from(el.querySelectorAll(".dnd__slot"))
+            .find(function (s) { return s.getAttribute("data-target") === target; }) || null;
+    }
+
+    // Um alvo guarda um item, nunca dois: marcar é sempre desmarcar o par anterior daquele alvo.
+    function setPair(target, item) {
+        pairInputs().forEach(function (input) {
+            if (input.getAttribute("data-target") !== target) return;
+            input.checked = item !== null && input.getAttribute("data-item") === item;
+        });
+
+        const slot = slotFor(target);
+        if (slot) {
+            slot.classList.toggle("is-filled", item !== null);
+            slot.querySelector(".dnd__slot-text").textContent = item === null ? PLACEHOLDER : item;
+        }
+
+        // Marcar por script não dispara "change", então a gravação é chamada aqui na mão — é o
+        // mesmo saveCurrent que o clique num radio dispara pelo caminho normal.
+        saveCurrent();
+    }
+
+    function setPicked(item) {
+        pickedItem = item;
+        const el = currentQuestionEl();
+        if (!el) return;
+        el.querySelectorAll(".dnd__item").forEach(function (btn) {
+            const isPicked = item !== null && btn.getAttribute("data-item") === item;
+            btn.classList.toggle("is-picked", isPicked);
+            btn.setAttribute("aria-pressed", isPicked ? "true" : "false");
+        });
+    }
+
+    container.addEventListener("click", function (e) {
+        const item = e.target.closest(".dnd__item");
+        if (item) {
+            const texto = item.getAttribute("data-item");
+            setPicked(pickedItem === texto ? null : texto);
+            return;
+        }
+
+        const slot = e.target.closest(".dnd__slot");
+        if (!slot) return;
+
+        if (pickedItem !== null) {
+            setPair(slot.getAttribute("data-target"), pickedItem);
+            setPicked(null);
+        } else if (slot.classList.contains("is-filled")) {
+            // Clicar num alvo já preenchido sem item selecionado devolve o item ao painel — é o
+            // equivalente a arrastá-lo de volta, que é como se corrige um engano.
+            setPair(slot.getAttribute("data-target"), null);
+        }
+    });
+
+    container.addEventListener("dragstart", function (e) {
+        const item = e.target.closest(".dnd__item");
+        if (!item) return;
+        const texto = item.getAttribute("data-item");
+        e.dataTransfer.setData("text/plain", texto);
+        e.dataTransfer.effectAllowed = "copy";
+        setPicked(texto);
+    });
+
+    container.addEventListener("dragover", function (e) {
+        const slot = e.target.closest(".dnd__slot");
+        if (!slot) return;
+        e.preventDefault(); // sem isso o navegador recusa o drop
+        e.dataTransfer.dropEffect = "copy";
+        slot.classList.add("is-over");
+    });
+
+    container.addEventListener("dragleave", function (e) {
+        const slot = e.target.closest(".dnd__slot");
+        if (slot) slot.classList.remove("is-over");
+    });
+
+    container.addEventListener("drop", function (e) {
+        const slot = e.target.closest(".dnd__slot");
+        if (!slot) return;
+        e.preventDefault();
+        slot.classList.remove("is-over");
+
+        const texto = e.dataTransfer.getData("text/plain") || pickedItem;
+        if (texto) setPair(slot.getAttribute("data-target"), texto);
+        setPicked(null);
+    });
 
     // ---- Ligações de eventos --------------------------------------------
     container.addEventListener("change", function (e) {

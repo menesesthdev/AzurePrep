@@ -13,5 +13,18 @@ public enum TipoDeQuestao
     EscolhaMultipla = 1,
 
     /// <summary>Afirmação avaliada como Verdadeiro/Falso ou Sim/Não.</summary>
-    SimNao = 2
+    SimNao = 2,
+
+    /// <summary>
+    /// Arrastar e soltar: itens de um painel são levados a alvos (categorias, descrições,
+    /// lacunas), um item por alvo.
+    /// </summary>
+    /// <remarks>
+    /// No banco, cada alternativa é um <b>par candidato</b> (alvo × item): a combinação certa é a
+    /// marcada como correta, e responder é selecionar um par por alvo. Modelar assim mantém a
+    /// correção, a gravação da resposta e o embaralhamento exatamente como já eram — igualdade de
+    /// conjuntos de Ids de alternativa —, em vez de exigir uma segunda forma de resposta que todo
+    /// caminho do sistema teria de aprender a tratar.
+    /// </remarks>
+    Associacao = 3
 }

@@ -1,0 +1,273 @@
+{
+  "exameCode": "AZ-900",
+  "area": "conceitos-de-nuvem",
+  "questoes": [
+    {
+      "id": "az900-cen-nuvem-resp-iaas-01",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso executa a máquina virtual VM-ERP-01 no Azure, criada a partir de uma imagem do Windows Server. Uma auditoria interna apontou que a VM está três meses sem atualizações de segurança do sistema operacional e que um firewall interno do convidado está desabilitado. A equipe alega que, por estar na nuvem, a Microsoft aplicaria as correções. Quem é responsável por corrigir os dois apontamentos?",
+      "explicacao": "Em IaaS a Microsoft responde pelo hardware, pela rede física e pelo hipervisor; tudo a partir do sistema operacional convidado — patches, firewall do convidado, aplicação e dados — é do cliente. É por isso que subir uma VM não terceiriza a manutenção dela (correta). Atribuir os patches à Microsoft e o firewall ao cliente é a confusão mais comum: parte do mesmo sistema operacional convidado não muda de dono conforme o assunto. Atribuir os dois à Microsoft descreve o comportamento de PaaS ou SaaS, não o de uma VM que o cliente criou e administra. E dizer que a responsabilidade depende da região confunde residência de dados com divisão de responsabilidades — a região altera onde o recurso roda, não quem o mantém.",
+      "opcoes": [
+        { "texto": "O cliente responde pelos dois: em IaaS, sistema operacional convidado para cima é dele.", "correta": true },
+        { "texto": "A Microsoft responde pelos patches do sistema operacional; o firewall do convidado é do cliente.", "correta": false },
+        { "texto": "A Microsoft responde pelos dois, pois a VM roda em infraestrutura gerenciada por ela.", "correta": false },
+        { "texto": "A divisão depende da região em que a VM foi implantada e do contrato de suporte contratado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-resp-identidade-02",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma consultoria migrou todo o correio corporativo para um serviço SaaS e a equipe de segurança pergunta o que ainda precisa manter. O time de infraestrutura sustenta que, em SaaS, nada mais é responsabilidade da empresa. Qual afirmação descreve corretamente o que permanece com o cliente mesmo em SaaS?",
+      "explicacao": "Informações e dados, dispositivos e — principalmente — contas e identidades permanecem sempre com o cliente, em qualquer modelo de serviço: é a linha que nunca se transfere, porque só o cliente sabe quem deve ter acesso a quê (correta). Dizer que apenas os dados permanecem esquece justamente as identidades, que são a superfície mais atacada de um SaaS. Dizer que nada permanece é a leitura literal de \"o fornecedor cuida de tudo\", que o modelo de responsabilidade compartilhada existe para desfazer. E responsabilizar o cliente pelo sistema operacional dos servidores do serviço descreve IaaS: em SaaS o cliente não tem acesso a esse sistema operacional nem para corrigi-lo.",
+      "opcoes": [
+        { "texto": "Contas e identidades, dados e dispositivos continuam sob responsabilidade do cliente.", "correta": true },
+        { "texto": "Apenas os dados continuam com o cliente; identidades passam a ser do provedor.", "correta": false },
+        { "texto": "Nada permanece com o cliente, pois o provedor opera toda a pilha do serviço.", "correta": false },
+        { "texto": "O cliente segue responsável pelo sistema operacional dos servidores que hospedam o serviço.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-assoc-responsabilidade-03",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de conformidade da Fabrikam está montando uma matriz de responsabilidades para a auditoria. Cada item abaixo precisa ser atribuído a quem responde por ele no Azure, considerando o modelo de implantação indicado.",
+      "explicacao": "Segurança física do datacenter nunca é do cliente — ele sequer tem acesso ao prédio —, então é exclusiva da Microsoft. Aplicar patches no sistema operacional de uma VM IaaS é exclusiva do cliente, porque a VM é dele e a Microsoft não entra no convidado. Já o sistema operacional que sustenta um Azure App Service é PaaS: o cliente publica o código e não administra o servidor, então a correção é da Microsoft. Exigir MFA nas contas é exclusiva do cliente em qualquer modelo, pois identidades nunca mudam de dono. A opção \"compartilhada em qualquer modelo\" existe para atrair quem lembra do nome do modelo e conclui que tudo é dividido: o modelo se chama compartilhado porque a divisão varia por item e por camada, não porque cada item tenha dois donos.",
+      "associacoes": [
+        { "alvo": "Segurança física dos datacenters", "item": "Responsabilidade exclusiva da Microsoft" },
+        { "alvo": "Patches do sistema operacional de uma VM IaaS", "item": "Responsabilidade exclusiva do cliente" },
+        { "alvo": "Patches do sistema operacional sob um Azure App Service", "item": "Responsabilidade exclusiva da Microsoft" },
+        { "alvo": "Exigir MFA nas contas de usuário", "item": "Responsabilidade exclusiva do cliente" }
+      ],
+      "itensExtras": [
+        "Responsabilidade compartilhada em qualquer modelo de serviço"
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-paas-limite-04",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe da Fabrikam hospeda a API de pedidos em um Azure App Service. Surgiu a exigência de instalar um agente de monitoramento proprietário como serviço do Windows na máquina que executa a aplicação, com acesso ao registro do sistema. O arquiteto avisa que isso muda o modelo de hospedagem. Qual é a razão correta?",
+      "explicacao": "Em PaaS o cliente controla a aplicação e a configuração dela, mas não o sistema operacional subjacente — não há como instalar serviço do Windows nem mexer no registro. Precisar disso é o sinal clássico de que o requisito exige IaaS, onde o cliente administra o convidado (correta). Dizer que basta mudar o plano do App Service confunde capacidade com controle: plano maior dá mais CPU e memória, não acesso ao sistema operacional. Dizer que o App Service permite qualquer instalação por SSH descreve mal o que o console oferece — o contêiner é gerenciado e não persiste esse tipo de alteração. E afirmar que o requisito viola o modelo de responsabilidade compartilhada troca uma limitação técnica por uma regra que não existe: o modelo descreve quem responde pelo quê, não proíbe requisitos.",
+      "opcoes": [
+        { "texto": "PaaS não expõe o sistema operacional ao cliente; o requisito passa a exigir IaaS.", "correta": true },
+        { "texto": "Basta mudar para um plano de App Service maior, que libera acesso ao sistema operacional.", "correta": false },
+        { "texto": "O App Service permite qualquer instalação pelo console SSH, sem mudar de modelo.", "correta": false },
+        { "texto": "O requisito viola o modelo de responsabilidade compartilhada e não pode ser atendido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-assoc-modelos-servico-05",
+      "topico": "Tipos de serviço em nuvem",
+      "tipo": "Associacao",
+      "enunciado": "A Northwind está classificando quatro cargas para decidir o time responsável por cada uma. Associe cada cenário ao modelo de serviço em nuvem que o descreve.",
+      "explicacao": "Uma VM Linux em que a própria equipe instala e atualiza o banco de dados é IaaS: o cliente administra o convidado inteiro. Publicar código num serviço gerenciado de aplicação, sem tocar no servidor, é PaaS — o mesmo vale para um banco de dados gerenciado, em que o provedor faz patch e backup do motor e o cliente cuida de esquema e dados. Já uma suíte de produtividade acessada só pelo navegador, sem nada a instalar ou operar, é SaaS. O erro típico é chamar o banco gerenciado de IaaS \"porque é banco de dados\": o que define o modelo é quem administra a plataforma, não que tipo de software roda nela. \"Nuvem híbrida\" está no painel de propósito — é modelo de implantação (onde a carga roda), não modelo de serviço (quanto da pilha é gerenciado), e confundir os dois eixos é o engano mais frequente deste domínio.",
+      "associacoes": [
+        { "alvo": "VM Linux em que a equipe instala e atualiza o próprio banco de dados", "item": "IaaS" },
+        { "alvo": "Aplicação publicada em serviço gerenciado, sem acesso ao servidor", "item": "PaaS" },
+        { "alvo": "Banco de dados gerenciado, com patch e backup do motor feitos pelo provedor", "item": "PaaS" },
+        { "alvo": "Suíte de produtividade usada pelo navegador, sem nada a instalar", "item": "SaaS" }
+      ],
+      "itensExtras": [
+        "Nuvem híbrida"
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-privada-06",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um órgão público precisa manter um sistema em datacenter próprio por exigência regulatória, mas quer oferecer às equipes internas um portal de autoatendimento com provisionamento sob demanda e cobrança interna por uso. Não haverá compartilhamento de infraestrutura com nenhuma outra organização. Qual modelo descreve o resultado?",
+      "explicacao": "Nuvem privada é exatamente isto: características de nuvem — autoatendimento, elasticidade, medição de uso — sobre infraestrutura dedicada a uma única organização, própria ou hospedada (correta). Chamar de nuvem pública ignora o ponto central do cenário, que é não compartilhar infraestrutura com terceiros. Chamar de híbrida exigiria que houvesse também consumo de nuvem pública integrado ao ambiente, e o enunciado diz que tudo permanece no datacenter próprio. E \"datacenter tradicional\" descreveria o que existia antes do portal de autoatendimento: é justamente a camada de automação e medição que faz a diferença entre virtualização e nuvem privada.",
+      "opcoes": [
+        { "texto": "Nuvem privada, por reunir características de nuvem em infraestrutura de uso exclusivo.", "correta": true },
+        { "texto": "Nuvem pública, porque o autoatendimento e a cobrança por uso definem o modelo público.", "correta": false },
+        { "texto": "Nuvem híbrida, porque há portal de autoatendimento sobre servidores locais.", "correta": false },
+        { "texto": "Datacenter tradicional, já que os servidores permanecem nas instalações do órgão.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-hibrida-07",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Adventure Works mantém o ERP em servidores locais por dependência de um dispositivo de chão de fábrica e publicou o portal de clientes no Azure. Os dois trocam dados por um túnel dedicado e as identidades são as mesmas nos dois lados. A diretoria pediu que a arquitetura fosse nomeada no relatório anual. Qual termo descreve o arranjo?",
+      "explicacao": "Nuvem híbrida é a combinação de infraestrutura local com nuvem pública operando como um ambiente integrado, que é precisamente o que a conectividade dedicada e a identidade comum caracterizam (correta). \"Multinuvem\" descreveria o uso de dois ou mais provedores de nuvem pública — o cenário só menciona um. \"Nuvem pública com extensão\" não é um modelo definido no exame e apenas renomeia o híbrido. E chamar de nuvem privada contraria o fato de que a carga do portal roda em infraestrutura compartilhada de um provedor público, que é o que a define como pública.",
+      "opcoes": [
+        { "texto": "Nuvem híbrida, por integrar ambiente local e nuvem pública como um único ambiente.", "correta": true },
+        { "texto": "Multinuvem, porque há mais de um local de execução das cargas da empresa.", "correta": false },
+        { "texto": "Nuvem pública com extensão local, já que o portal está no provedor público.", "correta": false },
+        { "texto": "Nuvem privada, pois a conectividade entre os ambientes é dedicada e não passa pela internet pública.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-assoc-modelos-implantacao-08",
+      "topico": "Modelos de nuvem",
+      "tipo": "Associacao",
+      "enunciado": "A área de arquitetura da Tailspin precisa rotular três iniciativas no inventário corporativo. Associe cada iniciativa ao modelo de implantação em nuvem correspondente.",
+      "explicacao": "Uma startup que executa tudo em serviços de um provedor, sem infraestrutura própria, é nuvem pública. Um banco que mantém o core em datacenter próprio e usa o Azure só para o canal digital, integrando os dois, é nuvem híbrida — o que caracteriza o híbrido é a integração, não a mera existência de servidores locais. Distribuir cargas entre dois provedores públicos diferentes é multinuvem, e essa é a distinção que mais se erra: multinuvem trata de quantos provedores, híbrido trata de local mais nuvem. \"Nuvem privada\" está no painel porque é o rótulo que se aplica por engano a qualquer coisa que envolva servidores próprios — mas ela exige infraestrutura dedicada operada com características de nuvem, e nenhuma das três iniciativas descreve isso.",
+      "associacoes": [
+        { "alvo": "Startup que executa tudo em serviços de um único provedor de nuvem", "item": "Nuvem pública" },
+        { "alvo": "Banco com core no datacenter próprio integrado ao canal digital no Azure", "item": "Nuvem híbrida" },
+        { "alvo": "Empresa que distribui cargas entre dois provedores públicos diferentes", "item": "Multinuvem" }
+      ],
+      "itensExtras": [
+        "Nuvem privada"
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-capex-opex-09",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O CFO da Contoso comparou duas propostas para um projeto de 18 meses: comprar servidores que serão depreciados em cinco anos ou executar a carga em VMs do Azure pagas por hora. Ele pediu que a diferença fosse descrita em termos financeiros, não técnicos. Qual descrição está correta?",
+      "explicacao": "Comprar servidores é despesa de capital (CapEx): desembolso adiantado por um ativo que será depreciado ao longo dos anos. Pagar VMs por hora é despesa operacional (OpEx): custo recorrente proporcional ao consumo, sem ativo a depreciar (correta). A alternativa que inverte os dois termos é o erro mais comum de quem memorizou as siglas sem associá-las ao desembolso. Dizer que ambos são OpEx porque \"tudo é custo mensal\" ignora que o servidor comprado gera um ativo no balanço, e não uma despesa mensal. E afirmar que a diferença é só contábil, sem efeito na decisão, contraria o motivo pelo qual a distinção aparece no exame: ela muda o risco assumido quando a demanda não se confirma.",
+      "opcoes": [
+        { "texto": "Comprar servidores é CapEx; pagar VMs por hora é OpEx, proporcional ao consumo.", "correta": true },
+        { "texto": "Comprar servidores é OpEx; pagar VMs por hora é CapEx, por gerar compromisso de longo prazo.", "correta": false },
+        { "texto": "Ambos são OpEx, pois nos dois casos há desembolso mensal ao longo do projeto.", "correta": false },
+        { "texto": "A diferença é apenas de classificação contábil e não altera o risco da decisão.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-consumo-vm-parada-10",
+      "topico": "Modelo baseado em consumo",
+      "tipo": "SimNao",
+      "enunciado": "A equipe de operações desalocou a máquina virtual VM-DEV-04 pelo portal do Azure ao fim do expediente e o disco gerenciado dela foi mantido. Avalie a afirmação: nesse estado, a cobrança de computação da VM cessa, mas o armazenamento do disco continua sendo cobrado.",
+      "explicacao": "A afirmação é verdadeira. Desalocar libera os recursos de computação e interrompe a cobrança por hora da VM, mas o disco gerenciado permanece provisionado e continua sendo cobrado pela capacidade — é por isso que \"desligar para economizar\" reduz a fatura sem zerá-la, e por isso que recursos órfãos (discos de VMs excluídas) aparecem como desperdício nas recomendações de custo. A leitura falsa costuma vir de duas confusões opostas: achar que desalocar não interrompe nada, ou achar que interrompe tudo. Vale lembrar que desligar a VM por dentro do sistema operacional, sem desalocar, mantém a cobrança de computação — o estado que importa é o do Azure, não o do convidado.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-elasticidade-escalabilidade-11",
+      "topico": "Benefícios da nuvem — escalabilidade e elasticidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A loja virtual da Northwind atende 200 requisições por segundo em dias normais e 4.000 durante a semana de promoções. Hoje a equipe adiciona instâncias manualmente na véspera e remove na segunda-feira seguinte. A diretoria quer que isso aconteça sem intervenção humana, acompanhando a demanda real. Qual característica da nuvem está sendo pedida?",
+      "explicacao": "Elasticidade é a capacidade de acrescentar e remover recursos automaticamente conforme a demanda varia — exatamente o que substitui o ajuste manual descrito (correta). Escalabilidade é a capacidade de crescer quando necessário, e o cenário já a tem: a equipe consegue crescer, só que na mão. A distinção entre as duas é o alvo da questão. Alta disponibilidade trata de continuar atendendo diante de falhas, não de acompanhar variação de carga. E confiabilidade trata da capacidade de se recuperar de falhas e continuar operando — um sistema pode ser muito confiável e mesmo assim precisar de intervenção humana para escalar.",
+      "opcoes": [
+        { "texto": "Elasticidade, por ajustar a capacidade automaticamente conforme a demanda varia.", "correta": true },
+        { "texto": "Escalabilidade, por permitir aumentar a capacidade nos períodos de pico.", "correta": false },
+        { "texto": "Alta disponibilidade, por manter o site no ar durante a semana de promoções.", "correta": false },
+        { "texto": "Confiabilidade, por permitir que o sistema se recupere de picos inesperados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-escala-vertical-12",
+      "topico": "Benefícios da nuvem — escalabilidade e elasticidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O banco de dados da aplicação de faturamento roda em uma única VM que não pode ser dividida entre vários servidores por limitação do fornecedor do software. Nos fechamentos mensais, a CPU satura. A equipe precisa aumentar a capacidade sem alterar a aplicação. Qual abordagem é adequada?",
+      "explicacao": "Aumentar o tamanho da VM — mais vCPUs e memória no mesmo servidor — é escala vertical (scale up), a única aplicável quando o software não distribui carga entre instâncias (correta). Acrescentar réplicas atrás de um balanceador é escala horizontal, que o próprio enunciado exclui ao dizer que o software não pode ser dividido. Habilitar autoescala em conjunto de instâncias esbarra no mesmo impedimento, além de não valer para uma VM única. E mover para outra região não altera a capacidade disponível para a carga: região influencia latência e preço, não o limite de CPU da instância.",
+      "opcoes": [
+        { "texto": "Escala vertical: redimensionar a VM para um tamanho com mais vCPUs e memória.", "correta": true },
+        { "texto": "Escala horizontal: acrescentar réplicas da VM atrás de um balanceador de carga.", "correta": false },
+        { "texto": "Habilitar autoescala em um conjunto de instâncias para o fechamento mensal.", "correta": false },
+        { "texto": "Mover a VM para uma região com mais capacidade disponível durante o fechamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-alta-disponibilidade-13",
+      "topico": "Benefícios da nuvem — alta disponibilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A aplicação de atendimento da Contoso roda em duas VMs na mesma região. O time precisa que o serviço continue disponível se um datacenter inteiro daquela região sofrer uma falha de energia, sem depender de restauração de backup. Qual característica está sendo buscada e o que a sustenta?",
+      "explicacao": "Alta disponibilidade é manter o serviço acessível apesar de falhas, e dentro de uma região quem a sustenta são as zonas de disponibilidade: datacenters fisicamente separados, com energia e refrigeração independentes (correta). Recuperação de desastre com restauração de backup é o caminho que o enunciado descarta explicitamente — e ela responde por perda maior, de região inteira, com tempo de recuperação. Escalabilidade trata de acompanhar a demanda, não de sobreviver a uma falha. E previsibilidade trata de desempenho e custo estimáveis, que nada dizem sobre continuar no ar quando um prédio cai.",
+      "opcoes": [
+        { "texto": "Alta disponibilidade, distribuindo as VMs entre zonas de disponibilidade da região.", "correta": true },
+        { "texto": "Recuperação de desastre, replicando as VMs para restauração em outra região.", "correta": false },
+        { "texto": "Escalabilidade, acrescentando instâncias suficientes para absorver a falha.", "correta": false },
+        { "texto": "Previsibilidade, garantindo desempenho constante mesmo durante incidentes.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-recuperacao-desastre-14",
+      "topico": "Benefícios da nuvem — confiabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Após um incidente regional em outro provedor, a diretoria da Fabrikam pediu um plano para o caso de a região primária do Azure ficar inteiramente indisponível por horas. A aplicação já usa três zonas de disponibilidade. Qual medida atende ao novo requisito?",
+      "explicacao": "Zonas protegem contra a perda de um datacenter dentro da região, mas não contra a perda da região inteira — para isso é preciso replicar para uma segunda região, tipicamente a região emparelhada (correta). Acrescentar uma quarta zona não ajuda: o cenário de falha em questão derruba todas as zonas juntas. Aumentar o tamanho das VMs trata de capacidade, não de continuidade. E aumentar a frequência dos backups dentro da mesma região melhora o ponto de recuperação, mas não adianta se o local onde os backups estão também é o que ficou indisponível — a separação geográfica é o ponto.",
+      "opcoes": [
+        { "texto": "Replicar a aplicação e os dados para uma segunda região, preparada para assumir a carga.", "correta": true },
+        { "texto": "Acrescentar uma quarta zona de disponibilidade à implantação na região atual.", "correta": false },
+        { "texto": "Aumentar o tamanho das VMs para que absorvam a carga durante o incidente.", "correta": false },
+        { "texto": "Aumentar a frequência dos backups mantidos na mesma região da aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-nao-e-beneficio-15",
+      "topico": "Benefícios da nuvem — governança e gerenciabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Ao apresentar a migração para o Azure, um gerente listou promessas para o comitê. Qual das afirmações a seguir NÃO é um benefício que a nuvem pública oferece por si só?",
+      "explicacao": "Conformidade regulatória não vem pronta pelo fato de a carga estar na nuvem: o Azure oferece certificações, controles e ferramentas, mas cabe ao cliente configurar, comprovar e manter a conformidade do que ele implanta — é a aplicação direta do modelo de responsabilidade compartilhada (correta, por ser a que NÃO é benefício automático). Aplicar configurações padronizadas por política, medir uso por recurso e implantar em outra região sem comprar hardware são, essas sim, capacidades que a plataforma entrega diretamente. A armadilha aqui é a plausibilidade: a nuvem realmente ajuda muito na conformidade, e por isso é fácil marcar as outras — o enunciado pede o que ela não garante sozinha.",
+      "opcoes": [
+        { "texto": "A conformidade regulatória do ambiente passa a ser garantida automaticamente pelo provedor.", "correta": true },
+        { "texto": "Configurações padronizadas podem ser aplicadas e auditadas por política em toda a organização.", "correta": false },
+        { "texto": "O consumo pode ser medido por recurso, permitindo rateio entre áreas da empresa.", "correta": false },
+        { "texto": "É possível implantar em outra região sem adquirir e instalar hardware previamente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-multipla-elasticidade-16",
+      "topico": "Benefícios da nuvem — escalabilidade e elasticidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Tailspin quer reduzir a fatura de um ambiente cuja carga cai a quase zero das 20h às 7h e nos fins de semana, sem prejudicar o horário comercial. Selecione duas medidas que exploram o modelo baseado em consumo para atingir esse objetivo.",
+      "explicacao": "Configurar autoescala para reduzir instâncias fora do horário de pico e desalocar ambientes de desenvolvimento fora do expediente atacam a mesma causa: pagar por capacidade ociosa. As duas funcionam porque a cobrança de computação é por tempo alocado (corretas). Comprar reservas de um ano para as instâncias de pico é uma boa opção de economia, mas para carga constante — reservar capacidade que fica ociosa 60% do tempo é justamente o desperdício que se quer eliminar. Mudar as VMs para uma região mais barata reduz a tarifa unitária, mas mantém o pagamento pelas horas ociosas, que é o problema descrito. E aumentar o tamanho das VMs para \"terminar o processamento mais cedo\" não se aplica: a carga descrita é interativa e definida pelo expediente, não por um lote a concluir.",
+      "opcoes": [
+        { "texto": "Configurar autoescala para reduzir o número de instâncias fora do horário de pico.", "correta": true },
+        { "texto": "Desalocar as VMs dos ambientes de desenvolvimento fora do expediente.", "correta": true },
+        { "texto": "Comprar reservas de um ano para todas as instâncias dimensionadas para o pico.", "correta": false },
+        { "texto": "Mover as VMs para uma região com tarifa por hora mais baixa, mantendo-as ligadas.", "correta": false },
+        { "texto": "Aumentar o tamanho das VMs para que o processamento termine mais cedo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-multipla-responsabilidade-17",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso vai executar uma aplicação em um serviço PaaS de aplicação web do Azure. A equipe de segurança precisa saber o que continua sob responsabilidade dela nesse modelo. Selecione duas responsabilidades que permanecem com o cliente.",
+      "explicacao": "Classificar e proteger os dados da aplicação e administrar as contas que acessam o serviço permanecem com o cliente em PaaS — dados e identidades nunca se transferem, em modelo nenhum (corretas). Aplicar patches no sistema operacional dos servidores e manter os controladores de rede física do datacenter são responsabilidades da Microsoft em PaaS; o cliente sequer tem acesso a esses componentes. Atualizar o firmware dos hosts é da Microsoft em qualquer modelo, inclusive IaaS — é o distrator que separa quem entendeu a fronteira de quem decorou que \"em IaaS tudo é do cliente\".",
+      "opcoes": [
+        { "texto": "Classificar e proteger os dados manipulados pela aplicação.", "correta": true },
+        { "texto": "Administrar as contas e as permissões de quem acessa o serviço.", "correta": true },
+        { "texto": "Aplicar patches no sistema operacional dos servidores que executam a aplicação.", "correta": false },
+        { "texto": "Manter os controladores de rede física do datacenter onde o serviço roda.", "correta": false },
+        { "texto": "Atualizar o firmware dos hosts físicos que sustentam a plataforma.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-multipla-hibrida-18",
+      "topico": "Modelos de nuvem",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um hospital precisa manter o prontuário eletrônico em servidores locais por exigência do regulador, mas quer usar a nuvem pública para processar imagens médicas em picos de demanda. Selecione duas afirmações corretas sobre a arquitetura híbrida resultante.",
+      "explicacao": "A carga sujeita à exigência regulatória permanece no ambiente local e a nuvem absorve o excedente de processamento, que é a definição operacional do híbrido; e o modelo permite consumir capacidade sob demanda sem transferir todo o sistema, que é a razão econômica de adotá-lo (corretas). Dizer que a nuvem híbrida elimina a necessidade de conectividade entre os ambientes inverte o requisito: é justamente a conectividade que os torna um só ambiente. Afirmar que o modelo transfere a conformidade do prontuário para o provedor contraria a responsabilidade compartilhada — o dado regulado nem sai do hospital. E dizer que híbrido exige o mesmo hardware nos dois lados descreve uma restrição que não existe.",
+      "opcoes": [
+        { "texto": "A carga sujeita à exigência regulatória permanece no ambiente local.", "correta": true },
+        { "texto": "A capacidade extra é consumida sob demanda, sem migrar o sistema inteiro.", "correta": true },
+        { "texto": "O modelo híbrido elimina a necessidade de conectividade entre os dois ambientes.", "correta": false },
+        { "texto": "A conformidade do prontuário passa a ser responsabilidade do provedor de nuvem.", "correta": false },
+        { "texto": "O modelo exige hardware idêntico no ambiente local e na nuvem pública.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-simnao-elasticidade-19",
+      "topico": "Benefícios da nuvem — escalabilidade e elasticidade",
+      "tipo": "SimNao",
+      "enunciado": "A equipe da Northwind configurou autoescala horizontal para a aplicação web, que passa de 2 para 12 instâncias conforme a fila de requisições cresce. Avalie a afirmação: essa configuração é um exemplo de escala vertical, porque aumenta a capacidade total de processamento disponível para a aplicação.",
+      "explicacao": "A afirmação é falsa. Aumentar a capacidade total não define o eixo da escala: o que separa vertical de horizontal é COMO ela cresce. Passar de 2 para 12 instâncias é escala horizontal (scale out) — acrescentam-se unidades iguais. Escala vertical seria trocar cada instância por uma maior, com mais vCPU e memória. A afirmação é sedutora porque a premissa está certa (a capacidade realmente aumenta) e só a conclusão está errada — é o padrão de distrator que exige entender a definição, não reconhecer a palavra \"capacidade\".",
+      "opcoes": [
+        { "texto": "Não", "correta": true },
+        { "texto": "Sim", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-nuvem-recursos-compartilhados-20",
+      "topico": "Computação em nuvem e recursos compartilhados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante a análise de risco da migração, a área jurídica da Fabrikam perguntou como a Microsoft impede que outra empresa hospedada no mesmo hardware físico acesse os dados da Contoso. Qual afirmação descreve corretamente o funcionamento da nuvem pública nesse ponto?",
+      "explicacao": "A nuvem pública é multilocatária: hardware físico é compartilhado entre clientes, e o isolamento é lógico — hipervisor, redes virtuais e controles de identidade separam os locatários, sem que nenhum enxergue os recursos do outro (correta). Dizer que cada cliente recebe hardware exclusivo descreve nuvem privada ou hosts dedicados, que são exceção contratada, não o padrão. Dizer que o isolamento depende de o cliente configurar criptografia confunde uma camada adicional de proteção com a separação entre locatários, que a plataforma garante independentemente. E afirmar que não há isolamento e que o risco é aceito por contrato é simplesmente falso — é o oposto do que sustenta o modelo.",
+      "opcoes": [
+        { "texto": "O hardware é compartilhado e o isolamento entre locatários é lógico, garantido pela plataforma.", "correta": true },
+        { "texto": "Cada cliente recebe hardware físico exclusivo, o que torna o isolamento desnecessário.", "correta": false },
+        { "texto": "O isolamento só existe se o cliente habilitar criptografia nos discos e no tráfego.", "correta": false },
+        { "texto": "Não há isolamento entre locatários; o risco é assumido contratualmente pelo cliente.", "correta": false }
+      ]
+    }
+  ]
+}

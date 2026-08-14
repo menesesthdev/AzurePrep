@@ -44,7 +44,76 @@ public static class CatalogoDeQuestoesDeSeed
         var arquivo = JsonSerializer.Deserialize<ArquivoDeQuestoes>(stream, Opcoes)
                       ?? throw new InvalidOperationException($"Recurso {nomeDoRecurso} não contém um lote de questões válido.");
 
-        return arquivo with { Origem = NomeCurto(nomeDoRecurso) };
+        return arquivo with
+        {
+            Origem = NomeCurto(nomeDoRecurso),
+            Questoes = arquivo.Questoes.Select(Expandir).ToList()
+        };
+    }
+
+    /// <summary>
+    /// Traduz o gabarito legível de uma questão de arrastar e soltar nos <b>pares candidatos</b>
+    /// que vão para o banco: uma alternativa para cada combinação de alvo com item, correta apenas
+    /// na combinação escrita em <c>associacoes</c>. Os outros tipos passam intactos.
+    /// </summary>
+    /// <remarks>
+    /// ⚠️ A ordem da expansão é <b>contrato</b>, não detalhe: o Id de cada alternativa vem da
+    /// posição (<see cref="GuidDeterministico.DeOpcao"/>), e as respostas já gravadas apontam para
+    /// esses Ids. Ela é alvo-a-alvo, e dentro de cada alvo na ordem dos itens — os corretos na
+    /// ordem em que aparecem em <c>associacoes</c>, depois os de <c>itensExtras</c>. Mudar isso
+    /// reescreveria o gabarito de tentativas antigas em silêncio.
+    ///
+    /// Idempotente: questão que já chega com <c>opcoes</c> preenchidas passa direto, o que deixa
+    /// <see cref="Validar"/> receber tanto a forma escrita à mão quanto a já expandida.
+    /// </remarks>
+    public static QuestaoDeSeed Expandir(QuestaoDeSeed questao)
+    {
+        ArgumentNullException.ThrowIfNull(questao);
+
+        if (!TentarConverterTipo(questao.Tipo, out var tipo)
+            || tipo != TipoDeQuestao.Associacao
+            || questao.Associacoes.Count == 0
+            || questao.Opcoes.Count > 0)
+        {
+            return questao;
+        }
+
+        var itens = ItensArrastaveis(questao);
+
+        var pares = new List<OpcaoDeSeed>(questao.Associacoes.Count * itens.Count);
+        foreach (var associacao in questao.Associacoes)
+        {
+            foreach (var item in itens)
+            {
+                pares.Add(new OpcaoDeSeed
+                {
+                    Texto = item,
+                    Alvo = associacao.Alvo,
+                    Correta = string.Equals(item, associacao.Item, StringComparison.Ordinal)
+                });
+            }
+        }
+
+        return questao with { Opcoes = pares };
+    }
+
+    /// <summary>
+    /// O painel de itens da questão: os que respondem a algum alvo, na ordem do gabarito, seguidos
+    /// dos distratores. Sem repetição — um item que responde a dois alvos aparece uma vez só.
+    /// </summary>
+    private static IReadOnlyList<string> ItensArrastaveis(QuestaoDeSeed questao)
+    {
+        var itens = new List<string>();
+
+        foreach (var texto in questao.Associacoes.Select(a => a.Item).Concat(questao.ItensExtras))
+        {
+            if (!string.IsNullOrWhiteSpace(texto) && !itens.Contains(texto, StringComparer.Ordinal))
+            {
+                itens.Add(texto);
+            }
+        }
+
+        return itens;
     }
 
     private static string NomeCurto(string nomeDoRecurso)
@@ -79,8 +148,11 @@ public static class CatalogoDeQuestoesDeSeed
                 problemas.Add($"{arquivo.Origem}: nenhum item em 'questoes'.");
             }
 
-            foreach (var questao in arquivo.Questoes)
+            foreach (var original in arquivo.Questoes)
             {
+                // Aceita tanto a forma escrita à mão quanto a já expandida — o carregador expande
+                // ao ler o recurso, mas um lote montado em teste chega cru.
+                var questao = Expandir(original);
                 var rotulo = $"{arquivo.Origem}[{questao.Id}]";
 
                 if (string.IsNullOrWhiteSpace(questao.Id))
@@ -148,20 +220,28 @@ public static class CatalogoDeQuestoesDeSeed
     private static void ValidarOpcoes(QuestaoDeSeed questao, string rotulo, List<string> problemas)
     {
         var corretas = questao.Opcoes.Count(o => o.Correta);
+        TentarConverterTipo(questao.Tipo, out var tipoLido);
+        var ehAssociacao = tipoLido == TipoDeQuestao.Associacao;
 
         if (questao.Opcoes.Any(o => string.IsNullOrWhiteSpace(o.Texto)))
         {
             problemas.Add($"{rotulo}: alternativa com texto vazio.");
         }
 
-        var textosRepetidos = questao.Opcoes
-            .GroupBy(o => NormalizarTexto(o.Texto))
-            .Where(g => g.Key.Length > 0 && g.Count() > 1)
-            .Select(g => g.First().Texto);
-
-        foreach (var texto in textosRepetidos)
+        // Numa questão de arrastar, o mesmo item aparece em todos os alvos de propósito — a
+        // repetição É o formato. A unicidade que importa ali é entre alvos e entre itens, e quem
+        // a verifica é ValidarAssociacoes.
+        if (!ehAssociacao)
         {
-            problemas.Add($"{rotulo}: alternativa repetida ('{texto}').");
+            var textosRepetidos = questao.Opcoes
+                .GroupBy(o => NormalizarTexto(o.Texto))
+                .Where(g => g.Key.Length > 0 && g.Count() > 1)
+                .Select(g => g.First().Texto);
+
+            foreach (var texto in textosRepetidos)
+            {
+                problemas.Add($"{rotulo}: alternativa repetida ('{texto}').");
+            }
         }
 
         if (corretas == 0)
@@ -171,6 +251,17 @@ public static class CatalogoDeQuestoesDeSeed
 
         if (!TentarConverterTipo(questao.Tipo, out var tipo))
         {
+            return;
+        }
+
+        if (questao.Associacoes.Count > 0 && !ehAssociacao)
+        {
+            problemas.Add($"{rotulo}: 'associacoes' só vale para o tipo Associacao (tipo é {questao.Tipo}).");
+        }
+
+        if (ehAssociacao)
+        {
+            ValidarAssociacoes(questao, rotulo, problemas);
             return;
         }
 
@@ -209,6 +300,79 @@ public static class CatalogoDeQuestoesDeSeed
             case TipoDeQuestao.SimNao when corretas != 1:
                 problemas.Add($"{rotulo}: SimNao exige exatamente 1 correta (tem {corretas}).");
                 break;
+        }
+    }
+
+    /// <summary>
+    /// Regras do arrastar e soltar, verificadas sobre o gabarito escrito à mão (alvos e itens) e
+    /// não sobre os pares já expandidos — é ali que o erro é cometido e é ali que a mensagem
+    /// precisa apontar.
+    /// </summary>
+    private static void ValidarAssociacoes(QuestaoDeSeed questao, string rotulo, List<string> problemas)
+    {
+        var alvos = questao.Associacoes;
+
+        if (alvos.Count < 3 || alvos.Count > 6)
+        {
+            // Menos de três alvos vira escolha única disfarçada; mais de seis não cabe na tela sem
+            // rolagem, e a prova real também fica nessa faixa.
+            problemas.Add($"{rotulo}: Associacao exige de 3 a 6 alvos (tem {alvos.Count}).");
+        }
+
+        if (alvos.Any(a => string.IsNullOrWhiteSpace(a.Alvo) || string.IsNullOrWhiteSpace(a.Item)))
+        {
+            problemas.Add($"{rotulo}: associação com alvo ou item vazio.");
+            return;
+        }
+
+        var alvosRepetidos = alvos
+            .GroupBy(a => NormalizarTexto(a.Alvo))
+            .Where(g => g.Count() > 1)
+            .Select(g => g.First().Alvo);
+
+        foreach (var alvo in alvosRepetidos)
+        {
+            // Dois alvos com o mesmo texto seriam a mesma caixa na tela, com dois gabaritos.
+            problemas.Add($"{rotulo}: alvo repetido ('{alvo}').");
+        }
+
+        // Item repetido ENTRE ALVOS é reuso legítimo (o painel o desduplica, e é assim que se tira
+        // a eliminação do jogo). O que não pode é repetição dentro de 'itensExtras' nem um extra
+        // que na verdade é resposta de algum alvo — aí o distrator não é distrator nenhum.
+        var respostas = alvos.Select(a => NormalizarTexto(a.Item)).ToHashSet();
+        var extrasVistos = new HashSet<string>();
+
+        foreach (var extra in questao.ItensExtras)
+        {
+            var chave = NormalizarTexto(extra);
+
+            if (chave.Length == 0)
+            {
+                problemas.Add($"{rotulo}: item extra vazio.");
+            }
+            else if (respostas.Contains(chave))
+            {
+                problemas.Add($"{rotulo}: item extra '{extra}' também é resposta de um alvo.");
+            }
+            else if (!extrasVistos.Add(chave))
+            {
+                problemas.Add($"{rotulo}: item extra repetido ('{extra}').");
+            }
+        }
+
+        var itensDistintos = alvos.Select(a => NormalizarTexto(a.Item)).Distinct().Count();
+        if (questao.ItensExtras.Count == 0 && itensDistintos == alvos.Count)
+        {
+            // Painel com exatamente um item por alvo se resolve por eliminação: quem sabe todos
+            // menos um acerta o último de graça. Ou entra um distrator, ou um item responde a mais
+            // de um alvo — que é o outro jeito de tirar a contagem do jogo.
+            problemas.Add($"{rotulo}: Associacao sem distrator — inclua 'itensExtras' ou reutilize " +
+                          "um item em mais de um alvo, senão a última associação sai por eliminação.");
+        }
+
+        if (questao.Opcoes.Count != alvos.Count * ItensArrastaveis(questao).Count)
+        {
+            problemas.Add($"{rotulo}: pares candidatos inconsistentes com os alvos e itens declarados.");
         }
     }
 

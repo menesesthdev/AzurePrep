@@ -3,6 +3,7 @@ using AzurePrep.Application.Contracts;
 using AzurePrep.Application.Sorteios;
 using AzurePrep.Domain.Entidades;
 using AzurePrep.Domain.Correcao;
+using AzurePrep.Domain.Enums;
 using AzurePrep.Domain.Sorteio;
 
 namespace AzurePrep.Application.Sessoes;
@@ -129,7 +130,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
 
         // A ordem das alternativas é a da TENTATIVA, não a do banco de questões — ver OrdemDasOpcoes.
         var options = OrdemDasOpcoes.Para(question, attempt.Id)
-            .Select((o, i) => new OpcaoDeQuestaoDto(o.Id, o.Text, i))
+            .Select((o, i) => new OpcaoDeQuestaoDto(o.Id, o.Text, i, o.TargetText))
             .ToList();
 
         return new QuestaoDto(
@@ -399,8 +400,23 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             // Mesma ordem que o candidato viu durante a prova: a revisão é releitura do que
             // aconteceu, e alternativa que troca de lugar depois atrapalha justamente quem está
             // tentando entender por que marcou o que marcou.
-            var options = OrdemDasOpcoes.Para(question, attempt.Id)
-                .Select(o => new RevisaoDeOpcaoDto(o.Text, o.IsCorrect, selected.Contains(o.Id)))
+            // Arrastar e soltar gera uma alternativa por combinação de alvo com item — listar todas
+            // na revisão seria despejar vinte linhas para uma questão de quatro alvos, quase todas
+            // irrelevantes. Sobram o gabarito e o que a pessoa montou, que é o que se vai comparar.
+            var relevantes = OrdemDasOpcoes.Para(question, attempt.Id)
+                .Where(o => question.Type != TipoDeQuestao.Associacao || o.IsCorrect || selected.Contains(o.Id));
+
+            if (question.Type == TipoDeQuestao.Associacao)
+            {
+                // Agrupar por alvo põe lado a lado "o que eu montei" e "o que era" de cada linha —
+                // que é a comparação que a revisão existe para permitir. O GroupBy do LINQ preserva
+                // a ordem de primeira aparição, então os alvos saem na ordem em que apareceram na
+                // tela desta tentativa, não numa ordem nova.
+                relevantes = relevantes.GroupBy(o => o.TargetText).SelectMany(g => g);
+            }
+
+            var options = relevantes
+                .Select(o => new RevisaoDeOpcaoDto(o.Text, o.IsCorrect, selected.Contains(o.Id), o.TargetText))
                 .ToList();
 
             reviews.Add(new RevisaoDeQuestaoDto(

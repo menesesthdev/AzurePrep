@@ -74,9 +74,14 @@ public class Questao : Entity
 
     public IReadOnlyCollection<OpcaoDeResposta> Options => _options.OrderBy(o => o.OrderIndex).ToList();
 
-    public OpcaoDeResposta AdicionarOpcao(string text, bool isCorrect, int orderIndex, Guid? id = null)
+    public OpcaoDeResposta AdicionarOpcao(
+        string text,
+        bool isCorrect,
+        int orderIndex,
+        Guid? id = null,
+        string? targetText = null)
     {
-        var option = new OpcaoDeResposta(Id, text, isCorrect, orderIndex, id);
+        var option = new OpcaoDeResposta(Id, text, isCorrect, orderIndex, id, targetText);
         _options.Add(option);
         return option;
     }

@@ -1,0 +1,329 @@
+{
+  "exameCode": "AZ-900",
+  "area": "governanca",
+  "questoes": [
+    {
+      "id": "az900-cen-gov-tag-heranca-01",
+      "topico": "Tags de recursos — herança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso aplicou a tag CentroDeCusto = R23 no resource group rg-financeiro-brs. Ao exportar a análise de custo por tag, a equipe percebeu que as VMs contidas no grupo aparecem sem essa tag. Qual é a explicação correta e o que resolve o problema?",
+      "explicacao": "Tags não são herdadas automaticamente do resource group pelos recursos contidos nele: o recurso só carrega a tag que estiver aplicada nele próprio. Uma política do Azure Policy com efeito de modificação pode acrescentar a tag aos recursos, e é assim que se garante a herança na prática (correta). Dizer que a herança leva algumas horas para propagar inventa um comportamento que não existe — nada vai mudar esperando. Dizer que só recursos criados depois da tag a herdam descreve uma regra igualmente inexistente e leva a equipe a recriar recursos à toa. E aplicar um resource lock protege contra alteração e exclusão, sem nenhuma relação com marcação.",
+      "opcoes": [
+        { "texto": "Tags não são herdadas; uma política com efeito de modificação aplica a tag aos recursos.", "correta": true },
+        { "texto": "A herança existe, mas leva algumas horas para propagar aos recursos do grupo.", "correta": false },
+        { "texto": "Só recursos criados após a marcação do grupo herdam a tag definida nele.", "correta": false },
+        { "texto": "É preciso aplicar um resource lock no grupo para que a tag valha nos recursos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-policy-vs-rbac-02",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A governança da Fabrikam exige que nenhuma máquina virtual seja criada sem a tag Projeto, inclusive por quem tem papel de Proprietário. A tentativa de criar uma VM sem a tag deve falhar no ato. Qual recurso implementa essa exigência?",
+      "explicacao": "Azure Policy com efeito de negação avalia a requisição antes da criação e a recusa quando a condição não é atendida — vale para qualquer identidade, inclusive Proprietário, porque atua sobre o recurso e não sobre a pessoa (correta). Uma atribuição de RBAC define quem pode criar VMs, mas nenhum papel consegue expressar \"pode criar, desde que com a tag Projeto\". Um resource lock impede alteração ou exclusão do que já existe e não avalia criação. E um alerta de orçamento do Cost Management avisa depois que o gasto ocorreu: percebe o efeito, não impede o ato — é o distrator para quem trata governança como monitoramento.",
+      "opcoes": [
+        { "texto": "Uma atribuição de Azure Policy com efeito de negação para VMs sem a tag.", "correta": true },
+        { "texto": "Uma atribuição de RBAC que só permite criar VMs com as tags exigidas.", "correta": false },
+        { "texto": "Um resource lock do tipo ReadOnly aplicado ao resource group de destino.", "correta": false },
+        { "texto": "Um alerta de orçamento no Microsoft Cost Management para recursos sem tag.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-lock-03",
+      "topico": "Resource locks",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O gateway de VPN vpngw-prod-brs foi excluído por engano durante uma limpeza de ambiente, causando três horas de indisponibilidade. A equipe quer impedir que o recurso seja excluído novamente, mas precisa continuar ajustando as configurações dele no dia a dia. Qual medida atende?",
+      "explicacao": "O resource lock do tipo CanNotDelete bloqueia a exclusão e permite leitura e alteração — exatamente o equilíbrio pedido (correta). O lock ReadOnly protegeria demais: além de impedir a exclusão, bloquearia os ajustes de configuração que a equipe precisa continuar fazendo. Remover o papel de Proprietário de todos reduz o risco, mas atinge muito mais do que a exclusão daquele recurso e deixa a operação sem quem administre. E uma policy de auditoria registra a exclusão depois de consumada — informa, não impede, que é a distinção central entre auditar e negar.",
+      "opcoes": [
+        { "texto": "Aplicar um resource lock do tipo CanNotDelete ao gateway.", "correta": true },
+        { "texto": "Aplicar um resource lock do tipo ReadOnly ao gateway.", "correta": false },
+        { "texto": "Remover o papel de Proprietário de todos os membros da equipe.", "correta": false },
+        { "texto": "Criar uma política de auditoria que registre exclusões de gateways.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-assoc-governanca-04",
+      "topico": "Azure Policy",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de governança da Northwind precisa escolher o mecanismo certo para cada exigência da política interna. Associe cada exigência ao recurso do Azure que a implementa.",
+      "explicacao": "Impedir que qualquer pessoa crie recursos fora de determinadas regiões é Azure Policy, que avalia a requisição e a nega — nenhum papel de RBAC sabe expressar essa condição. Conceder a um grupo permissão de reiniciar VMs sem poder excluí-las é RBAC, que trata de quem faz o quê. Impedir a exclusão acidental de um recurso crítico, mantendo-o editável, é resource lock. E rastrear a qual centro de custo cada recurso pertence, para rateio na fatura, é o papel das tags. O painel inclui \"Microsoft Cost Management\", que informa e alerta sobre gasto mas não impõe regra nenhuma — é o distrator para quem confunde ver com controlar.",
+      "associacoes": [
+        { "alvo": "Impedir a criação de recursos fora das regiões aprovadas", "item": "Azure Policy" },
+        { "alvo": "Permitir que um grupo reinicie VMs, mas não as exclua", "item": "RBAC" },
+        { "alvo": "Impedir a exclusão de um recurso crítico, mantendo-o editável", "item": "Resource lock" },
+        { "alvo": "Rastrear a qual centro de custo cada recurso pertence", "item": "Tags de recursos" }
+      ],
+      "itensExtras": [
+        "Microsoft Cost Management"
+      ]
+    },
+    {
+      "id": "az900-cen-gov-reserva-vs-spot-05",
+      "topico": "Opções de economia — combinação de mecanismos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Tailspin tem duas cargas. A primeira é o banco de dados de produção, que roda 24 horas por dia e ficará no ar pelos próximos três anos. A segunda é uma renderização em lote que pode ser interrompida e retomada a qualquer momento. Qual combinação minimiza o custo das duas?",
+      "explicacao": "Reservas trocam compromisso de prazo por desconto e são feitas para carga constante e previsível, como o banco de produção; VMs Spot usam capacidade ociosa com grande desconto e podem ser removidas a qualquer momento, o que só é aceitável para trabalho interrompível, como a renderização (correta). Inverter os dois é o erro que a questão persegue: Spot no banco de produção significa perder o banco quando o Azure precisar da capacidade. Usar reservas para as duas desperdiça compromisso em carga que nem sempre roda. E usar Spot para as duas expõe a produção à interrupção — vantagem de preço que se paga com indisponibilidade.",
+      "opcoes": [
+        { "texto": "Reserva para o banco de produção e VMs Spot para a renderização em lote.", "correta": true },
+        { "texto": "VMs Spot para o banco de produção e reserva para a renderização em lote.", "correta": false },
+        { "texto": "Reservas de três anos para as duas cargas, pelo maior desconto disponível.", "correta": false },
+        { "texto": "VMs Spot para as duas cargas, aproveitando a capacidade ociosa do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-hybrid-benefit-06",
+      "topico": "Opções de economia — Azure Hybrid Benefit",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso possui licenças do Windows Server com Software Assurance ativa, adquiridas para o datacenter próprio que será desativado. A empresa vai migrar essas cargas para VMs no Azure e quer reduzir o custo aproveitando o que já pagou. Qual mecanismo se aplica?",
+      "explicacao": "Azure Hybrid Benefit permite reaproveitar licenças de Windows Server e SQL Server com Software Assurance em VMs do Azure, pagando apenas pela computação — é o único dos quatro que converte licença já adquirida em desconto (correta). Azure Reservations dá desconto por compromisso de prazo, sem qualquer relação com licenças que a empresa já tem. Assinaturas dev/test oferecem tarifas reduzidas, mas só para ambientes de não produção, e as cargas descritas são de produção. E o savings plan for compute desconta por compromisso de gasto por hora — também não aproveita licença existente.",
+      "opcoes": [
+        { "texto": "Azure Hybrid Benefit, reaproveitando as licenças com Software Assurance.", "correta": true },
+        { "texto": "Azure Reservations, com compromisso de um ou três anos para as VMs.", "correta": false },
+        { "texto": "Assinatura dev/test, com tarifas reduzidas para as VMs migradas.", "correta": false },
+        { "texto": "Azure savings plan for compute, com compromisso de gasto por hora.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-savings-vs-reserva-07",
+      "topico": "Opções de economia — savings plan × reserva",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Fabrikam gasta cerca de 12 mil reais por mês em computação, mas troca frequentemente de tamanho de VM, de região e até de serviço, conforme os projetos mudam. Ela quer desconto por compromisso sem se prender a uma configuração específica. Qual opção é a mais adequada?",
+      "explicacao": "O Azure savings plan for compute compromete um valor de gasto por hora e aplica o desconto a diferentes serviços de computação, tamanhos e regiões — foi desenhado justamente para quem muda de configuração (correta). Azure Reservations dá desconto maior, mas amarra o compromisso a um tipo de recurso e escopo, o que penaliza quem troca de tamanho e região com frequência. VMs Spot não são compromisso e não servem para carga que precisa continuar rodando. E a assinatura dev/test não se aplica a produção nem é mecanismo de compromisso de gasto.",
+      "opcoes": [
+        { "texto": "Azure savings plan for compute, com compromisso de gasto por hora.", "correta": true },
+        { "texto": "Azure Reservations de um ano para os tamanhos de VM mais usados.", "correta": false },
+        { "texto": "VMs Spot para todas as cargas, aproveitando a capacidade ociosa.", "correta": false },
+        { "texto": "Assinatura dev/test aplicada a todas as assinaturas da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-pricing-vs-tco-08",
+      "topico": "TCO Calculator",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O comitê da Northwind quer um número que compare o custo de manter o datacenter atual — servidores, energia, licenças, equipe e espaço físico — com o custo equivalente no Azure ao longo de cinco anos. Qual ferramenta produz essa comparação?",
+      "explicacao": "A TCO Calculator existe para comparar o custo total de propriedade do ambiente local com o custo no Azure, incorporando eletricidade, espaço, hardware, licenças e pessoal ao longo do tempo (correta). A Pricing Calculator estima o preço de uma configuração no Azure, mas não conhece o custo do datacenter atual — logo, não compara nada. O Microsoft Cost Management analisa o gasto de recursos que já existem no Azure, ou seja, olha para trás e para dentro. E o Azure Advisor recomenda otimizações sobre recursos já implantados, sem qualquer projeção de migração.",
+      "opcoes": [
+        { "texto": "TCO Calculator, que compara o custo total de propriedade com o custo no Azure.", "correta": true },
+        { "texto": "Azure Pricing Calculator, estimando o preço da configuração equivalente.", "correta": false },
+        { "texto": "Microsoft Cost Management, analisando o gasto atual e projetando cinco anos.", "correta": false },
+        { "texto": "Azure Advisor, que recomenda a configuração mais econômica para a migração.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-assoc-custo-09",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "Associacao",
+      "enunciado": "A área financeira da Contoso quer registrar qual ferramenta responde a cada pergunta sobre custo. Associe cada pergunta à ferramenta adequada.",
+      "explicacao": "Estimar quanto custaria uma arquitetura que ainda não existe é a Pricing Calculator. Comparar o custo do datacenter próprio com o do Azure ao longo dos anos é a TCO Calculator, que inclui energia, espaço e pessoal. Ver quanto já foi gasto no mês e receber alerta ao ultrapassar um limite é o Microsoft Cost Management, que trabalha sobre o consumo real. E receber recomendações de recursos subutilizados que poderiam ser redimensionados é o Azure Advisor. O eixo que organiza tudo é o tempo: duas ferramentas olham para o futuro (antes de existir), e duas para o passado e o presente (depois de existir). \"Azure Policy\" está no painel porque também aparece em conversas de governança — mas ela impõe regra sobre configuração, e não responde pergunta nenhuma sobre custo.",
+      "associacoes": [
+        { "alvo": "Quanto custaria uma arquitetura que ainda não foi criada?", "item": "Azure Pricing Calculator" },
+        { "alvo": "Vale mais a pena manter o datacenter ou migrar para o Azure?", "item": "TCO Calculator" },
+        { "alvo": "Quanto já gastamos este mês e como ser avisado ao passar do limite?", "item": "Microsoft Cost Management" },
+        { "alvo": "Quais recursos estão subutilizados e poderiam ser redimensionados?", "item": "Azure Advisor" }
+      ],
+      "itensExtras": [
+        "Azure Policy"
+      ]
+    },
+    {
+      "id": "az900-cen-gov-orcamento-10",
+      "topico": "Microsoft Cost Management — orçamentos e alertas",
+      "tipo": "SimNao",
+      "enunciado": "A equipe configurou no Microsoft Cost Management um orçamento de 5.000 reais mensais para a assinatura Contoso-Dev, com alerta em 90%. Avalie a afirmação: ao atingir o valor do orçamento, o Azure interrompe automaticamente a criação de novos recursos na assinatura.",
+      "explicacao": "A afirmação é falsa. Orçamento no Cost Management é instrumento de acompanhamento: ao atingir os limiares configurados, ele dispara notificações e pode acionar automações — por exemplo, um grupo de ação que desliga recursos —, mas por si só não bloqueia nada, e o gasto continua correndo. Quem impede a criação de recursos é o Azure Policy, e quem impede a exclusão ou alteração é o resource lock. Essa confusão é comum porque a palavra \"orçamento\" sugere um teto rígido; no Azure, o teto é aviso, não barreira, e essa distinção é justamente o que o exame cobra.",
+      "opcoes": [
+        { "texto": "Não", "correta": true },
+        { "texto": "Sim", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-advisor-vs-monitor-11",
+      "topico": "Azure Advisor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de operações da Tailspin quer uma lista de ações concretas para melhorar confiabilidade, segurança, desempenho e custo do ambiente existente, com prioridade e passos de correção — sem precisar montar consultas ou painéis. Qual serviço entrega isso?",
+      "explicacao": "Azure Advisor analisa a configuração e a telemetria dos recursos e devolve recomendações acionáveis nas categorias de confiabilidade, segurança, excelência operacional, desempenho e custo, já priorizadas (correta). Azure Monitor coleta métricas e logs e permite investigar e alertar, mas é matéria-prima: quem interpreta e prioriza é a equipe. Azure Service Health informa sobre incidentes e manutenções da plataforma que afetam os seus recursos — trata do que a Microsoft está fazendo, não da configuração do cliente. E Microsoft Defender for Cloud entrega recomendações priorizadas, porém só de postura de segurança, o que atende a uma das quatro categorias pedidas.",
+      "opcoes": [
+        { "texto": "Azure Advisor, com recomendações priorizadas nas várias categorias.", "correta": true },
+        { "texto": "Azure Monitor, com métricas e logs de todos os recursos da assinatura.", "correta": false },
+        { "texto": "Azure Service Health, com o estado dos serviços que a empresa utiliza.", "correta": false },
+        { "texto": "Microsoft Defender for Cloud, com a lista priorizada de correções.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-service-health-12",
+      "topico": "Azure Service Health",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Às 3h da manhã, várias aplicações da Contoso na região Brazil South começaram a falhar ao mesmo tempo. A equipe precisa descobrir rapidamente se a causa é um incidente na plataforma do Azure ou um problema da própria empresa, e quer ser avisada por e-mail em ocorrências futuras. Qual serviço usar?",
+      "explicacao": "Azure Service Health mostra incidentes em andamento, manutenções planejadas e avisos de saúde que afetam especificamente os recursos e as regiões da assinatura, e permite configurar alertas — é a resposta direta para \"é a plataforma ou sou eu?\" (correta). Azure Monitor mostra que as aplicações estão falhando, mas não distingue a causa entre falha da plataforma e falha do cliente. Azure Advisor emite recomendações de melhoria e não reporta incidentes em curso. E a página pública de status do Azure informa apenas eventos amplos e não é personalizada para os recursos da assinatura — é o distrator mais próximo, e a personalização é o que os separa.",
+      "opcoes": [
+        { "texto": "Azure Service Health, com o estado dos serviços usados pela assinatura e alertas.", "correta": true },
+        { "texto": "Azure Monitor, com um painel de disponibilidade das aplicações afetadas.", "correta": false },
+        { "texto": "Azure Advisor, verificando as recomendações de confiabilidade emitidas.", "correta": false },
+        { "texto": "A página pública de status do Azure, consultada durante o incidente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-arc-13",
+      "topico": "Azure Arc",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Fabrikam tem 40 servidores no datacenter próprio e 15 em outro provedor de nuvem. A diretoria quer aplicar as mesmas políticas de configuração e ver todos eles no inventário do Azure, sem migrar nenhuma carga. Qual serviço atende?",
+      "explicacao": "Azure Arc projeta servidores, clusters Kubernetes e alguns serviços de dados que estão fora do Azure para dentro do plano de gerenciamento dele, permitindo inventário, políticas e governança unificados sem migrar carga alguma (correta). Azure Migrate serve para avaliar e executar migrações — ou seja, faz exatamente o que o enunciado descarta. Azure Monitor consegue coletar dados de máquinas externas com agente, mas monitorar não é governar: não aplica política nem coloca o servidor no inventário de recursos. E Azure Policy é o mecanismo de política, mas sozinho só alcança recursos do Azure; é o Arc que estende esse alcance.",
+      "opcoes": [
+        { "texto": "Azure Arc, projetando os servidores externos para o gerenciamento do Azure.", "correta": true },
+        { "texto": "Azure Migrate, para trazer os servidores ao Azure e governá-los ali.", "correta": false },
+        { "texto": "Azure Monitor, instalando agentes em todos os servidores externos.", "correta": false },
+        { "texto": "Azure Policy, atribuindo as políticas diretamente aos servidores externos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-bicep-14",
+      "topico": "Modelos ARM e Bicep",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe da Northwind precisa recriar de forma idêntica, em três assinaturas diferentes, um conjunto de 20 recursos. Exige-se que a execução repetida não duplique recursos já existentes e que o resultado seja versionado no repositório de código. Qual abordagem atende?",
+      "explicacao": "Modelos ARM e Bicep são declarativos e idempotentes: descrevem o estado desejado, e executá-los novamente converge para esse estado em vez de criar cópias — e são arquivos de texto, versionáveis no repositório (correta). Um script imperativo de Azure CLI cria recursos passo a passo e, sem tratamento explícito, repete o que já existe; ele descreve como fazer, não o que deve existir. Criar pelo portal e documentar em planilha não é reprodutível nem versionável. E exportar o template depois de criar tudo à mão é um ponto de partida útil, mas não atende ao requisito, porque a criação inicial continua manual e sujeita a divergência entre as três assinaturas.",
+      "opcoes": [
+        { "texto": "Escrever um modelo Bicep ou ARM e implantá-lo nas três assinaturas.", "correta": true },
+        { "texto": "Escrever um script de Azure CLI que crie os recursos na ordem correta.", "correta": false },
+        { "texto": "Criar os recursos pelo portal e documentar a configuração em planilha.", "correta": false },
+        { "texto": "Criar tudo manualmente na primeira assinatura e exportar o template depois.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-cloud-shell-15",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador precisa executar comandos de Azure CLI a partir de um computador emprestado, sem privilégios para instalar software e apenas com um navegador disponível. Ele já está autenticado no portal do Azure. Qual ferramenta permite isso?",
+      "explicacao": "Azure Cloud Shell é um shell executado no navegador, já autenticado com a sessão do portal e com Azure CLI e Azure PowerShell pré-instalados — não exige instalar nada na máquina local (correta). Instalar o Azure CLI localmente é justamente o que a restrição impede. Azure PowerShell tem o mesmo problema, além de ser outra ferramenta e não outra forma de acesso. E o portal do Azure permite administrar por interface gráfica, mas o enunciado pede execução de comandos de CLI, que é o que o Cloud Shell entrega dentro do próprio navegador.",
+      "opcoes": [
+        { "texto": "Azure Cloud Shell, executado no navegador e já autenticado.", "correta": true },
+        { "texto": "Azure CLI instalado localmente no computador emprestado.", "correta": false },
+        { "texto": "Azure PowerShell instalado localmente no computador emprestado.", "correta": false },
+        { "texto": "O portal do Azure, que substitui os comandos por interface gráfica.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-assoc-monitoramento-16",
+      "topico": "Azure Monitor",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de operações da Contoso está definindo a quem recorrer em cada situação. Associe cada necessidade ao serviço do Azure que a atende.",
+      "explicacao": "Investigar por que a latência da aplicação subiu, consultando métricas e logs coletados, é Azure Monitor. Saber se uma indisponibilidade tem origem em incidente da plataforma que afeta a sua região é Azure Service Health. Descobrir onde estão os dados pessoais espalhados pelo patrimônio de dados da empresa é Microsoft Purview, que faz descoberta e classificação. E obter provas de certificação e relatórios de auditoria para entregar ao regulador é o Service Trust Portal. O erro frequente é usar Azure Monitor para tudo: ele mostra o que aconteceu com os SEUS recursos, mas não diz se a causa foi da Microsoft nem entrega documento de conformidade. \"Azure Advisor\" está no painel porque recomenda melhorias — mas não investiga incidente, não classifica dado e não emite relatório de auditoria.",
+      "associacoes": [
+        { "alvo": "Investigar por que a latência da aplicação aumentou", "item": "Azure Monitor" },
+        { "alvo": "Saber se a indisponibilidade vem de um incidente da plataforma", "item": "Azure Service Health" },
+        { "alvo": "Descobrir e classificar onde estão os dados pessoais da empresa", "item": "Microsoft Purview" },
+        { "alvo": "Obter relatórios de auditoria e certificações para o regulador", "item": "Service Trust Portal" }
+      ],
+      "itensExtras": [
+        "Azure Advisor"
+      ]
+    },
+    {
+      "id": "az900-cen-gov-fator-custo-17",
+      "topico": "Fatores que afetam custo — tipo de recurso e consumo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A fatura da assinatura Contoso-Prod subiu 30% sem que nenhuma VM fosse criada. A investigação mostrou que uma aplicação passou a servir vídeos diretamente do Blob Storage para usuários na internet, com volume alto de downloads. Qual fator explica melhor o aumento?",
+      "explicacao": "A transferência de saída (egress) dos datacenters do Azure é cobrada por gigabyte e é a linha que cresce quando uma aplicação passa a servir conteúdo pesado para a internet — o armazenamento em si mudou pouco, o tráfego é que mudou muito (correta). O aumento do volume armazenado explicaria uma parte, mas o cenário descreve downloads, não gravações. A camada de acesso influencia o custo por GB armazenado e por operação de leitura, tendo peso menor que o egress nesse perfil. E a opção de redundância multiplica o custo de armazenamento, não o de tráfego para a internet — e o enunciado não menciona mudança de redundância.",
+      "opcoes": [
+        { "texto": "A transferência de dados de saída para a internet, cobrada por gigabyte.", "correta": true },
+        { "texto": "O aumento do volume de dados armazenados na conta de armazenamento.", "correta": false },
+        { "texto": "A camada de acesso configurada nos blobs que servem os vídeos.", "correta": false },
+        { "texto": "A opção de redundância escolhida para a conta de armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-multipla-policy-18",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A equipe de governança discute o que o Azure Policy pode fazer no ambiente da empresa. Selecione duas capacidades reais do serviço.",
+      "explicacao": "Negar a criação de recursos que não atendam a uma condição e auditar recursos já existentes que estejam fora de conformidade são dois efeitos centrais do Azure Policy — e a auditoria é o que permite descobrir o passivo antes de passar a negar (corretas). Conceder permissões a usuários e grupos é RBAC, não policy: essa é a fronteira mais cobrada do tema. Impedir a exclusão de um recurso específico é resource lock. E emitir a fatura por centro de custo é resultado de tags somadas ao Cost Management — a policy pode exigir que a tag exista, mas não rateia custo nenhum.",
+      "opcoes": [
+        { "texto": "Negar a criação de recursos que não atendam a uma condição definida.", "correta": true },
+        { "texto": "Auditar recursos já existentes que estejam fora de conformidade.", "correta": true },
+        { "texto": "Conceder a usuários e grupos permissão para administrar recursos.", "correta": false },
+        { "texto": "Impedir que um recurso específico seja excluído por engano.", "correta": false },
+        { "texto": "Emitir a fatura mensal separada por centro de custo da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-multipla-economia-19",
+      "topico": "Reduzir custo por desenho",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Fabrikam quer reduzir a fatura sem alterar a experiência dos usuários em produção. Selecione duas medidas que produzem economia real sem afetar a carga produtiva.",
+      "explicacao": "Excluir discos gerenciados órfãos — os que sobraram de VMs já removidas — elimina cobrança de recursos que ninguém usa; e mover para camadas mais frias os blobs sem acesso há meses reduz o custo por GB de dados que não estão sendo lidos (corretas). Reduzir o número de instâncias em produção durante o horário comercial atinge diretamente a experiência do usuário, que o enunciado exige preservar. Converter as VMs de produção em Spot as expõe a interrupção a qualquer momento. E desligar as réplicas de alta disponibilidade economiza de fato, mas ao preço de remover a proteção contra falhas — economia que só aparece na fatura, e cujo custo aparece no próximo incidente.",
+      "opcoes": [
+        { "texto": "Excluir discos gerenciados órfãos, deixados por VMs já removidas.", "correta": true },
+        { "texto": "Mover para camadas mais frias os blobs sem acesso há vários meses.", "correta": true },
+        { "texto": "Reduzir o número de instâncias em produção durante o horário comercial.", "correta": false },
+        { "texto": "Converter as VMs de produção em VMs Spot para obter o desconto.", "correta": false },
+        { "texto": "Desligar as réplicas de alta disponibilidade das aplicações críticas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-simnao-arc-20",
+      "topico": "Azure Arc",
+      "tipo": "SimNao",
+      "enunciado": "A equipe conectou ao Azure Arc um servidor Linux que roda no datacenter da empresa. Avalie a afirmação: a partir dessa conexão, a carga de trabalho do servidor passa a ser executada na infraestrutura do Azure.",
+      "explicacao": "A afirmação é falsa. Azure Arc estende o plano de gerenciamento do Azure a recursos que estão fora dele: o servidor aparece no inventário, recebe políticas e pode ser governado como se fosse um recurso do Azure — mas continua executando exatamente onde está, no datacenter da empresa. Nada é movido, e é justamente por isso que o Arc responde a cenários em que migrar não é possível ou não é desejado. Quem move carga para o Azure é a migração, com Azure Migrate e ferramentas correlatas. A leitura verdadeira vem de tratar \"gerenciado pelo Azure\" como sinônimo de \"hospedado no Azure\".",
+      "opcoes": [
+        { "texto": "Não", "correta": true },
+        { "texto": "Sim", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-purview-21",
+      "topico": "Microsoft Purview",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A área jurídica da Tailspin precisa saber em quais bases e contas de armazenamento existem dados pessoais de clientes, incluindo fontes fora do Azure, e quer um catálogo pesquisável dessas informações. Qual serviço atende?",
+      "explicacao": "Microsoft Purview faz descoberta, classificação e catalogação do patrimônio de dados, inclusive de fontes fora do Azure, respondendo a \"onde estão os dados sensíveis?\" (correta). Microsoft Defender for Cloud avalia a postura de segurança da infraestrutura, não o conteúdo dos dados. Azure Policy governa configuração de recursos e não inspeciona o que está armazenado dentro deles. E o Service Trust Portal publica relatórios de auditoria e certificações da Microsoft — documenta a conformidade do provedor, não faz descoberta nenhuma nos dados do cliente.",
+      "opcoes": [
+        { "texto": "Microsoft Purview, com descoberta, classificação e catálogo do patrimônio de dados.", "correta": true },
+        { "texto": "Microsoft Defender for Cloud, que avalia a segurança das fontes de dados.", "correta": false },
+        { "texto": "Azure Policy, com regras que identificam recursos contendo dados pessoais.", "correta": false },
+        { "texto": "Service Trust Portal, que documenta o tratamento de dados pessoais da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-nao-e-policy-22",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma analista está revisando os mecanismos de governança do ambiente. Qual das opções a seguir NÃO é atribuição do Azure Policy?",
+      "explicacao": "Definir quais usuários podem executar operações em um recurso é atribuição do RBAC, não do Azure Policy — policy avalia o recurso e sua configuração, sem conhecer permissões de pessoas (correta, por ser a que NÃO cabe à policy). Exigir tag obrigatória na criação, restringir os tamanhos de VM permitidos e auditar recursos sem criptografia habilitada são todos casos de uso legítimos e frequentes de policy. A dificuldade aqui é que todas as quatro descrevem controles reais do Azure; o que se cobra é saber qual mecanismo implementa cada um, e não se o controle existe.",
+      "opcoes": [
+        { "texto": "Definir quais usuários podem executar operações em um determinado recurso.", "correta": true },
+        { "texto": "Exigir que toda VM criada tenha uma tag obrigatória preenchida.", "correta": false },
+        { "texto": "Restringir os tamanhos de VM que podem ser criados na assinatura.", "correta": false },
+        { "texto": "Auditar recursos existentes que estejam sem criptografia habilitada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-multipla-tags-23",
+      "topico": "Tags de recursos — usos legítimos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso vai padronizar o uso de tags em todas as assinaturas. Selecione duas afirmações corretas sobre o que tags fazem no Azure.",
+      "explicacao": "Tags permitem agrupar o gasto por critério do negócio nos relatórios de custo e podem ser exigidas na criação de recursos por meio de política — são os dois usos que sustentam a padronização (corretas). Dizer que tags controlam quem acessa o recurso confunde marcação com RBAC: tag é metadado, não permissão. Dizer que impedem a exclusão descreve resource lock. E afirmar que são herdadas automaticamente pelos recursos do resource group é o engano mais caro do tema, porque a equipe marca só o grupo, confia na herança e descobre o problema apenas quando o relatório de custo sai incompleto.",
+      "opcoes": [
+        { "texto": "Permitem agrupar o gasto por critério de negócio nos relatórios de custo.", "correta": true },
+        { "texto": "Podem ser exigidas na criação de recursos por meio de política.", "correta": true },
+        { "texto": "Controlam quais usuários têm acesso aos recursos marcados.", "correta": false },
+        { "texto": "Impedem que os recursos marcados sejam excluídos por engano.", "correta": false },
+        { "texto": "São herdadas automaticamente por todos os recursos do resource group.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-gov-assoc-ferramentas-24",
+      "topico": "Ferramentas de gerenciamento",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de plataforma da Northwind está escolhendo a ferramenta certa para cada tarefa do dia. Associe cada tarefa à ferramenta mais adequada.",
+      "explicacao": "Descrever o estado desejado de um conjunto de recursos, de forma versionável e idempotente, é o papel de um modelo Bicep ou ARM. Executar um comando pontual pelo navegador, sem instalar nada na máquina, é Azure Cloud Shell. Explorar visualmente um recurso desconhecido e ver suas propriedades é o portal do Azure, que é a ferramenta de descoberta. E automatizar uma tarefa repetitiva a partir de um servidor de integração contínua é caso de Azure CLI, script executável em pipeline. A confusão mais comum é entre CLI e Cloud Shell: um é a ferramenta de comando, o outro é o lugar de onde se executa — e o Cloud Shell inclusive traz a CLI dentro dele. \"Azure Advisor\" está no painel porque é ferramenta do Azure e aparece no mesmo menu, mas ele recomenda melhorias e não executa tarefa nenhuma.",
+      "associacoes": [
+        { "alvo": "Descrever o estado desejado de 20 recursos, de forma versionável", "item": "Modelo Bicep ou ARM" },
+        { "alvo": "Rodar um comando pontual pelo navegador, sem instalar nada", "item": "Azure Cloud Shell" },
+        { "alvo": "Explorar visualmente um recurso desconhecido e suas propriedades", "item": "Portal do Azure" },
+        { "alvo": "Automatizar tarefa repetitiva a partir de um servidor de integração contínua", "item": "Azure CLI" }
+      ],
+      "itensExtras": [
+        "Azure Advisor"
+      ]
+    }
+  ]
+}

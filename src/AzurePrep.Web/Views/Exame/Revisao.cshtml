@@ -6,6 +6,7 @@
     {
         TipoDeQuestao.EscolhaMultipla => "Múltipla escolha",
         TipoDeQuestao.SimNao => "Sim/Não",
+        TipoDeQuestao.Associacao => "Arrastar e soltar",
         _ => "Escolha única"
     };
 }
@@ -73,7 +74,19 @@
                                         <text>✕</text>
                                     }
                                 </span>
-                                <span class="review-option__text">@o.Text</span>
+                                <span class="review-option__text">
+                                    @*
+                                        Arrastar e soltar: a alternativa é um par, e ler só o item
+                                        ("Azure Policy") não diz nada sem o alvo a que ele foi
+                                        atribuído. O alvo vem primeiro porque é a linha da tela.
+                                    *@
+                                    @if (o.TargetText is not null)
+                                    {
+                                        <span class="review-option__target">@o.TargetText</span>
+                                        <span class="review-option__arrow" aria-hidden="true">→</span>
+                                    }
+                                    @o.Text
+                                </span>
                                 @if (o.WasSelected)
                                 {
                                     <span class="review-option__tag">sua resposta</span>

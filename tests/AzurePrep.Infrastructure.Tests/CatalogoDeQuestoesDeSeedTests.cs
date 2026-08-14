@@ -1,3 +1,4 @@
+using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Seed;
 using Xunit;
 
@@ -32,6 +33,25 @@ public class CatalogoDeQuestoesDeSeedTests
         Assert.All(arquivos, a => Assert.False(string.IsNullOrWhiteSpace(a.ExameCode)));
         Assert.All(arquivos, a => Assert.False(string.IsNullOrWhiteSpace(a.Area)));
         Assert.All(arquivos, a => Assert.NotEmpty(a.Questoes));
+    }
+
+    /// <summary>
+    /// O banco de questões que vai ao ar, validado contra as áreas que existem de verdade.
+    /// </summary>
+    /// <remarks>
+    /// Sem este teste, a única barreira era o seed derrubando a aplicação no startup — ou seja, o
+    /// erro aparecia no deploy, não no commit. Uma questão nova com gabarito faltando, id repetido
+    /// ou alvo duplicado passa em tudo mais: compila, e os testes de regra abaixo usam lotes
+    /// sintéticos que nunca tocam nos arquivos reais.
+    /// </remarks>
+    [Fact]
+    public void Validar_CatalogoRealEmbutido_EstaIntegro()
+    {
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(
+            CatalogoDeQuestoesDeSeed.Carregar(),
+            AzurePrepDbSeeder.SlugsDeArea);
+
+        Assert.Empty(problemas);
     }
 
     [Fact]
@@ -230,6 +250,146 @@ public class CatalogoDeQuestoesDeSeedTests
             p => p.Contains("SimNao exige exatamente 2 alternativas"));
     }
 
+    // ------------------------------------------------------- arrastar e soltar (Associacao)
+
+    /// <summary>
+    /// A expansão é o contrato mais frágil do formato: ela decide a POSIÇÃO de cada alternativa, e
+    /// a posição decide o Id, e o Id é o que as respostas já gravadas apontam. Um refactor que
+    /// reordenasse os pares reescreveria o gabarito de tentativas antigas sem quebrar nada.
+    /// </summary>
+    [Fact]
+    public void Expandir_GeraUmParPorCombinacaoDeAlvoComItem_NaOrdemDeclarada()
+    {
+        var expandida = CatalogoDeQuestoesDeSeed.Expandir(QuestaoDeAssociacao());
+
+        // 3 alvos × 3 itens no painel (2 respostas distintas + 1 extra).
+        Assert.Equal(9, expandida.Opcoes.Count);
+
+        // Alvo a alvo, e dentro do alvo na ordem das respostas seguida dos extras.
+        Assert.Equal(
+            new[] { "Alvo A", "Alvo A", "Alvo A", "Alvo B", "Alvo B", "Alvo B", "Alvo C", "Alvo C", "Alvo C" },
+            expandida.Opcoes.Select(o => o.Alvo));
+
+        Assert.Equal(
+            new[] { "Item 1", "Item 2", "Distrator", "Item 1", "Item 2", "Distrator", "Item 1", "Item 2", "Distrator" },
+            expandida.Opcoes.Select(o => o.Texto));
+    }
+
+    [Fact]
+    public void Expandir_MarcaComoCorretoApenasOParDoGabarito()
+    {
+        var expandida = CatalogoDeQuestoesDeSeed.Expandir(QuestaoDeAssociacao());
+
+        var corretos = expandida.Opcoes.Where(o => o.Correta).Select(o => $"{o.Alvo}={o.Texto}");
+
+        // Um item pode responder a mais de um alvo — é o que tira a resolução por eliminação.
+        Assert.Equal(new[] { "Alvo A=Item 1", "Alvo B=Item 2", "Alvo C=Item 1" }, corretos);
+    }
+
+    [Fact]
+    public void Expandir_QuestaoQueNaoEAssociacao_PassaIntacta()
+    {
+        var original = QuestaoValida();
+
+        Assert.Same(original, CatalogoDeQuestoesDeSeed.Expandir(original));
+    }
+
+    [Fact]
+    public void Expandir_QuestaoJaExpandida_NaoExpandeDeNovo()
+    {
+        // Validar chama Expandir para aceitar lote cru; sem idempotência, um lote já carregado
+        // (que chega expandido) teria os pares multiplicados a cada passagem.
+        var expandida = CatalogoDeQuestoesDeSeed.Expandir(QuestaoDeAssociacao());
+
+        Assert.Equal(expandida.Opcoes.Count, CatalogoDeQuestoesDeSeed.Expandir(expandida).Opcoes.Count);
+    }
+
+    [Fact]
+    public void Validar_AssociacaoBemFormada_NaoAcusaNada()
+    {
+        Assert.Empty(CatalogoDeQuestoesDeSeed.Validar(new[] { Lote(QuestaoDeAssociacao()) }, Areas));
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(7)]
+    public void Validar_AssociacaoForaDaFaixaDeAlvos_Acusa(int quantidade)
+    {
+        var associacoes = Enumerable.Range(0, quantidade)
+            .Select(i => new AssociacaoDeSeed { Alvo = $"Alvo {i}", Item = $"Item {i}" })
+            .ToList();
+
+        var lote = Lote(QuestaoDeAssociacao() with { Associacoes = associacoes });
+
+        Assert.Contains(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas), p => p.Contains("de 3 a 6 alvos"));
+    }
+
+    [Fact]
+    public void Validar_AssociacaoComAlvoRepetido_Acusa()
+    {
+        // Dois alvos de mesmo texto seriam uma caixa só na tela, com dois gabaritos.
+        var lote = Lote(QuestaoDeAssociacao() with
+        {
+            Associacoes = new[]
+            {
+                new AssociacaoDeSeed { Alvo = "Alvo A", Item = "Item 1" },
+                new AssociacaoDeSeed { Alvo = "alvo a", Item = "Item 2" },
+                new AssociacaoDeSeed { Alvo = "Alvo C", Item = "Item 1" }
+            }
+        });
+
+        Assert.Contains(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas), p => p.Contains("alvo repetido"));
+    }
+
+    [Fact]
+    public void Validar_AssociacaoComUmItemPorAlvoESemDistrator_Acusa()
+    {
+        // Painel com exatamente um item por alvo se resolve por eliminação: quem sabe todos menos
+        // um acerta o último de graça, e a questão deixa de medir o que se propôs a medir.
+        var lote = Lote(QuestaoDeAssociacao() with
+        {
+            Associacoes = new[]
+            {
+                new AssociacaoDeSeed { Alvo = "Alvo A", Item = "Item 1" },
+                new AssociacaoDeSeed { Alvo = "Alvo B", Item = "Item 2" },
+                new AssociacaoDeSeed { Alvo = "Alvo C", Item = "Item 3" }
+            },
+            ItensExtras = Array.Empty<string>()
+        });
+
+        Assert.Contains(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas), p => p.Contains("sem distrator"));
+    }
+
+    [Fact]
+    public void Validar_ItemExtraQueTambemEResposta_Acusa()
+    {
+        var lote = Lote(QuestaoDeAssociacao() with { ItensExtras = new[] { "Item 2" } });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas),
+            p => p.Contains("também é resposta"));
+    }
+
+    [Fact]
+    public void Validar_AssociacoesEmTipoQueNaoEAssociacao_Acusa()
+    {
+        var lote = Lote(QuestaoValida() with { Associacoes = QuestaoDeAssociacao().Associacoes });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas),
+            p => p.Contains("só vale para o tipo Associacao"));
+    }
+
+    [Fact]
+    public void Validar_AssociacaoComItemRepetidoEntreAlvos_NaoAcusaAlternativaRepetida()
+    {
+        // O mesmo item aparece uma vez por alvo — a repetição É o formato. Se a regra genérica de
+        // alternativa repetida valesse aqui, nenhuma questão de arrastar passaria na validação.
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(new[] { Lote(QuestaoDeAssociacao()) }, Areas);
+
+        Assert.DoesNotContain(problemas, p => p.Contains("alternativa repetida"));
+    }
+
     [Fact]
     public void Validar_AcumulaTodosOsProblemasEmVezDePararNoPrimeiro()
     {
@@ -266,6 +426,26 @@ public class CatalogoDeQuestoesDeSeedTests
         Tipo = "EscolhaMultipla",
         Enunciado = "Uma equipe precisa de X restrição. Selecione duas opções que atendem ao requisito.",
         Opcoes = Opcoes(("Primeira", true), ("Segunda", true), ("Terceira", false), ("Quarta", false))
+    };
+
+    /// <summary>
+    /// Três alvos, dois itens de resposta (um deles reutilizado) e um distrator — o mínimo que
+    /// passa em todas as regras do tipo.
+    /// </summary>
+    private static QuestaoDeSeed QuestaoDeAssociacao() => new()
+    {
+        Id = "az900-teste-associacao-01",
+        Topico = "Modelos de serviço",
+        Tipo = "Associacao",
+        Enunciado = "Associe cada cenário à abordagem que o atende.",
+        Explicacao = ExplicacaoValida,
+        Associacoes = new[]
+        {
+            new AssociacaoDeSeed { Alvo = "Alvo A", Item = "Item 1" },
+            new AssociacaoDeSeed { Alvo = "Alvo B", Item = "Item 2" },
+            new AssociacaoDeSeed { Alvo = "Alvo C", Item = "Item 1" }
+        },
+        ItensExtras = new[] { "Distrator" }
     };
 
     private static IReadOnlyList<OpcaoDeSeed> Opcoes(params (string Texto, bool Correta)[] opcoes)

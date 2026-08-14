@@ -1,6 +1,7 @@
 @model QuestaoDto
 @{
     var isMultiple = Model.Type == TipoDeQuestao.EscolhaMultipla;
+    var isAssociacao = Model.Type == TipoDeQuestao.Associacao;
     var inputType = isMultiple ? "checkbox" : "radio";
     var selected = Model.SelectedOptionIds.ToHashSet();
 
@@ -13,6 +14,24 @@
         5 => "cinco",
         _ => Model.RequiredSelections.ToString()
     };
+
+    // Arrastar e soltar: as "opções" que chegam aqui são pares candidatos (alvo × item), já
+    // embaralhados pela tentativa. As duas colunas da tela saem da ordem em que alvo e item
+    // aparecem nessa lista — é o embaralhamento do par que embaralha as duas colunas de uma vez.
+    var itens = isAssociacao
+        ? Model.Options.Select(o => o.Text).Distinct(StringComparer.Ordinal).ToList()
+        : new List<string>();
+
+    var alvos = isAssociacao
+        ? Model.Options.Select(o => o.TargetText ?? string.Empty).Distinct(StringComparer.Ordinal).ToList()
+        : new List<string>();
+
+    // O que já está montado, para reabrir o item como o candidato o deixou.
+    var itemPorAlvo = isAssociacao
+        ? Model.Options.Where(o => selected.Contains(o.Id))
+            .GroupBy(o => o.TargetText ?? string.Empty, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().Text, StringComparer.Ordinal)
+        : new Dictionary<string, string>(StringComparer.Ordinal);
 }
 
 <article class="question"
@@ -38,22 +57,94 @@
             Selecione <strong>Sim</strong> se a afirmação for verdadeira. Caso contrário, selecione <strong>Não</strong>.
         </p>
     }
+    else if (isAssociacao)
+    {
+        <p class="question__instruction">
+            Para responder, arraste o item apropriado do painel da esquerda para o alvo correspondente
+            à direita. Cada item pode ser usado uma vez, mais de uma vez ou nenhuma vez.
+        </p>
+        <p class="question__hint">
+            Sem arrastar: selecione um item e depois o alvo. O mesmo funciona pelo teclado, com Tab e Enter.
+        </p>
+    }
 
-    <ul class="options">
-        @foreach (var option in Model.Options)
-        {
-            var inputId = $"opt-{option.Id}";
-            <li class="option">
-                <label class="option__label" for="@inputId">
-                    <input class="option__input"
-                           type="@inputType"
-                           id="@inputId"
-                           name="answer-@Model.Id"
-                           value="@option.Id"
-                           checked="@(selected.Contains(option.Id))" />
-                    <span class="option__text">@option.Text</span>
-                </label>
-            </li>
-        }
-    </ul>
+    @if (isAssociacao)
+    {
+        @*
+            Os checkboxes ficam escondidos, mas continuam sendo a resposta de verdade: é deles que
+            exam.js lê a seleção, exatamente como nos outros tipos. Assim o arrastar é só uma forma
+            de marcar caixas — nada no caminho de gravação, correção ou revisão precisa saber que
+            esta questão é diferente.
+        *@
+        <div class="dnd" data-dnd>
+            <div class="dnd__column">
+                <p class="dnd__column-title" id="pool-title-@Model.Id">Itens</p>
+                <ul class="dnd__pool" aria-labelledby="pool-title-@Model.Id">
+                    @foreach (var item in itens)
+                    {
+                        <li>
+                            <button type="button"
+                                    class="dnd__item"
+                                    draggable="true"
+                                    data-item="@item"
+                                    aria-pressed="false">@item</button>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="dnd__column">
+                <p class="dnd__column-title" id="targets-title-@Model.Id">Alvos</p>
+                <ul class="dnd__targets" aria-labelledby="targets-title-@Model.Id">
+                    @foreach (var alvo in alvos)
+                    {
+                        itemPorAlvo.TryGetValue(alvo, out var colocado);
+                        <li class="dnd__target">
+                            <span class="dnd__target-label">@alvo</span>
+                            <button type="button"
+                                    class="dnd__slot @(colocado is null ? "" : "is-filled")"
+                                    data-target="@alvo"
+                                    aria-label="Alvo: @alvo">
+                                <span class="dnd__slot-text">@(colocado ?? "Solte um item aqui")</span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="dnd__pairs" hidden>
+            @foreach (var option in Model.Options)
+            {
+                <input class="option__input"
+                       type="checkbox"
+                       id="opt-@option.Id"
+                       name="answer-@Model.Id"
+                       value="@option.Id"
+                       data-target="@option.TargetText"
+                       data-item="@option.Text"
+                       checked="@(selected.Contains(option.Id))" />
+            }
+        </div>
+    }
+    else
+    {
+        <ul class="options">
+            @foreach (var option in Model.Options)
+            {
+                var inputId = $"opt-{option.Id}";
+                <li class="option">
+                    <label class="option__label" for="@inputId">
+                        <input class="option__input"
+                               type="@inputType"
+                               id="@inputId"
+                               name="answer-@Model.Id"
+                               value="@option.Id"
+                               checked="@(selected.Contains(option.Id))" />
+                        <span class="option__text">@option.Text</span>
+                    </label>
+                </li>
+            }
+        </ul>
+    }
 </article>

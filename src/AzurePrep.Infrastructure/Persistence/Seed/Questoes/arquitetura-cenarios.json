@@ -1,0 +1,356 @@
+{
+  "exameCode": "AZ-900",
+  "area": "arquitetura",
+  "questoes": [
+    {
+      "id": "az900-cen-arq-zonas-vs-set-01",
+      "topico": "Availability Set × Availability Zone",
+      "tipo": "EscolhaUnica",
+      "enunciado": "As VMs VM-WEB-01 e VM-WEB-02 da Contoso estão em um availability set na região Brazil South. Um incidente derrubou o datacenter que hospeda as duas e o serviço ficou fora do ar. A equipe quer que uma falha desse tipo não derrube mais o serviço, mantendo tudo na mesma região. O que deve ser feito?",
+      "explicacao": "Availability set protege contra falhas dentro de um mesmo datacenter, distribuindo as VMs entre domínios de falha e de atualização — racks e ciclos de manutenção distintos. Ele não protege contra a perda do datacenter inteiro; para isso é preciso distribuir as VMs entre zonas de disponibilidade, que são instalações fisicamente separadas dentro da região (correta). Acrescentar VMs ao mesmo availability set repete o problema em escala maior, porque todas continuam no mesmo prédio. Aumentar o número de domínios de falha atua na mesma limitação: domínio de falha é rack, não datacenter. E replicar para a região emparelhada resolveria a perda da região inteira, mas o enunciado exige permanecer na mesma região.",
+      "opcoes": [
+        { "texto": "Distribuir as VMs entre zonas de disponibilidade da região.", "correta": true },
+        { "texto": "Acrescentar mais VMs ao mesmo availability set para aumentar a redundância.", "correta": false },
+        { "texto": "Aumentar o número de domínios de falha configurados no availability set.", "correta": false },
+        { "texto": "Replicar as VMs para a região emparelhada de Brazil South.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-assoc-alta-disp-02",
+      "topico": "Serviços zonais e zona-redundantes",
+      "tipo": "Associacao",
+      "enunciado": "A arquiteta da Fabrikam precisa escolher o mecanismo de resiliência para cada requisito abaixo, ao menor escopo que o atenda. Associe cada requisito ao mecanismo adequado.",
+      "explicacao": "Sobreviver à falha de um rack ou a uma janela de manutenção dentro de um datacenter é o que availability set entrega, com domínios de falha e de atualização. Sobreviver à perda de um datacenter inteiro dentro da região exige zonas de disponibilidade, que são instalações separadas com energia e rede próprias. Sobreviver à indisponibilidade da região inteira exige replicação para outra região — tipicamente a emparelhada, cuja atualização é sequenciada e cuja recuperação é priorizada. Já manter a cópia dos dados dentro do mesmo país por exigência legal é o que o par de regiões atende, já que os pares ficam na mesma geography, com a exceção conhecida do Brasil. \"Escalar o número de instâncias\" está no painel porque é a resposta reflexa de quem lê \"continuar no ar\": mais instâncias no mesmo lugar não sobrevivem à queda daquele lugar.",
+      "associacoes": [
+        { "alvo": "Sobreviver à falha de um rack ou a uma janela de manutenção", "item": "Availability set" },
+        { "alvo": "Sobreviver à perda de um datacenter inteiro dentro da região", "item": "Zonas de disponibilidade" },
+        { "alvo": "Sobreviver à indisponibilidade da região inteira", "item": "Replicação para outra região" },
+        { "alvo": "Manter a cópia secundária dentro dos limites da mesma geography", "item": "Par de regiões" }
+      ],
+      "itensExtras": [
+        "Escalar o número de instâncias"
+      ]
+    },
+    {
+      "id": "az900-cen-arq-vmss-vs-set-03",
+      "topico": "Virtual Machine Scale Sets",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A API pública da Northwind roda em quatro VMs idênticas criadas manualmente a partir da mesma imagem. O tráfego triplica em campanhas e cai depois. A equipe quer que o número de instâncias acompanhe a demanda sem que ninguém crie ou exclua VMs, mantendo o modelo de IaaS. Qual serviço atende?",
+      "explicacao": "Virtual Machine Scale Sets gerencia um conjunto de VMs idênticas a partir de uma imagem e ajusta o número de instâncias por regras de autoescala, sem criação manual — é o serviço desenhado para esse cenário em IaaS (correta). Availability set agrupa VMs para resiliência, mas não cria nem remove instância nenhuma: quem escala continua sendo a equipe. Azure App Service escala sozinho, porém é PaaS, e o enunciado pede a permanência em IaaS. E Azure Kubernetes Service também escala, mas exige recontêinerizar a aplicação e adotar orquestração — mudança muito maior do que o cenário pede, e igualmente fora de IaaS puro.",
+      "opcoes": [
+        { "texto": "Virtual Machine Scale Sets, com regras de autoescala sobre a mesma imagem.", "correta": true },
+        { "texto": "Availability set com quatro VMs, ajustando o número de domínios de falha.", "correta": false },
+        { "texto": "Azure App Service com escala automática habilitada no plano.", "correta": false },
+        { "texto": "Azure Kubernetes Service com autoescala de pods e de nós.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-aci-vs-aks-04",
+      "topico": "Comparação entre serviços de container",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um time de dados precisa executar um contêiner que processa um arquivo e termina, disparado algumas vezes por dia. Não há necessidade de orquestração, rede de serviços nem escalonamento entre nós, e a equipe não quer administrar cluster. Qual serviço do Azure é o mais adequado?",
+      "explicacao": "Azure Container Instances executa contêineres avulsos sob demanda, sem cluster para administrar, e cobra pelo tempo de execução — é o encaixe exato para tarefa que roda e termina (correta). Azure Kubernetes Service resolveria, mas traz um cluster inteiro para gerenciar por uma carga que nem orquestração exige: é a resposta certa de uma pergunta sobre microsserviços de longa duração. Azure Container Apps é a resposta certa quando há microsserviços com escala orientada a evento e ingresso HTTP gerenciado — mais do que o cenário pede. E uma VM com Docker instalado devolve à equipe exatamente a administração de servidor que ela quer evitar.",
+      "opcoes": [
+        { "texto": "Azure Container Instances, que executa o contêiner sob demanda sem cluster.", "correta": true },
+        { "texto": "Azure Kubernetes Service, com um pool de nós dimensionado para a tarefa.", "correta": false },
+        { "texto": "Azure Container Apps, com escala orientada a eventos e ingresso gerenciado.", "correta": false },
+        { "texto": "Uma máquina virtual com Docker instalado e um agendador local.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-functions-serverless-05",
+      "topico": "Computação serverless",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe da Tailspin precisa executar um trecho de código sempre que um arquivo é gravado em um contêiner do Blob Storage. O volume é irregular: há dias sem nenhum arquivo e dias com milhares. A equipe não quer pagar por capacidade ociosa nem administrar servidores. Qual serviço atende ao requisito?",
+      "explicacao": "Azure Functions no plano de consumo executa código a partir de gatilhos — inclusive o de Blob Storage —, escala conforme os eventos chegam e cobra por execução, sem capacidade ociosa (correta). Uma VM com serviço em segundo plano cobra por hora ligada, mesmo nos dias sem arquivo nenhum, que é o desperdício que o enunciado quer evitar. Um App Service com job agendado a cada minuto paga pelo plano continuamente e ainda introduz atraso e verificações vazias. E Azure Batch é a resposta certa para processamento paralelo de larga escala, agendado em pool de nós — sobra para reagir a um arquivo por vez.",
+      "opcoes": [
+        { "texto": "Azure Functions no plano de consumo, com gatilho de Blob Storage.", "correta": true },
+        { "texto": "Uma VM executando um serviço que monitora o contêiner continuamente.", "correta": false },
+        { "texto": "Um Azure App Service com um job agendado que verifica o contêiner a cada minuto.", "correta": false },
+        { "texto": "Azure Batch, com um pool de nós dimensionado para o pico de arquivos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-avd-06",
+      "topico": "Azure Virtual Desktop",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso contratou 300 profissionais temporários que usarão os próprios equipamentos por três meses. Eles precisam acessar um aplicativo Windows legado sem que dados corporativos sejam armazenados nos dispositivos pessoais, e a equipe de TI não quer distribuir notebooks. Qual serviço atende?",
+      "explicacao": "Azure Virtual Desktop entrega áreas de trabalho e aplicativos Windows a partir do Azure, com os dados permanecendo na sessão remota e não no dispositivo do usuário — é o encaixe para BYOD com aplicação Windows legada (correta). Azure App Service hospeda aplicações web e não executa aplicativo Windows de área de trabalho. Microsoft Entra ID resolve a identidade desses usuários, o que é necessário mas não entrega aplicação nenhuma — é o distrator para quem lê \"300 usuários temporários\" e pensa só em contas. E criar uma VM por usuário até funcionaria tecnicamente, mas sem broker de conexão, pool de sessões nem gestão de imagem: é a construção manual daquilo que o AVD entrega pronto.",
+      "opcoes": [
+        { "texto": "Azure Virtual Desktop, entregando o aplicativo em sessão remota.", "correta": true },
+        { "texto": "Azure App Service, publicando o aplicativo como aplicação web.", "correta": false },
+        { "texto": "Microsoft Entra ID, com contas de convidado para os temporários.", "correta": false },
+        { "texto": "Uma máquina virtual dedicada por usuário, acessada por área de trabalho remota.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-rg-regiao-07",
+      "topico": "Relação entre recurso e resource group",
+      "tipo": "SimNao",
+      "enunciado": "A equipe criou o resource group rg-analytics-brs na região Brazil South e nele implantou a conta de armazenamento stanalyticsuks01 na região UK South. Avalie a afirmação: essa implantação é inválida, porque um recurso precisa estar na mesma região do resource group que o contém.",
+      "explicacao": "A afirmação é falsa. Um resource group pode conter recursos de qualquer região — a região do grupo determina apenas onde ficam os metadados dele, não onde os recursos rodam. É por isso que existe resource group com recursos espalhados por várias regiões, arranjo comum e legítimo. O que a região do grupo de fato implica é sutil e vale conhecer: se a região do resource group estiver indisponível, pode não ser possível atualizar os metadados dos recursos contidos nele, mesmo que os recursos em si continuem funcionando em suas próprias regiões. A leitura verdadeira vem de confundir contêiner lógico com contêiner físico.",
+      "opcoes": [
+        { "texto": "Não", "correta": true },
+        { "texto": "Sim", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-hierarquia-escopo-08",
+      "topico": "Hierarquia de gerenciamento do Azure",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Fabrikam tem 14 assinaturas e precisa garantir que uma mesma regra de segurança valha em todas elas, inclusive nas que forem criadas no futuro, sem repetir a configuração assinatura por assinatura. Em qual escopo a regra deve ser aplicada?",
+      "explicacao": "Grupo de gerenciamento é o escopo acima da assinatura: o que se aplica nele é herdado por todas as assinaturas contidas, incluindo as que forem adicionadas depois — é o único escopo que atende ao \"inclusive as futuras\" (correta). Aplicar em cada assinatura funciona hoje e falha amanhã, porque a assinatura nova nasce sem a regra. Resource group é escopo ainda menor, abaixo da assinatura, e multiplicaria o problema. E aplicar no recurso individual é o extremo oposto do que o cenário pede — é o distrator para quem escolhe o escopo pelo lugar onde o efeito é visível, e não pelo lugar de onde ele se propaga.",
+      "opcoes": [
+        { "texto": "No grupo de gerenciamento que contém as assinaturas.", "correta": true },
+        { "texto": "Em cada uma das 14 assinaturas, individualmente.", "correta": false },
+        { "texto": "Em um resource group replicado em cada assinatura.", "correta": false },
+        { "texto": "Em cada recurso afetado pela regra de segurança.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-assoc-hierarquia-09",
+      "topico": "Hierarquia de gerenciamento do Azure",
+      "tipo": "Associacao",
+      "enunciado": "A área de governança da Northwind está documentando em que nível cada decisão é tomada. Associe cada objetivo ao escopo da hierarquia do Azure em que ele deve ser configurado.",
+      "explicacao": "Uma política que precisa valer para todas as assinaturas de uma diretoria, inclusive futuras, pertence ao grupo de gerenciamento — é o único escopo que se propaga para assinatura nova. O limite de gasto e a fatura são atributos da assinatura: é ela a unidade de cobrança. Excluir de uma vez tudo que pertence a um projeto encerrado é o caso de uso do resource group, cujo ciclo de vida agrupa recursos que nascem e morrem juntos. E uma marcação que só faz sentido para um item específico fica no próprio recurso. O painel traz \"Zona de disponibilidade\", que não é escopo de gerenciamento nenhum e sim uma localização física — o distrator para quem trata a hierarquia como se fosse geografia.",
+      "associacoes": [
+        { "alvo": "Regra que deve valer para todas as assinaturas de uma diretoria", "item": "Grupo de gerenciamento" },
+        { "alvo": "Limite de gasto e emissão da fatura", "item": "Assinatura" },
+        { "alvo": "Excluir de uma vez tudo que pertence a um projeto encerrado", "item": "Resource group" },
+        { "alvo": "Marcação que só faz sentido para um item isolado", "item": "Recurso" }
+      ],
+      "itensExtras": [
+        "Zona de disponibilidade"
+      ]
+    },
+    {
+      "id": "az900-cen-arq-vpn-vs-expressroute-10",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso precisa ligar o datacenter próprio a uma virtual network no Azure com largura de banda previsível e sem trafegar pela internet pública, atendendo a uma exigência do regulador financeiro. O custo mensal maior foi aprovado. Qual serviço atende?",
+      "explicacao": "ExpressRoute estabelece conexão privada e dedicada entre o ambiente local e o Azure por meio de um provedor de conectividade, sem passar pela internet pública e com banda contratada — é o que a exigência regulatória descreve (correta). VPN site a site é a alternativa mais barata, mas o túnel trafega criptografado sobre a internet pública, o que o enunciado exclui explicitamente. VPN ponto a site atende dispositivo individual, não datacenter. E peering de virtual networks conecta redes virtuais dentro do Azure entre si — não alcança o ambiente local, e é o distrator que mais atrai quem lê \"conexão privada\" sem checar as duas pontas.",
+      "opcoes": [
+        { "texto": "ExpressRoute, com circuito dedicado por um provedor de conectividade.", "correta": true },
+        { "texto": "VPN site a site, com túnel criptografado entre o datacenter e o gateway.", "correta": false },
+        { "texto": "VPN ponto a site, configurada nos servidores do datacenter.", "correta": false },
+        { "texto": "Peering de virtual networks entre a rede local e a rede do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-nsg-11",
+      "topico": "Grupos de segurança de rede e isolamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A virtual network vnet-prod-brs tem as sub-redes snet-web e snet-db. A equipe precisa impedir que qualquer máquina fora de snet-web alcance a porta 1433 das VMs em snet-db, mantendo o tráfego liberado entre as duas sub-redes nessa porta. Qual recurso implementa essa restrição?",
+      "explicacao": "Um network security group associado à sub-rede snet-db filtra o tráfego por origem, destino, porta e protocolo, e é exatamente o mecanismo para permitir 1433 apenas a partir de snet-web (correta). Azure Firewall também filtraria, mas é um serviço de firewall gerenciado para inspeção centralizada de tráfego norte-sul, com custo e complexidade desnecessários para uma regra entre sub-redes. Azure Policy governa quais recursos podem ser criados e como devem ser configurados — não inspeciona pacote nenhum, e é o distrator clássico de quem associa \"regra\" a \"policy\". E RBAC controla quem pode administrar os recursos no plano de gerenciamento, não quem alcança uma porta em tempo de execução.",
+      "opcoes": [
+        { "texto": "Um network security group associado à sub-rede snet-db.", "correta": true },
+        { "texto": "Uma instância de Azure Firewall inspecionando o tráfego da virtual network.", "correta": false },
+        { "texto": "Uma atribuição de Azure Policy restringindo o acesso à porta 1433.", "correta": false },
+        { "texto": "Uma atribuição de RBAC limitando quem acessa as VMs de snet-db.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-multipla-conectividade-12",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A equipe de redes da Tailspin fez afirmações sobre peering de virtual networks durante o desenho da arquitetura. Selecione duas afirmações corretas sobre esse recurso.",
+      "explicacao": "O peering conecta duas virtual networks para que os recursos se comuniquem por endereços privados, e o tráfego não passa pela internet pública — trafega pela rede da Microsoft (corretas). Dizer que o peering é transitivo por padrão é o erro mais caro do tema: se A faz peering com B e B com C, A não alcança C sem configuração adicional, e arquiteturas hub-and-spoke são desenhadas justamente em torno dessa limitação. Dizer que ele exige gateway de VPN inverte o ponto — o peering dispensa gateway, que só entra quando se quer trânsito. E afirmar que ele só funciona entre redes da mesma região descreve o peering regional, ignorando o peering global, que liga redes de regiões diferentes.",
+      "opcoes": [
+        { "texto": "Permite que recursos das duas redes se comuniquem por endereços IP privados.", "correta": true },
+        { "texto": "O tráfego entre as redes emparelhadas não passa pela internet pública.", "correta": true },
+        { "texto": "O peering é transitivo por padrão: se A liga a B e B liga a C, A alcança C.", "correta": false },
+        { "texto": "É obrigatório provisionar um gateway de VPN em cada uma das redes.", "correta": false },
+        { "texto": "Só é possível emparelhar virtual networks que estejam na mesma região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-redundancia-zrs-13",
+      "topico": "Redundância de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A conta de armazenamento stcontosodocs01 guarda documentos que a operação acessa o dia inteiro. O requisito é sobreviver à perda de um datacenter na região sem indisponibilidade, mas não há exigência de sobreviver à perda da região. O time quer o menor custo que atenda. Qual opção de redundância escolher?",
+      "explicacao": "ZRS replica os dados de forma síncrona entre três zonas de disponibilidade da mesma região: a perda de um datacenter não interrompe o acesso, e não se paga pela replicação geográfica que o requisito não pede (correta). LRS mantém três cópias dentro de um único datacenter — mais barato, mas é exatamente a falha que o cenário exige sobreviver. GRS replica para uma segunda região, o que excede o requisito e custa mais; além disso, na configuração padrão o acesso à cópia secundária depende de failover, não sendo automático para leitura. GZRS soma as duas proteções e é a opção mais cara das quatro, resolvendo um problema que o enunciado explicitamente não coloca.",
+      "opcoes": [
+        { "texto": "ZRS, com replicação síncrona entre zonas da mesma região.", "correta": true },
+        { "texto": "LRS, com três cópias dentro do mesmo datacenter.", "correta": false },
+        { "texto": "GRS, com replicação assíncrona para uma segunda região.", "correta": false },
+        { "texto": "GZRS, somando replicação entre zonas e entre regiões.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-assoc-redundancia-14",
+      "topico": "Redundância de armazenamento",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de armazenamento da Fabrikam precisa registrar, para cada requisito, a opção de redundância de menor custo que o satisfaz. Associe cada requisito à opção correspondente.",
+      "explicacao": "Quando os dados podem ser regerados e só é preciso proteção contra falha de disco ou rack, LRS basta — três cópias dentro de um datacenter, a opção mais barata. Quando o serviço precisa continuar disponível se um datacenter da região cair, entra ZRS, com replicação síncrona entre zonas. Quando é preciso sobreviver à perda da região inteira e o custo por zonas não se justifica, GRS replica para a região emparelhada. E quando os dois requisitos valem ao mesmo tempo — continuar no ar diante da queda de um datacenter E sobreviver à perda da região —, a resposta é GZRS. \"Camada de acesso Archive\" está no painel porque também aparece na tela de configuração da conta e é fácil confundir os eixos: camada de acesso trata do custo por frequência de leitura, redundância trata de quantas cópias existem e onde.",
+      "associacoes": [
+        { "alvo": "Dados regeráveis; basta proteger contra falha de disco ou rack", "item": "LRS" },
+        { "alvo": "Continuar disponível se um datacenter da região cair", "item": "ZRS" },
+        { "alvo": "Sobreviver à perda da região inteira, sem exigência entre zonas", "item": "GRS" },
+        { "alvo": "Sobreviver à queda de um datacenter e também à perda da região", "item": "GZRS" }
+      ],
+      "itensExtras": [
+        "Camada de acesso Archive"
+      ]
+    },
+    {
+      "id": "az900-cen-arq-camadas-blob-15",
+      "topico": "Camadas de acesso do Blob Storage",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso mantém 40 TB de gravações de atendimento que precisam ser guardadas por sete anos por exigência legal. O acesso é raríssimo — em média duas recuperações por ano, para auditoria — e a área jurídica aceita esperar horas pela restauração. Qual camada de acesso do Blob Storage minimiza o custo?",
+      "explicacao": "A camada Archive tem o menor custo de armazenamento e é desenhada para dados raramente acessados, exigindo reidratação que leva horas antes da leitura — condição que o enunciado aceita explicitamente (correta). A camada Cool serve para dados acessados com pouca frequência mas que precisam ficar disponíveis de imediato, e cobra mais por GB armazenado que Archive. A camada Cold fica entre Cool e Archive, também com acesso imediato e custo de armazenamento maior que Archive. E a camada Hot é a mais cara para armazenar e a mais barata para ler, o oposto do perfil descrito — é a resposta certa de uma pergunta sobre dados acessados o tempo todo.",
+      "opcoes": [
+        { "texto": "Archive, aceitando a reidratação de horas antes de cada leitura.", "correta": true },
+        { "texto": "Cool, que mantém os dados disponíveis para leitura imediata.", "correta": false },
+        { "texto": "Cold, intermediária entre Cool e Archive, com leitura imediata.", "correta": false },
+        { "texto": "Hot, para garantir que a auditoria não enfrente atraso na leitura.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-storage-servico-16",
+      "topico": "Serviços de armazenamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema legado da Northwind grava relatórios em um compartilhamento de rede acessado por caminho UNC e montado como unidade em servidores Windows. A empresa quer mover esse compartilhamento para o Azure sem alterar o código do sistema. Qual serviço de armazenamento atende?",
+      "explicacao": "Azure Files oferece compartilhamentos de arquivos gerenciados acessíveis por SMB, montáveis como unidade de rede — é o único que preserva o acesso por caminho UNC sem tocar no código (correta). Azure Blob Storage guarda objetos acessados por API REST ou SDK; migrar para ele exigiria reescrever a gravação, que é justamente o que o enunciado proíbe. Azure Queue Storage transporta mensagens entre componentes e não é sistema de arquivos. E Azure Table Storage guarda dados estruturados do tipo chave-valor — nenhum dos dois últimos tem semântica de arquivo, e ambos estão aqui porque compõem a mesma conta de armazenamento, o que faz muita gente tratá-los como intercambiáveis.",
+      "opcoes": [
+        { "texto": "Azure Files, com compartilhamento SMB montado como unidade de rede.", "correta": true },
+        { "texto": "Azure Blob Storage, com um contêiner por pasta do compartilhamento atual.", "correta": false },
+        { "texto": "Azure Queue Storage, com uma fila para cada relatório gerado.", "correta": false },
+        { "texto": "Azure Table Storage, guardando cada relatório como uma entidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-databox-17",
+      "topico": "Migração e movimentação de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Tailspin precisa transferir 180 TB de arquivos históricos para o Azure. O link de internet da matriz é de 100 Mbps e é compartilhado com a operação, que não pode ser prejudicada. A migração deve terminar em semanas, não em meses. Qual abordagem atende?",
+      "explicacao": "Azure Data Box transfere grandes volumes fisicamente: a Microsoft envia o dispositivo, os dados são copiados localmente e o aparelho retorna para ingestão no datacenter — é a resposta para volume alto com link insuficiente (correta). AzCopy pela internet é a ferramenta certa para volumes que cabem no link disponível; a 100 Mbps compartilhados, 180 TB levariam muitos meses e saturariam a operação. Storage Explorer é interface gráfica sobre o mesmo caminho de rede, com a mesma limitação de banda. E Azure Migrate coordena a avaliação e a migração de servidores e bancos de dados; ele orquestra o processo, mas não resolve o gargalo físico de transportar 180 TB por um link estreito.",
+      "opcoes": [
+        { "texto": "Azure Data Box, transportando os dados fisicamente até o datacenter.", "correta": true },
+        { "texto": "AzCopy, com transferência incremental pela internet fora do horário comercial.", "correta": false },
+        { "texto": "Azure Storage Explorer, enviando os arquivos em lotes pela interface gráfica.", "correta": false },
+        { "texto": "Azure Migrate, que executa a cópia dos arquivos pelo link existente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-entra-ds-18",
+      "topico": "Microsoft Entra Domain Services",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai migrar para VMs no Azure um aplicativo legado que exige ingresso em domínio, autenticação Kerberos e leitura de LDAP. A empresa já usa o Microsoft Entra ID, mas não quer manter controladores de domínio em VMs nem administrar replicação. Qual serviço atende?",
+      "explicacao": "Microsoft Entra Domain Services oferece serviços de domínio gerenciados — ingresso em domínio, Kerberos, NTLM e LDAP — sem que o cliente implante nem administre controladores de domínio, que é exatamente a restrição do enunciado (correta). Microsoft Entra ID sozinho não fala Kerberos nem LDAP: é um serviço de identidade baseado em protocolos modernos, e essa é a distinção que a questão cobra. Promover VMs a controladores de domínio resolveria tecnicamente, mas devolve à equipe a administração que ela quer evitar. E Azure Arc estende a governança do Azure a servidores fora dele, sem oferecer serviço de diretório algum.",
+      "opcoes": [
+        { "texto": "Microsoft Entra Domain Services, com serviços de domínio gerenciados.", "correta": true },
+        { "texto": "Microsoft Entra ID, que já fornece autenticação Kerberos e LDAP.", "correta": false },
+        { "texto": "Duas VMs promovidas a controladores de domínio na virtual network.", "correta": false },
+        { "texto": "Azure Arc, projetando o domínio local para dentro do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-acesso-condicional-19",
+      "topico": "Acesso condicional",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A área de segurança da Fabrikam quer que o segundo fator seja exigido apenas quando o acesso vier de fora da rede corporativa ou de um dispositivo não gerenciado, evitando atrito no escritório. Qual recurso implementa essa regra?",
+      "explicacao": "Acesso condicional avalia sinais — localização, estado do dispositivo, risco, aplicação — e decide exigir MFA, bloquear ou permitir; é o que torna a exigência do segundo fator condicional em vez de universal (correta). Habilitar MFA para todos os usuários atende à segurança mas ignora o requisito central, que é não pedir o fator dentro do escritório. Single sign-on reduz o número de autenticações entre aplicações, sem decidir quando exigir fator adicional. E RBAC define o que uma identidade já autenticada pode fazer nos recursos — atua depois da autenticação, e não sobre as condições dela.",
+      "opcoes": [
+        { "texto": "Políticas de acesso condicional, avaliando localização e estado do dispositivo.", "correta": true },
+        { "texto": "MFA habilitada para todos os usuários do diretório.", "correta": false },
+        { "texto": "Single sign-on entre as aplicações corporativas.", "correta": false },
+        { "texto": "Atribuições de RBAC por grupo de usuários e por escopo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-rbac-vs-policy-20",
+      "topico": "Controle de acesso baseado em função (RBAC)",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Na assinatura Contoso-Prod, a equipe de operações precisa reiniciar VMs e abrir chamados, mas não pode criar nem excluir recursos. Além disso, ninguém — nem administradores — deve conseguir criar recursos fora das regiões brasileiras. Qual combinação atende às duas exigências?",
+      "explicacao": "São dois problemas de naturezas diferentes: quem pode fazer o quê é RBAC, e o que pode existir e com qual configuração é Azure Policy. A restrição de região vale para todos, inclusive administradores, e é o caso de uso típico de policy — RBAC não sabe expressar \"nenhuma região além destas\" (correta). Usar RBAC para as duas exigências esbarra nisso: papel nenhum limita a região do recurso criado. Usar policy para as duas também falha, porque policy não concede nem revoga permissão a pessoas. E resource locks impedem alteração ou exclusão de recursos existentes, sem dizer nada sobre onde novos recursos podem ser criados.",
+      "opcoes": [
+        { "texto": "RBAC para as permissões da equipe e Azure Policy para restringir as regiões.", "correta": true },
+        { "texto": "RBAC para as permissões da equipe e para restringir as regiões permitidas.", "correta": false },
+        { "texto": "Azure Policy para as permissões da equipe e para restringir as regiões.", "correta": false },
+        { "texto": "RBAC para as permissões da equipe e resource locks para restringir as regiões.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-assoc-identidade-21",
+      "topico": "Autenticação e autorização",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de identidade da Northwind está mapeando requisitos para recursos do Microsoft Entra ID. Associe cada requisito ao recurso que o atende.",
+      "explicacao": "Entrar uma vez e acessar várias aplicações sem repetir credencial é single sign-on. Exigir um segundo fator além da senha é autenticação multifator. Exigir esse fator apenas em determinadas condições — fora da rede, dispositivo desconhecido, sinal de risco — é acesso condicional, que decide QUANDO aplicar o que a MFA oferece. E entrar sem digitar senha alguma, por chave de acesso, app autenticador ou biometria, é autenticação sem senha. O par que mais confunde é MFA × acesso condicional: um é o mecanismo, o outro é a política que decide quando acioná-lo. \"Controle de acesso baseado em função\" está no painel porque é a resposta de outra pergunta — o que a identidade pode fazer depois de autenticada, e não como ela se autentica.",
+      "associacoes": [
+        { "alvo": "Entrar uma vez e acessar várias aplicações sem repetir credencial", "item": "Single sign-on (SSO)" },
+        { "alvo": "Exigir um segundo fator além da senha", "item": "Autenticação multifator (MFA)" },
+        { "alvo": "Exigir o segundo fator apenas fora da rede corporativa", "item": "Acesso condicional" },
+        { "alvo": "Entrar por biometria ou chave de acesso, sem digitar senha", "item": "Autenticação sem senha" }
+      ],
+      "itensExtras": [
+        "Controle de acesso baseado em função (RBAC)"
+      ]
+    },
+    {
+      "id": "az900-cen-arq-defender-22",
+      "topico": "Microsoft Defender for Cloud",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria da Contoso pediu um indicador único que mostre o quanto o ambiente do Azure está aderente às boas práticas de segurança, com recomendações priorizadas do que corrigir primeiro. Qual serviço fornece isso?",
+      "explicacao": "Microsoft Defender for Cloud avalia continuamente a postura de segurança dos recursos, resume-a em uma pontuação de segurança e emite recomendações priorizadas — é exatamente o indicador pedido (correta). Azure Advisor também recomenda melhorias e inclui uma categoria de segurança, mas seu escopo é mais amplo (custo, desempenho, confiabilidade, excelência operacional) e ele não produz a pontuação de postura; é o distrator mais forte da questão. Azure Monitor coleta métricas e logs, servindo de base para investigar, sem avaliar aderência a boas práticas. E Microsoft Purview trata de governança e conformidade de dados, respondendo onde os dados sensíveis estão, não como está a segurança da infraestrutura.",
+      "opcoes": [
+        { "texto": "Microsoft Defender for Cloud, com pontuação de segurança e recomendações priorizadas.", "correta": true },
+        { "texto": "Azure Advisor, que emite recomendações de segurança para os recursos.", "correta": false },
+        { "texto": "Azure Monitor, consolidando métricas e logs de segurança do ambiente.", "correta": false },
+        { "texto": "Microsoft Purview, que mede a conformidade do ambiente do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-multipla-entra-23",
+      "topico": "Microsoft Entra ID",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Durante o desenho da solução de identidade, a equipe listou capacidades do Microsoft Entra ID. Selecione duas afirmações corretas sobre o serviço.",
+      "explicacao": "O Entra ID autentica usuários para aplicações em nuvem por protocolos modernos e permite acesso de parceiros externos por meio de identidades de convidado (corretas). Dizer que ele substitui integralmente um Active Directory local ignora que ele não fala Kerberos, LDAP nem ingresso em domínio — para isso existe o Entra Domain Services, e essa é a confusão mais frequente do tema. Dizer que ele controla o tráfego de rede entre sub-redes descreve NSG. E afirmar que exige um controlador de domínio em VM contradiz sua natureza: é um serviço gerenciado, sem servidor a implantar.",
+      "opcoes": [
+        { "texto": "Autentica usuários para aplicações em nuvem usando protocolos modernos.", "correta": true },
+        { "texto": "Permite conceder acesso a parceiros por meio de identidades de convidado.", "correta": true },
+        { "texto": "Substitui integralmente um Active Directory local, incluindo Kerberos e LDAP.", "correta": false },
+        { "texto": "Controla o tráfego de rede permitido entre sub-redes de uma virtual network.", "correta": false },
+        { "texto": "Exige ao menos um controlador de domínio implantado em uma VM do Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-multipla-regioes-24",
+      "topico": "Regiões, geographies e pares de regiões",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um arquiteto precisa explicar ao comitê o conceito de par de regiões do Azure. Selecione duas afirmações corretas sobre pares de regiões.",
+      "explicacao": "As atualizações planejadas da plataforma são aplicadas em apenas uma região do par por vez, e em um incidente de grande escala a recuperação de uma das regiões do par é priorizada — são duas das garantias que justificam o conceito (corretas). Dizer que a replicação entre as regiões do par é automática para todos os recursos é falso: ela depende do serviço e da configuração escolhida, como a opção de redundância da conta de armazenamento. Dizer que as regiões do par ficam sempre no mesmo país é a generalização que o próprio Brasil desmente, já que Brazil South é emparelhada com South Central US. E afirmar que o par elimina a necessidade de backup confunde redundância de infraestrutura com proteção contra exclusão e corrupção de dados — replicação copia o erro junto.",
+      "opcoes": [
+        { "texto": "Atualizações planejadas da plataforma são aplicadas a uma região do par por vez.", "correta": true },
+        { "texto": "Em incidentes de grande escala, a recuperação de uma das regiões do par é priorizada.", "correta": true },
+        { "texto": "A replicação entre as regiões do par é automática para todos os recursos criados.", "correta": false },
+        { "texto": "As duas regiões de um par estão sempre localizadas no mesmo país.", "correta": false },
+        { "texto": "O par de regiões elimina a necessidade de backup dos dados da aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-simnao-nsg-rbac-25",
+      "topico": "Grupos de segurança de rede e isolamento",
+      "tipo": "SimNao",
+      "enunciado": "Um administrador removeu a atribuição de RBAC que dava a João o papel de Colaborador na assinatura Contoso-Prod. Avalie a afirmação: com isso, João também deixa de conseguir alcançar pela rede a porta 443 de uma aplicação hospedada em uma VM daquela assinatura.",
+      "explicacao": "A afirmação é falsa. RBAC atua no plano de gerenciamento — quem pode criar, alterar, excluir e ler configurações de recursos no Azure. O acesso pela rede a uma aplicação hospedada numa VM é plano de dados, governado por NSG, firewall e pela autenticação da própria aplicação. João perdeu o direito de administrar a VM, mas continua alcançando a porta 443 como qualquer outro usuário da rede. Essa separação entre plano de gerenciamento e plano de dados é uma das fronteiras mais cobradas do exame, e a leitura verdadeira vem de tratar RBAC como se fosse firewall.",
+      "opcoes": [
+        { "texto": "Não", "correta": true },
+        { "texto": "Sim", "correta": false }
+      ]
+    },
+    {
+      "id": "az900-cen-arq-multipla-endpoints-26",
+      "topico": "Endpoints públicos e privados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A conta de armazenamento stcontosofin01 guarda dados financeiros e não pode ser alcançada pela internet pública. A equipe precisa que apenas recursos da virtual network vnet-prod-brs a acessem. Selecione duas medidas que contribuem para esse objetivo.",
+      "explicacao": "Criar um private endpoint dá à conta de armazenamento um endereço IP privado dentro da virtual network, fazendo o acesso trafegar pela rede privada; e desabilitar o acesso da rede pública no firewall da conta fecha a porta que restava (corretas). Trocar a redundância de LRS para GRS altera onde as cópias ficam, sem efeito algum sobre quem alcança a conta — é o distrator para quem associa \"proteger dados\" a \"replicar dados\". Mudar a camada de acesso de Hot para Cool é decisão de custo por frequência de leitura. E atribuir o papel de Leitor a menos usuários restringe a administração da conta no portal, mas não impede o acesso ao dado por chave ou por rede.",
+      "opcoes": [
+        { "texto": "Criar um private endpoint para a conta dentro de vnet-prod-brs.", "correta": true },
+        { "texto": "Desabilitar o acesso pela rede pública nas configurações de rede da conta.", "correta": true },
+        { "texto": "Alterar a redundância da conta de LRS para GRS.", "correta": false },
+        { "texto": "Mudar a camada de acesso padrão da conta de Hot para Cool.", "correta": false },
+        { "texto": "Atribuir o papel de Leitor a menos usuários na assinatura.", "correta": false }
+      ]
+    }
+  ]
+}

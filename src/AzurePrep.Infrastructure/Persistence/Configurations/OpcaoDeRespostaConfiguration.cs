@@ -13,6 +13,11 @@ public sealed class OpcaoDeRespostaConfiguration : IEntityTypeConfiguration<Opca
 
         builder.Property(o => o.QuestionId).IsRequired();
         builder.Property(o => o.Text).IsRequired().HasMaxLength(1000);
+
+        // Nulo em todo tipo que não seja arrastar-e-soltar — é o alvo do par candidato, não um
+        // campo que toda alternativa tem. Ver OpcaoDeResposta.TargetText.
+        builder.Property(o => o.TargetText).HasMaxLength(1000);
+
         builder.Property(o => o.IsCorrect).IsRequired();
         builder.Property(o => o.OrderIndex).IsRequired();
     }

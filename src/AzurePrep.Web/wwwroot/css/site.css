@@ -455,6 +455,81 @@ a { color: var(--c-primary); }
 .option__input { margin-top: 4px; width: 16px; height: 16px; accent-color: var(--c-primary); flex-shrink: 0; }
 .option__label:has(.option__input:checked) { background: var(--c-primary-tint); }
 
+/* ---- Arrastar e soltar (questões de associação) -------------------------- */
+/* Duas colunas: painel de itens à esquerda, alvos à direita — a mesma disposição
+   do sandbox oficial. Sem cor de destaque nem animação: continua sendo tela de
+   prova, e o arrastar não pode virar a parte divertida do simulado. */
+.question__hint {
+    margin: 0 0 20px;
+    font-size: .88rem;
+    color: var(--c-text-muted);
+}
+
+.dnd {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+    gap: 24px;
+    margin-top: 24px;
+    align-items: start;
+}
+.dnd__column-title {
+    margin: 0 0 10px;
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--c-text-muted);
+}
+.dnd__pool,
+.dnd__targets { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.dnd__item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    padding: 10px 12px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    cursor: grab;
+}
+.dnd__item:hover { background: #f5f7f9; }
+.dnd__item:active { cursor: grabbing; }
+.dnd__item.is-picked {
+    background: var(--c-primary-tint);
+    border-color: var(--c-primary);
+    box-shadow: inset 0 0 0 1px var(--c-primary);
+}
+
+.dnd__target { display: flex; flex-direction: column; gap: 4px; }
+.dnd__target-label { font-size: .95rem; }
+
+.dnd__slot {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    text-align: left;
+    font: inherit;
+    padding: 10px 12px;
+    background: #fbfcfd;
+    /* Tracejado enquanto vazio é o convite ao drop; preenchido vira caixa sólida. */
+    border: 1px dashed var(--c-border-strong);
+    border-radius: var(--radius);
+    color: var(--c-text-muted);
+    cursor: pointer;
+}
+.dnd__slot.is-filled {
+    border-style: solid;
+    border-color: var(--c-primary);
+    background: var(--c-primary-tint);
+    color: var(--c-text);
+}
+.dnd__slot.is-over { border-color: var(--c-primary); background: var(--c-primary-tint); }
+.dnd__slot-text { pointer-events: none; }
+
 /* ---- Barra de ações fixa ------------------------------------------------ */
 .exam-actions {
     position: fixed;
@@ -632,6 +707,9 @@ a { color: var(--c-primary); }
 .review-option--correct .review-option__mark { color: var(--c-answered); }
 .review-option--wrong .review-option__mark { color: var(--c-danger); }
 .review-option__tag { margin-left: auto; font-size: .72rem; color: var(--c-text-muted); font-style: italic; }
+/* Par de arrastar-e-soltar: o alvo em destaque, o item depois da seta. */
+.review-option__target { font-weight: 600; }
+.review-option__arrow { margin: 0 6px; color: var(--c-text-muted); }
 .review-item__explanation { font-size: .9rem; color: var(--c-text); background: #f9fafb; border: 1px solid var(--c-border); border-radius: var(--radius); padding: 12px 14px; }
 
 /* ==========================================================================
@@ -902,6 +980,12 @@ a { color: var(--c-primary); }
     .option__label { padding: 14px 8px; gap: 14px; }
     .option__input { width: 18px; height: 18px; }
     .mark-toggle input { width: 18px; height: 18px; }
+
+    /* Duas colunas lado a lado não cabem: o painel de itens sobe e os alvos
+       ficam abaixo. A ordem importa — é a mesma leitura de cima para baixo que
+       a instrução descreve ("do painel para o alvo"). */
+    .dnd { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .dnd__item, .dnd__slot { min-height: 48px; }
 }
 
 /* ---- ≤ 480px: celulares estreitos --------------------------------------- */
@@ -965,6 +1049,8 @@ a { color: var(--c-primary); }
 @media (hover: none) {
     .option__label:hover { background: transparent; }
     .option__label:has(.option__input:checked):hover { background: var(--c-primary-tint); }
+    .dnd__item:hover { background: var(--c-surface); }
+    .dnd__item.is-picked:hover { background: var(--c-primary-tint); }
     .review-row:hover { background: transparent; }
     .historico-tabela tbody tr:hover { background: transparent; }
     .provider:hover { background: var(--c-surface); border-color: var(--c-border-strong); }

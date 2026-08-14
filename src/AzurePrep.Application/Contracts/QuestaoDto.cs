@@ -10,7 +10,13 @@ namespace AzurePrep.Application.Contracts;
 /// a ordem das alternativas é embaralhada por tentativa (ver <c>OrdemDasOpcoes</c>). Expor o índice
 /// do arquivo aqui entregaria o gabarito, já que o seed escreve a alternativa correta primeiro.
 /// </remarks>
-public sealed record OpcaoDeQuestaoDto(Guid Id, string Text, int OrderIndex);
+/// <remarks>
+/// <paramref name="TargetText"/> só é preenchido nas questões de arrastar e soltar, onde a
+/// "opção" é um par candidato: o alvo em <paramref name="TargetText"/> e o item arrastável em
+/// <paramref name="Text"/>. A tela monta as duas colunas a partir desses pares — ver
+/// <c>OpcaoDeResposta.TargetText</c>.
+/// </remarks>
+public sealed record OpcaoDeQuestaoDto(Guid Id, string Text, int OrderIndex, string? TargetText = null);
 
 /// <summary>
 /// Questão renderizável durante a prova, já com a seleção atual do candidato e o estado

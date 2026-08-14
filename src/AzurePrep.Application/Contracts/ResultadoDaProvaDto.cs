@@ -11,7 +11,13 @@ public sealed record ResultadoPorAreaDto(
     decimal ScorePercent);
 
 /// <summary>Opção na revisão pós-prova — aqui sim expomos correta/selecionada.</summary>
-public sealed record RevisaoDeOpcaoDto(string Text, bool IsCorrect, bool WasSelected);
+/// <remarks>
+/// Nas questões de arrastar e soltar, <paramref name="TargetText"/> é o alvo e
+/// <paramref name="Text"/> o item que foi (ou deveria ter sido) solto nele. A revisão mostra só
+/// os pares que importam — o gabarito e o que a pessoa montou —, não as dezenas de combinações
+/// que o formato gera.
+/// </remarks>
+public sealed record RevisaoDeOpcaoDto(string Text, bool IsCorrect, bool WasSelected, string? TargetText = null);
 
 /// <summary>Uma questão na revisão questão a questão, com explicação e gabarito.</summary>
 public sealed record RevisaoDeQuestaoDto(

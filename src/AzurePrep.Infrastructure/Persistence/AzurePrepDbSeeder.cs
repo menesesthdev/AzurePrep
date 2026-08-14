@@ -30,6 +30,16 @@ public static class AzurePrepDbSeeder
         ("governanca", "Descrever gestão e governança do Azure", 32.5m)
     };
 
+    /// <summary>
+    /// Os slugs de área que os arquivos de questões podem referenciar.
+    /// </summary>
+    /// <remarks>
+    /// Público para que o teste de integridade valide o catálogo real contra as áreas reais. Sem
+    /// isso, o teste teria de repetir os slugs, e a cópia divergiria da definição sem nada quebrar
+    /// — que é exatamente o tipo de falha calada que este catálogo não pode ter.
+    /// </remarks>
+    public static IReadOnlyList<string> SlugsDeArea { get; } = Areas.Select(a => a.Key).ToList();
+
     public static async Task SemearAsync(AzurePrepDbContext db, CancellationToken cancellationToken = default)
     {
         var exam = await db.Exams
@@ -137,7 +147,12 @@ public static class AzurePrepDbSeeder
                     var nova = exam.AdicionarQuestao(area.Id, seed.Id, seed.Enunciado, tipo, seed.Explicacao, seed.Topico, id);
                     for (var i = 0; i < seed.Opcoes.Count; i++)
                     {
-                        nova.AdicionarOpcao(seed.Opcoes[i].Texto, seed.Opcoes[i].Correta, i, GuidDeterministico.DeOpcao(seed.Id, i));
+                        nova.AdicionarOpcao(
+                            seed.Opcoes[i].Texto,
+                            seed.Opcoes[i].Correta,
+                            i,
+                            GuidDeterministico.DeOpcao(seed.Id, i),
+                            seed.Opcoes[i].Alvo);
                     }
 
                     // Add explícito: a chave já vem preenchida do domínio, então o EF não tem como
@@ -206,11 +221,12 @@ public static class AzurePrepDbSeeder
                     seed.Opcoes[i].Texto,
                     seed.Opcoes[i].Correta,
                     i,
-                    GuidDeterministico.DeOpcao(seed.Id, i)));
+                    GuidDeterministico.DeOpcao(seed.Id, i),
+                    seed.Opcoes[i].Alvo));
             }
             else
             {
-                opcao.Atualizar(seed.Opcoes[i].Texto, seed.Opcoes[i].Correta);
+                opcao.Atualizar(seed.Opcoes[i].Texto, seed.Opcoes[i].Correta, seed.Opcoes[i].Alvo);
             }
         }
 
