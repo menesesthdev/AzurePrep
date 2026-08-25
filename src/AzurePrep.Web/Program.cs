@@ -52,7 +52,13 @@ using (var scope = app.Services.CreateScope())
     // então basta aplicar uma vez — repetir é barato e idempotente.
     await db.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
 
-    await AzurePrepDbSeeder.SemearAsync(db);
+    // O logger vai junto porque o seed tem um aviso que não pode ser exceção: exame cujo pool
+    // ainda não sustenta o tamanho declarado da prova (ver ConferirTamanhoDoPool).
+    var loggerDoSeed = scope.ServiceProvider
+        .GetRequiredService<ILoggerFactory>()
+        .CreateLogger(nameof(AzurePrepDbSeeder));
+
+    await AzurePrepDbSeeder.SemearAsync(db, loggerDoSeed);
 }
 
 // Configure the HTTP request pipeline.

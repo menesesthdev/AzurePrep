@@ -49,6 +49,25 @@ public class Exame : Entity
 
     public IReadOnlyCollection<Questao> Questions => _questions;
 
+    /// <summary>
+    /// Reescreve os parâmetros do exame no lugar, preservando o Id. O <see cref="Code"/> é a
+    /// identidade e não muda — para trocá-lo, o exame é outro.
+    /// </summary>
+    /// <remarks>
+    /// Existe para que a definição no seeder seja a fonte única da verdade também DEPOIS da
+    /// primeira execução. Sem isso, ajustar o tamanho ou o tempo de uma prova exigiria um
+    /// <c>UPDATE</c> escrito à mão numa migration — foi exatamente o que a migration
+    /// <c>SorteioDeQuestoes</c> teve de fazer para corrigir o <see cref="TotalQuestions"/> do
+    /// AZ-900. Com quatro exames em calibração, isso deixaria de ser eventual e viraria rotina.
+    /// </remarks>
+    public void AtualizarDefinicao(string name, int timeLimitMinutes, int passingScorePercent, int totalQuestions)
+    {
+        Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
+        TimeLimitMinutes = Guard.Positive(timeLimitMinutes, nameof(timeLimitMinutes));
+        PassingScorePercent = Guard.InRange(passingScorePercent, 0, 100, nameof(passingScorePercent));
+        TotalQuestions = Guard.Positive(totalQuestions, nameof(totalQuestions));
+    }
+
     public AreaDeHabilidade AdicionarAreaDeHabilidade(string key, string name, decimal weightPercent, Guid? id = null)
     {
         var skillArea = new AreaDeHabilidade(Id, key, name, weightPercent, id);

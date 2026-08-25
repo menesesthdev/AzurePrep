@@ -49,9 +49,106 @@ public class CatalogoDeQuestoesDeSeedTests
     {
         var problemas = CatalogoDeQuestoesDeSeed.Validar(
             CatalogoDeQuestoesDeSeed.Carregar(),
-            AzurePrepDbSeeder.SlugsDeArea);
+            AzurePrepDbSeeder.AreasPorExame);
 
         Assert.Empty(problemas);
+    }
+
+    /// <summary>
+    /// Todo lote embutido tem de apontar para um exame que existe de verdade.
+    /// </summary>
+    /// <remarks>
+    /// O seed aplica as questões filtrando por <c>exameCode</c>. Um código que não casa com exame
+    /// nenhum não entra em iteração nenhuma: o lote some sem erro, sem log e sem questão no banco.
+    /// Com um exame só isso era teórico; com quatro, é um dígito trocado.
+    /// </remarks>
+    [Fact]
+    public void CatalogoRealEmbutido_SoReferenciaExamesDefinidos()
+    {
+        var codigosDefinidos = AzurePrepDbSeeder.Exames.Select(e => e.Code).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var orfaos = CatalogoDeQuestoesDeSeed.Carregar()
+            .Where(a => !codigosDefinidos.Contains(a.ExameCode))
+            .Select(a => $"{a.Origem} → '{a.ExameCode}'")
+            .ToList();
+
+        Assert.True(orfaos.Count == 0, "Lotes apontando para exame inexistente: " + string.Join(", ", orfaos));
+    }
+
+    /// <summary>
+    /// Cada exame publicado precisa de pool que sustente o tamanho declarado da prova.
+    /// </summary>
+    /// <remarks>
+    /// O sorteio corta o total para o tamanho do pool (<c>Math.Min</c>) sem reclamar. Um exame
+    /// declarado com 50 itens e 30 questões escritas entrega uma prova de 30 — mais curta, sempre
+    /// a mesma, e sem nada que ligue o sintoma à causa. Como fidelidade à prova real é o produto,
+    /// isso é defeito, não obra em andamento: o exame entra em <c>Exames</c> quando o banco existe.
+    /// </remarks>
+    [Fact]
+    public void ExamesDefinidos_TemQuestoesSuficientesParaMontarUmaProva()
+    {
+        var questoesPorExame = CatalogoDeQuestoesDeSeed.Carregar()
+            .GroupBy(a => a.ExameCode, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count), StringComparer.OrdinalIgnoreCase);
+
+        var magros = AzurePrepDbSeeder.Exames
+            .Select(e => (e.Code, e.TotalQuestions, Escritas: questoesPorExame.GetValueOrDefault(e.Code)))
+            .Where(e => e.Escritas < e.TotalQuestions)
+            .Select(e => $"{e.Code}: {e.Escritas} escritas para prova de {e.TotalQuestions}")
+            .ToList();
+
+        Assert.True(magros.Count == 0, "Exame publicado sem pool suficiente: " + string.Join("; ", magros));
+    }
+
+    // ----------------------------------------------------------------- escopo de área por exame
+
+    [Fact]
+    public void Validar_ExameCodeDesconhecido_Acusa()
+    {
+        var lote = Lote(QuestaoValida()) with { ExameCode = "AZ-999" };
+
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, AzurePrepDbSeeder.AreasPorExame);
+
+        Assert.Contains(problemas, p => p.Contains("não corresponde a exame nenhum"));
+    }
+
+    /// <summary>
+    /// A área é escopada ao exame: um slug válido em OUTRO exame não vale aqui.
+    /// </summary>
+    /// <remarks>
+    /// É o erro que a lista plana de slugs deixava passar. Com todas as áreas de todos os exames
+    /// num balde só, um lote do AZ-104 apontando para <c>conceitos-de-nuvem</c> (área do AZ-900)
+    /// passaria na validação — e as questões cairiam num domínio que não é o delas, com peso de
+    /// blueprint errado no sorteio.
+    /// </remarks>
+    [Fact]
+    public void Validar_AreaDeOutroExame_Acusa()
+    {
+        var areasPorExame = new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AZ-900"] = new[] { "conceitos-de-nuvem" },
+            ["AZ-104"] = new[] { "redes" }
+        };
+
+        // Lote do AZ-104 usando a área do AZ-900.
+        var lote = Lote(QuestaoValida()) with { ExameCode = "AZ-104", Area = "conceitos-de-nuvem" };
+
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, areasPorExame);
+
+        Assert.Contains(problemas, p => p.Contains("não existe no exame AZ-104"));
+    }
+
+    [Fact]
+    public void Validar_AreaCorretaDoExame_NaoAcusa()
+    {
+        var areasPorExame = new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["AZ-104"] = new[] { "redes" }
+        };
+
+        var lote = Lote(QuestaoValida()) with { ExameCode = "AZ-104", Area = "redes" };
+
+        Assert.Empty(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, areasPorExame));
     }
 
     [Fact]

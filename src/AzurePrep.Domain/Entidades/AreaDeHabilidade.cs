@@ -39,4 +39,20 @@ public class AreaDeHabilidade : Entity
     public decimal WeightPercent { get; private set; }
 
     public IReadOnlyCollection<Questao> Questions => _questions;
+
+    /// <summary>
+    /// Reescreve nome e peso no lugar. A <see cref="Key"/> não muda — é por ela que os arquivos
+    /// de questões acham o domínio, e trocá-la órfãria o lote inteiro em silêncio.
+    /// </summary>
+    /// <remarks>
+    /// O peso é o que o sorteio usa para repartir a prova entre os domínios. A Microsoft revisa os
+    /// pesos do Skills Measured sem trocar o código do exame, então isto não é hipótese remota:
+    /// sem poder atualizar, o simulado seguiria montando provas com o blueprint antigo — e a falha
+    /// seria calada, porque uma prova com distribuição errada continua parecendo uma prova normal.
+    /// </remarks>
+    public void Atualizar(string name, decimal weightPercent)
+    {
+        Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
+        WeightPercent = Guard.InRange(weightPercent, 0m, 100m, nameof(weightPercent));
+    }
 }

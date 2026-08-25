@@ -130,6 +130,37 @@ public static class CatalogoDeQuestoesDeSeed
     public static IReadOnlyList<string> Validar(
         IReadOnlyList<ArquivoDeQuestoes> arquivos,
         IReadOnlyCollection<string> areasConhecidas)
+        => Validar(arquivos, _ => areasConhecidas);
+
+    /// <summary>
+    /// Valida um catálogo de <b>vários exames</b>, cada lote contra as áreas do exame que ele
+    /// declara em <c>exameCode</c>.
+    /// </summary>
+    /// <remarks>
+    /// Além do escopo correto das áreas, esta sobrecarga fecha um buraco que só existe com mais de
+    /// um exame: um lote cujo <c>exameCode</c> não casa com exame nenhum. O seeder aplica as
+    /// questões filtrando por código, então esse lote não pertenceria a iteração nenhuma e
+    /// <b>sumiria em silêncio</b> — sem erro, sem log, sem questão no banco. Com um exame só o
+    /// risco era teórico; com quatro, um dígito trocado é questão de tempo.
+    /// </remarks>
+    public static IReadOnlyList<string> Validar(
+        IReadOnlyList<ArquivoDeQuestoes> arquivos,
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> areasPorExame)
+    {
+        ArgumentNullException.ThrowIfNull(areasPorExame);
+
+        return Validar(arquivos, codigo =>
+            areasPorExame.TryGetValue(codigo ?? string.Empty, out var areas) ? areas : null);
+    }
+
+    /// <param name="areasDoExame">
+    /// Devolve as áreas válidas para um código de exame, ou <c>null</c> quando o exame é
+    /// desconhecido. A sobrecarga de lista plana ignora o código e devolve sempre as mesmas áreas
+    /// — é o que mantém os testes de regra escrevendo lotes sintéticos sem declarar exame nenhum.
+    /// </param>
+    private static IReadOnlyList<string> Validar(
+        IReadOnlyList<ArquivoDeQuestoes> arquivos,
+        Func<string, IReadOnlyCollection<string>?> areasDoExame)
     {
         var problemas = new List<string>();
         var idsVistos = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -137,10 +168,17 @@ public static class CatalogoDeQuestoesDeSeed
 
         foreach (var arquivo in arquivos)
         {
-            if (!areasConhecidas.Contains(arquivo.Area))
+            var areasConhecidas = areasDoExame(arquivo.ExameCode);
+
+            if (areasConhecidas is null)
+            {
+                problemas.Add($"{arquivo.Origem}: exameCode '{arquivo.ExameCode}' não corresponde a " +
+                              "exame nenhum — o lote inteiro seria ignorado pelo seed sem nenhum aviso.");
+            }
+            else if (!areasConhecidas.Contains(arquivo.Area, StringComparer.OrdinalIgnoreCase))
             {
                 problemas.Add($"{arquivo.Origem}: área '{arquivo.Area}' não existe no exame " +
-                              $"(conhecidas: {string.Join(", ", areasConhecidas)}).");
+                              $"{arquivo.ExameCode} (conhecidas: {string.Join(", ", areasConhecidas)}).");
             }
 
             if (arquivo.Questoes.Count == 0)

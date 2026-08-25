@@ -1,79 +1,177 @@
 using AzurePrep.Domain.Entidades;
 using AzurePrep.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace AzurePrep.Infrastructure.Persistence;
 
 /// <summary>
-/// Popula o banco com o exame AZ-900 e com as questões dos arquivos de seed embutidos.
+/// Popula o banco com os exames definidos em <see cref="Exames"/> e com as questões dos arquivos
+/// de seed embutidos.
 ///
 /// IMPORTANTE (regra não negociável do projeto): nenhuma questão do banco é ou pode ser copiada
-/// de dumps/vazamentos de prova. Todas são escritas a partir do Skills Measured outline público,
-/// com engenharia de distrator e explicação por distrator — ver <c>docs/formato-questoes.md</c>.
+/// de dumps/vazamentos de prova, nem adaptada dos practice assessments oficiais da Microsoft —
+/// aqueles são públicos e não violam NDA, mas continuam sendo conteúdo proprietário. Todas as
+/// questões são escritas a partir do Skills Measured outline público, com engenharia de distrator
+/// e explicação por distrator — ver <c>docs/formato-questoes.md</c>.
 ///
 /// O seed é <b>idempotente e incremental</b>: roda a cada startup, insere o que é novo e
 /// atualiza o que mudou, casando pelo <c>ExternalId</c> do arquivo. Adicionar um lote de questões
-/// é adicionar um JSON — nada aqui muda.
+/// é adicionar um JSON, e adicionar um exame é uma entrada em <see cref="Exames"/> — nada no
+/// algoritmo abaixo muda em nenhum dos dois casos.
 /// </summary>
 public static class AzurePrepDbSeeder
 {
-    private const string CodigoDoExame = "AZ-900";
-
     /// <summary>
-    /// Definição do exame e dos seus domínios, com os pesos do Skills Measured outline oficial.
-    /// As áreas são identificadas pelo slug, que é o que os arquivos de questões referenciam.
+    /// Os exames que o simulado publica, com os pesos do Skills Measured outline oficial.
     /// </summary>
-    private static readonly (string Key, string Name, decimal Weight)[] Areas =
-    {
-        ("conceitos-de-nuvem", "Descrever conceitos de nuvem", 27.5m),
-        ("arquitetura", "Descrever arquitetura e serviços do Azure", 37.5m),
-        ("governanca", "Descrever gestão e governança do Azure", 32.5m)
-    };
+    /// <remarks>
+    /// ⚠️ Um exame entra nesta lista quando o banco de questões dele existe, não quando se decide
+    /// escrevê-lo. Exame publicado sem pool suficiente não falha: o sorteio faz
+    /// <c>Math.Min(total, pool.Count)</c> e entrega uma prova mais curta, sempre parecida, sem
+    /// aviso nenhum — e fidelidade à prova real é justamente o produto. Ver o aviso emitido por
+    /// <see cref="ConferirTamanhoDoPool"/>.
+    /// </remarks>
+    public static IReadOnlyList<DefinicaoDeExame> Exames { get; } =
+    [
+        // 40 itens em 45 minutos espelha a entrega real do AZ-900. TotalQuestions não é "o tamanho
+        // do banco" e sim o tamanho da PROVA: o sorteio escolhe 40 entre centenas a cada tentativa.
+        new DefinicaoDeExame(
+            Code: "AZ-900",
+            Name: "Microsoft Azure Fundamentals",
+            TimeLimitMinutes: 45,
+            PassingScorePercent: 70,
+            TotalQuestions: 40,
+            Areas:
+            [
+                new AreaDeExame("conceitos-de-nuvem", "Descrever conceitos de nuvem", 27.5m),
+                new AreaDeExame("arquitetura", "Descrever arquitetura e serviços do Azure", 37.5m),
+                new AreaDeExame("governanca", "Descrever gestão e governança do Azure", 32.5m)
+            ])
+    ];
 
     /// <summary>
-    /// Os slugs de área que os arquivos de questões podem referenciar.
+    /// Os slugs de área que os arquivos de questões podem referenciar, por código de exame.
     /// </summary>
     /// <remarks>
     /// Público para que o teste de integridade valide o catálogo real contra as áreas reais. Sem
     /// isso, o teste teria de repetir os slugs, e a cópia divergiria da definição sem nada quebrar
     /// — que é exatamente o tipo de falha calada que este catálogo não pode ter.
+    ///
+    /// É um dicionário, e não uma lista plana, porque a área é escopada ao exame: <c>redes</c> do
+    /// AZ-104 não existe no AZ-900. Com uma lista única, um lote do AZ-104 apontando para uma área
+    /// do AZ-900 passaria na validação e as questões cairiam no domínio errado.
     /// </remarks>
-    public static IReadOnlyList<string> SlugsDeArea { get; } = Areas.Select(a => a.Key).ToList();
+    public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> AreasPorExame { get; } =
+        Exames.ToDictionary(
+            e => e.Code,
+            e => (IReadOnlyCollection<string>)e.Areas.Select(a => a.Key).ToList(),
+            StringComparer.OrdinalIgnoreCase);
 
-    public static async Task SemearAsync(AzurePrepDbContext db, CancellationToken cancellationToken = default)
+    public static async Task SemearAsync(
+        AzurePrepDbContext db,
+        ILogger? logger = null,
+        CancellationToken cancellationToken = default)
+    {
+        var catalogo = CatalogoDeQuestoesDeSeed.Carregar();
+
+        // Valida o catálogo INTEIRO de uma vez, antes de tocar no banco. Validar por exame, dentro
+        // do laço, deixaria passar justamente o erro que só existe entre exames: um lote cujo
+        // 'exameCode' não casa com exame nenhum não pertence a nenhuma iteração e sumiria calado.
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(catalogo, AreasPorExame);
+        if (problemas.Count > 0)
+        {
+            // Fail fast: subir com banco de questões inválido produziria prova com gabarito
+            // errado, que é pior que não subir. O teste de integridade pega isso antes do deploy.
+            throw new InvalidOperationException(
+                "Banco de questões inválido:" + Environment.NewLine + string.Join(Environment.NewLine, problemas));
+        }
+
+        foreach (var definicao in Exames)
+        {
+            var exam = await SincronizarExameAsync(db, definicao, cancellationToken);
+            await AplicarQuestoesAsync(db, exam, catalogo, cancellationToken);
+            ConferirTamanhoDoPool(exam, definicao, logger);
+        }
+    }
+
+    /// <summary>
+    /// Cria o exame se ele não existe e, se existe, realinha parâmetros e áreas com a definição.
+    /// </summary>
+    private static async Task<Exame> SincronizarExameAsync(
+        AzurePrepDbContext db,
+        DefinicaoDeExame definicao,
+        CancellationToken cancellationToken)
     {
         var exam = await db.Exams
             .Include(e => e.SkillAreas)
-            .FirstOrDefaultAsync(e => e.Code == CodigoDoExame, cancellationToken);
+            .FirstOrDefaultAsync(e => e.Code == definicao.Code, cancellationToken);
 
         if (exam is null)
         {
-            exam = CriarExame();
+            exam = new Exame(
+                code: definicao.Code,
+                name: definicao.Name,
+                timeLimitMinutes: definicao.TimeLimitMinutes,
+                passingScorePercent: definicao.PassingScorePercent,
+                totalQuestions: definicao.TotalQuestions);
+
             db.Exams.Add(exam);
-            await db.SaveChangesAsync(cancellationToken);
         }
-
-        await AplicarQuestoesAsync(db, exam, cancellationToken);
-    }
-
-    private static Exame CriarExame()
-    {
-        // 40 itens em 45 minutos espelha a entrega real do AZ-900. TotalQuestions deixou de ser
-        // "o tamanho do banco" e passou a ser o tamanho da PROVA: o sorteio escolhe 40 entre
-        // centenas a cada tentativa.
-        var exam = new Exame(
-            code: CodigoDoExame,
-            name: "Microsoft Azure Fundamentals",
-            timeLimitMinutes: 45,
-            passingScorePercent: 70,
-            totalQuestions: 40);
-
-        foreach (var (key, name, weight) in Areas)
+        else
         {
-            exam.AdicionarAreaDeHabilidade(key, name, weight);
+            exam.AtualizarDefinicao(
+                definicao.Name,
+                definicao.TimeLimitMinutes,
+                definicao.PassingScorePercent,
+                definicao.TotalQuestions);
         }
+
+        var areasPorKey = exam.SkillAreas.ToDictionary(a => a.Key, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var area in definicao.Areas)
+        {
+            if (areasPorKey.TryGetValue(area.Key, out var existente))
+            {
+                existente.Atualizar(area.Name, area.WeightPercent);
+            }
+            else
+            {
+                exam.AdicionarAreaDeHabilidade(area.Key, area.Name, area.WeightPercent);
+            }
+        }
+
+        // Área que saiu da definição NÃO é removida: as questões apontam para ela por FK
+        // Restrict, e apagá-la falharia no SaveChanges. Ela simplesmente deixa de receber cota no
+        // sorteio quando fica sem questão ativa — e, se ainda tiver, o SorteioDeQuestoes a trata
+        // como área órfã e lhe dá peso proporcional em vez de descartá-la em silêncio.
+        await db.SaveChangesAsync(cancellationToken);
 
         return exam;
+    }
+
+    /// <summary>
+    /// Avisa quando o pool ativo não sustenta o tamanho declarado da prova.
+    /// </summary>
+    /// <remarks>
+    /// Aviso, e não exceção: derrubar a aplicação porque um exame em construção ainda tem banco
+    /// magro impediria justamente o trabalho de construí-lo. Mas o silêncio também não serve — o
+    /// sorteio corta o total para o tamanho do pool sem reclamar, e o sintoma para o usuário é uma
+    /// prova curta e sempre parecida, que ninguém associa a "faltam questões escritas".
+    /// </remarks>
+    private static void ConferirTamanhoDoPool(Exame exam, DefinicaoDeExame definicao, ILogger? logger)
+    {
+        var ativas = exam.Questions.Count(q => q.IsActive);
+
+        if (ativas < definicao.TotalQuestions)
+        {
+            logger?.LogWarning(
+                "Exame {Codigo}: o pool tem {Ativas} questões ativas para uma prova de {Total} itens. " +
+                "O sorteio vai entregar uma prova mais curta e pouco variada até o banco crescer.",
+                definicao.Code,
+                ativas,
+                definicao.TotalQuestions);
+        }
     }
 
     /// <summary>
@@ -84,9 +182,10 @@ public static class AzurePrepDbSeeder
     private static async Task AplicarQuestoesAsync(
         AzurePrepDbContext db,
         Exame exam,
+        IReadOnlyList<ArquivoDeQuestoes> catalogo,
         CancellationToken cancellationToken)
     {
-        var arquivos = CatalogoDeQuestoesDeSeed.Carregar()
+        var arquivos = catalogo
             .Where(a => string.Equals(a.ExameCode, exam.Code, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
@@ -96,15 +195,6 @@ public static class AzurePrepDbSeeder
         }
 
         var areasPorKey = exam.SkillAreas.ToDictionary(a => a.Key, StringComparer.OrdinalIgnoreCase);
-
-        var problemas = CatalogoDeQuestoesDeSeed.Validar(arquivos, areasPorKey.Keys.ToList());
-        if (problemas.Count > 0)
-        {
-            // Fail fast: subir com banco de questões inválido produziria prova com gabarito
-            // errado, que é pior que não subir. O teste de integridade pega isso antes do deploy.
-            throw new InvalidOperationException(
-                "Banco de questões inválido:" + Environment.NewLine + string.Join(Environment.NewLine, problemas));
-        }
 
         // O Guid vem do ExternalId, então buscar por Id já cobre a colisão de chave entre exames —
         // não é preciso uma segunda consulta por ExternalId. As questões deste exame entram na
