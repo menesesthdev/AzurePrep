@@ -47,7 +47,27 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("conceitos-de-nuvem", "Descrever conceitos de nuvem", 27.5m),
                 new AreaDeExame("arquitetura", "Descrever arquitetura e serviços do Azure", 37.5m),
                 new AreaDeExame("governanca", "Descrever gestão e governança do Azure", 32.5m)
-            ])
+            ]),
+
+        // Pesos conferidos no study guide oficial (skills measured de 17/04/2026): os slugs abaixo
+        // são os cinco functional groups publicados, com o ponto médio de cada faixa.
+        // ⚠️ Publicado: false — ver DefinicaoDeExame.Publicado. Sai do catálogo e recusa tentativa
+        // até o banco de questões sustentar os 50 itens da prova.
+        new DefinicaoDeExame(
+            Code: "AZ-104",
+            Name: "Microsoft Azure Administrator",
+            TimeLimitMinutes: 100,
+            PassingScorePercent: 70,
+            TotalQuestions: 50,
+            Areas:
+            [
+                new AreaDeExame("identidade-governanca", "Gerenciar identidades e governança do Azure", 22.5m),
+                new AreaDeExame("armazenamento", "Implementar e gerenciar armazenamento", 17.5m),
+                new AreaDeExame("computacao", "Implantar e gerenciar recursos de computação do Azure", 22.5m),
+                new AreaDeExame("rede-virtual", "Implementar e gerenciar rede virtual", 17.5m),
+                new AreaDeExame("monitoramento", "Monitorar e manter recursos do Azure", 12.5m)
+            ],
+            Publicado: false)
     ];
 
     /// <summary>
@@ -114,7 +134,8 @@ public static class AzurePrepDbSeeder
                 name: definicao.Name,
                 timeLimitMinutes: definicao.TimeLimitMinutes,
                 passingScorePercent: definicao.PassingScorePercent,
-                totalQuestions: definicao.TotalQuestions);
+                totalQuestions: definicao.TotalQuestions,
+                isPublished: definicao.Publicado);
 
             db.Exams.Add(exam);
         }
@@ -124,7 +145,8 @@ public static class AzurePrepDbSeeder
                 definicao.Name,
                 definicao.TimeLimitMinutes,
                 definicao.PassingScorePercent,
-                definicao.TotalQuestions);
+                definicao.TotalQuestions,
+                definicao.Publicado);
         }
 
         var areasPorKey = exam.SkillAreas.ToDictionary(a => a.Key, StringComparer.OrdinalIgnoreCase);
@@ -163,15 +185,30 @@ public static class AzurePrepDbSeeder
     {
         var ativas = exam.Questions.Count(q => q.IsActive);
 
-        if (ativas < definicao.TotalQuestions)
+        if (ativas >= definicao.TotalQuestions)
         {
-            logger?.LogWarning(
-                "Exame {Codigo}: o pool tem {Ativas} questões ativas para uma prova de {Total} itens. " +
-                "O sorteio vai entregar uma prova mais curta e pouco variada até o banco crescer.",
+            return;
+        }
+
+        if (!definicao.Publicado)
+        {
+            // Em construção o pool magro é o estado esperado — vira nota de progresso, não alarme.
+            logger?.LogInformation(
+                "Exame {Codigo} (em construção): {Ativas} de {Total} questões necessárias para publicar.",
                 definicao.Code,
                 ativas,
                 definicao.TotalQuestions);
+
+            return;
         }
+
+        logger?.LogWarning(
+            "Exame {Codigo} está PUBLICADO com apenas {Ativas} questões ativas para uma prova de " +
+            "{Total} itens. O sorteio vai entregar uma prova mais curta e pouco variada — marque-o " +
+            "como não publicado ou complete o banco.",
+            definicao.Code,
+            ativas,
+            definicao.TotalQuestions);
     }
 
     /// <summary>

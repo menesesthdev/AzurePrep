@@ -93,10 +93,12 @@ public sealed class SessaoDeProvaPersistenceTests : IDisposable
     {
         using var ctx = CreateContext();
 
+        // Por código, não SingleAsync(): o seed passou a semear vários exames, e este teste é
+        // sobre o banco de questões do AZ-900 especificamente.
         var exam = await ctx.Exams
             .Include(e => e.SkillAreas)
             .Include(e => e.Questions).ThenInclude(q => q.Options)
-            .SingleAsync();
+            .SingleAsync(e => e.Code == "AZ-900");
 
         Assert.Equal("AZ-900", exam.Code);
         Assert.Equal(3, exam.SkillAreas.Count);

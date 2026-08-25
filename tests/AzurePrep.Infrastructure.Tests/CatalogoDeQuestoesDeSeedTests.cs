@@ -76,28 +76,57 @@ public class CatalogoDeQuestoesDeSeedTests
     }
 
     /// <summary>
-    /// Cada exame publicado precisa de pool que sustente o tamanho declarado da prova.
+    /// Cada exame <b>publicado</b> precisa de pool que sustente o tamanho declarado da prova.
     /// </summary>
     /// <remarks>
     /// O sorteio corta o total para o tamanho do pool (<c>Math.Min</c>) sem reclamar. Um exame
     /// declarado com 50 itens e 30 questões escritas entrega uma prova de 30 — mais curta, sempre
     /// a mesma, e sem nada que ligue o sintoma à causa. Como fidelidade à prova real é o produto,
-    /// isso é defeito, não obra em andamento: o exame entra em <c>Exames</c> quando o banco existe.
+    /// isso é defeito e não obra em andamento.
+    ///
+    /// Exame com <c>Publicado: false</c> fica fora daqui de propósito: é exatamente o estado de
+    /// "banco sendo escrito", e é o que permite semear e testar um exame desde a primeira questão.
+    /// Publicá-lo antes da hora é que passa a falhar — que é o momento certo para falhar.
     /// </remarks>
     [Fact]
-    public void ExamesDefinidos_TemQuestoesSuficientesParaMontarUmaProva()
+    public void ExamesPublicados_TemQuestoesSuficientesParaMontarUmaProva()
     {
         var questoesPorExame = CatalogoDeQuestoesDeSeed.Carregar()
             .GroupBy(a => a.ExameCode, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count), StringComparer.OrdinalIgnoreCase);
 
         var magros = AzurePrepDbSeeder.Exames
+            .Where(e => e.Publicado)
             .Select(e => (e.Code, e.TotalQuestions, Escritas: questoesPorExame.GetValueOrDefault(e.Code)))
             .Where(e => e.Escritas < e.TotalQuestions)
             .Select(e => $"{e.Code}: {e.Escritas} escritas para prova de {e.TotalQuestions}")
             .ToList();
 
         Assert.True(magros.Count == 0, "Exame publicado sem pool suficiente: " + string.Join("; ", magros));
+    }
+
+    /// <summary>
+    /// Exame em construção não pode vazar para o catálogo nem aceitar tentativa.
+    /// </summary>
+    /// <remarks>
+    /// Guarda de sanidade sobre a própria definição: marcar <c>Publicado: true</c> por descuido
+    /// num exame sem banco é o erro que o flag existe para evitar, e ele não quebraria nada — só
+    /// publicaria uma prova de meia dúzia de itens. O teste acima cobre o caso; este documenta o
+    /// pareamento entre os dois estados para quem for adicionar o próximo exame.
+    /// </remarks>
+    [Fact]
+    public void ExamesEmConstrucao_EstaoDeclaradosComoNaoPublicados()
+    {
+        var questoesPorExame = CatalogoDeQuestoesDeSeed.Carregar()
+            .GroupBy(a => a.ExameCode, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count), StringComparer.OrdinalIgnoreCase);
+
+        Assert.All(
+            AzurePrepDbSeeder.Exames,
+            e => Assert.True(
+                e.Publicado == questoesPorExame.GetValueOrDefault(e.Code) >= e.TotalQuestions,
+                $"{e.Code}: Publicado={e.Publicado} mas tem {questoesPorExame.GetValueOrDefault(e.Code)} " +
+                $"questões para uma prova de {e.TotalQuestions}."));
     }
 
     // ----------------------------------------------------------------- escopo de área por exame

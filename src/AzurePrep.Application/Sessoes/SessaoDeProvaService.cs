@@ -44,6 +44,15 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
         var exam = await _examRepository.ObterPorIdAsync(examId, cancellationToken)
                    ?? throw new InvalidOperationException($"Exame {examId} não encontrado.");
 
+        // Some do catálogo NÃO é o mesmo que estar indisponível: o id do exame trafega no
+        // formulário de "Iniciar simulado", então esconder o botão não impede quem já o tem.
+        // Sem esta guarda, um exame em construção entregaria uma prova de meia dúzia de itens.
+        if (!exam.IsPublished)
+        {
+            throw new InvalidOperationException(
+                $"O exame {exam.Code} ainda está em construção e não aceita tentativas.");
+        }
+
         // A composição da prova é decidida agora e gravada com a tentativa: é o que garante que
         // reabrir o simulado mostre exatamente os mesmos itens, e o que permite ao próximo
         // sorteio saber o que esta pessoa já viu.

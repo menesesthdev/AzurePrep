@@ -17,6 +17,11 @@ public sealed class ExameConfiguration : IEntityTypeConfiguration<Exame>
         builder.Property(e => e.PassingScorePercent).IsRequired();
         builder.Property(e => e.TotalQuestions).IsRequired();
 
+        // Default true: a coluna nasce valendo "publicado", então a migration não tranca o AZ-900
+        // que já está no ar. Mesmo raciocínio do backfill de EmailConfirmedAt — coluna nova cujo
+        // valor padrão bloqueia acesso é uma indisponibilidade silenciosa em produção.
+        builder.Property(e => e.IsPublished).IsRequired().HasDefaultValue(true);
+
         builder.HasIndex(e => e.Code).IsUnique();
 
         builder.HasMany(e => e.SkillAreas)

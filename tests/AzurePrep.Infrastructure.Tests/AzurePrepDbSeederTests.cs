@@ -209,6 +209,98 @@ public sealed class AzurePrepDbSeederTests : IDisposable
         Assert.Equal(areaIds, await leitura.SkillAreas.Select(a => a.Id).OrderBy(id => id).ToListAsync());
     }
 
+    // ------------------------------------------------------------------- exame em construção
+
+    /// <summary>
+    /// O flag de publicação da definição chega ao banco como está declarado.
+    /// </summary>
+    [Fact]
+    public async Task Semear_GravaOEstadoDePublicacaoDeCadaExame()
+    {
+        await using (var ctx = CreateContext())
+        {
+            await AzurePrepDbSeeder.SemearAsync(ctx);
+        }
+
+        await using var leitura = CreateContext();
+        var porCodigo = await leitura.Exams.ToDictionaryAsync(e => e.Code, e => e.IsPublished);
+
+        Assert.All(AzurePrepDbSeeder.Exames, d => Assert.Equal(d.Publicado, porCodigo[d.Code]));
+    }
+
+    /// <summary>
+    /// Exame em construção é semeado normalmente — é isso que permite escrever o banco aos poucos.
+    /// </summary>
+    /// <remarks>
+    /// O par que importa: ele PRECISA existir no banco (senão os lotes com aquele
+    /// <c>exameCode</c> não teriam onde entrar, e a validação os rejeitaria como órfãos) e
+    /// PRECISA ficar invisível no catálogo. Testar só um dos dois lados deixaria o outro livre
+    /// para regredir.
+    /// </remarks>
+    /// <remarks>
+    /// Escrito como invariante sobre a lista, e não sobre "o exame em construção": quando o AZ-104
+    /// for publicado a asserção passa a valer sobre um conjunto vazio, o que é o resultado certo —
+    /// em vez de o teste começar a falhar por ter ficado sem sujeito.
+    /// </remarks>
+    [Fact]
+    public async Task Semear_ExamesEmConstrucao_ExistemNoBancoComSuasAreas()
+    {
+        await using (var ctx = CreateContext())
+        {
+            await AzurePrepDbSeeder.SemearAsync(ctx);
+        }
+
+        await using var leitura = CreateContext();
+        var noBanco = await leitura.Exams.Include(e => e.SkillAreas).ToListAsync();
+
+        Assert.All(AzurePrepDbSeeder.Exames.Where(d => !d.Publicado), definicao =>
+        {
+            var exame = Assert.Single(noBanco, e => e.Code == definicao.Code);
+            Assert.False(exame.IsPublished);
+            Assert.Equal(definicao.Areas.Count, exame.SkillAreas.Count);
+        });
+    }
+
+    /// <summary>
+    /// Publicar e despublicar segue a definição, nos dois sentidos.
+    /// </summary>
+    /// <remarks>
+    /// O sentido que importa é o de VOLTA: se o seed só soubesse publicar, um exame que precisasse
+    /// sair do ar às pressas (gabarito errado descoberto em produção) exigiria UPDATE manual no
+    /// banco — exatamente o que <c>AtualizarDefinicao</c> existe para evitar.
+    /// </remarks>
+    [Fact]
+    public async Task Semear_EstadoDePublicacaoDivergente_RealinhaNosDoisSentidos()
+    {
+        var definicao = AzurePrepDbSeeder.Exames.First(e => e.Publicado);
+
+        await using (var ctx = CreateContext())
+        {
+            await AzurePrepDbSeeder.SemearAsync(ctx);
+        }
+
+        // Alguém tirou do ar direto no banco; o seed seguinte tem de repor o estado declarado.
+        await using (var ctx = CreateContext())
+        {
+            var exame = await ctx.Exams.SingleAsync(e => e.Code == definicao.Code);
+            exame.AtualizarDefinicao(
+                definicao.Name,
+                definicao.TimeLimitMinutes,
+                definicao.PassingScorePercent,
+                definicao.TotalQuestions,
+                isPublished: false);
+            await ctx.SaveChangesAsync();
+        }
+
+        await using (var ctx = CreateContext())
+        {
+            await AzurePrepDbSeeder.SemearAsync(ctx);
+        }
+
+        await using var leitura = CreateContext();
+        Assert.True((await leitura.Exams.SingleAsync(e => e.Code == definicao.Code)).IsPublished);
+    }
+
     // --------------------------------------------------------------------- catálogo inválido
 
     /// <summary>

@@ -11,13 +11,19 @@ namespace AzurePrep.Infrastructure.Persistence.Seed;
 /// <c>CodigoDoExame</c> e um array de áreas soltos, cada exame novo pedia uma segunda cópia do
 /// mesmo código — e a segunda cópia é onde os dois caminhos começam a divergir sem ninguém notar.
 /// </remarks>
+/// <param name="Publicado">
+/// <c>false</c> enquanto o banco de questões está sendo escrito. O exame é semeado e recebe
+/// questões normalmente — o que permite exercitá-lo pelo seed e pelos testes desde a primeira
+/// questão —, mas fica fora do catálogo e recusa novas tentativas até virar <c>true</c>.
+/// </param>
 public sealed record DefinicaoDeExame(
     string Code,
     string Name,
     int TimeLimitMinutes,
     int PassingScorePercent,
     int TotalQuestions,
-    IReadOnlyList<AreaDeExame> Areas);
+    IReadOnlyList<AreaDeExame> Areas,
+    bool Publicado = true);
 
 /// <summary>Um domínio do Skills Measured: slug estável, nome de UI e peso em pontos percentuais.</summary>
 /// <param name="Key">

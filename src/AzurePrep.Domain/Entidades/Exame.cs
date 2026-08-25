@@ -22,7 +22,8 @@ public class Exame : Entity
         int timeLimitMinutes,
         int passingScorePercent,
         int totalQuestions,
-        Guid? id = null)
+        Guid? id = null,
+        bool isPublished = true)
         : base(id ?? Guid.NewGuid())
     {
         Code = Guard.NotNullOrWhiteSpace(code, nameof(code));
@@ -30,6 +31,7 @@ public class Exame : Entity
         TimeLimitMinutes = Guard.Positive(timeLimitMinutes, nameof(timeLimitMinutes));
         PassingScorePercent = Guard.InRange(passingScorePercent, 0, 100, nameof(passingScorePercent));
         TotalQuestions = Guard.Positive(totalQuestions, nameof(totalQuestions));
+        IsPublished = isPublished;
     }
 
     /// <summary>Código oficial do exame (ex.: "AZ-900").</summary>
@@ -44,6 +46,24 @@ public class Exame : Entity
 
     /// <summary>Quantidade de questões que compõem uma tentativa deste exame.</summary>
     public int TotalQuestions { get; private set; }
+
+    /// <summary>
+    /// Se o exame está disponível para os candidatos. Exame <b>em construção</b> existe no banco,
+    /// recebe questões e pode ser testado, mas não aparece no catálogo nem aceita nova tentativa.
+    /// </summary>
+    /// <remarks>
+    /// Existe porque escrever um banco de questões é trabalho de semanas e os arquivos de seed
+    /// exigem um <c>exameCode</c> que corresponda a um exame declarado — sem este estado
+    /// intermediário, um exame só poderia entrar no sistema já pronto, e as centenas de questões
+    /// teriam de ser escritas sem nunca serem exercitadas pelo seed nem pelos testes.
+    ///
+    /// ⚠️ Não é cosmético: o sorteio entrega uma prova mais curta quando o pool não cobre
+    /// <see cref="TotalQuestions"/> (<c>Math.Min</c>), sem erro nenhum. Deixar um exame incompleto
+    /// visível publicaria uma prova curta e sempre parecida — e fidelidade à prova real é o
+    /// produto. Por isso o bloqueio é imposto também ao INICIAR a tentativa, não só na listagem:
+    /// esconder o botão não impede quem tem o id.
+    /// </remarks>
+    public bool IsPublished { get; private set; } = true;
 
     public IReadOnlyCollection<AreaDeHabilidade> SkillAreas => _skillAreas;
 
@@ -60,12 +80,18 @@ public class Exame : Entity
     /// <c>SorteioDeQuestoes</c> teve de fazer para corrigir o <see cref="TotalQuestions"/> do
     /// AZ-900. Com quatro exames em calibração, isso deixaria de ser eventual e viraria rotina.
     /// </remarks>
-    public void AtualizarDefinicao(string name, int timeLimitMinutes, int passingScorePercent, int totalQuestions)
+    public void AtualizarDefinicao(
+        string name,
+        int timeLimitMinutes,
+        int passingScorePercent,
+        int totalQuestions,
+        bool isPublished = true)
     {
         Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
         TimeLimitMinutes = Guard.Positive(timeLimitMinutes, nameof(timeLimitMinutes));
         PassingScorePercent = Guard.InRange(passingScorePercent, 0, 100, nameof(passingScorePercent));
         TotalQuestions = Guard.Positive(totalQuestions, nameof(totalQuestions));
+        IsPublished = isPublished;
     }
 
     public AreaDeHabilidade AdicionarAreaDeHabilidade(string key, string name, decimal weightPercent, Guid? id = null)
