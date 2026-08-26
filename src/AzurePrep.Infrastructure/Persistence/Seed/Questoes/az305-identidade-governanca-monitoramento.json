@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-305",
+  "area": "identidade-governanca-monitoramento",
+  "questoes": [
+    {
+      "id": "az305-idgov-autenticacao-hibrida-01",
+      "topico": "Autenticação híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso tem um Active Directory local com doze mil contas e vai adotar o Microsoft 365. A política de segurança da empresa proíbe que qualquer forma de hash de senha seja armazenada fora do datacenter próprio, e a diretoria pediu a menor quantidade possível de servidores adicionais. A validação da senha precisa acontecer contra o controlador de domínio local. Qual método de autenticação recomendar?",
+      "explicacao": "A autenticação pass-through atende às duas restrições ao mesmo tempo: a validação da senha é encaminhada a um agente leve instalado na rede local, que a verifica contra o controlador de domínio, e nenhum hash é sincronizado para a nuvem. Ela exige apenas os agentes, não uma infraestrutura de federação com servidores de front-end, balanceador e certificados — o que atende ao pedido de poucos servidores adicionais. A sincronização de hash de senha é o método recomendado por padrão pela simplicidade e pela resiliência, e seria a resposta se a primeira restrição não existisse: ela armazena na nuvem um hash do hash, o que a política declarada proíbe. A federação com AD FS também mantém a validação local, mas é justamente a opção mais pesada em servidores e operação, contrariando a segunda restrição — ela se justifica quando há exigência de cartão inteligente ou provedor de autenticação de terceiros. E contas somente em nuvem descartariam o diretório existente e as doze mil contas.",
+      "opcoes": [
+        { "texto": "Autenticação pass-through, com agentes na rede local.", "correta": true },
+        { "texto": "Sincronização de hash de senha com o Microsoft Entra ID.", "correta": false },
+        { "texto": "Federação com AD FS, com farm de servidores e proxy de aplicativo web.", "correta": false },
+        { "texto": "Contas criadas diretamente no Microsoft Entra ID, sem vínculo com o diretório local.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-pim-acesso-permanente-02",
+      "topico": "Governança de identidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma auditoria apontou que catorze pessoas têm a função Proprietário permanentemente atribuída na assinatura de produção. A exigência é que ninguém mantenha privilégio administrativo em caráter permanente, que a elevação seja temporária e justificada, e que cada elevação fique registrada para auditoria. As pessoas continuam precisando executar tarefas administrativas eventualmente. O que recomendar?",
+      "explicacao": "O Privileged Identity Management é a resposta: as pessoas passam a ser elegíveis à função em vez de atribuídas, ativam por tempo limitado quando precisam, com justificativa e, se configurado, aprovação — e cada ativação fica registrada. Isso elimina o privilégio permanente sem tirar a capacidade de trabalhar, que é exatamente o par de requisitos do enunciado. Rebaixar todos para Colaborador reduz o alcance, mas mantém privilégio permanente e ainda quebra as tarefas que exigem Proprietário. Exigir autenticação multifator para operações administrativas é uma camada útil e complementar, mas não muda o fato de o privilégio ser contínuo — quem for comprometido depois do fator continua Proprietário o tempo todo. E revisões de acesso periódicas são parte de uma boa governança e aparecem naturalmente ao lado do PIM, porém sozinhas apenas confirmam periodicamente quem tem acesso permanente, sem torná-lo temporário.",
+      "opcoes": [
+        { "texto": "Microsoft Entra Privileged Identity Management, com atribuições elegíveis e ativação por tempo limitado.", "correta": true },
+        { "texto": "Rebaixar as catorze pessoas para a função Colaborador na assinatura.", "correta": false },
+        { "texto": "Exigir autenticação multifator para toda operação administrativa na assinatura.", "correta": false },
+        { "texto": "Configurar revisões de acesso trimestrais sobre as atribuições de Proprietário.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-acesso-condicional-risco-03",
+      "topico": "Autorização e acesso condicional",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso quer que o acesso a aplicativos corporativos exija fator adicional apenas quando o sinal de risco da entrada for elevado — por exemplo, endereço associado a atividade maliciosa ou viagem impossível — e que o acesso seja bloqueado quando a conta estiver marcada como comprometida. Fora desses casos, a experiência deve permanecer sem atrito. Qual solução atende?",
+      "explicacao": "Políticas de acesso condicional com condição de risco de entrada e de risco de usuário atendem: o risco é calculado pelo Identity Protection e usado como condição, de modo que o fator adicional só aparece quando o sinal justifica e o bloqueio ocorre quando a conta é avaliada como comprometida. É esse encadeamento entre sinal e política que entrega a experiência sem atrito no caso normal. Autenticação multifator por usuário aplica o fator sempre, para todo mundo, sem noção de risco — é o modelo que o cenário quer superar. Acesso condicional exigindo fator para todos os aplicativos também ignora o sinal e produz atrito permanente. E exigir dispositivo em conformidade é um controle de acesso condicional legítimo e forte, mas responde à pergunta \"de onde\" e não \"quão arriscada é esta entrada\" — não bloqueia a conta comprometida que se apresenta de um dispositivo conforme.",
+      "opcoes": [
+        { "texto": "Acesso condicional com condições de risco de entrada e de risco de usuário, alimentadas pelo Identity Protection.", "correta": true },
+        { "texto": "Autenticação multifator habilitada por usuário para todos os colaboradores.", "correta": false },
+        { "texto": "Acesso condicional exigindo autenticação multifator em todos os aplicativos corporativos.", "correta": false },
+        { "texto": "Acesso condicional exigindo dispositivo marcado como em conformidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-revisao-de-acesso-04",
+      "topico": "Governança de identidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso tem cerca de quatrocentos convidados externos com acesso a grupos e aplicativos, acumulados ao longo de três anos de projetos com parceiros. Muitos projetos terminaram e ninguém sabe quem ainda precisa de acesso. A exigência é que a permanência de cada convidado passe a ser confirmada periodicamente pelo responsável da área, com remoção automática de quem não for confirmado. O que recomendar?",
+      "explicacao": "As revisões de acesso do Microsoft Entra são o mecanismo: elas criam ciclos recorrentes em que um revisor designado — o dono do grupo, o gestor ou o próprio usuário — confirma ou nega a permanência, e a configuração pode remover automaticamente quem não for aprovado ou quem não responder. É exatamente o par \"confirmação periódica pelo responsável\" mais \"remoção automática\" do enunciado. O Privileged Identity Management resolve elevação temporária de privilégio, que é outro problema — ele não recertifica pertencimento a grupo de projeto. Expirar convites em noventa dias por política atacaria o acúmulo futuro de forma cega, derrubando também quem ainda precisa, e não resolve os quatrocentos que já existem. E um relatório mensal de convidados inativos entrega informação, mas transfere a decisão e a execução para alguém agir manualmente, que é justamente o que falhou nos três anos anteriores.",
+      "opcoes": [
+        { "texto": "Revisões de acesso recorrentes, com o responsável como revisor e remoção automática de quem não for confirmado.", "correta": true },
+        { "texto": "Privileged Identity Management aplicado às contas de convidado.", "correta": false },
+        { "texto": "Política que expira automaticamente todo convite de convidado em noventa dias.", "correta": false },
+        { "texto": "Relatório mensal de convidados sem atividade, enviado aos responsáveis de área.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-managed-hsm-05",
+      "topico": "Gestão de segredos e chaves",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma exigência regulatória do setor financeiro determina que as chaves criptográficas da Contoso fiquem em módulo de segurança de hardware de locatário único, com controle administrativo integral do cliente e sem que o provedor tenha acesso ao material. O volume de operações criptográficas é alto e constante. Qual serviço recomendar?",
+      "explicacao": "O Azure Managed HSM é o único da lista que entrega módulo de hardware de locatário único, com domínio de segurança sob controle do cliente e modelo em que o operador do serviço não tem acesso ao material das chaves — que são exatamente os três termos da exigência. Ele também sustenta volume alto de operações por ser um pool dedicado. O Key Vault no nível Premium respalda chaves em hardware, mas o serviço é multilocatário e o controle administrativo não é integral, então não satisfaz a exigência de locatário único. O Key Vault Standard protege as chaves por software e é ainda mais distante do requisito. E o Azure App Configuration não é cofre de chaves: guarda configuração de aplicação e, por recomendação do próprio produto, deve referenciar um cofre para material sensível em vez de armazená-lo.",
+      "opcoes": [
+        { "texto": "Azure Key Vault Managed HSM, com pool dedicado de locatário único.", "correta": true },
+        { "texto": "Azure Key Vault no nível Premium, com chaves respaldadas por hardware.", "correta": false },
+        { "texto": "Azure Key Vault no nível Standard, com chaves protegidas por software.", "correta": false },
+        { "texto": "Azure App Configuration com valores marcados como sensíveis.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-workspace-residencia-06",
+      "topico": "Desenho de coleta de logs",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso opera em Brasil e Alemanha. A área jurídica determinou que os registros gerados por recursos alemães não podem sair da União Europeia, e a equipe de operações quer consultar tudo de um lugar só, sem duplicar dados. Qual desenho de workspaces do Log Analytics atende às duas necessidades?",
+      "explicacao": "O desenho correto é um workspace por região — um em região europeia e outro em região brasileira — porque a residência dos dados de um workspace é determinada pela região em que ele foi criado; consultar de um lugar só é resolvido por consultas entre workspaces, que alcançam vários workspaces em uma única consulta sem copiar nada. As duas necessidades são atendidas sem conflito, e a chave é perceber que \"consultar junto\" não exige \"armazenar junto\". Um workspace único no Brasil viola a determinação jurídica, porque os dados alemães passariam a residir fora da União Europeia. Um workspace único na Alemanha atende à residência dos dados alemães e é desnecessário para os brasileiros, além de submeter todo o restante a uma regra que só vale para parte do ambiente. E replicar continuamente os dados alemães para um workspace brasileiro é a pior das opções: duplica custo e leva os dados exatamente para onde não podem estar.",
+      "opcoes": [
+        { "texto": "Um workspace por região, com consultas entre workspaces para a visão unificada.", "correta": true },
+        { "texto": "Um workspace único em região brasileira, recebendo os registros das duas operações.", "correta": false },
+        { "texto": "Um workspace único em região europeia, recebendo os registros das duas operações.", "correta": false },
+        { "texto": "Um workspace por região, com replicação contínua dos dados alemães para o brasileiro.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-roteamento-siem-07",
+      "topico": "Roteamento de logs",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O centro de operações de segurança da Contoso usa uma plataforma de terceiros que consome eventos por streaming, em tempo quase real, a partir de um endpoint compatível com Kafka. Os registros de atividade e de recursos do Azure precisam chegar lá continuamente, sem processo de exportação em lote e sem que alguém busque arquivos periodicamente. Qual destino de configuração de diagnóstico recomendar?",
+      "explicacao": "O Event Hubs é o destino: ele é o ponto de saída de streaming do Azure Monitor, expõe um endpoint compatível com o protocolo do Kafka e é justamente o caminho previsto para entregar registros a ferramentas de terceiros em tempo quase real. É a combinação \"streaming\" mais \"plataforma externa\" que decide. Uma conta de armazenamento é o destino certo para retenção longa e barata, mas produz arquivos que alguém precisa buscar — exatamente o processo em lote que o enunciado descarta. Um workspace do Log Analytics é o destino para consulta e análise dentro do Azure, e alimentar uma ferramenta externa a partir dele exigiria construir uma exportação, invertendo o desenho. E o Microsoft Sentinel é uma excelente recomendação quando a organização aceita trocar de plataforma de operações de segurança, mas o enunciado declara que a plataforma de terceiros permanece — recomendá-lo seria responder a uma pergunta que não foi feita.",
+      "opcoes": [
+        { "texto": "Azure Event Hubs, consumido pela plataforma externa por streaming.", "correta": true },
+        { "texto": "Conta de armazenamento, com a plataforma externa lendo os arquivos periodicamente.", "correta": false },
+        { "texto": "Workspace do Log Analytics, com exportação agendada para a plataforma externa.", "correta": false },
+        { "texto": "Microsoft Sentinel, substituindo a plataforma de terceiros do centro de operações.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-retencao-longa-08",
+      "topico": "Roteamento de logs",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma norma exige guardar por sete anos os registros de auditoria de uma aplicação. Nos primeiros trinta dias eles são consultados diariamente pela operação; depois disso, a expectativa é de acesso raro, apenas em investigação ou auditoria, e o custo de armazenamento passa a ser a preocupação principal. Qual desenho de retenção recomendar?",
+      "explicacao": "O desenho adequado combina os dois eixos: retenção interativa curta no workspace do Log Analytics, cobrindo a janela em que a consulta é diária e o custo por gigabyte se justifica pela facilidade de análise, e arquivamento do restante em camada fria de conta de armazenamento, onde sete anos custam uma fração e o acesso raro é aceitável. É a resposta que trata separadamente as duas fases de vida do dado, que é o que o enunciado descreve. Manter sete anos de retenção interativa no workspace funciona e é o desenho mais caro possível, ignorando a preocupação declarada com custo. Trinta dias apenas no workspace descumpre a norma, porque os dados simplesmente deixam de existir. E arquivar tudo direto em camada fria desde o primeiro dia atende à norma e destrói a operação diária dos primeiros trinta dias, que passaria a depender de reidratação.",
+      "opcoes": [
+        { "texto": "Retenção interativa curta no workspace e arquivamento do restante em camada fria de conta de armazenamento.", "correta": true },
+        { "texto": "Retenção de sete anos configurada diretamente no workspace do Log Analytics.", "correta": false },
+        { "texto": "Retenção de trinta dias no workspace, que é o período em que os dados são realmente usados.", "correta": false },
+        { "texto": "Envio direto para conta de armazenamento em camada Archive desde o primeiro dia.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-hierarquia-grupos-09",
+      "topico": "Estrutura de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai organizar quarenta assinaturas em grupos de gerenciamento. Uma proposta espelha o organograma da empresa, com um grupo por diretoria e subgrupos por gerência. A arquiteta observa que as diretorias são reorganizadas quase todo ano, enquanto os requisitos de conformidade — produção regulada, produção comum, não produção — são estáveis. Qual princípio deve orientar a hierarquia?",
+      "explicacao": "A hierarquia deve refletir os requisitos de governança que serão herdados, e não o organograma. O que desce por ela são políticas e atribuições de função, então o critério útil de agrupamento é \"quais assinaturas devem receber as mesmas regras\" — e o enunciado já entrega essa resposta ao dizer que produção regulada, produção comum e não produção são estáveis, enquanto as diretorias mudam todo ano. Uma hierarquia por organograma obriga a remontar a árvore a cada reorganização, com risco de assinatura mudar de conjunto de políticas por um motivo puramente administrativo. Agrupar por região geográfica só faz sentido se as regras variarem por região, o que não é o caso descrito. E uma hierarquia plana funciona tecnicamente, mas devolve o problema que os grupos existem para resolver, porque cada política teria de ser atribuída quarenta vezes. Para custo e responsabilidade, a ferramenta certa são marcações e escopos de cobrança, que mudam sem reorganizar a árvore.",
+      "opcoes": [
+        { "texto": "Agrupar pelos requisitos de governança herdados, que são estáveis, e tratar organograma por marcações.", "correta": true },
+        { "texto": "Espelhar o organograma, porque a responsabilidade pelo custo segue a estrutura da empresa.", "correta": false },
+        { "texto": "Agrupar por região geográfica das assinaturas, garantindo aderência à residência de dados.", "correta": false },
+        { "texto": "Manter todas as assinaturas no grupo raiz, evitando complexidade desnecessária.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-identidade-consumidor-10",
+      "topico": "Gestão de identidades",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai lançar um aplicativo voltado ao consumidor final, com expectativa de centenas de milhares de cadastros. Os usuários devem poder criar conta própria, entrar com contas Google e Facebook, e a jornada de cadastro precisa ter marca personalizada. Esses usuários não são colaboradores e não devem aparecer no diretório corporativo. Qual solução de identidade recomendar?",
+      "explicacao": "A recomendação é uma solução de identidade para clientes externos, com locatário separado do corporativo: ela oferece autocadastro, federação com provedores sociais como Google e Facebook, e jornadas com marca personalizada, mantendo os consumidores fora do diretório dos colaboradores — que é o requisito de separação declarado no fim do enunciado. A colaboração B2B é desenhada para parceiros de negócio convidados individualmente, e não para autocadastro em massa de consumidores, além de colocá-los no mesmo locatário corporativo. Criar contas de usuário no diretório corporativo mistura consumidores com colaboradores, com consequências de licenciamento, de governança e de superfície de ataque. E autenticação própria dentro da aplicação joga para a equipe a responsabilidade de guardar senha, aplicar fator adicional e federar provedores sociais, que é justamente o trabalho que um serviço de identidade evita.",
+      "opcoes": [
+        { "texto": "Um locatário de identidade para clientes externos, separado do corporativo, com federação social e marca personalizada.", "correta": true },
+        { "texto": "Colaboração B2B no locatário corporativo, convidando cada consumidor como convidado.", "correta": false },
+        { "texto": "Criação de contas de usuário no próprio diretório corporativo, com licenças reduzidas.", "correta": false },
+        { "texto": "Autenticação implementada dentro da aplicação, com banco de credenciais próprio.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-keyvault-rbac-11",
+      "topico": "Gestão de segredos e chaves",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso terá cerca de sessenta cofres de chaves distribuídos por várias assinaturas. A exigência é conceder permissões de forma consistente, herdando de escopos superiores quando fizer sentido, com o mesmo modelo de auditoria usado no restante do Azure e possibilidade de atribuição em nível de segredo individual. Qual modelo de permissão do Key Vault recomendar?",
+      "explicacao": "O modelo de RBAC do Azure é o adequado: as permissões passam a ser atribuições de função como as de qualquer outro recurso, o que traz herança de grupo de gerenciamento, assinatura e grupo de recursos, auditoria unificada no log de atividades e a possibilidade de atribuir no escopo de um segredo individual. Com sessenta cofres, essa consistência é o ponto — ela é o que evita sessenta configurações divergentes. As políticas de acesso do cofre são o modelo mais antigo e funcionam, mas são definidas cofre a cofre, não herdam de escopos superiores e usam um vocabulário de permissões próprio, separado do resto do Azure. Endpoints privados resolvem caminho de rede e não têm relação com o modelo de permissão. E firewall do cofre restringe origem, que também é outro eixo — nenhum dos dois responde a como as permissões são concedidas.",
+      "opcoes": [
+        { "texto": "Modelo de permissão baseado no RBAC do Azure, com atribuições herdadas dos escopos superiores.", "correta": true },
+        { "texto": "Políticas de acesso do cofre, definidas individualmente em cada um dos sessenta cofres.", "correta": false },
+        { "texto": "Endpoints privados em cada cofre, restringindo o acesso à rede virtual correspondente.", "correta": false },
+        { "texto": "Firewall do cofre liberando apenas as sub-redes das aplicações que o consomem.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-rastreamento-distribuido-12",
+      "topico": "Desenho de monitoramento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma requisição de usuário atravessa sete serviços antes de responder, e a equipe leva horas para descobrir qual deles causou a lentidão de um pedido específico. A exigência é reconstruir o caminho completo de uma requisição individual, com o tempo gasto em cada salto e a dependência externa envolvida. Qual recomendação atende?",
+      "explicacao": "O Application Insights com rastreamento distribuído é a recomendação: ele correlaciona a telemetria dos sete serviços por um identificador de operação propagado entre eles, permitindo reconstruir a linha do tempo de uma requisição individual, com a duração de cada salto e as chamadas a dependências externas — que é literalmente o que o enunciado pede. O mapa de aplicação que ele desenha é o subproduto mais visível dessa correlação. Métricas de plataforma de cada serviço mostram agregados e revelam que algo está lento, sem permitir descer a um pedido específico. Um workspace centralizado com consultas por serviço melhora a investigação, mas sem correlação de operação a reconstrução do caminho continua sendo trabalho manual de cruzar horários. E alertas por limite de latência avisam que existe um problema, o que a equipe já sabe — o que falta é localizar onde.",
+      "opcoes": [
+        { "texto": "Application Insights com rastreamento distribuído, correlacionando a telemetria dos sete serviços.", "correta": true },
+        { "texto": "Métricas de plataforma de cada serviço, consolidadas em um painel único.", "correta": false },
+        { "texto": "Workspace centralizado do Log Analytics, com uma consulta por serviço.", "correta": false },
+        { "texto": "Regras de alerta por limite de latência em cada um dos sete serviços.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-assinatura-limite-13",
+      "topico": "Estrutura de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma plataforma cresceu e passou a esbarrar em limites de recursos por assinatura, e a área financeira também precisa que o custo de cada unidade de negócio venha separado na fatura, sem depender de rateio calculado depois. As unidades compartilham as mesmas regras de conformidade. Qual estrutura recomendar?",
+      "explicacao": "A recomendação é criar assinaturas separadas por unidade de negócio, sob o mesmo grupo de gerenciamento. A assinatura é simultaneamente o limite de escala e o limite de cobrança do Azure, então dividi-la resolve os dois problemas declarados de uma vez; e mantê-las sob o mesmo grupo de gerenciamento preserva a herança das políticas comuns, atendendo ao fato de que as unidades compartilham as regras de conformidade. Separar apenas por grupos de recursos organiza e permite relatório por escopo, mas não move o limite de recursos, que é por assinatura — o problema de escala continuaria. Marcações por unidade de negócio resolvem o rateio no relatório e igualmente não afetam limites; além disso, o enunciado pede separação na própria fatura, e não cálculo posterior. E um grupo de gerenciamento por unidade organiza a governança sem criar assinatura nenhuma, portanto não toca em nenhum dos dois requisitos.",
+      "opcoes": [
+        { "texto": "Uma assinatura por unidade de negócio, todas sob o mesmo grupo de gerenciamento.", "correta": true },
+        { "texto": "Um grupo de recursos por unidade de negócio, dentro da assinatura atual.", "correta": false },
+        { "texto": "Manter a assinatura atual e separar o custo por marcações de unidade de negócio.", "correta": false },
+        { "texto": "Um grupo de gerenciamento por unidade de negócio, mantendo a assinatura atual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-multi-privilegio-14",
+      "topico": "Governança de identidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso quer reduzir o risco associado a identidades privilegiadas em uma assinatura crítica. O objetivo declarado é que o privilégio não exista de forma permanente e que a permanência de quem ainda é elegível seja reavaliada periodicamente por um responsável. Quais duas medidas atacam diretamente esses dois objetivos? Selecione duas.",
+      "explicacao": "As duas medidas são atribuições elegíveis com ativação por tempo limitado no Privileged Identity Management, que remove o privilégio permanente ao transformá-lo em algo que se ativa quando necessário, e revisões de acesso recorrentes sobre quem é elegível, que reavaliam a permanência com um responsável designado. Elas cobrem exatamente os dois objetivos, um cada. Exigir autenticação multifator na ativação é uma prática recomendada e costuma acompanhar o PIM, mas fortalece a prova de identidade sem alterar a permanência do privilégio, que é o que se quer atacar. Substituir Proprietário por Colaborador reduz o alcance e mantém o privilégio permanente. E restringir o acesso administrativo a endereços da rede corporativa é um controle de origem, útil e ortogonal: alguém dentro da rede continua com privilégio permanente.",
+      "opcoes": [
+        { "texto": "Atribuições elegíveis com ativação por tempo limitado no Privileged Identity Management.", "correta": true },
+        { "texto": "Revisões de acesso recorrentes sobre quem é elegível às funções privilegiadas.", "correta": true },
+        { "texto": "Exigir autenticação multifator no momento da ativação da função.", "correta": false },
+        { "texto": "Substituir as atribuições de Proprietário por Colaborador em toda a assinatura.", "correta": false },
+        { "texto": "Restringir o acesso administrativo aos endereços da rede corporativa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-multi-keyvault-perda-15",
+      "topico": "Gestão de segredos e chaves",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um cofre de chaves guarda a chave que criptografa os discos de um ambiente de produção. A arquiteta precisa garantir que nem uma exclusão acidental nem uma ação maliciosa de alguém com permissão administrativa possam destruir definitivamente essa chave. Quais duas configurações do cofre atendem a esse objetivo? Selecione duas.",
+      "explicacao": "A exclusão temporária faz com que o objeto excluído entre em estado recuperável por um período de retenção, em vez de sumir; a proteção contra limpeza impede que alguém apague permanentemente durante esse período, inclusive quem tem permissão administrativa — e é essa segunda configuração que cobre a parte maliciosa do requisito, porque sem ela um administrador poderia excluir e limpar em seguida. As duas juntas são o par que o cenário exige. Restringir o acesso ao cofre por endpoint privado protege o caminho de rede e não impede exclusão feita por quem já tem permissão. O firewall do cofre tem a mesma limitação. E replicar a chave para um cofre em outra região não é uma operação disponível para chave gerada no cofre, e mesmo que fosse, resolveria indisponibilidade regional e não exclusão indevida.",
+      "opcoes": [
+        { "texto": "Exclusão temporária habilitada, com período de retenção definido.", "correta": true },
+        { "texto": "Proteção contra limpeza (purge protection) habilitada.", "correta": true },
+        { "texto": "Endpoint privado restringindo o acesso ao cofre à rede virtual.", "correta": false },
+        { "texto": "Firewall do cofre liberando apenas as sub-redes das aplicações.", "correta": false },
+        { "texto": "Replicação da chave para um cofre em outra região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-multi-conformidade-16",
+      "topico": "Gestão de conformidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso precisa demonstrar aderência a um padrão regulatório em quarenta assinaturas, tanto impedindo configurações não conformes daqui em diante quanto medindo continuamente o estado atual do parque, com um painel para a auditoria. Quais duas capacidades atendem, cada uma a uma parte do requisito? Selecione duas.",
+      "explicacao": "Uma iniciativa do Azure Policy atribuída no grupo de gerenciamento raiz das quarenta assinaturas atende à parte de impedir e medir: os efeitos Deny barram criação não conforme e a avaliação contínua produz o percentual de conformidade por assinatura. O painel de conformidade regulatória do Defender for Cloud atende à parte de demonstrar para a auditoria: ele mapeia o estado do ambiente contra padrões regulatórios reconhecidos, que é a linguagem que o auditor espera. As duas se complementam em vez de competir. Bloqueios de recurso impedem exclusão e alteração, sem qualquer noção de conformidade a um padrão. Marcações organizam e permitem rateio, mas não avaliam configuração. E revisões de acesso tratam de quem tem permissão, que é governança de identidade e não conformidade de configuração do parque.",
+      "opcoes": [
+        { "texto": "Iniciativa do Azure Policy atribuída no grupo de gerenciamento que contém as assinaturas.", "correta": true },
+        { "texto": "Painel de conformidade regulatória do Microsoft Defender for Cloud.", "correta": true },
+        { "texto": "Bloqueios de recurso do tipo Não Pode Excluir em todos os grupos de recursos.", "correta": false },
+        { "texto": "Estratégia de marcações obrigatórias por assinatura e centro de custo.", "correta": false },
+        { "texto": "Revisões de acesso trimestrais sobre as atribuições de função das assinaturas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-idgov-simnao-residencia-17",
+      "topico": "Desenho de coleta de logs",
+      "tipo": "SimNao",
+      "enunciado": "Os recursos da operação alemã da Contoso estão sujeitos a uma exigência de que seus registros não deixem a União Europeia. Um engenheiro propôs enviar as configurações de diagnóstico desses recursos para o workspace centralizado do Log Analytics, que fica em uma região dos Estados Unidos, argumentando que o dado continua sendo da empresa alemã. Avalie a afirmação: essa configuração atende à exigência de residência de dados.",
+      "explicacao": "A afirmação é falsa. A residência dos dados de um workspace é determinada pela região em que o workspace foi criado, e não pela origem dos recursos que enviam os registros: ao apontar recursos alemães para um workspace nos Estados Unidos, os dados passam a residir lá, o que é exatamente o que a exigência proíbe. A titularidade do dado não altera onde ele está armazenado. O desenho que atende às duas necessidades é um workspace por região, com consultas entre workspaces para a visão unificada — assim \"consultar junto\" deixa de exigir \"armazenar junto\", que é a confusão na raiz da proposta. Vale notar que esse tipo de decisão é difícil de reverter depois: não existe mover um workspace de região, então corrigir significa criar outro e perder o histórico já ingerido ou mantê-lo em dois lugares.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-idgov-simnao-pim-condicional-18",
+      "topico": "Governança de identidade",
+      "tipo": "SimNao",
+      "enunciado": "Uma proposta de arquitetura elimina o Privileged Identity Management do escopo, argumentando que políticas de acesso condicional exigindo autenticação multifator e dispositivo em conformidade para toda operação administrativa já resolvem o risco de identidades privilegiadas. Avalie a afirmação: o acesso condicional torna o Privileged Identity Management desnecessário nesse cenário.",
+      "explicacao": "A afirmação é falsa. Acesso condicional e Privileged Identity Management resolvem problemas diferentes e não se substituem. O acesso condicional decide se uma entrada é permitida, com base em quem, de onde, de qual dispositivo e sob qual risco — ele fortalece a prova de identidade no momento do acesso. O PIM decide por quanto tempo o privilégio existe, transformando atribuição permanente em elegibilidade ativável, com justificativa, prazo, aprovação opcional e registro. Com apenas acesso condicional, uma conta que passe por todos os controles continua sendo Proprietária o dia inteiro, todos os dias, e o comprometimento dessa sessão entrega privilégio administrativo contínuo. As duas camadas são complementares, e a recomendação usual é exigir autenticação forte justamente no momento da ativação do PIM — o que só faz sentido porque são coisas distintas.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-idgov-assoc-autenticacao-19",
+      "topico": "Autenticação híbrida",
+      "tipo": "Associacao",
+      "enunciado": "Cada restrição abaixo decide um método de autenticação diferente para o mesmo diretório híbrido. Associe cada restrição ao método adequado.",
+      "explicacao": "Menor infraestrutura possível e maior resiliência a uma queda do ambiente local é sincronização de hash de senha, o método padrão recomendado — a autenticação continua funcionando mesmo com o datacenter fora do ar. Proibição de armazenar qualquer hash de senha na nuvem, com validação local, é autenticação pass-through, que encaminha a validação a agentes leves. Exigência de cartão inteligente ou de provedor de autenticação de terceiros no momento da entrada é federação com AD FS, que é o único que abre esse ponto de extensão. E identidades que não existem no diretório local e nunca existirão são contas somente em nuvem. O Microsoft Entra Connect está no painel porque é o nome que todo mundo associa a identidade híbrida: ele é a ferramenta de sincronização que implementa esses métodos, e não um método — escolhê-lo não responde a nenhuma das quatro restrições.",
+      "associacoes": [
+        { "alvo": "Menor infraestrutura local possível, com autenticação funcionando mesmo se o datacenter cair", "item": "Sincronização de hash de senha" },
+        { "alvo": "Proibido armazenar qualquer hash de senha na nuvem; validação contra o controlador local", "item": "Autenticação pass-through" },
+        { "alvo": "Entrada precisa aceitar cartão inteligente ou provedor de autenticação de terceiros", "item": "Federação com AD FS" },
+        { "alvo": "Identidades que não existem no diretório local e nunca existirão", "item": "Contas somente em nuvem" }
+      ],
+      "itensExtras": [
+        "Microsoft Entra Connect"
+      ]
+    },
+    {
+      "id": "az305-idgov-assoc-destino-log-20",
+      "topico": "Roteamento de logs",
+      "tipo": "Associacao",
+      "enunciado": "Para cada necessidade de registro abaixo, a arquiteta precisa escolher o destino adequado da configuração de diagnóstico. Associe cada necessidade ao destino.",
+      "explicacao": "Consultar e correlacionar registros com linguagem de consulta, cruzando fontes diferentes, é o workspace do Log Analytics. Guardar sete anos ao menor custo, com acesso raro, é a conta de armazenamento, onde a retenção é governada por regras de ciclo de vida. Entregar eventos continuamente a uma plataforma externa de operações de segurança é o Event Hubs, o ponto de saída de streaming. E reconstruir o caminho de uma requisição individual entre vários serviços, com o tempo de cada salto, é o Application Insights, pelo rastreamento distribuído. A configuração de diagnóstico está no painel porque é o mecanismo que liga o recurso a qualquer um desses destinos — é o encanamento, não o destino, e escolhê-la não responde a nenhuma das quatro necessidades.",
+      "associacoes": [
+        { "alvo": "Consultar e correlacionar registros de fontes diferentes com linguagem de consulta", "item": "Workspace do Log Analytics" },
+        { "alvo": "Guardar sete anos ao menor custo, com acesso raro", "item": "Conta de armazenamento" },
+        { "alvo": "Entregar eventos continuamente a uma plataforma externa de segurança", "item": "Event Hubs" },
+        { "alvo": "Reconstruir o caminho de uma requisição entre vários serviços, com o tempo de cada salto", "item": "Application Insights" }
+      ],
+      "itensExtras": [
+        "Configuração de diagnóstico"
+      ]
+    },
+    {
+      "id": "az305-idgov-assoc-governanca-21",
+      "topico": "Estrutura de governança",
+      "tipo": "Associacao",
+      "enunciado": "Cada objetivo de governança abaixo é atendido por um mecanismo diferente. Associe cada objetivo ao mecanismo adequado.",
+      "explicacao": "Aplicar o mesmo conjunto de regras a dezenas de assinaturas de uma vez, com herança, é o grupo de gerenciamento — ele é o escopo, e é onde a atribuição é feita. Impedir que recursos nasçam fora do padrão e medir continuamente o parque é o Azure Policy, que atua sobre a forma dos recursos. Separar limites de escala e de cobrança entre unidades de negócio é a assinatura, que é simultaneamente o limite técnico e o limite financeiro do Azure. E ratear o custo por centro de custo dentro de uma mesma assinatura é a marcação, dimensão pela qual a análise de custos agrupa. O Privileged Identity Management está no painel porque é governança de primeira linha e a resposta reflexa a \"controlar acesso\": ele governa por quanto tempo o privilégio existe, que é governança de identidade — nenhum dos quatro objetivos acima trata disso.",
+      "associacoes": [
+        { "alvo": "Aplicar o mesmo conjunto de regras a dezenas de assinaturas de uma vez, com herança", "item": "Grupo de gerenciamento" },
+        { "alvo": "Impedir que recursos nasçam fora do padrão e medir o parque continuamente", "item": "Azure Policy" },
+        { "alvo": "Separar limites de escala e de cobrança entre unidades de negócio", "item": "Assinatura" },
+        { "alvo": "Ratear o custo por centro de custo dentro de uma mesma assinatura", "item": "Marcações" }
+      ],
+      "itensExtras": [
+        "Privileged Identity Management"
+      ]
+    },
+    {
+      "id": "az305-idgov-assoc-segredos-22",
+      "topico": "Gestão de segredos e chaves",
+      "tipo": "Associacao",
+      "enunciado": "Cada necessidade abaixo pede um serviço diferente para guardar ou apresentar credencial. Associe cada necessidade ao serviço adequado.",
+      "explicacao": "Chaves em módulo de hardware de locatário único, com controle administrativo integral do cliente, é o Managed HSM. Segredos, certificados e chaves de uso geral, com rotação e auditoria, é o Key Vault. Configuração de aplicação com sinalizadores de funcionalidade e valores por ambiente é o App Configuration, que referencia o cofre quando o valor é sensível. E uma aplicação em execução no Azure acessando outros recursos sem guardar credencial nenhuma é identidade gerenciada — a única das quatro em que não há segredo a proteger, porque não há segredo. O certificado gerenciado do App Service está no painel porque também é material criptográfico e resolve um caso real: emitir e renovar automaticamente o certificado TLS de um domínio personalizado. Ele é específico daquele cenário e não atende a nenhuma das quatro necessidades acima.",
+      "associacoes": [
+        { "alvo": "Chaves em hardware de locatário único, com controle administrativo integral do cliente", "item": "Azure Key Vault Managed HSM" },
+        { "alvo": "Segredos, certificados e chaves de uso geral, com rotação e auditoria", "item": "Azure Key Vault" },
+        { "alvo": "Configuração de aplicação com sinalizadores de funcionalidade e valores por ambiente", "item": "Azure App Configuration" },
+        { "alvo": "Aplicação no Azure acessando outros recursos sem guardar credencial nenhuma", "item": "Identidade gerenciada" }
+      ],
+      "itensExtras": [
+        "Certificado gerenciado do App Service"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-305",
+  "area": "continuidade",
+  "questoes": [
+    {
+      "id": "az305-cont-rpo-minutos-01",
+      "topico": "Objetivos de recuperação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema de faturamento roda em quinze máquinas virtuais no Azure. O comitê definiu que, numa indisponibilidade da região, a perda máxima aceitável de dados é de quinze minutos e o sistema precisa voltar a operar em até uma hora. O orçamento foi aprovado para atender a esses números. Qual solução recomendar?",
+      "explicacao": "O Azure Site Recovery é a recomendação: ele replica continuamente as máquinas para a região secundária, com objetivo de ponto de recuperação medido em segundos a poucos minutos, e o failover coloca as máquinas no ar em minutos, atendendo aos dois números declarados. É a única solução da lista cuja replicação é contínua — e é a continuidade da replicação que determina o objetivo de ponto de recuperação. O Azure Backup com restauração entre regiões protege contra perda de dados e opera em outra ordem de grandeza: a cópia é periódica, então a perda aceitável seria de horas, e restaurar quinze máquinas leva bem mais de uma hora. Instantâneos de disco copiados para outra região são pontuais e manuais, com os mesmos dois problemas agravados. E aumentar a redundância dos discos para geográfica protege o dado armazenado sem manter máquina nenhuma pronta para assumir — não há o que ligar do outro lado.",
+      "opcoes": [
+        { "texto": "Azure Site Recovery replicando continuamente as máquinas para a região secundária.", "correta": true },
+        { "texto": "Azure Backup com restauração entre regiões habilitada no cofre.", "correta": false },
+        { "texto": "Instantâneos de disco periódicos, copiados para uma conta de armazenamento na região secundária.", "correta": false },
+        { "texto": "Discos gerenciados com redundância geográfica na região secundária.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-rpo-diario-02",
+      "topico": "Objetivos de recuperação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um ambiente de relatórios internos roda em oito máquinas virtuais. O negócio declarou que perder até um dia de dados é aceitável e que o sistema pode ficar fora do ar por até oito horas sem impacto relevante. A diretoria pediu explicitamente a solução de menor custo que atenda a esses números. Qual recomendar?",
+      "explicacao": "O Azure Backup com política diária e cofre com redundância geográfica é o encaixe: a cópia diária atende ao objetivo de ponto de recuperação de um dia, restaurar oito máquinas cabe folgadamente em oito horas, e o custo é uma fração do de qualquer replicação contínua — que é o critério explícito da diretoria. Reconhecer que o requisito é frouxo é o ponto da questão: superdimensionar continuidade é um erro de arquitetura tão real quanto subdimensionar. O Site Recovery entregaria objetivos muito melhores e cobra replicação contínua e computação reservada no destino, custando bem mais para atender a um requisito que não pede isso. Replicar para outra região com máquinas ligadas em espera quente é ainda mais caro, pagando computação parada. E não ter proteção nenhuma, confiando em recriar do zero, não atende ao objetivo de ponto de recuperação, porque não há dado a recuperar.",
+      "opcoes": [
+        { "texto": "Azure Backup com política diária, em cofre com redundância geográfica.", "correta": true },
+        { "texto": "Azure Site Recovery replicando continuamente para a região secundária.", "correta": false },
+        { "texto": "Réplicas das máquinas ligadas em espera quente na região secundária.", "correta": false },
+        { "texto": "Recriar o ambiente a partir dos modelos de infraestrutura, sem proteção de dados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-sql-zona-03",
+      "topico": "Alta disponibilidade de dados relacionais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco relacional crítico precisa continuar disponível se um datacenter inteiro da região ficar fora do ar, sem exigir failover manual e sem que a aplicação mude o endereço de conexão. Perder a região inteira não faz parte do escopo desta decisão, que será tratada separadamente. Qual configuração recomendar?",
+      "explicacao": "A configuração com redundância de zona é a resposta: as réplicas do banco passam a ser distribuídas por zonas de disponibilidade diferentes dentro da mesma região, e a promoção em caso de perda de uma zona é feita pelo próprio serviço, sem intervenção e sem mudar o endereço de conexão. É exatamente o escopo declarado — falha de datacenter dentro da região. Um grupo de failover automático para outra região é a resposta certa para o escopo que o enunciado explicitamente adiou, e recomendá-lo aqui é responder a outra pergunta. Uma réplica de leitura serve para escalar consulta e não assume escrita automaticamente. E backups com redundância geográfica protegem o dado e exigem restaurar, com tempo de recuperação incompatível com \"continuar disponível\".",
+      "opcoes": [
+        { "texto": "Configurar o banco com redundância de zona dentro da região.", "correta": true },
+        { "texto": "Configurar um grupo de failover automático para uma região secundária.", "correta": false },
+        { "texto": "Adicionar uma réplica de leitura na mesma região.", "correta": false },
+        { "texto": "Manter os backups do banco com redundância geográfica.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-gzrs-04",
+      "topico": "Alta disponibilidade de dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma conta de armazenamento guarda documentos de um sistema regulado. O requisito é que os dados sobrevivam tanto à perda de um datacenter dentro da região primária quanto à perda da região inteira, e a área jurídica exige que exista uma cópia fora da região primária. O acesso à cópia remota em operação normal não é necessário. Qual redundância recomendar?",
+      "explicacao": "A redundância geográfica de zona é a única da lista que cobre os dois eixos ao mesmo tempo: as cópias na região primária são distribuídas por zonas de disponibilidade, o que sobrevive à perda de um datacenter, e ainda existe réplica em região distante, o que sobrevive à perda da região. Como o enunciado diz que ler a cópia remota em operação normal não é necessário, a variante com acesso de leitura seria capacidade não requisitada e custo desnecessário. A redundância de zona cobre a perda de datacenter e deixa a exigência jurídica de cópia fora da região sem atender. A redundância geográfica simples cobre a região e mantém as cópias primárias num único datacenter, deixando o primeiro requisito descoberto. E a redundância local não cobre nenhum dos dois.",
+      "opcoes": [
+        { "texto": "Redundância geográfica de zona (GZRS).", "correta": true },
+        { "texto": "Redundância de zona (ZRS).", "correta": false },
+        { "texto": "Redundância geográfica (GRS).", "correta": false },
+        { "texto": "Redundância local (LRS).", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-failover-conta-05",
+      "topico": "Alta disponibilidade de dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma conta de armazenamento com redundância geográfica ficou inacessível porque a região primária sofreu uma interrupção prolongada. A equipe pergunta o que esperar do comportamento do serviço e o que precisa ser feito. Qual descrição está correta?",
+      "explicacao": "O failover de conta é iniciado pelo cliente, não acontece sozinho, e pode implicar perda dos dados que ainda não haviam sido replicados no momento da interrupção — a replicação é assíncrona, então há uma defasagem, e o serviço informa o horário da última sincronização justamente para dimensionar essa perda. Depois do failover a conta passa a ser local na nova região primária, e restabelecer a redundância geográfica é um passo posterior e deliberado. Esperar failover automático é a expectativa mais comum e está errada: a decisão é do cliente porque envolve aceitar perda de dados. Supor que não há perda ignora a natureza assíncrona da replicação. E imaginar que basta apontar a aplicação para o endereço secundário só funcionaria numa conta com acesso de leitura habilitado, e mesmo assim daria leitura, não escrita.",
+      "opcoes": [
+        { "texto": "O failover é iniciado pelo cliente, pode haver perda do que não foi replicado, e a conta fica local depois.", "correta": true },
+        { "texto": "O failover é executado automaticamente pelo serviço assim que a interrupção é detectada.", "correta": false },
+        { "texto": "O failover é iniciado pelo cliente e não há perda de dados, porque a replicação é síncrona.", "correta": false },
+        { "texto": "Basta apontar a aplicação para o endereço secundário, que aceita leitura e escrita.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-cosmos-regional-06",
+      "topico": "Alta disponibilidade de dados semiestruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um catálogo de produtos em Cosmos DB atende usuários no mundo todo a partir de uma única região de escrita. O requisito é que uma interrupção regional não derrube o serviço, que a transição ocorra sem intervenção humana e que a aplicação não precise mudar de endereço. Qual configuração recomendar?",
+      "explicacao": "Associar regiões adicionais à conta e habilitar o failover automático é a resposta: o Cosmos DB replica os dados para as regiões associadas e, na indisponibilidade da região de escrita, promove outra automaticamente; o cliente conecta-se ao mesmo ponto de extremidade da conta, que passa a direcionar para a nova região — o endereço não muda, que é o terceiro requisito. Habilitar escritas em múltiplas regiões resolveria disponibilidade e latência de escrita, mas é mais do que se pediu, custa mais e traz o compromisso de consistência que o enunciado não menciona precisar. Fazer backup periódico para outra região protege os dados sem manter serviço disponível — recuperar é restaurar, não continuar. E replicar por processo próprio para uma segunda conta reconstrói mal, com esforço, algo que o serviço já faz nativamente, e ainda exige que a aplicação saiba trocar de endereço.",
+      "opcoes": [
+        { "texto": "Associar regiões adicionais à conta e habilitar o failover automático.", "correta": true },
+        { "texto": "Habilitar escritas em múltiplas regiões em quatro continentes.", "correta": false },
+        { "texto": "Configurar backup periódico do contêiner para uma conta em outra região.", "correta": false },
+        { "texto": "Replicar os documentos por processo próprio para uma segunda conta em outra região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-aks-zonas-07",
+      "topico": "Alta disponibilidade de computação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um cluster de Kubernetes hospeda a aplicação principal da Contoso em uma região com zonas de disponibilidade. O requisito é que a perda de um datacenter dentro da região não derrube a aplicação, mantendo capacidade suficiente para atender à carga com uma zona fora. A equipe quer a solução mais simples que atenda. Qual recomendar?",
+      "explicacao": "Distribuir os nós do pool por várias zonas de disponibilidade e dimensionar a capacidade para suportar a perda de uma delas é a recomendação: a perda de um datacenter tira apenas parte dos nós, e o orquestrador reagenda as cargas nos nós restantes — desde que haja capacidade sobrando, que é a segunda metade do requisito e a parte esquecida com mais frequência. Um segundo cluster em outra região atende a um requisito maior, de perda regional, que o enunciado não pede, e acrescenta a complexidade de sincronizar estado e distribuir tráfego. Aumentar o número de nós numa única zona multiplica capacidade sem tolerar a perda daquela zona — todos caem juntos. E backup do cluster protege configuração e dados persistentes, sem manter a aplicação no ar durante a falha.",
+      "opcoes": [
+        { "texto": "Distribuir os nós por várias zonas e dimensionar a capacidade para operar com uma zona a menos.", "correta": true },
+        { "texto": "Criar um segundo cluster em outra região, com o tráfego distribuído entre os dois.", "correta": false },
+        { "texto": "Aumentar o número de nós do pool, mantendo todos na mesma zona.", "correta": false },
+        { "texto": "Configurar backup do cluster e dos volumes persistentes, com restauração automatizada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-backup-blob-08",
+      "topico": "Recuperação de dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um contêiner de blobs recebe gravações de um processo automatizado. O requisito é conseguir voltar o conteúdo do contêiner inteiro ao estado exato de qualquer momento dos últimos trinta dias, para o caso de um defeito no processo corromper os dados de forma gradual e só ser percebido dias depois. Qual configuração recomendar?",
+      "explicacao": "A restauração pontual no tempo para blobs em blocos é a resposta: ela permite reverter um contêiner inteiro ao estado de um instante específico dentro da janela configurada, que é literalmente o requisito. Ela depende de versionamento, feed de alterações e exclusão temporária habilitados, e é justamente essa combinação que registra a linha do tempo das gravações. O versionamento sozinho preserva as versões anteriores de cada blob e obriga alguém a identificar e reverter blob por blob — inviável para corrupção gradual espalhada por milhares de arquivos. A exclusão temporária cobre exclusão, e o cenário descreve corrupção por sobrescrita, não remoção. E a replicação de objeto para outra conta copiaria a corrupção junto, com atraso — ela protege contra perda regional, não contra dado ruim.",
+      "opcoes": [
+        { "texto": "Restauração pontual no tempo para blobs em blocos, com janela de trinta dias.", "correta": true },
+        { "texto": "Versionamento de blob, revertendo cada arquivo à versão anterior quando necessário.", "correta": false },
+        { "texto": "Exclusão temporária de blob com retenção de trinta dias.", "correta": false },
+        { "texto": "Replicação de objeto contínua para uma conta em outra região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-files-backup-09",
+      "topico": "Recuperação de dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um compartilhamento do Azure Files é usado por uma equipe de projetos. O requisito é permitir que um usuário recupere sozinho a versão de ontem de um arquivo específico, e que a área de infraestrutura consiga restaurar o compartilhamento inteiro a partir de qualquer dia dos últimos noventa dias. Qual solução recomendar?",
+      "explicacao": "O backup do Azure para compartilhamentos de arquivos, baseado em instantâneos e gerenciado por um cofre, atende aos dois requisitos com um mecanismo só: os instantâneos ficam acessíveis pelo próprio cliente, permitindo que o usuário recupere a versão anterior de um arquivo sem abrir chamado, e a política do cofre governa a retenção de noventa dias e a restauração do compartilhamento inteiro. Instantâneos criados por automação própria fariam parte do trabalho e transferem para a equipe agendamento, retenção e verificação, sem o catálogo e os relatórios do serviço. Copiar o compartilhamento para blobs todo dia cria uma cópia sem semântica de arquivo e sem recuperação pelo próprio usuário. E a redundância geográfica protege contra perda da região e não devolve a versão de ontem de um arquivo — replicação não é backup, e essa é a confusão que a questão testa.",
+      "opcoes": [
+        { "texto": "Backup do Azure para compartilhamentos de arquivos, com política de retenção de noventa dias.", "correta": true },
+        { "texto": "Instantâneos do compartilhamento criados por automação própria, uma vez por dia.", "correta": false },
+        { "texto": "Cópia diária do conteúdo do compartilhamento para um contêiner de blobs.", "correta": false },
+        { "texto": "Redundância geográfica na conta de armazenamento que hospeda o compartilhamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-cofre-imutavel-10",
+      "topico": "Proteção dos backups",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Após um incidente de ransomware em outra empresa do setor, a diretoria exigiu garantia de que, mesmo com um administrador do ambiente comprometido, os backups não possam ser destruídos nem ter a retenção encurtada. A operação de backup precisa continuar funcionando normalmente para o time. O que recomendar?",
+      "explicacao": "Um cofre imutável é a resposta central: com ele, operações que poderiam levar à perda de dados de backup — encurtar retenção, desabilitar proteções, remover a política — passam a ser recusadas pelo próprio serviço, independentemente da permissão de quem as solicita. É essa recusa na plataforma, e não a confiança em permissões, que atende à exigência de resistir a um administrador comprometido. A exclusão temporária é uma proteção real e insuficiente sozinha aqui, porque quem tem privilégio pode reduzir ou desabilitar a retenção — ela protege contra acidente melhor do que contra ação deliberada. Um bloqueio de recurso no cofre impede excluir o recurso e não impede alterar políticas dentro dele. E restringir a função de administrador de backup a poucas pessoas reduz a superfície e continua dependendo de que nenhuma delas seja comprometida, que é a premissa que o requisito rejeita.",
+      "opcoes": [
+        { "texto": "Habilitar o cofre imutável, que recusa operações capazes de reduzir a proteção dos backups.", "correta": true },
+        { "texto": "Habilitar a exclusão temporária do cofre com o maior período de carência disponível.", "correta": false },
+        { "texto": "Aplicar um bloqueio de recurso do tipo Não Pode Excluir no cofre.", "correta": false },
+        { "texto": "Restringir a função de administrador de backup a duas pessoas da equipe.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-hibrido-vmware-11",
+      "topico": "Recuperação de cargas híbridas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso mantém sessenta máquinas virtuais em um ambiente VMware no datacenter próprio e não pretende migrá-las agora. O requisito é ter um plano de recuperação que coloque essas cargas em execução no Azure em caso de desastre no datacenter, com perda de dados medida em minutos, e que possa ser exercitado sem impacto na operação. Qual solução recomendar?",
+      "explicacao": "O Azure Site Recovery é a solução: ele replica continuamente máquinas VMware locais para o Azure, entregando objetivo de ponto de recuperação em minutos, e oferece teste de failover, que sobe as máquinas numa rede isolada sem interromper a origem nem a replicação — que é exatamente o requisito de exercitar o plano sem impacto. O Azure Backup para servidores locais protege dados e restaura em outra ordem de grandeza de tempo, além de não manter cargas prontas para assumir. Migrar tudo para o Azure com o Azure Migrate resolve outro problema e contraria o enunciado, que declara que a migração não está em pauta. E replicar por ferramenta do próprio hipervisor para máquinas no Azure não é possível dessa forma, já que o destino não roda o mesmo hipervisor — é a alternativa que soa natural para quem pensa só do lado do ambiente local.",
+      "opcoes": [
+        { "texto": "Azure Site Recovery replicando as máquinas VMware para o Azure, com teste de failover periódico.", "correta": true },
+        { "texto": "Azure Backup com o agente instalado nas sessenta máquinas locais.", "correta": false },
+        { "texto": "Azure Migrate, replicando e migrando as sessenta máquinas para o Azure.", "correta": false },
+        { "texto": "Replicação nativa do hipervisor local para máquinas virtuais equivalentes no Azure.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-zona-vs-conjunto-12",
+      "topico": "Alta disponibilidade de computação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação em três máquinas virtuais precisa do maior nível de disponibilidade oferecido dentro de uma única região, e a área de negócio quer que a perda de um datacenter inteiro não interrompa o serviço. A região escolhida oferece zonas de disponibilidade. Qual arranjo recomendar e por quê?",
+      "explicacao": "Distribuir as três máquinas por zonas de disponibilidade diferentes é o arranjo com maior disponibilidade dentro de uma região, e é o único que sobrevive à perda de um datacenter inteiro — zonas são instalações fisicamente separadas, com energia, refrigeração e rede independentes. É esse requisito, declarado no enunciado, que decide. Um conjunto de disponibilidade distribui as máquinas por domínios de falha e de atualização dentro de um mesmo datacenter: protege contra falha de rack e contra janela de manutenção, e não contra a perda da instalação. Combinar as duas coisas não é possível: uma máquina é implantada em uma zona ou em um conjunto de disponibilidade, e não nos dois. E um conjunto de dimensionamento numa única zona concentra tudo no mesmo lugar, que é exatamente o que se quer evitar.",
+      "opcoes": [
+        { "texto": "As três máquinas em zonas de disponibilidade diferentes, que são instalações fisicamente separadas.", "correta": true },
+        { "texto": "As três máquinas em um conjunto de disponibilidade, distribuídas por domínios de falha.", "correta": false },
+        { "texto": "As três máquinas em um conjunto de disponibilidade, e este associado a uma zona.", "correta": false },
+        { "texto": "As três máquinas em um conjunto de dimensionamento, numa única zona da região.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-app-multi-regiao-13",
+      "topico": "Alta disponibilidade de computação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação web em App Service precisa continuar atendendo se a região inteira ficar indisponível, com tempo de recuperação de poucos minutos e sem que alguém precise executar um procedimento manual. O estado de sessão já está externalizado e o banco tem réplica na região secundária. Qual arranjo de camada web recomendar?",
+      "explicacao": "Implantar o aplicativo em duas regiões e colocar o Azure Front Door à frente, com sondas de integridade, é o arranjo: as sondas detectam a região indisponível e o roteamento passa a enviar todo o tráfego para a região saudável em segundos, sem intervenção — que é o requisito de tempo e de ausência de procedimento manual. Como o estado já está externalizado e o banco já tem réplica, a camada web é a peça que falta. Manter a segunda região apenas provisionada e escalar sob demanda introduz um passo humano e o tempo de escalar, incompatível com poucos minutos sem intervenção. Backup do aplicativo e restauração na região secundária é ainda mais lento e igualmente manual. E o Traffic Manager também distribuiria entre regiões, mas atua na resolução de nomes: a transição depende da expiração do cache de DNS nos clientes, o que costuma exceder poucos minutos e não é controlável.",
+      "opcoes": [
+        { "texto": "O aplicativo implantado em duas regiões, com Azure Front Door e sondas de integridade à frente.", "correta": true },
+        { "texto": "O aplicativo implantado em duas regiões, com a secundária escalada manualmente quando necessário.", "correta": false },
+        { "texto": "Backup do aplicativo, restaurado na região secundária em caso de indisponibilidade.", "correta": false },
+        { "texto": "O aplicativo em duas regiões, com Traffic Manager em modo de prioridade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-multi-plano-14",
+      "topico": "Objetivos de recuperação",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A auditoria apontou que a Contoso tem replicação configurada com o Azure Site Recovery, mas nenhuma evidência de que o plano de recuperação funcione de fato. A exigência é demonstrar, periodicamente e sem impacto na produção, que as cargas sobem na região secundária na ordem correta. Quais duas práticas atendem à exigência? Selecione duas.",
+      "explicacao": "Executar teste de failover periódico numa rede isolada é uma das duas: ele cria as máquinas no destino sem interromper a origem nem pausar a replicação, e é a única operação que produz evidência real sem impacto — depois, a limpeza do teste desfaz o que foi criado. A outra é o plano de recuperação com grupos ordenados e scripts, que codifica a sequência em que as cargas devem subir; sem ele, a ordem existe apenas na cabeça de alguém, e é justamente a ordem que a auditoria quer ver demonstrada. Aumentar a frequência de replicação melhora o objetivo de ponto de recuperação sem produzir evidência nenhuma. Um failover real em janela de manutenção comprova, com interrupção — que é o que a exigência descarta. E documentar o procedimento é necessário e não é demonstração: documento não prova execução.",
+      "opcoes": [
+        { "texto": "Teste de failover periódico em uma rede isolada da região secundária.", "correta": true },
+        { "texto": "Plano de recuperação com grupos ordenados e scripts, definindo a sequência de subida.", "correta": true },
+        { "texto": "Aumentar a frequência de replicação para reduzir o objetivo de ponto de recuperação.", "correta": false },
+        { "texto": "Executar um failover real em janela de manutenção, uma vez por semestre.", "correta": false },
+        { "texto": "Documentar o procedimento de recuperação e revisá-lo trimestralmente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-multi-backup-malicioso-15",
+      "topico": "Proteção dos backups",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "O requisito é que nenhuma operação capaz de destruir backups possa ser concluída por uma única identidade comprometida, e que a retenção configurada não possa ser reduzida por quem administra o cofre. A operação normal de backup e restauração precisa seguir sem atrito adicional para o time. Quais duas capacidades atendem? Selecione duas.",
+      "explicacao": "O cofre imutável atende à segunda parte: ele recusa, na própria plataforma, operações que reduziriam a proteção — encurtar retenção, desabilitar proteções —, independentemente de quem as solicita. A autorização multiusuário atende à primeira: operações críticas passam a exigir aprovação de uma identidade distinta, guardada por um recurso de proteção separado, de modo que uma única identidade comprometida não conclui a destruição sozinha. As duas juntas cobrem exatamente o par do enunciado, e nenhuma delas afeta backup e restauração de rotina. A exclusão temporária protege contra remoção acidental e pode ser reduzida por quem administra, que é o cenário rejeitado. Um bloqueio de recurso impede excluir o cofre, sem impedir alterações nas políticas dentro dele. E redundância geográfica protege contra perda da região, não contra ação deliberada.",
+      "opcoes": [
+        { "texto": "Cofre imutável, recusando operações que reduzam a proteção dos backups.", "correta": true },
+        { "texto": "Autorização multiusuário, exigindo aprovação de uma identidade distinta.", "correta": true },
+        { "texto": "Exclusão temporária do cofre com período de carência estendido.", "correta": false },
+        { "texto": "Bloqueio de recurso do tipo Não Pode Excluir aplicado ao cofre.", "correta": false },
+        { "texto": "Redundância geográfica no armazenamento do cofre.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-multi-ha-relacional-16",
+      "topico": "Alta disponibilidade de dados relacionais",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um banco relacional precisa sobreviver tanto à perda de um datacenter dentro da região quanto à perda da região inteira, e a aplicação não pode alterar a cadeia de conexão em nenhum dos dois casos. Quais duas configurações, juntas, atendem aos dois eixos? Selecione duas.",
+      "explicacao": "A configuração com redundância de zona cobre o primeiro eixo: as réplicas ficam em zonas diferentes da mesma região e a promoção é feita pelo serviço, sem mudança de endereço. O grupo de failover automático cobre o segundo: ele mantém réplica em outra região e publica pontos de extremidade estáveis, de modo que assumir a região secundária também não exige mudar a cadeia de conexão. Os dois eixos são independentes e por isso exigem as duas configurações — tratá-los como um só é o erro que a questão testa. A replicação geográfica ativa replicaria para outra região e obrigaria a aplicação a mudar de endereço, falhando na restrição declarada. Backups com redundância geográfica protegem o dado e não mantêm disponibilidade. E a réplica de leitura escala consulta, sem assumir escrita.",
+      "opcoes": [
+        { "texto": "Configuração com redundância de zona dentro da região primária.", "correta": true },
+        { "texto": "Grupo de failover automático com uma região secundária.", "correta": true },
+        { "texto": "Replicação geográfica ativa para um servidor em outra região.", "correta": false },
+        { "texto": "Backups do banco com redundância geográfica habilitada.", "correta": false },
+        { "texto": "Réplica de leitura adicional na região primária.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-cont-simnao-backup-rpo-17",
+      "topico": "Objetivos de recuperação",
+      "tipo": "SimNao",
+      "enunciado": "Um comitê definiu para um sistema transacional um objetivo de ponto de recuperação de quinze minutos. Um analista propôs atender a esse objetivo apenas com o Azure Backup das máquinas virtuais, argumentando que basta configurar a política de backup com a maior frequência disponível. Avalie a afirmação: o Azure Backup sozinho é adequado para um objetivo de ponto de recuperação de quinze minutos.",
+      "explicacao": "A afirmação é falsa. O Azure Backup trabalha com cópias pontuais, tomadas em intervalos que vão de algumas horas a um dia conforme a política — ele foi desenhado para retenção e recuperação de estado, não para replicação contínua. Mesmo com a maior frequência disponível, o intervalo entre cópias é ordens de grandeza maior que quinze minutos, e a perda potencial de dados fica muito acima do objetivo definido. Para objetivos medidos em minutos, o mecanismo adequado é replicação contínua, com o Azure Site Recovery no caso de máquinas virtuais, ou recursos nativos de replicação no caso de bancos de dados. Vale registrar que os dois não competem e costumam coexistir: a replicação atende ao desastre regional com perda mínima, e o backup atende à corrupção lógica e à exigência de retenção — que a replicação não cobre, porque replicaria o dado corrompido.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-cont-simnao-replicacao-backup-18",
+      "topico": "Recuperação de dados não estruturados",
+      "tipo": "SimNao",
+      "enunciado": "Uma conta de armazenamento está configurada com redundância geográfica de zona, o que mantém cópias em zonas distintas da região primária e uma réplica em região distante. A equipe concluiu que, com essa configuração, não é necessário nenhum mecanismo adicional de backup para os blobs. Avalie a afirmação: a redundância do armazenamento dispensa backup dos blobs.",
+      "explicacao": "A afirmação é falsa, e a distinção é a mais importante de continuidade: redundância protege contra falha de infraestrutura, backup protege contra o dado ficar errado. A replicação é fiel e rápida — se um processo sobrescrever um arquivo com conteúdo corrompido, ou se alguém excluir um contêiner, a alteração é replicada para todas as cópias, inclusive a da região distante. Nenhuma quantidade de redundância devolve o conteúdo anterior. O que cobre esses casos são mecanismos que preservam estado no tempo: versionamento contra sobrescrita, exclusão temporária contra remoção, restauração pontual no tempo contra corrupção gradual e backup em cofre contra ação maliciosa. Quem responde Sim está tratando durabilidade como se fosse recuperabilidade, que é a confusão por trás de boa parte das perdas de dados reais na nuvem.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-cont-assoc-objetivo-19",
+      "topico": "Objetivos de recuperação",
+      "tipo": "Associacao",
+      "enunciado": "Cada objetivo de recuperação abaixo decide um mecanismo diferente. Associe cada objetivo ao mecanismo adequado.",
+      "explicacao": "Perda máxima de minutos e retorno em menos de uma hora, para máquinas em execução, é Azure Site Recovery — o único com replicação contínua. Perda aceitável de um dia, com restauração do estado de uma data específica dentro de algumas semanas, é Azure Backup. Guardar cópias mensais por sete anos para auditoria é retenção de longo prazo, que responde a conformidade e não a desastre. E reverter um disco em minutos, logo antes de uma atualização arriscada, é instantâneo de disco: pontual, barato e criado sob demanda para aquele momento. A redundância geográfica da conta está no painel porque é a resposta reflexa a qualquer pergunta sobre perder dados: ela mantém cópias em outra região e protege contra falha de infraestrutura, não contra dado errado nem contra o tempo — replicação copia o erro junto, e por isso não atende a nenhum dos quatro objetivos acima.",
+      "associacoes": [
+        { "alvo": "Perda máxima de minutos e retorno em menos de uma hora, para máquinas em execução", "item": "Azure Site Recovery" },
+        { "alvo": "Perda aceitável de um dia, restaurando o estado de uma data das últimas semanas", "item": "Azure Backup" },
+        { "alvo": "Guardar cópias mensais por sete anos, para auditoria", "item": "Retenção de longo prazo" },
+        { "alvo": "Reverter um disco em minutos, logo antes de uma atualização arriscada", "item": "Instantâneo de disco" }
+      ],
+      "itensExtras": [
+        "Redundância geográfica da conta de armazenamento"
+      ]
+    },
+    {
+      "id": "az305-cont-assoc-falha-computacao-20",
+      "topico": "Alta disponibilidade de computação",
+      "tipo": "Associacao",
+      "enunciado": "Cada falha que se quer tolerar exige um mecanismo diferente de alta disponibilidade. Associe cada falha ao mecanismo adequado.",
+      "explicacao": "Falha de rack ou janela de manutenção de host dentro de um mesmo datacenter é o conjunto de disponibilidade, com seus domínios de falha e de atualização. Perda de um datacenter inteiro dentro da região são as zonas de disponibilidade, instalações fisicamente separadas. Perda da região inteira, mantendo as máquinas em execução do outro lado, é replicação com o Azure Site Recovery. E falha de uma instância da aplicação web, sem que o usuário perca a sessão, é a combinação de várias instâncias com estado externalizado — o que mostra que disponibilidade nem sempre é um serviço de infraestrutura, e às vezes é uma decisão de arquitetura da aplicação. O grupo de posicionamento por proximidade está no painel porque também agrupa máquinas e por isso é confundido com alta disponibilidade: ele aproxima instâncias para reduzir latência entre elas, o que vai na direção oposta de espalhar — não tolera falha nenhuma.",
+      "associacoes": [
+        { "alvo": "Falha de rack ou manutenção de host dentro de um mesmo datacenter", "item": "Conjunto de disponibilidade" },
+        { "alvo": "Perda de um datacenter inteiro dentro da região", "item": "Zonas de disponibilidade" },
+        { "alvo": "Perda da região inteira, mantendo as máquinas em execução do outro lado", "item": "Replicação com Azure Site Recovery" },
+        { "alvo": "Falha de uma instância da aplicação web, sem o usuário perder a sessão", "item": "Várias instâncias com estado externalizado" }
+      ],
+      "itensExtras": [
+        "Grupo de posicionamento por proximidade"
+      ]
+    },
+    {
+      "id": "az305-cont-assoc-ha-por-dado-21",
+      "topico": "Alta disponibilidade de dados relacionais",
+      "tipo": "Associacao",
+      "enunciado": "Cada tipo de dado abaixo tem um mecanismo próprio para sobreviver à perda da região. Associe cada tipo de dado ao mecanismo adequado.",
+      "explicacao": "Banco relacional que precisa assumir em outra região sem a aplicação mudar de endereço é o grupo de failover automático, pelos pontos de extremidade estáveis. Banco de documentos distribuído globalmente é a conta do Cosmos DB com regiões adicionais associadas e failover automático. Blobs e arquivos em conta de armazenamento é a redundância geográfica de zona, que cobre zona e região ao mesmo tempo. E máquinas virtuais em execução é a replicação com o Azure Site Recovery. A restauração pontual no tempo está no painel porque é um mecanismo de recuperação legítimo e muito usado, e serve para lembrar a distinção que organiza este domínio inteiro: ela devolve o dado a um instante anterior, protegendo contra dado errado — nenhum dos quatro alvos acima trata disso, todos tratam de perda de infraestrutura.",
+      "associacoes": [
+        { "alvo": "Banco relacional que assume em outra região sem a aplicação mudar de endereço", "item": "Grupo de failover automático" },
+        { "alvo": "Banco de documentos distribuído globalmente", "item": "Cosmos DB com regiões adicionais e failover automático" },
+        { "alvo": "Blobs e compartilhamentos de arquivos em conta de armazenamento", "item": "Redundância geográfica de zona" },
+        { "alvo": "Máquinas virtuais em execução", "item": "Replicação com Azure Site Recovery" }
+      ],
+      "itensExtras": [
+        "Restauração pontual no tempo"
+      ]
+    },
+    {
+      "id": "az305-cont-assoc-ameaca-dado-22",
+      "topico": "Proteção dos backups",
+      "tipo": "Associacao",
+      "enunciado": "Cada ameaça abaixo exige um controle diferente, e replicação não resolve nenhuma delas. Associe cada ameaça ao controle adequado.",
+      "explicacao": "Um processo que sobrescreve arquivos com conteúdo corrompido ao longo de dias pede restauração pontual no tempo para blobs, que devolve o contêiner ao estado de um instante anterior. Exclusão acidental de um blob dentro do período de retenção é exclusão temporária. Um administrador comprometido tentando encurtar a retenção dos backups é o cofre imutável, que recusa a operação na plataforma. E uma única identidade comprometida tentando concluir sozinha uma operação destrutiva é a autorização multiusuário, que exige um segundo aprovador. A redundância geográfica de zona está no painel porque é a proteção de dados mais lembrada e a que menos se aplica aqui: ela replica fielmente — inclusive a corrupção, a exclusão e a ação maliciosa — e por isso não neutraliza nenhuma das quatro ameaças, que são todas sobre o dado ficar errado, não sobre a infraestrutura falhar.",
+      "associacoes": [
+        { "alvo": "Processo que sobrescreve arquivos com conteúdo corrompido ao longo de dias", "item": "Restauração pontual no tempo para blobs" },
+        { "alvo": "Exclusão acidental de um blob, dentro do período de retenção", "item": "Exclusão temporária" },
+        { "alvo": "Administrador comprometido tentando encurtar a retenção dos backups", "item": "Cofre imutável" },
+        { "alvo": "Uma única identidade comprometida tentando concluir uma operação destrutiva", "item": "Autorização multiusuário" }
+      ],
+      "itensExtras": [
+        "Redundância geográfica de zona"
+      ]
+    }
+  ]
+}

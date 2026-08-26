@@ -8,6 +8,7 @@ using AzurePrep.Domain.Entidades;
 using AzurePrep.Domain.Enums;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Repositories;
+using AzurePrep.Infrastructure.Persistence.Seed;
 using AzurePrep.Infrastructure.Time;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -16,30 +17,56 @@ using Xunit;
 namespace AzurePrep.Infrastructure.Tests;
 
 /// <summary>
-/// Exercita o banco do AZ-104 no pipeline de verdade: sorteio, apresentação, gravação de resposta,
-/// correção e score report — contra SQLite real, com uma request por operação.
+/// Exercita no pipeline de verdade — sorteio, apresentação, gravação, correção e score report —
+/// <b>todo exame cujo banco já cobre os domínios declarados</b>, contra SQLite real e com uma
+/// request por operação.
 /// </summary>
 /// <remarks>
-/// Existe porque o AZ-104 está em construção e por isso <b>recusa tentativa em produção</b>: sem
-/// este teste, as 108 questões teriam sido escritas, validadas quanto à forma e nunca respondidas.
-/// Validação de catálogo confere estrutura (contagem de alternativas, gabarito presente, tipo
-/// consistente); ela não diz se o conteúdo atravessa o sorteio, a correção e o placar por domínio.
-/// A diferença aparece justamente nos tipos que o formato expande — uma questão de arrastar e
-/// soltar vira 20 alternativas no banco, e nada além de responder uma de verdade prova que o
-/// conjunto correto é reconhecido como acerto.
+/// Nasceu preso ao AZ-104, porque era o único exame completo. Generalizar não foi cosmético: a
+/// pergunta que o teste responde não é "o AZ-104 funciona", e sim "um exame cujo banco está pronto
+/// atravessa o pipeline". Com <see cref="ExamesCompletos"/> derivando a lista do catálogo, cada
+/// exame novo passa a ser exercitado no dia em que fecha a cobertura, sem que ninguém lembre de
+/// escrever teste — e um exame que regredir (domínio esvaziado) simplesmente sai da lista, o que
+/// os testes de integridade do catálogo já denunciam por outro caminho.
 ///
-/// O exame é publicado <b>apenas dentro do banco deste teste</b>, o que é o ponto: dá para validar
-/// o conteúdo antes de decidir publicá-lo para os usuários.
+/// Os exames são publicados <b>apenas dentro do banco deste teste</b>. As definições no seeder
+/// seguem como estão, o que é o ponto: dá para validar o conteúdo no fluxo completo antes de
+/// decidir publicá-lo para os usuários.
 /// </remarks>
-public sealed class ProvaDoAz104Tests : IDisposable
+public sealed class ProvaCompletaTests : IDisposable
 {
-    private const string Codigo = "AZ-104";
+    /// <summary>
+    /// Códigos de exame cujo catálogo cobre todos os domínios declarados e sustenta o tamanho da
+    /// prova. É a mesma condição que os testes de integridade exigem para publicar.
+    /// </summary>
+    public static TheoryData<string> ExamesCompletos()
+    {
+        var porExameEArea = CatalogoDeQuestoesDeSeed.Carregar()
+            .GroupBy(a => (Exame: a.ExameCode, a.Area))
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count));
+
+        var dados = new TheoryData<string>();
+
+        foreach (var definicao in AzurePrepDbSeeder.Exames)
+        {
+            var porArea = definicao.Areas
+                .Select(a => porExameEArea.GetValueOrDefault((definicao.Code, a.Key)))
+                .ToList();
+
+            if (porArea.All(total => total > 0) && porArea.Sum() >= definicao.TotalQuestions)
+            {
+                dados.Add(definicao.Code);
+            }
+        }
+
+        return dados;
+    }
 
     private readonly SqliteConnection _connection;
     private readonly IClock _clock = new SystemClock();
     private static readonly Guid _usuarioId = Guid.NewGuid();
 
-    public ProvaDoAz104Tests()
+    public ProvaCompletaTests()
     {
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
@@ -48,15 +75,17 @@ public sealed class ProvaDoAz104Tests : IDisposable
         ctx.Database.EnsureCreated();
         AzurePrepDbSeeder.SemearAsync(ctx).GetAwaiter().GetResult();
 
-        // Publica só neste banco em memória. A definição no seeder segue Publicado: false.
-        var exame = ctx.Exams.Single(e => e.Code == Codigo);
-        exame.AtualizarDefinicao(
-            exame.Name, exame.TimeLimitMinutes, exame.PassingScorePercent, exame.TotalQuestions,
-            isPublished: true);
+        // Publica todos neste banco em memória — as definições no seeder não são tocadas.
+        foreach (var exame in ctx.Exams.ToList())
+        {
+            exame.AtualizarDefinicao(
+                exame.Name, exame.TimeLimitMinutes, exame.PassingScorePercent, exame.TotalQuestions,
+                isPublished: true);
+        }
 
         ctx.Users.Add(new Usuario(
-            ProvedorDeLogin.Google, "provider-key-az104", "Candidato AZ-104",
-            "az104@example.com", null, _clock.UtcNow, _usuarioId));
+            ProvedorDeLogin.Google, "provider-key-prova", "Candidato de Teste",
+            "prova@example.com", null, _clock.UtcNow, _usuarioId));
         ctx.SaveChanges();
     }
 
@@ -87,26 +116,27 @@ public sealed class ProvaDoAz104Tests : IDisposable
         public Random Criar() => new(20260825);
     }
 
-    private async Task<Exame> ObterExameAsync()
+    private async Task<Exame> ObterExameAsync(string codigo)
     {
         using var ctx = CreateContext();
-        return await ctx.Exams.Include(e => e.SkillAreas).SingleAsync(e => e.Code == Codigo);
+        return await ctx.Exams.Include(e => e.SkillAreas).SingleAsync(e => e.Code == codigo);
     }
 
-    private async Task<Guid> IniciarAsync()
+    private async Task<Guid> IniciarAsync(string codigo)
     {
-        var exame = await ObterExameAsync();
+        var exame = await ObterExameAsync(codigo);
         var (service, ctx) = NewRequest();
         using (ctx) return await service.IniciarTentativaAsync(exame.Id);
     }
 
     // ------------------------------------------------------------------ composição da prova
 
-    [Fact]
-    public async Task Prova_TemExatamenteOTamanhoDeclarado()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task Prova_TemExatamenteOTamanhoDeclarado(string codigo)
     {
-        var exame = await ObterExameAsync();
-        var attemptId = await IniciarAsync();
+        var exame = await ObterExameAsync(codigo);
+        var attemptId = await IniciarAsync(codigo);
 
         using var ctx = CreateContext();
         var sorteadas = await ctx.ExamAttemptQuestions
@@ -122,16 +152,17 @@ public sealed class ProvaDoAz104Tests : IDisposable
     /// </summary>
     /// <remarks>
     /// A tolerância de ±1 item existe porque a repartição é pelo método do maior resto e os pesos
-    /// somam 92,5 (pontos médios das faixas oficiais), então a cota exata quase nunca é inteira.
+    /// oficiais raramente somam 100 nos pontos médios, então a cota exata quase nunca é inteira.
     /// O que o teste garante é o que importa: nenhum domínio some, nenhum domina, e a distribuição
-    /// acompanha o blueprint mesmo com os cinco domínios tendo pools de tamanho parecido — que é
-    /// exatamente a situação em que um sorteio ingênuo, proporcional ao pool, passaria despercebido.
+    /// acompanha o blueprint mesmo quando os domínios têm pools de tamanho parecido — que é
+    /// exatamente a situação em que um sorteio proporcional ao pool passaria despercebido.
     /// </remarks>
-    [Fact]
-    public async Task Prova_RepartePorDominioSegundoOPesoDoBlueprint()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task Prova_RepartePorDominioSegundoOPesoDoBlueprint(string codigo)
     {
-        var exame = await ObterExameAsync();
-        var attemptId = await IniciarAsync();
+        var exame = await ObterExameAsync(codigo);
+        var attemptId = await IniciarAsync(codigo);
 
         using var ctx = CreateContext();
         var porArea = await ctx.ExamAttemptQuestions
@@ -152,7 +183,7 @@ public sealed class ProvaDoAz104Tests : IDisposable
 
             Assert.True(
                 Math.Abs(obtido - esperado) <= 1m,
-                $"{area.Key}: {obtido} itens, esperado ~{esperado:0.0}");
+                $"{codigo}/{area.Key}: {obtido} itens, esperado ~{esperado:0.0}");
         }
     }
 
@@ -164,10 +195,11 @@ public sealed class ProvaDoAz104Tests : IDisposable
     /// no banco, e sim como todas as combinações de alvo com item. Se a expansão quebrasse, a
     /// questão continuaria sendo sorteada e apresentada — só nunca poderia ser acertada.
     /// </remarks>
-    [Fact]
-    public async Task Prova_ContemOsQuatroFormatos()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task Prova_ContemOsQuatroFormatos(string codigo)
     {
-        var attemptId = await IniciarAsync();
+        var attemptId = await IniciarAsync(codigo);
 
         using var ctx = CreateContext();
         var tipos = await ctx.ExamAttemptQuestions
@@ -184,23 +216,23 @@ public sealed class ProvaDoAz104Tests : IDisposable
 
     // ------------------------------------------------------------------------- fluxo completo
 
-    private async Task<Dictionary<Guid, List<Guid>>> GabaritoAsync(bool corretas)
+    private async Task<Dictionary<Guid, List<Guid>>> GabaritoAsync(string codigo)
     {
         using var ctx = CreateContext();
         var questoes = await ctx.Questions
             .Include(q => q.Options)
-            .Where(q => ctx.Exams.Any(e => e.Id == q.ExamId && e.Code == Codigo))
+            .Where(q => ctx.Exams.Any(e => e.Id == q.ExamId && e.Code == codigo))
             .ToListAsync();
 
         return questoes.ToDictionary(
             q => q.Id,
-            q => q.Options.Where(o => o.IsCorrect == corretas).Select(o => o.Id).ToList());
+            q => q.Options.Where(o => o.IsCorrect).Select(o => o.Id).ToList());
     }
 
-    private async Task<ResultadoDaProvaDto> ResponderTudoAsync(bool corretamente)
+    private async Task<ResultadoDaProvaDto> ResponderTudoAsync(string codigo, bool corretamente)
     {
-        var attemptId = await IniciarAsync();
-        var gabarito = await GabaritoAsync(corretas: true);
+        var attemptId = await IniciarAsync(codigo);
+        var gabarito = await GabaritoAsync(codigo);
 
         int total;
         {
@@ -216,8 +248,8 @@ public sealed class ProvaDoAz104Tests : IDisposable
                 var q = await service.ObterQuestaoAsync(attemptId, n);
                 var corretas = gabarito[q!.Id];
 
-                // Para errar, marca uma alternativa que não está no gabarito. Vale para todos os
-                // tipos: acertar exige o conjunto EXATO, então qualquer conjunto diferente erra.
+                // Para errar, marca uma alternativa fora do gabarito. Vale para todos os tipos:
+                // acertar exige o conjunto EXATO, então qualquer conjunto diferente erra.
                 var selecao = corretamente
                     ? corretas
                     : q.Options.Select(o => o.Id).Where(id => !corretas.Contains(id)).Take(1).ToList();
@@ -231,12 +263,13 @@ public sealed class ProvaDoAz104Tests : IDisposable
         using (c) return (await svc.FinalizarTentativaAsync(attemptId))!;
     }
 
-    [Fact]
-    public async Task ProvaInteira_RespondidaCorretamente_Pontua100EAprova()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task ProvaInteira_RespondidaCorretamente_Pontua100EAprova(string codigo)
     {
-        var resultado = await ResponderTudoAsync(corretamente: true);
+        var resultado = await ResponderTudoAsync(codigo, corretamente: true);
 
-        Assert.Equal(Codigo, resultado.ExamCode);
+        Assert.Equal(codigo, resultado.ExamCode);
         Assert.Equal(100m, resultado.ScorePercent);
         Assert.True(resultado.Passed);
         Assert.Equal(resultado.TotalQuestions, resultado.CorrectAnswers);
@@ -244,10 +277,11 @@ public sealed class ProvaDoAz104Tests : IDisposable
         Assert.Equal(EscalaDeNota.NotaDeCorte, resultado.ScaledPassingScore);
     }
 
-    [Fact]
-    public async Task ProvaInteira_RespondidaErrada_ZeraEReprova()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task ProvaInteira_RespondidaErrada_ZeraEReprova(string codigo)
     {
-        var resultado = await ResponderTudoAsync(corretamente: false);
+        var resultado = await ResponderTudoAsync(codigo, corretamente: false);
 
         Assert.Equal(0m, resultado.ScorePercent);
         Assert.False(resultado.Passed);
@@ -256,13 +290,14 @@ public sealed class ProvaDoAz104Tests : IDisposable
     }
 
     /// <summary>
-    /// O score report traz os cinco domínios, e a soma dos itens por domínio fecha com a prova.
+    /// O score report traz todos os domínios, e a soma dos itens por domínio fecha com a prova.
     /// </summary>
-    [Fact]
-    public async Task ScoreReport_CobreOsCincoDominios()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task ScoreReport_CobreTodosOsDominios(string codigo)
     {
-        var exame = await ObterExameAsync();
-        var resultado = await ResponderTudoAsync(corretamente: true);
+        var exame = await ObterExameAsync(codigo);
+        var resultado = await ResponderTudoAsync(codigo, corretamente: true);
 
         Assert.Equal(exame.SkillAreas.Count, resultado.SkillAreas.Count);
         Assert.Equal(resultado.TotalQuestions, resultado.SkillAreas.Sum(a => a.TotalQuestions));
@@ -273,15 +308,11 @@ public sealed class ProvaDoAz104Tests : IDisposable
     /// <summary>
     /// A revisão de estudo traz explicação em toda questão, inclusive nas de arrastar e soltar.
     /// </summary>
-    /// <remarks>
-    /// É a tela que justifica o simulado ensinar em vez de só pontuar. Explicação vazia passaria
-    /// pela validação de catálogo apenas se tivesse ao menos 120 caracteres — o que este teste
-    /// confirma é que ela sobrevive ao caminho até o DTO, e que o gabarito exibido não vem vazio.
-    /// </remarks>
-    [Fact]
-    public async Task RevisaoDeEstudo_TrazExplicacaoEGabaritoEmTodaQuestao()
+    [Theory]
+    [MemberData(nameof(ExamesCompletos))]
+    public async Task RevisaoDeEstudo_TrazExplicacaoEGabaritoEmTodaQuestao(string codigo)
     {
-        var resultado = await ResponderTudoAsync(corretamente: true);
+        var resultado = await ResponderTudoAsync(codigo, corretamente: true);
 
         Assert.Equal(resultado.TotalQuestions, resultado.Questions.Count);
         Assert.All(resultado.Questions, q =>

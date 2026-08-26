@@ -235,11 +235,13 @@ public static class AzurePrepDbSeeder
         {
             logger?.Log(
                 definicao.Publicado ? LogLevel.Warning : LogLevel.Information,
-                "Exame {Codigo}: os domínios {Dominios} não têm nenhuma questão ativa. O sorteio " +
-                "redistribui a cota deles entre os demais, então a prova sai completa com parte do " +
-                "blueprint ausente.",
+                "Exame {Codigo}: {Sujeito} {Dominios} sem nenhuma questão ativa. O sorteio " +
+                "redistribui a cota {Pronome} entre os demais, então a prova sai completa com parte " +
+                "do blueprint ausente.",
                 definicao.Code,
-                string.Join(", ", vazios));
+                vazios.Count == 1 ? "domínio" : "domínios",
+                string.Join(", ", vazios),
+                vazios.Count == 1 ? "dele" : "deles");
         }
 
         if (ativas >= definicao.TotalQuestions)

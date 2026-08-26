@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-305",
+  "area": "armazenamento-dados",
+  "questoes": [
+    {
+      "id": "az305-dados-managed-instance-01",
+      "topico": "Escolha de serviço relacional",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação legada usa um SQL Server local com trabalhos do SQL Server Agent, consultas que cruzam três bancos da mesma instância e um componente que depende do Service Broker. A diretoria quer sair do datacenter e reduzir ao máximo a administração de servidor, e o time não tem orçamento para reescrever a aplicação. Qual serviço recomendar?",
+      "explicacao": "O Azure SQL Managed Instance é o encaixe: ele entrega compatibilidade praticamente completa com o SQL Server, incluindo o Agent, consultas entre bancos da mesma instância e o Service Broker, e ainda assim é um serviço gerenciado, sem sistema operacional para administrar. É a combinação de compatibilidade com gerência reduzida que decide, e é exatamente o cenário para o qual a instância gerenciada existe. O Azure SQL Database é mais gerenciado ainda e seria a recomendação se a aplicação fosse compatível, mas ele é um banco isolado: não tem Agent no mesmo formato, não faz consulta entre bancos como a aplicação faz e não oferece Service Broker — cada um desses exigiria reescrita, que é o que o orçamento proíbe. SQL Server em máquina virtual atende à compatibilidade de forma total e devolve toda a administração de servidor que a diretoria quer eliminar. E o Cosmos DB não é relacional, então descarta a aplicação inteira.",
+      "opcoes": [
+        { "texto": "Azure SQL Managed Instance.", "correta": true },
+        { "texto": "Azure SQL Database, banco isolado no nível De Uso Geral.", "correta": false },
+        { "texto": "SQL Server em máquina virtual do Azure.", "correta": false },
+        { "texto": "Azure Cosmos DB com a API para NoSQL.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-hyperscale-02",
+      "topico": "Camadas de serviço",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco de dados relacional tem oito terabytes e cresce cerca de meio terabyte por mês. O requisito declarado é que a restauração após um incidente leve minutos, e não horas, independentemente do tamanho que o banco tiver no futuro. A carga é predominantemente de leitura, com relatórios pesados concorrendo com a operação. Qual camada de serviço recomendar?",
+      "explicacao": "A camada Hyperscale é a recomendação: ela desacopla armazenamento e computação, suporta bancos muito grandes e faz backup e restauração baseados em instantâneos de arquivos, de modo que o tempo de restauração deixa de crescer com o tamanho do banco — que é exatamente o requisito declarado. Ela ainda permite acrescentar réplicas de leitura, o que endereça os relatórios concorrendo com a operação. A camada Comercialmente Crítica entrega a menor latência e inclui réplica de leitura, mas o backup e a restauração continuam proporcionais ao tamanho, então o requisito de minutos falha conforme o banco cresce. A camada De Uso Geral tem o mesmo problema, agravado por armazenamento remoto. E migrar para máquina virtual com discos ultra resolveria desempenho e devolveria toda a operação de backup para a equipe, sem entregar restauração em minutos por si só.",
+      "opcoes": [
+        { "texto": "Azure SQL Database na camada Hyperscale.", "correta": true },
+        { "texto": "Azure SQL Database na camada Comercialmente Crítica.", "correta": false },
+        { "texto": "Azure SQL Database na camada De Uso Geral, com armazenamento ampliado.", "correta": false },
+        { "texto": "SQL Server em máquina virtual com discos ultra.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-serverless-03",
+      "topico": "Camadas de computação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco de dados de um sistema interno é usado de forma imprevisível: fica dias sem nenhuma consulta e depois recebe algumas horas de uso intenso. O volume de dados é pequeno e o custo é a preocupação principal. A área aceita que a primeira consulta após um período ocioso demore alguns segundos a mais. Qual camada de computação recomendar?",
+      "explicacao": "A camada de computação sem servidor do Azure SQL Database é a recomendação: ela escala automaticamente dentro de uma faixa, cobra por segundo de computação efetivamente usada e pausa o banco após um período de inatividade, retomando na primeira conexão seguinte. A latência de retomada é exatamente o que o enunciado declara aceitar, e a pausa é o que elimina o custo de computação nos dias parados. A camada provisionada com o menor tamanho reduz o custo, mas continua cobrando por computação alocada nos dias em que ninguém consulta. Um pool elástico é a resposta certa para muitos bancos com picos individuais em momentos diferentes, e não para um banco só — sozinho ele não resolve ociosidade. E a camada Hyperscale resolve tamanho e restauração rápida, dois eixos que o enunciado explicitamente descarta ao dizer que o volume é pequeno.",
+      "opcoes": [
+        { "texto": "Camada de computação sem servidor, com pausa automática após inatividade.", "correta": true },
+        { "texto": "Camada de computação provisionada, no menor tamanho disponível.", "correta": false },
+        { "texto": "Pool elástico compartilhando recursos com outros bancos.", "correta": false },
+        { "texto": "Camada Hyperscale, pelo desacoplamento entre computação e armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-pool-elastico-04",
+      "topico": "Escalabilidade de banco de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema multiempresa mantém duzentos bancos de dados, um por cliente. Cada banco fica ocioso na maior parte do tempo e tem picos curtos e imprevisíveis, em horários diferentes para cada cliente. Dimensionar cada banco para o próprio pico sairia caro; dimensionar para a média causaria lentidão nos picos. Qual solução recomendar?",
+      "explicacao": "Um pool elástico é a resposta: os duzentos bancos compartilham um conjunto de recursos comprado uma vez, e cada um consome do conjunto conforme precisa. Como os picos são curtos e ocorrem em horários diferentes, é improvável que muitos coincidam, e o pool absorve os picos individuais sem exigir que cada banco seja dimensionado para o próprio máximo — que é literalmente o dilema descrito. A camada sem servidor por banco resolveria ociosidade, e é a resposta certa quando há poucos bancos; com duzentos, o custo de cada um retomando e escalando individualmente perde para o compartilhamento. Consolidar tudo em um banco único com esquema por cliente resolve custo e cria acoplamento entre clientes, com risco de um pico afetar todos e problemas de isolamento e restauração individual. E dimensionar cada banco para o pico é justamente a alternativa cara que o enunciado descarta.",
+      "opcoes": [
+        { "texto": "Pool elástico compartilhando recursos entre os duzentos bancos.", "correta": true },
+        { "texto": "Camada de computação sem servidor aplicada individualmente a cada banco.", "correta": false },
+        { "texto": "Consolidar os duzentos bancos em um único banco, com esquema separado por cliente.", "correta": false },
+        { "texto": "Dimensionar cada banco individualmente para o próprio pico observado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-failover-group-05",
+      "topico": "Continuidade de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação precisa continuar operando se a região primária do banco ficar indisponível. O requisito declarado é que a cadeia de conexão da aplicação não mude durante a transição, porque ela está distribuída em dezenas de instâncias e em integrações de parceiros que não podem ser alteradas rapidamente. Qual mecanismo recomendar?",
+      "explicacao": "Um grupo de failover automático é a recomendação: ele publica pontos de extremidade estáveis de leitura e escrita que apontam sempre para o primário corrente, de modo que a transição redireciona as conexões sem que ninguém altere a cadeia de conexão — que é exatamente a restrição declarada. A replicação geográfica ativa entrega a mesma replicação subjacente e é a armadilha da questão: ela funciona, mas cada secundário tem o próprio nome de servidor, então assumir em outra região obriga a mudar a cadeia de conexão nas dezenas de instâncias e nos parceiros. Restaurar de backup em outra região atende à sobrevivência do dado com tempo de recuperação muito maior e também com endereço novo. E a redundância geográfica do armazenamento de backup protege as cópias, sem manter uma réplica pronta para assumir.",
+      "opcoes": [
+        { "texto": "Grupo de failover automático, com pontos de extremidade estáveis de leitura e escrita.", "correta": true },
+        { "texto": "Replicação geográfica ativa para um servidor em outra região.", "correta": false },
+        { "texto": "Restauração geográfica a partir do backup, na região secundária.", "correta": false },
+        { "texto": "Armazenamento de backup com redundância geográfica.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-always-encrypted-06",
+      "topico": "Proteção de dados relacionais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma exigência de conformidade determina que o número do cartão armazenado em uma coluna nunca possa ser lido em texto claro por quem administra o banco de dados, incluindo membros da equipe com privilégio máximo no servidor. A aplicação precisa continuar consultando por igualdade nessa coluna. Qual recurso recomendar?",
+      "explicacao": "O Always Encrypted é o único da lista que atende: a criptografia acontece no driver do cliente, e as chaves ficam sob controle da aplicação, fora do alcance de quem administra o banco — de modo que nem o administrador com privilégio máximo vê o texto claro. A consulta por igualdade continua possível com criptografia determinística, que é o detalhe que torna o requisito viável. A criptografia transparente de dados protege os arquivos em repouso e é invisível para quem consulta: o administrador continua lendo tudo em texto claro por consulta, o que falha no requisito central. O mascaramento dinâmico de dados oculta o valor no resultado conforme a permissão, mas o dado permanece em claro no banco e quem tem privilégio suficiente pode desmascarar. E a segurança em nível de linha filtra quais linhas cada um enxerga, sem proteger o conteúdo da coluna de quem tem acesso à linha.",
+      "opcoes": [
+        { "texto": "Always Encrypted, com criptografia determinística na coluna.", "correta": true },
+        { "texto": "Criptografia transparente de dados no banco.", "correta": false },
+        { "texto": "Mascaramento dinâmico de dados na coluna do cartão.", "correta": false },
+        { "texto": "Segurança em nível de linha, restringindo o acesso por usuário.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-retencao-longa-07",
+      "topico": "Continuidade de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma norma do setor exige que a Contoso consiga restaurar o estado do banco de dados relacional referente ao último dia de cada mês, para qualquer mês dos últimos sete anos. A restauração é rara, feita apenas em auditoria, e o custo precisa ser contido. Qual recurso recomendar?",
+      "explicacao": "A retenção de longo prazo de backups é o recurso desenhado exatamente para isso: ela guarda backups completos semanais, mensais e anuais por até uma década, armazenados de forma barata, e permite restaurar o ponto correspondente a cada período. O requisito de \"último dia de cada mês por sete anos\" é literalmente a política mensal desse recurso. A restauração pontual no tempo cobre uma janela curta, de poucos dias a algumas semanas, e é o que responde a erro operacional recente — não alcança sete anos. Copiar o banco todo mês para outra assinatura funcionaria e transfere para a equipe a responsabilidade por agendamento, verificação e custo de bancos ativos parados. E exportar mensalmente para arquivo em conta de armazenamento é o caminho artesanal do mesmo objetivo: exige automação própria, não é backup nativo e a restauração é mais lenta e mais frágil.",
+      "opcoes": [
+        { "texto": "Retenção de longo prazo de backups, com política mensal por sete anos.", "correta": true },
+        { "texto": "Restauração pontual no tempo, com o período de retenção no máximo permitido.", "correta": false },
+        { "texto": "Cópia mensal do banco para outra assinatura, mantida como banco ativo.", "correta": false },
+        { "texto": "Exportação mensal para arquivo em conta de armazenamento, por automação própria.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-consistencia-cosmos-08",
+      "topico": "Cosmos DB",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo global escreve em quatro regiões simultaneamente para reduzir a latência de escrita dos usuários. O requisito funcional é que cada usuário sempre veja as próprias gravações imediatamente após fazê-las; ler dados desatualizados de outros usuários por alguns instantes é aceitável. Qual nível de consistência do Cosmos DB recomendar?",
+      "explicacao": "A consistência de sessão é o encaixe: ela garante que dentro de uma mesma sessão as leituras enxerguem as próprias gravações, que é literalmente o requisito de ler o que se acabou de escrever, e permite que gravações de outras sessões apareçam com atraso, que o enunciado declara aceitável. É também o nível padrão do serviço, e o que oferece o melhor equilíbrio entre latência e garantia para esse padrão de uso. A consistência forte oferece a garantia mais rigorosa e é incompatível com escritas em múltiplas regiões, então sequer é aplicável ao cenário descrito. Desatualização limitada dá uma garantia mais forte que sessão em troca de latência e custo maiores, sem que o requisito peça isso. E a consistência eventual é a mais barata e rápida, porém não garante que o usuário veja a própria gravação, que é exatamente o requisito funcional declarado.",
+      "opcoes": [
+        { "texto": "Consistência de sessão.", "correta": true },
+        { "texto": "Consistência forte.", "correta": false },
+        { "texto": "Consistência de desatualização limitada (bounded staleness).", "correta": false },
+        { "texto": "Consistência eventual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-chave-particao-09",
+      "topico": "Cosmos DB",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um contêiner do Cosmos DB guardará eventos de telemetria de milhões de dispositivos, com consultas quase sempre filtrando por dispositivo e por intervalo de tempo. A equipe precisa escolher a chave de partição. Uma proposta sugere usar a data do evento, argumentando que as consultas sempre têm filtro de tempo. Qual observação está correta?",
+      "explicacao": "Usar a data cria uma partição quente: todas as gravações de um mesmo dia caem na mesma partição lógica, o que concentra a escrita, limita a taxa efetiva e leva a limitação de requisições, independentemente da capacidade total contratada. O identificador do dispositivo é a escolha adequada porque tem cardinalidade alta e distribui gravações e leituras de forma uniforme — e, como as consultas já filtram por dispositivo, elas permanecem dentro de uma única partição, que é o caso mais eficiente. Dizer que a data é boa por alinhar com o filtro de tempo ignora que alinhamento de consulta não compensa concentração de escrita. Uma chave sintética aleatória distribui bem e destrói a eficiência das consultas, que passariam a percorrer todas as partições. E supor que a escolha só importa acima de certo volume inverte o problema: chave de partição não pode ser alterada depois, então errar cedo custa migrar o contêiner inteiro.",
+      "opcoes": [
+        { "texto": "A data concentra as gravações do dia numa partição; o identificador do dispositivo distribui e mantém a consulta em partição única.", "correta": true },
+        { "texto": "A data é adequada, porque alinhar a chave ao filtro mais usado é o critério principal.", "correta": false },
+        { "texto": "O ideal é uma chave sintética aleatória, que garante distribuição perfeita das gravações.", "correta": false },
+        { "texto": "A escolha só passa a importar acima de alguns terabytes; abaixo disso qualquer chave serve.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-data-lake-10",
+      "topico": "Dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai construir uma plataforma analítica que processará arquivos organizados em uma estrutura de pastas por ano, mês e dia, com trabalhos que renomeiam e movem diretórios inteiros entre etapas do processamento, e que precisa aplicar permissões diferentes por diretório para times distintos. Qual solução de armazenamento recomendar?",
+      "explicacao": "O Azure Data Lake Storage Gen2 é a recomendação: ele é armazenamento de blobs com namespace hierárquico habilitado, o que torna diretórios objetos de verdade — renomear ou mover um diretório passa a ser uma operação de metadados, em vez de copiar e apagar cada arquivo — e habilita listas de controle de acesso por diretório, que é o segundo requisito. Os dois pontos do enunciado apontam para o namespace hierárquico. Blobs sem namespace hierárquico armazenam os mesmos dados e simulam pastas por prefixo de nome: renomear um diretório vira uma operação por arquivo, cara e não atômica, e as permissões param no nível do contêiner. O Azure Files entrega compartilhamento com semântica de sistema de arquivos, mas é desenhado para acesso tipo compartilhamento de rede e não para o padrão de processamento analítico em escala. E o Cosmos DB é banco de documentos, não armazenamento de arquivos.",
+      "opcoes": [
+        { "texto": "Azure Data Lake Storage Gen2, com namespace hierárquico habilitado.", "correta": true },
+        { "texto": "Armazenamento de blobs em blocos, com pastas simuladas por prefixo de nome.", "correta": false },
+        { "texto": "Azure Files premium, montado pelos nós de processamento.", "correta": false },
+        { "texto": "Azure Cosmos DB com a API para NoSQL, guardando os arquivos como documentos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-imutabilidade-11",
+      "topico": "Dados não estruturados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um requisito regulatório exige que documentos fiscais fiquem armazenados por cinco anos sem possibilidade de alteração ou exclusão, inclusive por administradores da assinatura, e que essa impossibilidade seja demonstrável em auditoria. Qual configuração de armazenamento recomendar?",
+      "explicacao": "Uma política de retenção baseada em tempo com imutabilidade, aplicada ao contêiner e então bloqueada, é o que atende: enquanto a política vigora, os blobs não podem ser modificados nem excluídos por ninguém, e o bloqueio da política impede que ela própria seja encurtada ou removida — inclusive por quem administra a assinatura, que é a parte do requisito que as demais opções não alcançam. Ser um controle da plataforma, e não um procedimento, é também o que a torna demonstrável em auditoria. Um bloqueio de recurso do tipo Não Pode Excluir protege a conta e o contêiner, e não impede sobrescrever um blob. Exclusão temporária e versionamento permitem recuperar o que foi apagado ou sobrescrito, o que é proteção contra acidente e não imutabilidade — o estado original não fica preservado de forma inalterável. E permissões restritivas dependem de que ninguém as altere, e administradores podem alterá-las.",
+      "opcoes": [
+        { "texto": "Política de retenção baseada em tempo com imutabilidade, bloqueada no contêiner.", "correta": true },
+        { "texto": "Bloqueio de recurso do tipo Não Pode Excluir na conta de armazenamento.", "correta": false },
+        { "texto": "Exclusão temporária e versionamento de blob habilitados com retenção de cinco anos.", "correta": false },
+        { "texto": "Atribuições de função concedendo apenas leitura a todos os usuários da assinatura.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-replica-leitura-12",
+      "topico": "Escalabilidade de banco de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Relatórios pesados executados sobre o banco transacional estão degradando o tempo de resposta da aplicação em horário comercial. Os relatórios toleram dados com alguns segundos de atraso. O requisito é isolar essa carga sem duplicar a operação de manutenção do banco e sem alterar a lógica das consultas de relatório. Qual recomendação atende?",
+      "explicacao": "Usar a réplica de leitura já incluída nas camadas de maior desempenho, direcionando as conexões de relatório com a intenção de aplicação somente leitura, é a recomendação: a réplica é mantida pelo próprio serviço, não acrescenta operação de manutenção e o direcionamento é feito na cadeia de conexão, sem tocar nas consultas. A tolerância a alguns segundos de atraso, declarada no enunciado, é o que torna a réplica adequada. Criar uma cópia do banco atualizada por processo próprio resolve o isolamento e cria exatamente a operação de manutenção que o requisito quer evitar. Aumentar a camada de serviço do banco alivia o sintoma sem isolar as cargas, e o relatório continua competindo com a operação. E mover os relatórios para um serviço analítico é uma arquitetura legítima e maior, com processo de ingestão a construir — muito além do que o cenário pede e contrariando a exigência de não alterar as consultas.",
+      "opcoes": [
+        { "texto": "Direcionar os relatórios à réplica de leitura incluída na camada, com intenção de aplicação somente leitura.", "correta": true },
+        { "texto": "Manter uma cópia do banco atualizada por processo próprio, exclusiva para relatórios.", "correta": false },
+        { "texto": "Aumentar a camada de serviço do banco para absorver as duas cargas.", "correta": false },
+        { "texto": "Mover os relatórios para um serviço analítico dedicado, com ingestão periódica.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-integracao-onprem-13",
+      "topico": "Integração de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso precisa orquestrar cargas diárias que leem de trinta fontes — algumas em bancos locais atrás do firewall corporativo, outras em serviços na nuvem —, aplicam transformações e gravam num data lake. O requisito inclui agendamento, novas tentativas, monitoramento de execução e linhagem, sem que a equipe escreva um orquestrador. Qual solução recomendar?",
+      "explicacao": "O Azure Data Factory com runtime de integração auto-hospedado é a recomendação: o serviço entrega agendamento, novas tentativas, monitoramento e linhagem prontos, e o runtime auto-hospedado instalado na rede corporativa é o que permite ler as fontes locais fazendo conexão de saída, sem abrir porta de entrada no firewall. As duas peças juntas cobrem o enunciado inteiro. O Data Factory sem esse runtime resolveria apenas as fontes na nuvem e é a alternativa mais próxima e mais incompleta — é o detalhe que separa quem já montou uma ingestão híbrida de quem só conhece o serviço. Logic Apps orquestra fluxos de negócio muito bem e não é a ferramenta para carga de dados em volume, com paralelismo e linhagem. E funções acionadas por agendamento devolvem à equipe justamente a construção do orquestrador que o requisito exclui.",
+      "opcoes": [
+        { "texto": "Azure Data Factory com runtime de integração auto-hospedado na rede corporativa.", "correta": true },
+        { "texto": "Azure Data Factory usando apenas o runtime de integração do Azure.", "correta": false },
+        { "texto": "Azure Logic Apps com conectores para cada uma das trinta fontes.", "correta": false },
+        { "texto": "Azure Functions acionadas por agendamento, uma por fonte de dados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-multi-visibilidade-14",
+      "topico": "Proteção de dados relacionais",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de suporte precisa consultar a base de clientes, mas não deve enxergar o documento de identificação completo nem registros de clientes de outras filiais. O requisito é que isso valha para qualquer ferramenta que se conecte ao banco, sem alterar a aplicação nem as consultas existentes. Quais duas capacidades atendem? Selecione duas.",
+      "explicacao": "O mascaramento dinâmico de dados atende à primeira parte: ele oculta parcial ou totalmente o valor da coluna no conjunto de resultados conforme a permissão de quem consulta, e é aplicado pelo mecanismo do banco, portanto vale para qualquer ferramenta e não exige mudança de consulta. A segurança em nível de linha atende à segunda: um predicado filtra automaticamente as linhas visíveis por usuário, também no banco e também de forma transparente. As duas são justamente as capacidades que agem sem tocar na aplicação, que é a restrição declarada. Always Encrypted protege melhor o valor, e exige driver com acesso às chaves e adaptação da aplicação, além de restringir os tipos de consulta possíveis. A criptografia transparente de dados protege os arquivos em repouso e não altera nada do que a consulta devolve. E o firewall do servidor controla de onde a conexão pode vir, não o que ela enxerga.",
+      "opcoes": [
+        { "texto": "Mascaramento dinâmico de dados na coluna do documento.", "correta": true },
+        { "texto": "Segurança em nível de linha filtrando por filial.", "correta": true },
+        { "texto": "Always Encrypted aplicado à coluna do documento.", "correta": false },
+        { "texto": "Criptografia transparente de dados no banco.", "correta": false },
+        { "texto": "Regras de firewall do servidor restringindo as origens de conexão.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-multi-cosmos-custo-15",
+      "topico": "Cosmos DB",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um contêiner do Cosmos DB de um sistema interno recebe rajadas curtas de requisições algumas vezes por semana e fica praticamente ocioso no resto do tempo. Hoje ele usa taxa de transferência provisionada manualmente, dimensionada para o pico, e o custo está desproporcional ao uso. Quais duas opções reduzem o custo mantendo a capacidade nas rajadas? Selecione duas.",
+      "explicacao": "A taxa de transferência com dimensionamento automático é uma das duas: ela varia entre um décimo do teto e o teto conforme a demanda, cobrando pelo consumo em cada hora, o que preserva a capacidade nas rajadas e derruba o custo nos períodos ociosos. O modo sem servidor é a outra, e é a mais agressiva em custo para esse perfil: cobra apenas pelas unidades de requisição efetivamente consumidas, sem qualquer piso de provisionamento — adequado justamente a cargas intermitentes e de volume moderado. Reduzir a taxa provisionada manual até a média corta o custo e provoca limitação de requisições durante as rajadas, que é o que o enunciado quer evitar. Habilitar escritas em múltiplas regiões aumenta disponibilidade e custo, sem relação com ociosidade. E mudar a consistência para eventual pode reduzir o consumo de leitura na margem, mas não ataca o custo de capacidade provisionada e altera uma garantia funcional por motivo financeiro.",
+      "opcoes": [
+        { "texto": "Taxa de transferência com dimensionamento automático (autoescala).", "correta": true },
+        { "texto": "Modo sem servidor, cobrando apenas pelas unidades de requisição consumidas.", "correta": true },
+        { "texto": "Reduzir a taxa de transferência provisionada manual para a média observada.", "correta": false },
+        { "texto": "Habilitar escritas em múltiplas regiões para distribuir a carga.", "correta": false },
+        { "texto": "Alterar o nível de consistência do contêiner para eventual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-multi-durabilidade-blob-16",
+      "topico": "Dados não estruturados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Documentos guardados em blobs precisam sobreviver a dois cenários distintos: um processo automatizado que sobrescreve um arquivo com conteúdo errado, e a indisponibilidade prolongada da região inteira. A equipe quer que os dois estejam cobertos por configuração da própria conta, sem construir automação. Quais duas configurações atendem, cada uma a um cenário? Selecione duas.",
+      "explicacao": "O versionamento de blob cobre a sobrescrita: cada escrita passa a gerar uma versão nova e preserva a anterior, que é o único mecanismo da lista que recupera conteúdo substituído — o blob não foi excluído, então proteção contra exclusão não ajuda. A redundância geográfica cobre a perda da região, mantendo cópia em região distante. As duas são configurações da conta, sem automação a escrever, que é a restrição declarada. A exclusão temporária de blob é a confusão mais comum aqui: ela recupera blob excluído, e não blob sobrescrito. A redundância de zona protege contra a perda de um datacenter dentro da mesma região, e não contra a indisponibilidade da região inteira. E a política de ciclo de vida move e expira blobs por idade, o que não protege contra nada — no limite, remove dados.",
+      "opcoes": [
+        { "texto": "Versionamento de blob habilitado na conta.", "correta": true },
+        { "texto": "Redundância geográfica no armazenamento da conta.", "correta": true },
+        { "texto": "Exclusão temporária de blob com retenção estendida.", "correta": false },
+        { "texto": "Redundância de zona no armazenamento da conta.", "correta": false },
+        { "texto": "Política de gerenciamento de ciclo de vida movendo versões antigas para camada fria.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-dados-simnao-consistencia-forte-17",
+      "topico": "Cosmos DB",
+      "tipo": "SimNao",
+      "enunciado": "Uma proposta de arquitetura para um aplicativo global configura uma conta do Cosmos DB com escritas habilitadas em cinco regiões, para reduzir a latência de escrita, e define o nível de consistência forte, argumentando que assim toda leitura em qualquer região devolverá sempre o dado mais recente. Avalie a afirmação: essa combinação é suportada e entrega o comportamento descrito.",
+      "explicacao": "A afirmação é falsa. A consistência forte não é compatível com contas configuradas para escritas em múltiplas regiões: garantir leitura linearizável global exigiria coordenação síncrona entre todas as regiões de escrita, o que anularia justamente o ganho de latência que motivou a configuração — e por isso o serviço não oferece essa combinação. É preciso escolher entre uma coisa e outra: escritas em várias regiões com um nível de consistência mais relaxado, tipicamente sessão ou desatualização limitada, ou uma única região de escrita com consistência forte. Quem responde Sim costuma tratar consistência e distribuição geográfica como eixos independentes, quando são exatamente o compromisso central de um banco distribuído. Para o requisito mais frequente na prática — cada usuário enxergar as próprias gravações — a consistência de sessão resolve sem abrir mão das escritas distribuídas.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-dados-simnao-pitr-18",
+      "topico": "Continuidade de dados",
+      "tipo": "SimNao",
+      "enunciado": "Uma auditoria interna pediu a restauração de um banco do Azure SQL Database no estado em que ele se encontrava há sessenta dias. O banco tem apenas a configuração padrão de backup, sem nenhuma política adicional configurada. Avalie a afirmação: a restauração pontual no tempo permite atender a esse pedido.",
+      "explicacao": "A afirmação é falsa. A restauração pontual no tempo opera dentro de uma janela curta de retenção, configurável até algumas semanas, e sessenta dias está fora dela — sem nenhuma política adicional, o backup daquele dia simplesmente não existe mais. Atender a pedidos desse tipo exige ter configurado antes a retenção de longo prazo, que guarda backups completos semanais, mensais e anuais por até uma década; é uma decisão de projeto tomada no início, e não algo que se resolve no momento da auditoria. Quem responde Sim costuma confundir os dois mecanismos porque ambos aparecem como \"backup\" na mesma tela. A distinção prática é clara: a restauração pontual responde a erro operacional recente, com granularidade de segundos; a retenção de longo prazo responde a exigência de conformidade, com granularidade de semanas ou meses.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-dados-assoc-servico-relacional-19",
+      "topico": "Escolha de serviço relacional",
+      "tipo": "Associacao",
+      "enunciado": "Cada restrição abaixo decide um serviço relacional diferente. Associe cada restrição ao serviço adequado.",
+      "explicacao": "Compatibilidade quase total com SQL Server — Agent, consultas entre bancos, Service Broker — sem administrar servidor é o Azure SQL Managed Instance. Um banco isolado, moderno, com o menor esforço de gerência possível é o Azure SQL Database. Necessidade de controle do sistema operacional, de uma versão específica do mecanismo ou de software de terceiros instalado junto é SQL Server em máquina virtual. E documentos JSON com latência de milissegundos e distribuição global é Cosmos DB, que sequer é relacional e entra aqui porque a decisão de armazenamento frequentemente passa por descartá-lo ou escolhê-lo. O Azure Database for PostgreSQL está no painel porque é uma escolha relacional legítima e muito usada — resolve o caso de quem já roda PostgreSQL ou quer um mecanismo de código aberto gerenciado — e não atende a nenhuma das quatro restrições acima, todas ligadas ao mecanismo do SQL Server ou ao modelo de documentos.",
+      "associacoes": [
+        { "alvo": "Compatibilidade quase total com SQL Server, sem administrar servidor", "item": "Azure SQL Managed Instance" },
+        { "alvo": "Banco isolado e moderno, com o menor esforço de gerência possível", "item": "Azure SQL Database" },
+        { "alvo": "Controle do sistema operacional e versão específica do mecanismo", "item": "SQL Server em máquina virtual" },
+        { "alvo": "Documentos JSON com latência de milissegundos e distribuição global", "item": "Azure Cosmos DB" }
+      ],
+      "itensExtras": [
+        "Azure Database for PostgreSQL"
+      ]
+    },
+    {
+      "id": "az305-dados-assoc-camada-servico-20",
+      "topico": "Camadas de serviço",
+      "tipo": "Associacao",
+      "enunciado": "Para cada requisito abaixo, a arquiteta precisa escolher a camada de serviço ou de computação do Azure SQL Database. Associe cada requisito à opção adequada.",
+      "explicacao": "Banco muito grande e em crescimento, com restauração que não pode piorar conforme ele cresce, é a camada Hyperscale. Menor latência possível, com armazenamento local e réplica de leitura incluída, é a camada Comercialmente Crítica. Uso intermitente com longos períodos ociosos e cobrança por consumo é a camada de computação sem servidor. E muitos bancos com picos individuais em horários diferentes, compartilhando um orçamento de recursos, é o pool elástico. A camada De Uso Geral está no painel porque é o ponto de partida padrão e a escolha certa da maioria das cargas — equilíbrio entre custo e desempenho com armazenamento remoto —, e é justamente por ser o padrão que ela não responde a nenhum dos quatro requisitos acima, que existem para descrever exceções ao padrão.",
+      "associacoes": [
+        { "alvo": "Banco muito grande e crescendo, com restauração que não pode piorar com o tamanho", "item": "Hyperscale" },
+        { "alvo": "Menor latência possível, com armazenamento local e réplica de leitura incluída", "item": "Comercialmente Crítica" },
+        { "alvo": "Uso intermitente, com longos períodos ociosos e cobrança por consumo", "item": "Computação sem servidor" },
+        { "alvo": "Muitos bancos com picos individuais em horários diferentes, num orçamento comum", "item": "Pool elástico" }
+      ],
+      "itensExtras": [
+        "De Uso Geral"
+      ]
+    },
+    {
+      "id": "az305-dados-assoc-protecao-21",
+      "topico": "Proteção de dados relacionais",
+      "tipo": "Associacao",
+      "enunciado": "Cada exigência de proteção abaixo é atendida por um recurso diferente do banco de dados. Associe cada exigência ao recurso.",
+      "explicacao": "Impedir que o administrador do banco leia o valor em texto claro, com as chaves fora do alcance dele, é Always Encrypted — o único que tira a chave do servidor. Proteger os arquivos de dados e de backup em repouso, de forma transparente para quem consulta, é a criptografia transparente de dados. Ocultar parte do valor no resultado conforme a permissão de quem consulta, sem alterar o dado armazenado, é o mascaramento dinâmico de dados. E restringir quais linhas cada usuário enxerga, por predicado aplicado no mecanismo, é a segurança em nível de linha. O firewall do servidor está no painel porque também é proteção e costuma ser a primeira coisa configurada: ele decide de onde a conexão pode vir, e nenhuma das quatro exigências acima trata de origem — todas tratam do que se enxerga depois de conectado.",
+      "associacoes": [
+        { "alvo": "Impedir que o administrador do banco leia o valor em texto claro", "item": "Always Encrypted" },
+        { "alvo": "Proteger arquivos de dados e de backup em repouso, de forma transparente", "item": "Criptografia transparente de dados" },
+        { "alvo": "Ocultar parte do valor no resultado, conforme a permissão de quem consulta", "item": "Mascaramento dinâmico de dados" },
+        { "alvo": "Restringir quais linhas cada usuário enxerga, por predicado no mecanismo", "item": "Segurança em nível de linha" }
+      ],
+      "itensExtras": [
+        "Regras de firewall do servidor"
+      ]
+    },
+    {
+      "id": "az305-dados-assoc-recuperacao-22",
+      "topico": "Continuidade de dados",
+      "tipo": "Associacao",
+      "enunciado": "Cada objetivo de recuperação de dados abaixo pede um mecanismo diferente. Associe cada objetivo ao mecanismo adequado.",
+      "explicacao": "Voltar um banco ao estado de poucas horas atrás, depois de uma atualização sem cláusula de filtro, é a restauração pontual no tempo, que trabalha com granularidade de segundos dentro de uma janela curta. Guardar backups mensais por sete anos para auditoria é a retenção de longo prazo. Assumir em outra região sem que a aplicação mude a cadeia de conexão é o grupo de failover automático, pelos pontos de extremidade estáveis. E manter cópia dos blobs em outra região para o caso de perda regional é a redundância geográfica da conta de armazenamento. A exportação para arquivo de pacote de dados está no painel porque também produz uma cópia dos dados e é o caminho artesanal que muita equipe adota: serve para mover ou arquivar um banco pontualmente, é manual, mais lento para restaurar e não atende a nenhum dos quatro objetivos como mecanismo contínuo.",
+      "associacoes": [
+        { "alvo": "Voltar o banco ao estado de poucas horas atrás, após uma atualização sem filtro", "item": "Restauração pontual no tempo" },
+        { "alvo": "Guardar backups mensais por sete anos, para auditoria", "item": "Retenção de longo prazo" },
+        { "alvo": "Assumir em outra região sem que a aplicação mude a cadeia de conexão", "item": "Grupo de failover automático" },
+        { "alvo": "Manter cópia dos blobs em outra região, para o caso de perda regional", "item": "Redundância geográfica da conta" }
+      ],
+      "itensExtras": [
+        "Exportação para arquivo de pacote de dados (bacpac)"
+      ]
+    }
+  ]
+}
