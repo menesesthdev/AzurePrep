@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-400",
+  "area": "controle-codigo",
+  "questoes": [
+    {
+      "id": "az400-codigo-squash-01",
+      "topico": "Estratégias de integração",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma solicitação de alteração típica da equipe chega com trinta a quarenta commits do tipo \"wip\", \"corrige typo\" e \"ajusta após review\". A liderança técnica quer que a linha principal tenha um commit por alteração entregue, com mensagem descritiva, para que o histórico sirva de registro do que mudou e para que reverter uma entrega seja uma operação só. Qual tipo de integração recomendar?",
+      "explicacao": "A integração com compactação — squash — é a recomendação: ela combina todos os commits da solicitação de alteração num único commit na linha principal, com mensagem escrita no momento da integração. O histórico da principal passa a ter uma entrada por entrega, legível como registro, e reverter aquela entrega vira reverter um commit só, que é o segundo requisito. O ruído dos commits de trabalho fica na branch de origem e não polui a principal. Um commit de merge preserva todos os quarenta commits mais o próprio merge, que é exatamente o histórico que a liderança quer evitar. A integração com rebase replica os quarenta commits linearmente na principal — melhora a forma e não reduz o ruído. E o avanço rápido exige histórico linear na origem e traz os mesmos commits, além de falhar quando a principal andou.",
+      "opcoes": [
+        { "texto": "Integração com compactação (squash), gerando um commit por solicitação de alteração.", "correta": true },
+        { "texto": "Integração com commit de merge, preservando o histórico completo da branch.", "correta": false },
+        { "texto": "Integração com rebase, replicando os commits linearmente sobre a principal.", "correta": false },
+        { "texto": "Integração por avanço rápido, sem criar commit de merge.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-revert-02",
+      "topico": "Recuperação de dados no Git",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um commit já integrado à linha principal há dois dias introduziu um defeito, e outras oito pessoas já puxaram esse estado para as próprias máquinas. É preciso desfazer a alteração o quanto antes, sem quebrar o repositório local de ninguém e sem exigir que a equipe execute procedimentos de recuperação. Qual comando recomendar?",
+      "explicacao": "O revert é a operação adequada: ele cria um commit novo que aplica o inverso das alterações, sem tocar no que já existe no histórico. Como nada é reescrito, quem já puxou o estado apenas recebe mais um commit no próximo pull, sem conflito de histórico e sem procedimento nenhum — que é exatamente a restrição do enunciado. O registro de que o defeito existiu e foi desfeito também permanece, o que é desejável para auditoria. O reset move o ponteiro da branch e, uma vez enviado para a origem, reescreve o histórico compartilhado: as oito pessoas passariam a ter um histórico divergente e teriam de intervir manualmente. O rebase interativo removendo o commit tem o mesmo problema, com a agravante de reescrever também os commits posteriores. E o cherry-pick traz um commit de outro lugar, o que não desfaz nada.",
+      "opcoes": [
+        { "texto": "git revert, criando um commit que aplica o inverso das alterações.", "correta": true },
+        { "texto": "git reset com envio forçado, movendo a linha principal para antes do commit.", "correta": false },
+        { "texto": "Rebase interativo removendo o commit e enviando o histórico reescrito.", "correta": false },
+        { "texto": "git cherry-pick do último commit bom, trazendo-o para o topo da principal.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-reflog-03",
+      "topico": "Recuperação de dados no Git",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma pessoa executou um reset forte na própria branch local e perdeu três commits de trabalho de um dia inteiro. Os commits nunca foram enviados para a origem, então não estão em lugar nenhum além da máquina dela. Ela ainda não executou nenhuma coleta de lixo no repositório. Qual caminho recupera o trabalho?",
+      "explicacao": "O reflog é o caminho: ele registra localmente todas as posições por onde a referência passou, inclusive as que deixaram de ser alcançáveis por qualquer branch. Consultando o reflog encontra-se o identificador do commit anterior ao reset, e a partir dele o trabalho pode ser recuperado criando uma branch naquele ponto. O detalhe de nunca ter havido coleta de lixo é o que garante que os objetos ainda existem — passado o prazo de expiração, eles são removidos e a recuperação deixa de ser possível. Buscar na origem não adianta porque os commits nunca foram enviados, o que o enunciado declara. Restaurar de backup do disco é o último recurso, muito mais caro que uma consulta ao reflog. E refazer o trabalho é jogar fora um dia por desconhecer um comando.",
+      "opcoes": [
+        { "texto": "Consultar o reflog, localizar o commit anterior ao reset e criar uma branch nele.", "correta": true },
+        { "texto": "Buscar os commits na origem e restaurar a branch a partir dela.", "correta": false },
+        { "texto": "Restaurar o repositório a partir do backup do disco da máquina.", "correta": false },
+        { "texto": "Refazer o trabalho, já que commits removidos por reset forte são irrecuperáveis.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-cherry-pick-04",
+      "topico": "Recuperação de dados no Git",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma correção crítica foi feita e integrada na linha principal, que já contém também três funcionalidades incompletas. A mesma correção precisa chegar à branch da versão 4.2, que está em produção, sem levar junto nenhuma das funcionalidades incompletas. Qual operação recomendar?",
+      "explicacao": "O cherry-pick é a operação: ele aplica sobre a branch de destino apenas as alterações do commit escolhido, deixando de fora tudo o mais que existe na origem. É exatamente o mecanismo para propagar uma correção pontual entre linhas que divergiram, e é o que sustenta o caminho de correção emergencial em estratégias com branches de release. Integrar a principal na branch 4.2 traria as três funcionalidades incompletas junto, que é precisamente o que o enunciado proíbe. Integrar a 4.2 na principal inverte o sentido e não coloca a correção em produção. E recriar a branch 4.2 a partir da principal descartaria a linha de produção e substituiria por um estado que contém trabalho inacabado — o pior desfecho possível para um ambiente em uso.",
+      "opcoes": [
+        { "texto": "git cherry-pick do commit da correção para a branch da versão 4.2.", "correta": true },
+        { "texto": "Integrar a linha principal na branch da versão 4.2.", "correta": false },
+        { "texto": "Integrar a branch da versão 4.2 na linha principal.", "correta": false },
+        { "texto": "Recriar a branch da versão 4.2 a partir do estado atual da linha principal.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-lfs-05",
+      "topico": "Escala do repositório",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um repositório de um jogo guarda texturas e modelos que somam vários gigabytes, versionados junto com o código. Cada clone leva quase uma hora e o repositório cresce rápido, porque cada nova versão de um binário é armazenada inteira. A equipe precisa continuar versionando esses arquivos. Qual solução recomendar?",
+      "explicacao": "O Git LFS é a solução: os arquivos grandes passam a ser armazenados fora do repositório, e o que fica versionado é um ponteiro leve. O clone deixa de baixar todo o histórico de cada binário e passa a trazer apenas as versões efetivamente necessárias, o que ataca as duas queixas — tempo de clone e crescimento. E o versionamento dos arquivos continua existindo, que é a restrição declarada. Remover os binários do repositório e guardá-los num compartilhamento resolve o tamanho e abandona o versionamento, além de separar o binário da revisão do código que o usa. Comprimir os arquivos antes de commitar reduz um pouco cada versão e não muda o fato de que cada alteração armazena um objeto inteiro novo. E o clone raso reduz o histórico baixado, sem resolver o crescimento nem servir a quem precisa do histórico completo.",
+      "opcoes": [
+        { "texto": "Adotar o Git LFS, versionando ponteiros e armazenando os binários fora do repositório.", "correta": true },
+        { "texto": "Remover os binários do repositório e mantê-los num compartilhamento de arquivos.", "correta": false },
+        { "texto": "Comprimir os arquivos binários antes de cada commit.", "correta": false },
+        { "texto": "Orientar a equipe a clonar com profundidade limitada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-clone-parcial-06",
+      "topico": "Escala do repositório",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um repositório com quinze anos de histórico e centenas de milhares de commits demora dezenas de minutos para clonar, embora não tenha arquivos grandes. As pessoas trabalham quase sempre em uma fração pequena da árvore de diretórios, mas precisam poder consultar o histórico quando necessário. Qual abordagem recomendar?",
+      "explicacao": "Clone parcial combinado com checkout esparso é a abordagem: o clone parcial não baixa o conteúdo dos objetos de imediato, buscando-os sob demanda, e o checkout esparso materializa em disco apenas os diretórios em que a pessoa trabalha. O histórico continua acessível, com os objetos sendo obtidos quando de fato consultados — que é a ressalva do enunciado. Ferramentas como o Scalar existem justamente para configurar e manter esse arranjo. O Git LFS resolve arquivo grande e o enunciado declara que não há nenhum, então não ataca a causa. Um clone raso é rápido e trunca o histórico, quebrando o requisito de poder consultá-lo. E dividir o repositório em vários resolveria o tamanho com uma reorganização estrutural cara, que só se justifica se houver outros motivos além do tempo de clone.",
+      "opcoes": [
+        { "texto": "Clone parcial com checkout esparso, buscando objetos sob demanda.", "correta": true },
+        { "texto": "Adotar o Git LFS para reduzir o volume baixado no clone.", "correta": false },
+        { "texto": "Clone raso, limitando a profundidade do histórico baixado.", "correta": false },
+        { "texto": "Dividir o repositório em vários repositórios menores por área do produto.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-limpar-historico-07",
+      "topico": "Escala do repositório",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um arquivo de dados de dois gigabytes foi commitado por engano há oito meses e removido no commit seguinte. O repositório continua enorme, porque o objeto permanece no histórico. A equipe quer reduzir o tamanho de fato. O que a operação exige, além de executar a ferramenta de reescrita?",
+      "explicacao": "A reescrita de histórico produz identificadores novos para todos os commits a partir do ponto alterado, então ela exige envio forçado para a origem e obriga toda a equipe a realinhar os repositórios locais — na prática, clonar de novo é o caminho mais seguro. Solicitações de alteração abertas precisam ser recriadas, porque apontam para commits que deixaram de existir. É uma operação coordenada, e é por isso que remover algo do histórico é caro e se evita commitando com cuidado. Achar que basta executar a ferramenta ignora que o histórico é compartilhado e que a origem precisa aceitar a substituição. Um commit de remoção é o que já foi feito e não reduz nada, porque o objeto continua alcançável pelo histórico. E a coleta de lixo remove objetos inalcançáveis; enquanto o commit antigo existir, o arquivo é alcançável.",
+      "opcoes": [
+        { "texto": "Envio forçado à origem e realinhamento de todos os clones e solicitações de alteração abertas.", "correta": true },
+        { "texto": "Nada além disso: executada a ferramenta, a origem e os clones se atualizam no próximo pull.", "correta": false },
+        { "texto": "Um commit de remoção do arquivo, seguido da execução da ferramenta.", "correta": false },
+        { "texto": "Apenas executar a coleta de lixo do Git na origem, que remove o objeto grande.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-validacao-build-08",
+      "topico": "Políticas de branch",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Três vezes no último mês a linha principal ficou com o build quebrado, sempre porque uma solicitação de alteração foi integrada antes de a verificação terminar, ou porque alguém enviou direto para a branch. A equipe quer que isso deixe de ser possível, e não apenas desencorajado. Quais configurações atendem?",
+      "explicacao": "Exigir validação de build como verificação obrigatória na política da branch e bloquear o envio direto, obrigando toda alteração a passar por solicitação de alteração, atendem juntas: a primeira impede integrar antes de a verificação passar, a segunda fecha o caminho que contorna a política inteira. As duas causas descritas no enunciado são fechadas exatamente por essas duas configurações, e o pedido é explicitamente por impedimento, não por convenção. Um número mínimo de revisores melhora a qualidade da revisão e não garante que o build passe — pessoa aprova código quebrado. Limitar o tipo de integração organiza o histórico e não verifica nada. E um alerta no canal da equipe quando o build quebra é detecção depois do fato, que é justamente o estado atual.",
+      "opcoes": [
+        { "texto": "Validação de build obrigatória na política da branch e bloqueio de envio direto.", "correta": true },
+        { "texto": "Número mínimo de revisores e resolução obrigatória de comentários.", "correta": false },
+        { "texto": "Limitar os tipos de integração permitidos e exigir histórico linear.", "correta": false },
+        { "texto": "Alerta no canal da equipe sempre que o build da linha principal quebrar.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-limitar-merge-09",
+      "topico": "Políticas de branch",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe decidiu que a linha principal terá um commit por entrega, mas o histórico continua misturando commits de merge, sequências rebaseadas e commits únicos, porque cada pessoa escolhe o tipo de integração no momento de concluir a solicitação de alteração. Qual configuração torna a decisão efetiva?",
+      "explicacao": "Limitar, na política da branch, os tipos de integração permitidos — deixando apenas a compactação — é o que torna a decisão efetiva: a opção deixa de ser oferecida a quem conclui a solicitação, e o resultado passa a ser uniforme sem depender de ninguém lembrar. É a diferença entre combinar e configurar, que é o ponto da questão. Documentar a decisão no wiki e revisar em reunião é convenção, e convenção depende de memória sob pressa. Exigir histórico linear é um requisito relacionado e mais frouxo: ele proíbe commit de merge e continua aceitando tanto compactação quanto rebase, então não produz um commit por entrega. E revisar o histórico semanalmente e corrigir por reescrita trata o sintoma depois do fato, com uma operação que reescreve histórico compartilhado — cara e arriscada para algo que uma configuração resolve.",
+      "opcoes": [
+        { "texto": "Limitar na política da branch os tipos de integração permitidos, deixando apenas a compactação.", "correta": true },
+        { "texto": "Documentar a decisão no wiki da equipe e revisá-la nas reuniões de retrospectiva.", "correta": false },
+        { "texto": "Exigir histórico linear na branch principal.", "correta": false },
+        { "texto": "Revisar o histórico semanalmente e corrigir por reescrita o que estiver fora do padrão.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-tag-anotada-10",
+      "topico": "Organização do repositório",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma norma interna exige que cada versão publicada tenha uma marca no repositório registrando quem a publicou, quando e com qual descrição, e que essa marca possa ser assinada criptograficamente para comprovar a origem. Qual mecanismo do Git atende?",
+      "explicacao": "A tag anotada é o mecanismo: ela é um objeto próprio no repositório, guarda quem a criou, a data, uma mensagem descritiva e pode ser assinada criptograficamente — que são exatamente os quatro elementos exigidos. É por isso que ela é a forma recomendada para marcar versões publicadas. A tag leve é apenas um ponteiro para um commit, sem autor, sem data própria, sem mensagem e sem possibilidade de assinatura; serve para marcação temporária e não atende a nenhuma das exigências. Uma branch por versão publicada é um ponteiro móvel, que continua avançando conforme recebe commits — a marca deixaria de identificar o estado publicado. E registrar a versão numa página do wiki guarda a informação fora do repositório, sem vínculo verificável com o commit correspondente.",
+      "opcoes": [
+        { "texto": "Tag anotada, que é um objeto com autor, data, mensagem e possibilidade de assinatura.", "correta": true },
+        { "texto": "Tag leve apontando para o commit publicado.", "correta": false },
+        { "texto": "Uma branch nomeada com o número de cada versão publicada.", "correta": false },
+        { "texto": "Registro da versão e do identificador do commit numa página do wiki.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-feed-compartilhado-11",
+      "topico": "Compartilhamento entre repositórios",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma biblioteca de utilitários está copiada dentro de doze repositórios de produto. As cópias já divergiram, e uma correção de segurança precisou ser aplicada doze vezes na semana passada — três delas saíram diferentes. Cada produto tem o próprio ciclo de release e precisa decidir quando adotar uma versão nova da biblioteca. Qual abordagem recomendar?",
+      "explicacao": "Publicar a biblioteca como pacote versionado em um feed interno e consumi-la por dependência declarada é a abordagem: a correção passa a ser feita uma vez, publicada como versão nova, e cada produto decide quando atualizar a referência — que é exatamente o requisito de ciclos independentes. O versionamento semântico dá a cada equipe a informação de compatibilidade para tomar essa decisão. Um submódulo Git compartilha o código sem duplicar e acopla o consumidor a um commit específico, com fluxo de atualização mais áspero e sem noção de compatibilidade entre versões. Consolidar os doze produtos num repositório único resolve a duplicação com uma reorganização estrutural muito maior do que o problema pede. E automatizar a propagação da cópia para os doze repositórios mantém doze cópias e acrescenta uma automação para mantê-las sincronizadas — mais peças para divergir.",
+      "opcoes": [
+        { "texto": "Publicar a biblioteca como pacote versionado em um feed interno, consumido por dependência.", "correta": true },
+        { "texto": "Substituir as cópias por um submódulo Git apontando para o repositório da biblioteca.", "correta": false },
+        { "texto": "Consolidar os doze produtos e a biblioteca em um repositório único.", "correta": false },
+        { "texto": "Automatizar a propagação da cópia da biblioteca para os doze repositórios.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-permissao-repositorio-12",
+      "topico": "Organização do repositório",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma organização precisa que ninguém, nem os administradores do projeto, consiga apagar a branch principal de um repositório crítico ou enviar histórico reescrito para ela. Ao mesmo tempo, o fluxo normal de solicitações de alteração precisa continuar funcionando sem atrito adicional. Qual configuração recomendar?",
+      "explicacao": "Proteger a branch com regras que bloqueiem o envio forçado e a exclusão, aplicadas inclusive a quem tem função administrativa, é a configuração: as regras de proteção têm a opção de valer para administradores, e é justamente essa opção que atende ao \"nem os administradores\" do enunciado. O fluxo de solicitações de alteração segue intacto, porque a proteção age sobre envio direto e sobre operações destrutivas, não sobre integração revisada. Remover a permissão de contribuir dos administradores quebraria o trabalho deles em outras branches e continuaria permitindo que reativassem a permissão. Um bloqueio de recurso é um conceito do Azure Resource Manager, sem efeito sobre branches de um repositório Git. E fazer backup diário do repositório permite restaurar depois do estrago, sem impedir que ele aconteça — o requisito é impedir.",
+      "opcoes": [
+        { "texto": "Regras de proteção bloqueando envio forçado e exclusão da branch, aplicadas também a administradores.", "correta": true },
+        { "texto": "Remover a permissão de contribuir dos administradores do projeto.", "correta": false },
+        { "texto": "Aplicar um bloqueio de recurso do tipo Não Pode Excluir sobre o repositório.", "correta": false },
+        { "texto": "Configurar backup diário do repositório, permitindo restaurar a branch se necessário.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-rebase-compartilhada-13",
+      "topico": "Estratégias de integração",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para eliminar commits de merge, um engenheiro propôs que a equipe passe a executar rebase da linha principal sempre que ela divergir, incluindo quando outras pessoas já tenham baixado aquele estado. A engenheira responsável recusa a proposta. Qual é o argumento correto?",
+      "explicacao": "O rebase reescreve o histórico gerando identificadores novos para os commits reposicionados. Numa branch compartilhada, isso faz o estado da origem divergir do que cada pessoa tem localmente, e o próximo pull produz histórico duplicado ou conflito que exige intervenção manual em cada máquina — o custo cai sobre a equipe inteira. Por isso a regra prática é rebasear apenas branches que ninguém mais usa, e integrar branches compartilhadas com merge ou compactação. Dizer que rebase é mais lento erra o motivo: desempenho não é a questão. Afirmar que ele perde alterações não procede, já que os commits são reaplicados. E dizer que ele só funciona com uma pessoa por branch descreve a recomendação de forma imprecisa: o problema não é quem trabalha na branch, e sim quem já baixou o histórico que será reescrito.",
+      "opcoes": [
+        { "texto": "Rebase reescreve identificadores; numa branch já baixada por outros, cada pessoa terá de intervir manualmente.", "correta": true },
+        { "texto": "Rebase é significativamente mais lento que merge em repositórios com histórico longo.", "correta": false },
+        { "texto": "Rebase descarta alterações quando há conflito entre os commits reposicionados.", "correta": false },
+        { "texto": "Rebase só funciona quando há exatamente uma pessoa trabalhando na branch.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-multi-protecao-14",
+      "topico": "Políticas de branch",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma auditoria exige evidência de que nenhuma alteração chega à linha principal sem revisão humana e sem verificação automatizada, e de que essa regra não pode ser contornada por quem tem função administrativa. Quais duas configurações, juntas, produzem essa garantia? Selecione duas.",
+      "explicacao": "Exigir número mínimo de revisores com aprovação registrada cobre a revisão humana e deixa o rastro que a auditoria pede; exigir validação de build bem-sucedida como verificação obrigatória cobre a verificação automatizada. As duas atuam sobre a conclusão da solicitação de alteração, e a garantia contra contorno vem de aplicá-las também a administradores — opção que as regras de proteção oferecem e sem a qual a evidência não se sustenta. Limitar os tipos de integração organiza o histórico e não verifica nada. Exigir item de trabalho vinculado melhora a rastreabilidade e não é revisão nem verificação. E exigir resolução de todos os comentários é uma boa prática de revisão que pressupõe que alguém comentou — sem revisores mínimos, uma solicitação sem comentário nenhum passa satisfazendo a regra.",
+      "opcoes": [
+        { "texto": "Número mínimo de revisores, com aprovação registrada na solicitação de alteração.", "correta": true },
+        { "texto": "Validação de build bem-sucedida como verificação obrigatória para concluir.", "correta": true },
+        { "texto": "Limitação dos tipos de integração permitidos na branch.", "correta": false },
+        { "texto": "Exigência de item de trabalho vinculado em cada solicitação de alteração.", "correta": false },
+        { "texto": "Exigência de que todos os comentários da revisão estejam resolvidos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-multi-escala-15",
+      "topico": "Escala do repositório",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um repositório tem oito gigabytes: metade vem de arquivos de mídia versionados ao longo dos anos e metade de um histórico muito longo de código. Clonar leva quarenta minutos e a equipe cresceu. Quais duas técnicas atacam diretamente cada uma dessas duas causas? Selecione duas.",
+      "explicacao": "O Git LFS ataca a metade de mídia: os binários saem do repositório e ficam referenciados por ponteiro, de modo que o clone deixa de baixar todas as versões históricas de cada arquivo. O clone parcial com checkout esparso ataca a metade de histórico longo: os objetos passam a ser buscados sob demanda e apenas os diretórios em uso são materializados. Cada uma resolve uma causa, e é por isso que as duas são necessárias — aplicar só uma deixa metade do problema de pé. Aumentar a compressão do repositório dá ganho marginal, porque objetos Git já são comprimidos. Reduzir a retenção dos artefatos de build não toca no repositório de código. E dividir por área de produto é uma reorganização estrutural que resolveria por outro caminho e cujo custo só se justifica com motivos além do tempo de clone.",
+      "opcoes": [
+        { "texto": "Adotar o Git LFS para os arquivos de mídia versionados.", "correta": true },
+        { "texto": "Adotar clone parcial com checkout esparso para o histórico longo de código.", "correta": true },
+        { "texto": "Aumentar o nível de compressão do repositório na origem.", "correta": false },
+        { "texto": "Reduzir a retenção dos artefatos de build associados ao repositório.", "correta": false },
+        { "texto": "Dividir o repositório por área de produto, criando repositórios menores.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-multi-compartilhamento-16",
+      "topico": "Compartilhamento entre repositórios",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um conjunto de definições de pipeline em YAML e um conjunto de utilitários de código precisam ser reutilizados por catorze repositórios, sem cópia em nenhum deles, e cada consumidor precisa poder fixar a versão que usa. Quais duas abordagens atendem, cada uma ao seu tipo de artefato? Selecione duas.",
+      "explicacao": "Para as definições de pipeline, a abordagem é mantê-las como templates YAML em um repositório central e referenciá-los, fixando a versão por tag — cada consumidor decide quando absorver uma alteração. Para os utilitários de código, é publicá-los como pacote versionado em um feed interno, consumido por dependência declarada. As duas eliminam a cópia e dão controle de versão a quem consome, cada uma no formato adequado ao seu tipo de artefato — que é a estrutura da pergunta. Copiar os arquivos com automação mantém catorze cópias, que é o que se quer evitar. Um repositório monolítico resolve por consolidação e é mudança estrutural muito maior. E documentar os trechos no wiki para cópia manual é a pior versão da duplicação, sem nem o benefício da automação.",
+      "opcoes": [
+        { "texto": "Templates YAML num repositório central, referenciados com versão fixada por tag.", "correta": true },
+        { "texto": "Utilitários publicados como pacote versionado em feed interno.", "correta": true },
+        { "texto": "Automação que copia os arquivos compartilhados para os catorze repositórios.", "correta": false },
+        { "texto": "Consolidação dos catorze repositórios em um repositório monolítico.", "correta": false },
+        { "texto": "Documentação dos trechos compartilhados no wiki, para cópia manual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-codigo-simnao-revert-17",
+      "topico": "Recuperação de dados no Git",
+      "tipo": "SimNao",
+      "enunciado": "Depois que um commit contendo um trecho de configuração indevido foi integrado à linha principal, a equipe executou um revert e concluiu que o conteúdo daquele commit não está mais presente no repositório. Avalie a afirmação: o revert remove do repositório o conteúdo do commit revertido.",
+      "explicacao": "A afirmação é falsa. O revert cria um commit novo que aplica as alterações inversas: o estado atual da árvore volta ao que era antes, e o commit original permanece intacto no histórico, com todo o seu conteúdo recuperável por qualquer pessoa que consulte aquele ponto. É precisamente essa propriedade que torna o revert seguro em branches compartilhadas — ele não reescreve nada —, e é a mesma propriedade que o torna inadequado para eliminar conteúdo. Quando o objetivo é fazer o conteúdo deixar de existir, o caminho é reescrever o histórico com uma ferramenta de limpeza, com tudo o que isso implica: envio forçado, realinhamento de todos os clones e recriação das solicitações de alteração abertas. E se o conteúdo era uma credencial, nada disso substitui revogá-la, porque ela pode já ter sido copiada.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-codigo-simnao-tag-leve-18",
+      "topico": "Organização do repositório",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe marca cada versão publicada com uma tag leve, criada a partir do commit correspondente. O responsável afirma que isso é suficiente para o registro de auditoria exigido, que pede saber quem publicou cada versão e quando. Avalie a afirmação: a tag leve atende a esse requisito de auditoria.",
+      "explicacao": "A afirmação é falsa. Uma tag leve é apenas um nome apontando para um commit: ela não guarda quem a criou, quando foi criada, nem mensagem alguma, e não pode ser assinada. A data e o autor que aparecem ao consultá-la são do commit apontado, que podem ser de outra pessoa e de outro momento — quem escreveu o código não é necessariamente quem decidiu publicá-lo, e essa diferença é exatamente o que a auditoria quer registrar. A tag anotada é o mecanismo adequado, porque é um objeto próprio com autor, data e mensagem, e aceita assinatura criptográfica para comprovar a origem. Vale registrar ainda que tags leves são fáceis de mover ou recriar sem deixar rastro, o que enfraquece qualquer uso delas como registro imutável.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-codigo-assoc-operacao-git-19",
+      "topico": "Recuperação de dados no Git",
+      "tipo": "Associacao",
+      "enunciado": "Cada situação abaixo é resolvida por uma operação diferente do Git. Associe cada situação à operação adequada.",
+      "explicacao": "Desfazer um commit já integrado e já baixado por outras pessoas é revert, que cria o inverso sem reescrever nada. Recuperar commits locais perdidos por um reset forte é reflog, que guarda as posições anteriores da referência enquanto os objetos não expiram. Levar apenas uma correção específica da linha principal para uma branch de versão é cherry-pick. E descartar completamente commits locais ainda não enviados, voltando a branch a um ponto anterior, é reset — seguro justamente porque nada foi compartilhado. O rebase interativo está no painel porque também reorganiza histórico e é a ferramenta mais lembrada para \"arrumar commits\": ele reordena, junta e edita commits de uma branch própria antes de publicá-la, e não é o instrumento certo para nenhuma das quatro situações acima — em duas delas, aplicá-lo em histórico compartilhado seria justamente o erro.",
+      "associacoes": [
+        { "alvo": "Desfazer um commit já integrado e já baixado por outras pessoas", "item": "git revert" },
+        { "alvo": "Recuperar commits locais perdidos por um reset forte", "item": "git reflog" },
+        { "alvo": "Levar só uma correção da linha principal para a branch de uma versão", "item": "git cherry-pick" },
+        { "alvo": "Descartar commits locais ainda não enviados, voltando a branch a um ponto anterior", "item": "git reset" }
+      ],
+      "itensExtras": [
+        "Rebase interativo"
+      ]
+    },
+    {
+      "id": "az400-codigo-assoc-integracao-20",
+      "topico": "Estratégias de integração",
+      "tipo": "Associacao",
+      "enunciado": "Cada requisito de histórico abaixo decide um tipo de integração diferente. Associe cada requisito ao tipo adequado.",
+      "explicacao": "Um commit por entrega na linha principal, com o ruído da branch descartado, é a integração com compactação. Preservar todos os commits da branch e registrar explicitamente o ponto de junção é o commit de merge. Histórico linear preservando os commits individuais da branch é a integração com rebase. E integrar sem criar commit algum, quando a branch está diretamente à frente e nada divergiu, é o avanço rápido. O cherry-pick está no painel porque também move alterações entre branches e por isso é confundido com um tipo de integração: ele aplica commits escolhidos a dedo, deixando o restante para trás, o que é propagação seletiva e não integração — usá-lo como forma de integrar produz duplicação de commits e conflitos depois, quando as branches forem de fato integradas.",
+      "associacoes": [
+        { "alvo": "Um commit por entrega na principal, descartando o ruído da branch", "item": "Integração com compactação (squash)" },
+        { "alvo": "Preservar todos os commits da branch e registrar o ponto de junção", "item": "Commit de merge" },
+        { "alvo": "Histórico linear, preservando os commits individuais da branch", "item": "Integração com rebase" },
+        { "alvo": "Integrar sem criar commit, com a branch diretamente à frente da principal", "item": "Avanço rápido (fast-forward)" }
+      ],
+      "itensExtras": [
+        "git cherry-pick"
+      ]
+    },
+    {
+      "id": "az400-codigo-assoc-politica-21",
+      "topico": "Políticas de branch",
+      "tipo": "Associacao",
+      "enunciado": "Cada garantia exigida sobre a linha principal é produzida por uma configuração diferente. Associe cada garantia à configuração adequada.",
+      "explicacao": "Nada é integrado sem passar na verificação automatizada é a validação de build obrigatória. Nada é integrado sem que outra pessoa aprove é o número mínimo de revisores. O histórico da principal segue um padrão único é a limitação dos tipos de integração permitidos. E ninguém envia direto nem apaga a branch, nem quem é administrador, são as regras de proteção contra envio forçado e exclusão, aplicadas também a administradores. A proteção de push da varredura de segredos está no painel porque também é uma proteção configurada sobre o repositório e é fácil confundi-la com política de branch: ela recusa o envio que contém credencial, o que é uma garantia real e de outra natureza — vale para qualquer branch e não tem relação com integração, revisão ou formato de histórico.",
+      "associacoes": [
+        { "alvo": "Nada é integrado sem passar na verificação automatizada", "item": "Validação de build obrigatória" },
+        { "alvo": "Nada é integrado sem que outra pessoa aprove", "item": "Número mínimo de revisores" },
+        { "alvo": "O histórico da principal segue um padrão único", "item": "Limitação dos tipos de integração permitidos" },
+        { "alvo": "Ninguém envia direto nem apaga a branch, nem quem é administrador", "item": "Regras de proteção contra envio forçado e exclusão" }
+      ],
+      "itensExtras": [
+        "Proteção de push da varredura de segredos"
+      ]
+    },
+    {
+      "id": "az400-codigo-assoc-escala-22",
+      "topico": "Escala do repositório",
+      "tipo": "Associacao",
+      "enunciado": "Cada problema de repositório abaixo pede uma técnica diferente. Associe cada problema à técnica adequada.",
+      "explicacao": "Arquivos binários grandes versionados, cujo histórico infla o clone, é Git LFS. Histórico muito longo com a pessoa trabalhando em uma fração pequena da árvore é clone parcial com checkout esparso. Um arquivo enorme commitado por engano, que precisa deixar de existir no histórico, é reescrita de histórico com ferramenta de limpeza — e ela cobra envio forçado e realinhamento de todos os clones. Código compartilhado por vários repositórios, com versão fixada por consumidor, é feed de pacotes. O repositório monolítico está no painel porque é uma decisão estrutural real, adotada por organizações grandes e frequentemente proposta como resposta a qualquer dor de repositório: ele resolve compartilhamento por consolidação e agrava justamente os dois primeiros problemas da lista, porque concentra ainda mais conteúdo e histórico num só lugar.",
+      "associacoes": [
+        { "alvo": "Arquivos binários grandes versionados inflam o clone", "item": "Git LFS" },
+        { "alvo": "Histórico longo, com trabalho concentrado numa fração pequena da árvore", "item": "Clone parcial com checkout esparso" },
+        { "alvo": "Arquivo enorme commitado por engano precisa deixar de existir no histórico", "item": "Reescrita de histórico com ferramenta de limpeza" },
+        { "alvo": "Código compartilhado por vários repositórios, com versão fixada por consumidor", "item": "Feed de pacotes" }
+      ],
+      "itensExtras": [
+        "Repositório monolítico"
+      ]
+    }
+  ]
+}

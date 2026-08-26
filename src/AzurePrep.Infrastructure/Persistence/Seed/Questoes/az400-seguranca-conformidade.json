@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-400",
+  "area": "seguranca-conformidade",
+  "questoes": [
+    {
+      "id": "az400-seg-protecao-push-01",
+      "topico": "Varredura de segredos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Nos últimos meses três credenciais foram commitadas por engano e detectadas horas depois, exigindo rotação de emergência. A equipe quer que a próxima tentativa seja barrada antes de o valor entrar no histórico do repositório, e não apenas descoberta depois. Qual configuração atende?",
+      "explicacao": "A proteção de push da varredura de segredos é o que atende: ela avalia o conteúdo no momento do envio e recusa o push que contém um padrão de credencial reconhecido, impedindo que o valor chegue ao histórico. A diferença com as demais opções é temporal e decisiva — uma vez no histórico, o segredo tem de ser considerado comprometido e rotacionado, mesmo que o commit seja revertido depois, porque ele continua recuperável. A varredura de segredos sem proteção de push é justamente o que a equipe já tem: detecta e alerta, com o valor já dentro. Um gancho de pré-commit local ajuda e depende de cada pessoa tê-lo instalado, o que não é controle organizacional. E uma etapa de pipeline que falha ao encontrar credencial roda depois do push, então o valor já está no repositório quando o alerta aparece.",
+      "opcoes": [
+        { "texto": "Proteção de push da varredura de segredos, que recusa o envio contendo a credencial.", "correta": true },
+        { "texto": "Varredura de segredos no repositório, gerando alerta para a equipe de segurança.", "correta": false },
+        { "texto": "Gancho de pré-commit instalado na máquina de cada pessoa da equipe.", "correta": false },
+        { "texto": "Etapa de pipeline que falha o build quando encontra padrão de credencial no código.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-codeql-02",
+      "topico": "Varredura de código",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma auditoria pediu evidência de que o código escrito internamente é analisado em busca de padrões que levam a injeção de comandos, travessia de diretório e uso inseguro de funções criptográficas. As bibliotecas de terceiros já são acompanhadas por outra ferramenta. Qual capacidade recomendar?",
+      "explicacao": "A varredura de código com análise estática, do tipo CodeQL, é o que atende: ela examina o código-fonte escrito internamente procurando padrões que levam a classes conhecidas de vulnerabilidade, incluindo exatamente as três citadas, e produz achados rastreáveis por arquivo e linha — que é a evidência que a auditoria pede. O enunciado ainda declara que dependências já têm outra ferramenta, o que descarta a resposta reflexa. A varredura de dependências trata das bibliotecas de terceiros e é justamente a parte já coberta. A varredura de segredos procura credenciais no repositório, outra categoria de achado. E a varredura de imagem de contêiner examina o que foi empacotado — sistema operacional base e pacotes instalados — e não o código-fonte da aplicação, que é o objeto do pedido.",
+      "opcoes": [
+        { "texto": "Varredura de código com análise estática sobre o código-fonte da aplicação.", "correta": true },
+        { "texto": "Varredura de dependências, cobrindo as bibliotecas usadas pela aplicação.", "correta": false },
+        { "texto": "Varredura de segredos no histórico e no conteúdo do repositório.", "correta": false },
+        { "texto": "Varredura de imagem de contêiner antes da publicação no registro.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-licenca-03",
+      "topico": "Conformidade de dependências",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O jurídico da Contoso precisa saber se alguma biblioteca de código aberto usada nos produtos tem licença que obrigue a divulgar o código-fonte do produto que a incorpora. A equipe já roda varredura de vulnerabilidades nas dependências e não encontrou nada relacionado. Qual capacidade responde à pergunta do jurídico?",
+      "explicacao": "A varredura de licenças de dependências é a capacidade adequada: ela inventaria as licenças declaradas por cada componente de terceiros e permite sinalizar as que impõem obrigações incompatíveis com a distribuição do produto, tipicamente as recíprocas fortes. É uma dimensão de conformidade distinta de segurança, e é por isso que a varredura de vulnerabilidades não encontrou nada — ela procura falhas conhecidas, não obrigações contratuais. A varredura de código analisa o código próprio em busca de padrões inseguros. Alertas de dependência vulnerável são a mesma ferramenta que já rodou. E um inventário manual das bibliotecas produziria a resposta uma vez, ficando desatualizado na próxima alteração de dependência — o valor da varredura é ser contínua e integrada ao fluxo.",
+      "opcoes": [
+        { "texto": "Varredura de licenças das dependências de código aberto.", "correta": true },
+        { "texto": "Varredura de código com análise estática sobre os projetos.", "correta": false },
+        { "texto": "Alertas de dependência vulnerável, ampliando o conjunto de fontes consultadas.", "correta": false },
+        { "texto": "Inventário manual das bibliotecas, revisado a cada release.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-identidade-usuario-04",
+      "topico": "Identidades para automação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Doze funções e quatro aplicativos web precisam ler segredos do mesmo cofre de chaves. A equipe quer conceder a permissão uma única vez e não refazer a concessão quando um desses recursos for recriado durante uma implantação de infraestrutura. Qual tipo de identidade recomendar?",
+      "explicacao": "Uma identidade gerenciada atribuída pelo usuário é a recomendação: ela é um recurso próprio, independente do ciclo de vida dos recursos que a utilizam, pode ser associada a vários deles ao mesmo tempo e sobrevive à recriação de qualquer um. Concede-se a permissão no cofre uma vez, para essa identidade, e nada precisa ser refeito depois — que é exatamente o par de requisitos declarado. Identidades atribuídas pelo sistema são criadas e destruídas junto com cada recurso, então seriam dezesseis identidades distintas e dezesseis concessões, refeitas a cada recriação. Uma entidade de serviço com segredo compartilhado atenderia à parte de identidade única e reintroduz exatamente o segredo de longa duração que as identidades gerenciadas eliminam. E conceder a permissão a um grupo de segurança contendo as identidades atribuídas pelo sistema reduz o trabalho de concessão, sem resolver a recriação: a identidade nova precisaria ser adicionada ao grupo.",
+      "opcoes": [
+        { "texto": "Uma identidade gerenciada atribuída pelo usuário, associada aos dezesseis recursos.", "correta": true },
+        { "texto": "Identidade gerenciada atribuída pelo sistema em cada um dos dezesseis recursos.", "correta": false },
+        { "texto": "Uma entidade de serviço com segredo, compartilhada pelos dezesseis recursos.", "correta": false },
+        { "texto": "Um grupo de segurança contendo as identidades atribuídas pelo sistema dos recursos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-identidade-sistema-05",
+      "topico": "Identidades para automação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma máquina virtual isolada executa um processo que grava em uma única conta de armazenamento. A equipe quer que a identidade usada por esse processo desapareça junto com a máquina quando ela for desprovisionada, para não deixar identidade órfã com permissão viva no ambiente. Qual tipo de identidade recomendar?",
+      "explicacao": "A identidade gerenciada atribuída pelo sistema é a recomendação: ela é criada com o recurso, existe apenas enquanto ele existir e é removida automaticamente quando ele é excluído, junto com as atribuições de função associadas. É exatamente o comportamento pedido — evitar identidade órfã com permissão viva —, e o acoplamento de ciclo de vida, que é limitação em outros cenários, aqui é a característica desejada. Uma identidade atribuída pelo usuário continuaria existindo depois da exclusão da máquina, com a permissão de escrita intacta, que é o que se quer evitar. Uma entidade de serviço com segredo tem o mesmo problema de permanência e ainda acrescenta credencial para guardar e girar. E usar a chave de acesso da conta de armazenamento abandona a identidade gerenciada por completo, voltando a distribuir segredo.",
+      "opcoes": [
+        { "texto": "Identidade gerenciada atribuída pelo sistema na própria máquina virtual.", "correta": true },
+        { "texto": "Identidade gerenciada atribuída pelo usuário, associada à máquina virtual.", "correta": false },
+        { "texto": "Entidade de serviço dedicada, com segredo guardado no cofre de chaves.", "correta": false },
+        { "texto": "Chave de acesso da conta de armazenamento, configurada no processo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-github-app-06",
+      "topico": "Autenticação de automações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma automação da organização precisa abrir solicitações de alteração e comentar em dezoito repositórios. Hoje ela usa o token de acesso pessoal de um engenheiro, e a auditoria apontou dois problemas: as ações aparecem como se fossem daquela pessoa, e tudo para quando ela sai da empresa. Qual mecanismo recomendar?",
+      "explicacao": "Um aplicativo do GitHub é a recomendação: ele tem identidade própria, independente de qualquer pessoa, recebe permissões granulares apenas para o que precisa fazer e é instalado nos repositórios escolhidos — o que resolve os dois apontamentos de uma vez, porque as ações passam a aparecer como do aplicativo e nada depende do vínculo empregatício de alguém. O token da execução do fluxo de trabalho é automático e limitado ao repositório da própria execução, então não alcança dezoito repositórios. Um token de acesso pessoal criado numa conta de serviço remove a dependência de uma pessoa específica e traz de volta os problemas conhecidos de conta compartilhada: credencial de longa duração, escopo grosseiro e responsabilidade difusa. E aumentar a validade do token atual não trata de nenhum dos dois apontamentos — apenas adia a falha.",
+      "opcoes": [
+        { "texto": "Um aplicativo do GitHub, com identidade própria e permissões granulares nos repositórios.", "correta": true },
+        { "texto": "O token da execução do fluxo de trabalho, com permissões ampliadas.", "correta": false },
+        { "texto": "Um token de acesso pessoal criado a partir de uma conta de serviço da organização.", "correta": false },
+        { "texto": "O mesmo token de acesso pessoal, com validade estendida e escopo revisado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-token-execucao-07",
+      "topico": "Autenticação de automações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um fluxo de trabalho precisa apenas marcar o status de verificação e comentar na própria solicitação de alteração que o disparou. Um engenheiro propôs criar um token de acesso pessoal e guardá-lo como segredo do repositório. A engenheira de plataforma discorda. Qual é o argumento correto?",
+      "explicacao": "O token da execução já é emitido automaticamente para cada execução, tem escopo limitado ao repositório que a disparou e expira quando o trabalho termina — ele atende exatamente ao que o fluxo precisa, sem nenhum segredo a criar, guardar ou girar. Introduzir um token de acesso pessoal acrescenta credencial de longa duração e escopo mais amplo para não ganhar nada, que é o argumento contra a proposta. As permissões desse token podem ainda ser reduzidas ao mínimo necessário na declaração do fluxo. Dizer que o token da execução não permite comentar está errado, e é a suposição que costuma motivar a criação desnecessária do token pessoal. Afirmar que ele só funciona na linha principal também não procede. E propor um aplicativo do GitHub é a resposta certa para automação que atravessa repositórios, e aqui seria complexidade sem necessidade.",
+      "opcoes": [
+        { "texto": "O token da execução já atende: escopo do próprio repositório, emitido automaticamente e expirado ao fim do trabalho.", "correta": true },
+        { "texto": "O token da execução não permite comentar em solicitações de alteração, mas um aplicativo do GitHub resolveria.", "correta": false },
+        { "texto": "O token da execução só funciona em fluxos disparados na linha principal.", "correta": false },
+        { "texto": "A proposta é válida, desde que o token tenha validade curta e rotação automatizada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-stakeholder-08",
+      "topico": "Permissões e níveis de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Quinze pessoas das áreas de negócio precisam acompanhar o quadro, criar e comentar itens de trabalho e consultar painéis, sem nenhum acesso ao código nem aos pipelines. A área financeira pediu que o custo de licenciamento fosse o menor possível. Qual configuração recomendar?",
+      "explicacao": "O nível de acesso de participante — conhecido como Stakeholder — é a recomendação: ele é gratuito, permite trabalhar com itens de trabalho e consultar painéis, e não dá acesso a repositórios nem a pipelines em projetos privados. Atende exatamente ao escopo descrito com o menor custo, que é a restrição explícita. Conceder o nível básico e restringir o acesso ao código por permissão funcionaria tecnicamente e paga licença por quinze pessoas que não usam o que estão pagando — além de depender de a restrição de permissão ser mantida corretamente ao longo do tempo. Criar um projeto separado só com o quadro fragmenta o planejamento, separando os itens do código que os implementa e destruindo a rastreabilidade. E exportar relatórios periodicamente devolve para alguém um trabalho manual e tira das áreas de negócio a capacidade de criar item, que é parte do pedido.",
+      "opcoes": [
+        { "texto": "Nível de acesso de participante (Stakeholder) para as quinze pessoas.", "correta": true },
+        { "texto": "Nível de acesso básico, com o acesso a repositórios removido por permissão.", "correta": false },
+        { "texto": "Um projeto separado contendo apenas o quadro, sem repositórios nem pipelines.", "correta": false },
+        { "texto": "Exportação periódica de relatórios do quadro para as áreas de negócio.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-colaborador-externo-09",
+      "topico": "Permissões e níveis de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um consultor contratado por três meses precisa contribuir com código em um único repositório da organização no GitHub. Ele não deve enxergar os demais repositórios privados, não deve aparecer na lista de membros da organização e o acesso precisa ser removível de uma vez ao fim do contrato. Qual arranjo recomendar?",
+      "explicacao": "Adicioná-lo como colaborador externo naquele repositório é o arranjo: o acesso fica restrito ao repositório escolhido, ele não se torna membro da organização — portanto não enxerga o restante nem aparece na lista de membros — e a remoção é uma única ação ao fim do contrato. Os três requisitos são atendidos exatamente pelo que esse papel define. Torná-lo membro da organização com acesso a uma equipe dá visibilidade da organização e dos repositórios que a equipe alcança, violando dois dos requisitos. Criar uma organização separada só para o consultor isola demais: o código teria de ser duplicado ou sincronizado, com custo e risco desproporcionais. E pedir que ele contribua por fork, sem acesso ao repositório, é o modelo de projetos de código aberto e é possível — mas o enunciado descreve contribuição direta e não menciona essa restrição, então introduz atrito sem requisito que o justifique.",
+      "opcoes": [
+        { "texto": "Adicioná-lo como colaborador externo no repositório específico.", "correta": true },
+        { "texto": "Torná-lo membro da organização, com acesso a uma equipe daquele repositório.", "correta": false },
+        { "texto": "Criar uma organização separada apenas para o consultor, com uma cópia do repositório.", "correta": false },
+        { "texto": "Mantê-lo sem acesso e receber as contribuições por fork e solicitação de alteração.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-arquivo-seguro-10",
+      "topico": "Material sensível em automação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma etapa de assinatura de pacote precisa de um arquivo de certificado com chave privada durante a execução do pipeline. O arquivo não pode ficar versionado no repositório, e a equipe quer controlar quais pipelines podem consumi-lo. Qual mecanismo recomendar?",
+      "explicacao": "Os arquivos seguros do Azure Pipelines são o mecanismo: eles armazenam o arquivo criptografado fora do repositório, disponibilizam-no ao agente apenas durante a execução autorizada e têm controle de quais pipelines podem consumi-los, que é o segundo requisito. É o recurso desenhado exatamente para certificados, repositórios de chaves e perfis de provisionamento. Guardar o certificado codificado numa variável secreta funciona para conteúdo pequeno, distorce o mecanismo — variável não foi feita para arquivo binário — e não oferece o controle por pipeline da mesma forma. Versionar o arquivo criptografado no repositório coloca o material no histórico e transfere o problema para onde guardar a chave que o decifra. E gerar um certificado novo a cada execução não serve para assinatura, em que o certificado precisa ser o mesmo e confiável para quem verifica.",
+      "opcoes": [
+        { "texto": "Arquivo seguro do Azure Pipelines, com autorização por pipeline.", "correta": true },
+        { "texto": "Variável secreta contendo o certificado codificado em texto.", "correta": false },
+        { "texto": "Arquivo criptografado versionado no repositório, decifrado durante a execução.", "correta": false },
+        { "texto": "Geração de um certificado novo a cada execução do pipeline.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-grupo-variavel-cofre-11",
+      "topico": "Material sensível em automação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Nove pipelines usam a mesma credencial de um sistema externo, hoje copiada como variável secreta em cada um deles. A política de segurança passou a exigir rotação trimestral da credencial, e a equipe quer que a rotação não exija editar pipeline nenhum. Qual configuração recomendar?",
+      "explicacao": "Vincular um grupo de variáveis ao cofre de chaves e referenciá-lo nos nove pipelines é a configuração: o valor deixa de existir dentro dos pipelines e passa a ser buscado no cofre no momento da execução, de modo que girar a credencial é atualizar o segredo em um único lugar — nenhum pipeline é editado, que é o requisito. Ganha-se junto a auditoria de acesso do cofre. Um grupo de variáveis comum, sem vínculo com o cofre, já reduziria de nove cópias para uma e ainda exigiria editar o grupo a cada rotação, além de manter o valor no serviço de pipeline em vez do cofre. Automatizar a atualização das nove variáveis por script resolve o sintoma criando automação para manter cópias sincronizadas — mais peças para falhar. E aumentar a validade da credencial contraria diretamente a política que motivou a mudança.",
+      "opcoes": [
+        { "texto": "Grupo de variáveis vinculado ao cofre de chaves, referenciado pelos nove pipelines.", "correta": true },
+        { "texto": "Grupo de variáveis comum, compartilhado pelos nove pipelines.", "correta": false },
+        { "texto": "Script agendado que atualiza a variável secreta nos nove pipelines a cada rotação.", "correta": false },
+        { "texto": "Credencial com validade estendida, reduzindo a frequência necessária de rotação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-defender-devops-12",
+      "topico": "Estratégia de varredura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso tem repositórios no GitHub e no Azure DevOps, com varreduras configuradas de forma desigual entre eles. A área de segurança quer uma visão única da postura de segurança do código de toda a organização, ao lado dos achados de segurança da infraestrutura em nuvem que já acompanha. O que recomendar?",
+      "explicacao": "Conectar os ambientes de DevOps ao Microsoft Defender for Cloud é a recomendação: a capacidade de segurança de DevOps traz os achados dos repositórios das duas plataformas para o mesmo painel em que a área já acompanha a postura da infraestrutura, o que entrega a visão única pedida e permite comparar cobertura entre repositórios — inclusive expondo os que estão sem varredura. Habilitar a varredura avançada em cada repositório individualmente melhora a cobertura e mantém os achados espalhados por duas plataformas, sem a consolidação que é o objetivo. Exportar os alertas para uma planilha mensal produz uma foto desatualizada e manual. E padronizar tudo em uma única plataforma de repositório resolveria por consolidação de ferramenta, com um custo de migração que o enunciado não pede e que não é necessário para obter a visão.",
+      "opcoes": [
+        { "texto": "Conectar os ambientes de DevOps ao Microsoft Defender for Cloud, consolidando os achados.", "correta": true },
+        { "texto": "Habilitar a varredura avançada de segurança em cada repositório, plataforma por plataforma.", "correta": false },
+        { "texto": "Exportar mensalmente os alertas das duas plataformas para uma planilha consolidada.", "correta": false },
+        { "texto": "Migrar todos os repositórios para uma única plataforma e padronizar a varredura nela.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-imagem-conteiner-13",
+      "topico": "Estratégia de varredura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A aplicação é empacotada em contêiner a partir de uma imagem base pública. A varredura de código e a de dependências passam limpas, e mesmo assim uma auditoria encontrou vulnerabilidades conhecidas em pacotes do sistema operacional dentro da imagem publicada. Qual verificação está faltando no fluxo?",
+      "explicacao": "Falta a varredura da imagem de contêiner, executada no pipeline antes da publicação e também no registro para as imagens já publicadas. Ela examina as camadas da imagem — sistema operacional base e pacotes instalados — que é justamente o território que as outras duas varreduras não cobrem: a de código analisa o que a equipe escreveu, e a de dependências analisa as bibliotecas declaradas pela aplicação. Nenhuma das duas enxerga um pacote do sistema herdado da imagem base, e é por isso que ambas passaram limpas. Ampliar o escopo da varredura de dependências não alcança as camadas da imagem. Fixar a versão da imagem base é boa prática de reprodutibilidade e congela também as vulnerabilidades existentes. E revisar manualmente o arquivo de construção mostra qual imagem base é usada, sem dizer o que há dentro dela.",
+      "opcoes": [
+        { "texto": "Varredura da imagem de contêiner, no pipeline antes da publicação e no registro depois.", "correta": true },
+        { "texto": "Ampliação do escopo da varredura de dependências para incluir pacotes do sistema.", "correta": false },
+        { "texto": "Fixação da versão exata da imagem base no arquivo de construção.", "correta": false },
+        { "texto": "Revisão manual do arquivo de construção a cada alteração da imagem base.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-multi-bloqueio-14",
+      "topico": "Estratégia de varredura",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma política determina que nenhuma alteração com vulnerabilidade conhecida seja integrada à linha principal. Hoje as varreduras existem e apenas geram alertas, que a equipe frequentemente ignora. Quais duas configurações fazem a verificação efetivamente barrar a integração? Selecione duas.",
+      "explicacao": "As duas configurações são tornar a varredura de código uma verificação obrigatória na política de branch, de modo que o resultado precise passar antes do merge, e habilitar a revisão de dependência na solicitação de alteração com bloqueio quando ela introduzir componente vulnerável. As duas transformam alerta em portão, que é exatamente a lacuna descrita — a diferença entre notificar e impedir é o que a política exige. Alertas de dependência vulnerável no repositório continuam sendo notificação, e são o que já existe. Uma varredura agendada noturna encontra o problema depois da integração, quando ele já está na linha principal. E um painel consolidado dos achados melhora visibilidade e não impede nada; aliás, mais visibilidade sobre alertas que ninguém trata costuma piorar a fadiga em vez de resolver.",
+      "opcoes": [
+        { "texto": "Varredura de código configurada como verificação obrigatória na política de branch.", "correta": true },
+        { "texto": "Revisão de dependência na solicitação de alteração, bloqueando componente vulnerável.", "correta": true },
+        { "texto": "Alertas de dependência vulnerável habilitados no repositório.", "correta": false },
+        { "texto": "Varredura completa agendada para rodar toda madrugada na linha principal.", "correta": false },
+        { "texto": "Painel consolidando os achados de segurança de todos os repositórios.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-multi-identidade-usuario-15",
+      "topico": "Identidades para automação",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A equipe está decidindo entre identidade gerenciada atribuída pelo sistema e atribuída pelo usuário para um conjunto de cargas. Quais duas situações exigem especificamente a identidade atribuída pelo usuário? Selecione duas.",
+      "explicacao": "A primeira situação é vários recursos precisarem da mesma identidade, com a permissão concedida uma única vez: só a identidade atribuída pelo usuário pode ser associada a mais de um recurso. A segunda é a permissão precisar existir antes do recurso — cenário comum em implantação automatizada, em que a identidade é criada e autorizada previamente para que a carga já suba funcionando, sem um segundo passo de concessão depois. A identidade atribuída pelo sistema não existe antes do recurso, por definição. Uma carga isolada com permissão exclusiva é o caso clássico da identidade atribuída pelo sistema. Querer que a identidade seja removida junto com o recurso é literalmente o comportamento da atribuída pelo sistema, e o oposto do que a atribuída pelo usuário oferece. E autenticar sem armazenar segredo vale para as duas, então não distingue nada.",
+      "opcoes": [
+        { "texto": "Vários recursos precisam da mesma identidade, com a permissão concedida uma única vez.", "correta": true },
+        { "texto": "A permissão precisa estar concedida antes de o recurso ser criado.", "correta": true },
+        { "texto": "Uma carga isolada precisa de permissão exclusiva, usada só por ela.", "correta": false },
+        { "texto": "A identidade deve ser removida automaticamente quando o recurso for excluído.", "correta": false },
+        { "texto": "A carga precisa autenticar no Azure sem armazenar segredo algum.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-multi-permissao-escala-16",
+      "topico": "Permissões e níveis de acesso",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A gestão de permissões de uma organização com quarenta repositórios e cento e vinte pessoas virou trabalho diário: concessões individuais, acessos que sobram após mudança de time e nenhuma visão de quem pode o quê. Quais duas práticas atacam a causa estrutural? Selecione duas.",
+      "explicacao": "Conceder acesso exclusivamente por grupos ou equipes que reflitam papéis, nunca a indivíduos, é a primeira: com cento e vinte pessoas, o problema não é quem tem acesso hoje e sim o número de decisões individuais a manter, e agrupar reduz a gestão de centenas de concessões para dezenas de pertencimentos. A segunda é revisar periodicamente os pertencimentos, com um responsável designado, que é o que retira o acesso que sobrou depois de alguém mudar de time — sem essa revisão, permissões só crescem. Documentar o mapa de acessos numa página do wiki produz um retrato que envelhece na primeira mudança. Conceder acesso administrativo aos líderes de time descentraliza a concessão individual sem eliminá-la, e amplia quem pode conceder. E exigir aprovação de dois administradores para cada concessão adiciona atrito a cada pedido, sem reduzir a quantidade de pedidos.",
+      "opcoes": [
+        { "texto": "Conceder acesso exclusivamente por grupos ou equipes que reflitam papéis.", "correta": true },
+        { "texto": "Revisar periodicamente os pertencimentos, com um responsável designado por grupo.", "correta": true },
+        { "texto": "Documentar o mapa de acessos em uma página do wiki, revisada a cada trimestre.", "correta": false },
+        { "texto": "Conceder acesso administrativo aos líderes de cada time, que passam a gerir os próprios acessos.", "correta": false },
+        { "texto": "Exigir aprovação de dois administradores para cada concessão individual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-seg-simnao-pat-17",
+      "topico": "Autenticação de automações",
+      "tipo": "SimNao",
+      "enunciado": "Uma integração usa um token de acesso pessoal com escopo de acesso total e validade de um ano, guardado como variável secreta do pipeline. O responsável argumenta que, por estar armazenado como segredo e mascarado nos logs, o arranjo é seguro o suficiente e não precisa mudar. Avalie a afirmação: armazenar o token como variável secreta compensa o escopo amplo e a validade longa.",
+      "explicacao": "A afirmação é falsa. Armazenar como segredo protege contra um tipo de exposição — o valor aparecer na saída de execução — e não altera duas propriedades independentes que determinam o dano: o escopo, que define o que a credencial pode fazer se vazar, e a validade, que define por quanto tempo ela continua útil para quem a obtiver. Um token de acesso total válido por um ano entrega, no pior caso, um ano de acesso irrestrito. As três dimensões são ortogonais, e tratar custódia como se compensasse escopo e prazo é o erro central aqui. O caminho é reduzir o escopo ao mínimo necessário, encurtar a validade e, quando a plataforma permitir, eliminar o segredo — com federação de identidade para acesso ao Azure, ou com aplicativo do GitHub para automação da organização, que têm identidade própria e credenciais de curta duração.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-seg-simnao-rotacao-18",
+      "topico": "Varredura de segredos",
+      "tipo": "SimNao",
+      "enunciado": "A varredura de segredos detectou uma chave de API commitada há duas semanas. A equipe removeu a linha do código, fez um commit de correção e fechou o alerta, concluindo que o problema estava resolvido porque a chave não está mais no código atual. Avalie a afirmação: remover a credencial em um commit posterior é suficiente para tratar o incidente.",
+      "explicacao": "A afirmação é falsa. Um commit posterior altera o estado atual do código e não apaga o histórico: a credencial continua recuperável em qualquer clone do repositório, em qualquer fork, em caches e em artefatos de build produzidos naquele período. Como ela esteve exposta por duas semanas, tem de ser considerada comprometida — e o único tratamento que encerra o risco é revogá-la e emitir uma nova, o que invalida imediatamente qualquer cópia que tenha vazado. Reescrever o histórico é possível e é a parte cara e menos importante: mesmo feito com sucesso, não desfaz o que já foi clonado. A ordem correta é revogar primeiro, depois emitir a nova credencial e atualizar os consumidores, e só então avaliar limpeza de histórico. E é justamente por esse custo que a proteção de push, que impede a entrada, vale mais que a detecção posterior.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-seg-assoc-varredura-19",
+      "topico": "Estratégia de varredura",
+      "tipo": "Associacao",
+      "enunciado": "Cada risco abaixo é encontrado por um tipo diferente de varredura. Associe cada risco ao tipo adequado.",
+      "explicacao": "Padrão inseguro no código escrito pela própria equipe — injeção, travessia de diretório, uso incorreto de criptografia — é varredura de código com análise estática. Vulnerabilidade conhecida em biblioteca de terceiros declarada pelo projeto é varredura de dependências. Credencial presente no código ou no histórico do repositório é varredura de segredos. E obrigação legal imposta pela licença de um componente de código aberto é varredura de licenças, que é conformidade e não segurança. A varredura de imagem de contêiner está no painel porque é um quinto tipo igualmente real e frequentemente esquecido: ela examina o sistema operacional base e os pacotes instalados na imagem, território que nenhuma das quatro acima alcança — e é exatamente por isso que uma aplicação com código e dependências limpos ainda pode publicar uma imagem vulnerável.",
+      "associacoes": [
+        { "alvo": "Padrão inseguro no código escrito pela própria equipe", "item": "Varredura de código (análise estática)" },
+        { "alvo": "Vulnerabilidade conhecida em biblioteca de terceiros declarada pelo projeto", "item": "Varredura de dependências" },
+        { "alvo": "Credencial presente no código ou no histórico do repositório", "item": "Varredura de segredos" },
+        { "alvo": "Obrigação legal imposta pela licença de um componente de código aberto", "item": "Varredura de licenças" }
+      ],
+      "itensExtras": [
+        "Varredura de imagem de contêiner"
+      ]
+    },
+    {
+      "id": "az400-seg-assoc-acesso-20",
+      "topico": "Permissões e níveis de acesso",
+      "tipo": "Associacao",
+      "enunciado": "Cada pessoa ou automação abaixo precisa do menor acesso que atenda à sua necessidade. Associe cada caso ao mecanismo adequado.",
+      "explicacao": "Pessoa de negócio que só consulta o quadro, cria e comenta itens recebe o nível de acesso de participante, que é gratuito e não alcança código nem pipelines. Prestador que contribui em um único repositório sem integrar a organização é colaborador externo. Automação da organização que age em vários repositórios com identidade própria é um aplicativo do GitHub. E fluxo de trabalho que age apenas no repositório da própria execução usa o token da execução, emitido automaticamente e expirado ao fim do trabalho. O token de acesso pessoal de um administrador está no painel porque é o atalho que resolve todos esses casos em minutos e é a pior resposta para qualquer um deles: carrega a identidade de uma pessoa, tem escopo mais amplo que o necessário, validade longa e some quando ela sai da empresa — os quatro mecanismos acima existem justamente para substituí-lo.",
+      "associacoes": [
+        { "alvo": "Pessoa de negócio que só consulta o quadro, cria e comenta itens de trabalho", "item": "Nível de acesso de participante (Stakeholder)" },
+        { "alvo": "Prestador que contribui em um único repositório, sem integrar a organização", "item": "Colaborador externo" },
+        { "alvo": "Automação da organização que age em vários repositórios, com identidade própria", "item": "Aplicativo do GitHub" },
+        { "alvo": "Fluxo de trabalho que age apenas no repositório da própria execução", "item": "Token da execução" }
+      ],
+      "itensExtras": [
+        "Token de acesso pessoal de um administrador"
+      ]
+    },
+    {
+      "id": "az400-seg-assoc-material-sensivel-21",
+      "topico": "Material sensível em automação",
+      "tipo": "Associacao",
+      "enunciado": "Cada necessidade de material sensível na automação pede um mecanismo diferente. Associe cada necessidade ao mecanismo adequado.",
+      "explicacao": "Uma credencial usada por vários pipelines, que precisa ser girada num único lugar, é um grupo de variáveis vinculado ao cofre de chaves — o valor mora no cofre e é buscado na execução. Um arquivo de certificado com chave privada, consumido durante a execução e fora do repositório, é o arquivo seguro do pipeline. Um valor simples usado por um único pipeline, que não deve aparecer na saída, é a variável secreta. E acesso ao Azure sem que exista segredo algum a guardar é a federação de identidade de carga de trabalho, que troca o segredo por um token de curta duração. O arquivo de configuração criptografado versionado no repositório está no painel porque parece resolver todos: ele coloca o material no histórico e apenas desloca o problema para onde guardar a chave que o decifra — que continua precisando de um dos quatro mecanismos acima.",
+      "associacoes": [
+        { "alvo": "Credencial usada por vários pipelines, que precisa ser girada num único lugar", "item": "Grupo de variáveis vinculado ao cofre de chaves" },
+        { "alvo": "Arquivo de certificado com chave privada, consumido durante a execução", "item": "Arquivo seguro do pipeline" },
+        { "alvo": "Valor simples de um único pipeline, que não deve aparecer na saída", "item": "Variável secreta" },
+        { "alvo": "Acesso ao Azure sem que exista segredo algum a guardar", "item": "Federação de identidade de carga de trabalho" }
+      ],
+      "itensExtras": [
+        "Arquivo de configuração criptografado versionado no repositório"
+      ]
+    },
+    {
+      "id": "az400-seg-assoc-vazamento-22",
+      "topico": "Material sensível em automação",
+      "tipo": "Associacao",
+      "enunciado": "Cada caminho de vazamento de segredo é fechado por um controle diferente. Associe cada caminho ao controle adequado.",
+      "explicacao": "O valor aparecer na saída de execução é fechado marcando a variável como secreta, o que faz o serviço mascará-la. Execução disparada por contribuidor externo acessar os segredos do repositório é fechada não expondo segredos a esse tipo de gatilho e exigindo aprovação antes de executar — porque o código que roda ali vem de fora. O segredo entrar no histórico do repositório é fechado pela proteção de push, que recusa o envio. E o segredo de longa duração existir é eliminado pela federação de identidade, que o substitui por token de curta duração emitido a cada execução. Reduzir a retenção dos logs está no painel porque parece uma medida de segurança e é falso conforto: ela encurta a janela em que o valor exposto fica visível, sem impedir que ele seja exposto nem que alguém o tenha lido no minuto seguinte — o segredo continua comprometido.",
+      "associacoes": [
+        { "alvo": "O valor aparece na saída de execução do pipeline", "item": "Marcar a variável como secreta" },
+        { "alvo": "Execução disparada por contribuidor externo acessa os segredos do repositório", "item": "Não expor segredos a esse gatilho e exigir aprovação" },
+        { "alvo": "O segredo entra no histórico do repositório", "item": "Proteção de push da varredura de segredos" },
+        { "alvo": "Existe um segredo de longa duração guardado para a automação", "item": "Federação de identidade de carga de trabalho" }
+      ],
+      "itensExtras": [
+        "Reduzir a retenção dos logs de execução"
+      ]
+    }
+  ]
+}

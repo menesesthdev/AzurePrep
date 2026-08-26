@@ -9,10 +9,22 @@
       "enunciado": "Um pipeline precisa implantar em servidores que ficam numa rede privada, sem entrada aberta a partir da internet, e a política de segurança proíbe abrir porta de entrada no firewall da empresa. A equipe usa agentes hospedados pela Microsoft e a etapa de implantação falha por não alcançar os servidores. Qual solução respeita a política declarada?",
       "explicacao": "Um agente auto-hospedado instalado dentro da rede privada resolve porque a comunicação é iniciada por ele: o agente faz sondagem de saída ao serviço, recebe o trabalho e executa localmente, de modo que nenhuma porta de entrada precisa ser aberta. É esse sentido da conexão que satisfaz a política. Liberar no firewall as faixas de endereços dos agentes hospedados atende tecnicamente, mas viola a política declarada e ainda é frágil, porque essas faixas mudam. Um grupo de implantação com agentes nos servidores é uma variação legítima da resposta correta e resolveria o caso, mas continua sendo agente dentro da rede — a formulação que aparece na alternativa, de que dispensa conectividade, é o que a torna errada. E aumentar o tempo limite da etapa trata um sintoma de espera, quando o problema é que a rota não existe.",
       "opcoes": [
-        { "texto": "Instalar um agente auto-hospedado dentro da rede privada, que faz conexão de saída ao serviço.", "correta": true },
-        { "texto": "Liberar no firewall as faixas de endereços usadas pelos agentes hospedados pela Microsoft.", "correta": false },
-        { "texto": "Usar um grupo de implantação, que dispensa conectividade entre o agente e os servidores.", "correta": false },
-        { "texto": "Aumentar o tempo limite da etapa de implantação e configurar novas tentativas.", "correta": false }
+        {
+          "texto": "Instalar um agente auto-hospedado dentro da rede privada, que faz conexão de saída ao serviço.",
+          "correta": true
+        },
+        {
+          "texto": "Liberar no firewall as faixas de endereços usadas pelos agentes hospedados pela Microsoft.",
+          "correta": false
+        },
+        {
+          "texto": "Usar um grupo de implantação, que dispensa conectividade entre o agente e os servidores.",
+          "correta": false
+        },
+        {
+          "texto": "Aumentar o tempo limite da etapa de implantação e configurar novas tentativas.",
+          "correta": false
+        }
       ]
     },
     {
@@ -22,10 +34,22 @@
       "enunciado": "A auditoria apontou que o pipeline de implantação guarda um segredo de cliente de entidade de serviço, com validade de dois anos, e exigiu eliminar segredos de longa duração da automação. A implantação continua tendo de criar recursos no Azure. A equipe quer a solução que remove o segredo sem trocar de ferramenta de pipeline. Qual recomendar?",
       "explicacao": "A federação de identidade de carga de trabalho, que usa OpenID Connect, é o que atende: o pipeline apresenta um token de curta duração emitido pelo próprio serviço de pipeline, e uma credencial federada configurada na entidade de serviço confia naquele emissor e naquele assunto específico. Não há segredo armazenado em lugar nenhum, o que elimina a rotação e o risco de vazamento — que é exatamente o que a auditoria pediu. Guardar o segredo no Key Vault e lê-lo no pipeline melhora a custódia, mas o segredo de longa duração continua existindo, então a exigência não é atendida. Reduzir a validade para noventa dias apenas troca um risco por trabalho recorrente de rotação. E identidade gerenciada é a resposta certa para carga que roda dentro do Azure; o agente do pipeline hospedado não é um recurso do Azure com identidade atribuível, e é justamente por isso que a federação existe.",
       "opcoes": [
-        { "texto": "Federação de identidade de carga de trabalho com OpenID Connect, sem segredo armazenado.", "correta": true },
-        { "texto": "Mover o segredo para o Key Vault e lê-lo no pipeline em tempo de execução.", "correta": false },
-        { "texto": "Reduzir a validade do segredo para noventa dias, com rotação automatizada.", "correta": false },
-        { "texto": "Atribuir uma identidade gerenciada ao agente hospedado usado pelo pipeline.", "correta": false }
+        {
+          "texto": "Federação de identidade de carga de trabalho com OpenID Connect, sem segredo armazenado.",
+          "correta": true
+        },
+        {
+          "texto": "Mover o segredo para o Key Vault e lê-lo no pipeline em tempo de execução.",
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a validade do segredo para noventa dias, com rotação automatizada.",
+          "correta": false
+        },
+        {
+          "texto": "Atribuir uma identidade gerenciada ao agente hospedado usado pelo pipeline.",
+          "correta": false
+        }
       ]
     },
     {
@@ -35,10 +59,22 @@
       "enunciado": "A equipe migrou os pipelines clássicos para YAML e precisa que a implantação em produção só ocorra após aprovação de dois responsáveis, com o pipeline pausado até lá. No modelo clássico isso era um gate de pré-implantação no estágio. Onde essa regra é configurada em pipelines YAML, e por quê?",
       "explicacao": "Em pipelines YAML a aprovação é uma verificação configurada no **ambiente**, e não no arquivo do pipeline. A razão é de segurança e não de organização: se a aprovação morasse no YAML, qualquer pessoa capaz de abrir uma solicitação de alteração no repositório poderia removê-la no mesmo commit que faz a implantação. Ao viver no ambiente, a regra é governada por quem administra o recurso, e o trabalho de implantação só é executado quando os aprovadores designados liberam — o pipeline fica pausado enquanto isso. Declarar a aprovação no YAML do estágio não existe como recurso, o que faz dessa a alternativa mais plausível e mais errada. Política de branch protege a integração de código no repositório, e não a implantação em um ambiente. E permissões de pipeline controlam quem executa, não introduzem pausa para aprovação.",
       "opcoes": [
-        { "texto": "Como verificação de aprovação no ambiente, para que a regra não possa ser removida por quem altera o YAML.", "correta": true },
-        { "texto": "No próprio YAML do estágio de produção, com a lista de aprovadores declarada no arquivo.", "correta": false },
-        { "texto": "Como política de branch no repositório, exigindo dois revisores antes do merge.", "correta": false },
-        { "texto": "Nas permissões do pipeline, restringindo quem pode executá-lo em produção.", "correta": false }
+        {
+          "texto": "Como verificação de aprovação no ambiente, para que a regra não possa ser removida por quem altera o YAML.",
+          "correta": true
+        },
+        {
+          "texto": "No próprio YAML do estágio de produção, com a lista de aprovadores declarada no arquivo.",
+          "correta": false
+        },
+        {
+          "texto": "Como política de branch no repositório, exigindo dois revisores antes do merge.",
+          "correta": false
+        },
+        {
+          "texto": "Nas permissões do pipeline, restringindo quem pode executá-lo em produção.",
+          "correta": false
+        }
       ]
     },
     {
@@ -48,10 +84,22 @@
       "enunciado": "Dezoito repositórios têm pipelines YAML quase idênticos, e uma mudança na etapa de verificação de segurança precisou ser copiada dezoito vezes na semana passada — duas cópias saíram erradas. A equipe quer que a próxima mudança seja feita uma vez só, mantendo cada repositório com o próprio pipeline. Qual abordagem atende?",
       "explicacao": "Extrair as etapas comuns para templates YAML em um repositório central e referenciá-los pelos dezoito pipelines é a abordagem: cada repositório mantém o próprio arquivo, curto, que consome o template versionado, e a mudança passa a ser feita uma vez no repositório central. É o mecanismo desenhado exatamente para esse problema, e permite ainda fixar a versão do template por tag, controlando quando cada repositório absorve a alteração. Um pipeline único para os dezoito repositórios elimina a duplicação, mas acopla os ciclos de vida e é o oposto do requisito declarado, que é manter um pipeline por repositório. Grupos de variáveis compartilham valores, não etapas — a lógica duplicada continuaria igual. E um script copiado por automação continua sendo dezoito cópias, com o mesmo risco de divergência que causou o problema.",
       "opcoes": [
-        { "texto": "Extrair as etapas para templates YAML num repositório central e referenciá-los nos dezoito pipelines.", "correta": true },
-        { "texto": "Criar um pipeline único que faça build e implantação dos dezoito repositórios.", "correta": false },
-        { "texto": "Mover as etapas para um grupo de variáveis compartilhado entre os pipelines.", "correta": false },
-        { "texto": "Automatizar a cópia do trecho YAML para os dezoito repositórios a cada alteração.", "correta": false }
+        {
+          "texto": "Extrair as etapas para templates YAML num repositório central e referenciá-los nos dezoito pipelines.",
+          "correta": true
+        },
+        {
+          "texto": "Criar um pipeline único que faça build e implantação dos dezoito repositórios.",
+          "correta": false
+        },
+        {
+          "texto": "Mover as etapas para um grupo de variáveis compartilhado entre os pipelines.",
+          "correta": false
+        },
+        {
+          "texto": "Automatizar a cópia do trecho YAML para os dezoito repositórios a cada alteração.",
+          "correta": false
+        }
       ]
     },
     {
@@ -61,10 +109,22 @@
       "enunciado": "O pipeline principal falha em cerca de um a cada cinco execuções, sempre em testes de integração diferentes, e as reexecuções passam sem nenhuma alteração de código. O time já ignora falhas e reexecuta por hábito. A liderança quer atacar a causa, não o sintoma. Qual é o primeiro passo mais útil?",
       "explicacao": "Habilitar a detecção de testes instáveis e passar a medir quais testes falham de forma intermitente é o primeiro passo: sem identificar quais são, qualquer ação é palpite. A medição transforma \"o pipeline é instável\" em uma lista nominal de testes com taxa de falha, que é o que permite corrigir ou colocar em quarentena com critério. O custo do problema não é o tempo de reexecução, e sim que o time deixou de confiar no sinal — e um pipeline em que a falha é ignorada por hábito não protege mais nada. Configurar novas tentativas automáticas esconde o sintoma e aprofunda exatamente essa perda de confiança. Remover os testes de integração do pipeline elimina o sinal junto com o ruído. E aumentar o tempo limite só ajudaria se a causa fosse espera, o que a descrição não indica, já que a falha muda de teste a cada execução.",
       "opcoes": [
-        { "texto": "Habilitar a detecção de testes instáveis e medir quais falham de forma intermitente.", "correta": true },
-        { "texto": "Configurar novas tentativas automáticas para a etapa de testes de integração.", "correta": false },
-        { "texto": "Mover os testes de integração para um pipeline noturno separado.", "correta": false },
-        { "texto": "Aumentar o tempo limite do trabalho para evitar interrupções por espera.", "correta": false }
+        {
+          "texto": "Habilitar a detecção de testes instáveis e medir quais falham de forma intermitente.",
+          "correta": true
+        },
+        {
+          "texto": "Configurar novas tentativas automáticas para a etapa de testes de integração.",
+          "correta": false
+        },
+        {
+          "texto": "Mover os testes de integração para um pipeline noturno separado.",
+          "correta": false
+        },
+        {
+          "texto": "Aumentar o tempo limite do trabalho para evitar interrupções por espera.",
+          "correta": false
+        }
       ]
     },
     {
@@ -74,10 +134,22 @@
       "enunciado": "Uma biblioteca interna é consumida por nove aplicações. A equipe precisa publicar uma correção de defeito que não muda a interface pública, e quer que as nove aplicações absorvam a correção automaticamente na próxima restauração de dependências, sem alteração em cada uma. As aplicações declaram a dependência com faixa de versão compatível. Qual incremento de versão semântica aplicar?",
       "explicacao": "O incremento correto é o de correção, o terceiro número — de 4.2.7 para 4.2.8. Em versionamento semântico, correção de defeito sem mudança de interface incrementa o dígito de patch, e as faixas de compatibilidade que as aplicações declaram absorvem esse incremento automaticamente, que é exatamente o requisito. Incrementar o número menor sinalizaria funcionalidade nova compatível: seria absorvido por muitas faixas, mas comunica algo falso sobre o conteúdo da versão, e versionamento é contrato de comunicação antes de ser número. Incrementar o número maior sinaliza mudança incompatível e é o pior caso aqui, porque as faixas de compatibilidade não o absorvem — as nove aplicações teriam de ser alteradas uma a uma, contrariando o requisito. E versionar por data resolve rastreabilidade, mas não expressa compatibilidade, então nenhuma faixa pode decidir sozinha se a atualização é segura.",
       "opcoes": [
-        { "texto": "Incrementar o número de correção (patch), por exemplo de 4.2.7 para 4.2.8.", "correta": true },
-        { "texto": "Incrementar o número menor (minor), por exemplo de 4.2.7 para 4.3.0.", "correta": false },
-        { "texto": "Incrementar o número maior (major), por exemplo de 4.2.7 para 5.0.0.", "correta": false },
-        { "texto": "Passar a versionar por data, por exemplo 2026.08.25.", "correta": false }
+        {
+          "texto": "Incrementar o número de correção (patch), por exemplo de 4.2.7 para 4.2.8.",
+          "correta": true
+        },
+        {
+          "texto": "Incrementar o número menor (minor), por exemplo de 4.2.7 para 4.3.0.",
+          "correta": false
+        },
+        {
+          "texto": "Incrementar o número maior (major), por exemplo de 4.2.7 para 5.0.0.",
+          "correta": false
+        },
+        {
+          "texto": "Passar a versionar por data, por exemplo 2026.08.25.",
+          "correta": false
+        }
       ]
     },
     {
@@ -87,10 +159,22 @@
       "enunciado": "Um incidente numa fonte pública de pacotes deixou o build da empresa quebrado por três horas. A equipe quer que builds futuros não dependam da disponibilidade da fonte pública, sem manter cópia manual de cada pacote e sem deixar de receber atualizações. Qual configuração atende?",
       "explicacao": "Configurar a fonte pública como origem upstream no feed interno é o que atende: na primeira vez que um pacote é solicitado, o feed o busca lá fora e passa a guardar uma cópia própria; a partir daí os builds consomem da cópia local, e uma indisponibilidade externa deixa de quebrar o build. Como o encadeamento continua ativo, versões novas seguem sendo obtidas quando pedidas, o que atende ao requisito de não congelar atualizações. Baixar e publicar cada pacote à mão resolve a disponibilidade e cria o trabalho manual que o enunciado descarta. Fixar todas as versões é boa prática de reprodutibilidade, mas não protege contra a fonte estar fora do ar no momento da restauração. E armazenar em cache no agente ajuda apenas enquanto aquele agente existir, o que não vale para agentes efêmeros e não é garantia nenhuma.",
       "opcoes": [
-        { "texto": "Configurar a fonte pública como upstream do feed interno, que passa a guardar cópia dos pacotes usados.", "correta": true },
-        { "texto": "Baixar e publicar manualmente no feed interno cada pacote usado pelos projetos.", "correta": false },
-        { "texto": "Fixar todas as versões de dependência no arquivo de projeto, sem faixas.", "correta": false },
-        { "texto": "Armazenar em cache o diretório de pacotes no agente entre execuções.", "correta": false }
+        {
+          "texto": "Configurar a fonte pública como upstream do feed interno, que passa a guardar cópia dos pacotes usados.",
+          "correta": true
+        },
+        {
+          "texto": "Baixar e publicar manualmente no feed interno cada pacote usado pelos projetos.",
+          "correta": false
+        },
+        {
+          "texto": "Fixar todas as versões de dependência no arquivo de projeto, sem faixas.",
+          "correta": false
+        },
+        {
+          "texto": "Armazenar em cache o diretório de pacotes no agente entre execuções.",
+          "correta": false
+        }
       ]
     },
     {
@@ -100,10 +184,22 @@
       "enunciado": "Depois de uma implantação que degradou o desempenho e só foi percebida horas depois, a equipe quer que o pipeline aguarde vinte minutos após publicar em homologação, consulte as métricas de erro e latência, e só prossiga para produção se estiverem dentro do limite — sem ninguém acompanhando. Qual mecanismo atende?",
       "explicacao": "Um portão de implantação que consulta a integridade no Azure Monitor, com tempo de espera antes da primeira avaliação, é o mecanismo: ele adia a avaliação pelo intervalo configurado, consulta as regras de alerta ou a métrica e libera ou barra a promoção automaticamente, sem intervenção. É exatamente o que o cenário descreve. Uma verificação de aprovação manual resolveria o controle, mas exige alguém disponível e contraria o requisito de não haver ninguém acompanhando. Uma etapa de script que dorme vinte minutos e falha se a métrica estiver ruim chega perto do objetivo, mas ocupa o agente durante toda a espera — o portão foi feito para não pagar esse custo — e joga a lógica para dentro de um script que ninguém mantém. E aumentar a cobertura de testes unitários ataca outra classe de defeito: degradação de desempenho sob carga real não é detectada por teste unitário.",
       "opcoes": [
-        { "texto": "Um portão de implantação consultando a integridade no Azure Monitor, com tempo de espera antes da avaliação.", "correta": true },
-        { "texto": "Uma verificação de aprovação manual no ambiente de produção, feita após vinte minutos.", "correta": false },
-        { "texto": "Uma etapa de script que aguarda vinte minutos e falha se a métrica estiver fora do limite.", "correta": false },
-        { "texto": "Elevar a exigência de cobertura de testes unitários no portão de build.", "correta": false }
+        {
+          "texto": "Um portão de implantação consultando a integridade no Azure Monitor, com tempo de espera antes da avaliação.",
+          "correta": true
+        },
+        {
+          "texto": "Uma verificação de aprovação manual no ambiente de produção, feita após vinte minutos.",
+          "correta": false
+        },
+        {
+          "texto": "Uma etapa de script que aguarda vinte minutos e falha se a métrica estiver fora do limite.",
+          "correta": false
+        },
+        {
+          "texto": "Elevar a exigência de cobertura de testes unitários no portão de build.",
+          "correta": false
+        }
       ]
     },
     {
@@ -113,10 +209,22 @@
       "enunciado": "Uma aplicação em App Service tem inicialização lenta: leva cerca de noventa segundos para carregar o cache interno antes de responder bem. Toda implantação provoca uma janela de respostas lentas e alguns tempos esgotados. A equipe quer eliminar isso sem alterar o código de inicialização. Qual abordagem resolve?",
       "explicacao": "Publicar no slot de preparação, deixar a aplicação aquecer e então executar o swap é o que resolve: o swap só troca as instâncias depois que elas respondem, então o tráfego de produção passa a ser atendido por instâncias já aquecidas, e a janela de lentidão desaparece sem tocar no código. É o caso de uso canônico dos slots. Aumentar o número de instâncias não ajuda porque todas passariam pela mesma inicialização lenta ao mesmo tempo. Habilitar Sempre Ativado impede que a aplicação seja descarregada por inatividade, o que é útil mas não tem efeito sobre uma implantação, em que o processo é novo de qualquer forma. E implantar fora do horário de pico reduz o número de pessoas afetadas sem eliminar o problema — é mitigação por horário, e o requisito é eliminar a janela.",
       "opcoes": [
-        { "texto": "Publicar no slot de preparação, aguardar o aquecimento e executar o swap.", "correta": true },
-        { "texto": "Aumentar o número de instâncias do plano antes de cada implantação.", "correta": false },
-        { "texto": "Habilitar a configuração Sempre Ativado no aplicativo.", "correta": false },
-        { "texto": "Agendar as implantações para a madrugada, fora do horário de pico.", "correta": false }
+        {
+          "texto": "Publicar no slot de preparação, aguardar o aquecimento e executar o swap.",
+          "correta": true
+        },
+        {
+          "texto": "Aumentar o número de instâncias do plano antes de cada implantação.",
+          "correta": false
+        },
+        {
+          "texto": "Habilitar a configuração Sempre Ativado no aplicativo.",
+          "correta": false
+        },
+        {
+          "texto": "Agendar as implantações para a madrugada, fora do horário de pico.",
+          "correta": false
+        }
       ]
     },
     {
@@ -126,10 +234,22 @@
       "enunciado": "A empresa usa branches de release. Um defeito crítico apareceu em produção, e a branch principal já contém funcionalidades pela metade que não podem ir ao ar. A correção precisa chegar a produção em minutos e não pode se perder na próxima release. Qual caminho de correção emergencial recomendar?",
       "explicacao": "O caminho é ramificar a partir da tag da versão em produção, corrigir ali, publicar dessa branch e depois integrar a correção de volta à principal. Ramificar da tag garante que só o defeito muda em relação ao que está no ar, sem arrastar nada pela metade; e a reintegração é o passo que impede o defeito de reaparecer na próxima release — é a metade mais esquecida do procedimento e a que causa regressão. Corrigir na principal e publicar dali levaria junto as funcionalidades incompletas, que é exatamente o que o enunciado proíbe. Reverter a última implantação é uma resposta legítima a incidente, mas remove também as correções boas daquela versão e não é o que foi pedido. E esperar a próxima release programada ignora a criticidade declarada.",
       "opcoes": [
-        { "texto": "Ramificar da tag da versão em produção, corrigir, publicar e reintegrar a correção na branch principal.", "correta": true },
-        { "texto": "Corrigir na branch principal e publicar a partir dela, por ser a versão mais atual.", "correta": false },
-        { "texto": "Reverter a implantação para a versão anterior e tratar o defeito na próxima release.", "correta": false },
-        { "texto": "Corrigir na branch principal e aguardar a próxima release programada.", "correta": false }
+        {
+          "texto": "Ramificar da tag da versão em produção, corrigir, publicar e reintegrar a correção na branch principal.",
+          "correta": true
+        },
+        {
+          "texto": "Corrigir na branch principal e publicar a partir dela, por ser a versão mais atual.",
+          "correta": false
+        },
+        {
+          "texto": "Reverter a implantação para a versão anterior e tratar o defeito na próxima release.",
+          "correta": false
+        },
+        {
+          "texto": "Corrigir na branch principal e aguardar a próxima release programada.",
+          "correta": false
+        }
       ]
     },
     {
@@ -139,10 +259,22 @@
       "enunciado": "Um pipeline multiestágio compila o código no estágio de homologação e compila de novo no estágio de produção, a partir do mesmo commit. Uma implantação recente funcionou em homologação e falhou em produção, e a investigação não achou diferença de configuração. Qual mudança de desenho elimina essa classe de problema?",
       "explicacao": "Compilar uma vez e promover o mesmo artefato pelos estágios é o princípio que elimina essa classe de problema. Duas compilações do mesmo commit não são garantidamente idênticas: versão de dependência resolvida por faixa, versão de ferramenta no agente e variáveis presentes no ambiente de build podem diferir, e aí o que foi testado em homologação não é o que foi para produção. Promover o binário torna o objeto testado e o objeto publicado literalmente o mesmo. Fixar a mesma versão do agente reduz uma das fontes de divergência e deixa as outras de pé. Reexecutar o estágio de homologação antes de produção apenas repete o teste sobre um artefato que continuará sendo recompilado depois. E comparar as saídas dos dois builds a cada execução é diagnóstico permanente para um problema que o desenho correto simplesmente não tem.",
       "opcoes": [
-        { "texto": "Compilar uma vez, publicar o artefato e promover o mesmo artefato por todos os estágios.", "correta": true },
-        { "texto": "Fixar a mesma versão de agente e das ferramentas nos dois estágios.", "correta": false },
-        { "texto": "Reexecutar o estágio de homologação imediatamente antes do de produção.", "correta": false },
-        { "texto": "Comparar automaticamente as saídas dos dois builds e falhar se divergirem.", "correta": false }
+        {
+          "texto": "Compilar uma vez, publicar o artefato e promover o mesmo artefato por todos os estágios.",
+          "correta": true
+        },
+        {
+          "texto": "Fixar a mesma versão de agente e das ferramentas nos dois estágios.",
+          "correta": false
+        },
+        {
+          "texto": "Reexecutar o estágio de homologação imediatamente antes do de produção.",
+          "correta": false
+        },
+        {
+          "texto": "Comparar automaticamente as saídas dos dois builds e falhar se divergirem.",
+          "correta": false
+        }
       ]
     },
     {
@@ -152,10 +284,22 @@
       "enunciado": "O tempo de espera na fila de builds cresceu para quarenta minutos nos horários de pico, enquanto o tempo de execução de cada build permanece em oito minutos. A liderança pediu redução do tempo total até o resultado, com atenção a custo. Qual diagnóstico e ação são adequados?",
       "explicacao": "O gargalo é a concorrência disponível, não a duração do build: com execução estável em oito minutos e espera de quarenta, o trabalho está parado na fila aguardando um executor livre. A ação é aumentar os trabalhos paralelos, comprando mais concorrência ou acrescentando agentes auto-hospedados — e a comparação de custo entre as duas opções é justamente a atenção que a liderança pediu. Otimizar o build para rodar em quatro minutos atacaria a metade menor do problema e deixaria a maior parte da espera intacta. Reduzir a frequência de execução diminui a fila cortando sinal, que é o oposto de integração contínua. E aumentar o tempo limite dos trabalhos não tem relação nenhuma com fila — ele governa quanto tempo um trabalho pode durar depois de começar.",
       "opcoes": [
-        { "texto": "O gargalo é a concorrência; aumentar os trabalhos paralelos ou acrescentar agentes auto-hospedados.", "correta": true },
-        { "texto": "O gargalo é a duração do build; otimizar as etapas para rodar em quatro minutos.", "correta": false },
-        { "texto": "O gargalo é o excesso de execuções; disparar o pipeline apenas em solicitações de alteração.", "correta": false },
-        { "texto": "O gargalo é o tempo limite dos trabalhos; elevá-lo para reduzir a espera na fila.", "correta": false }
+        {
+          "texto": "O gargalo é a concorrência; aumentar os trabalhos paralelos ou acrescentar agentes auto-hospedados.",
+          "correta": true
+        },
+        {
+          "texto": "O gargalo é a duração do build; otimizar as etapas para rodar em quatro minutos.",
+          "correta": false
+        },
+        {
+          "texto": "O gargalo é o excesso de execuções; disparar o pipeline apenas em solicitações de alteração.",
+          "correta": false
+        },
+        {
+          "texto": "O gargalo é o tempo limite dos trabalhos; elevá-lo para reduzir a espera na fila.",
+          "correta": false
+        }
       ]
     },
     {
@@ -165,10 +309,22 @@
       "enunciado": "Uma implantação precisa renomear uma coluna usada pela aplicação. A estratégia de publicação é em rodízio, então versões antiga e nova do código convivem por alguns minutos. A equipe quer evitar erro durante essa convivência, sem interromper o serviço. Qual abordagem de mudança de esquema recomendar?",
       "explicacao": "A abordagem é expandir e contrair: primeiro acrescenta-se a coluna nova mantendo a antiga, com as duas sendo escritas durante a transição; depois publica-se o código que lê da nova; e só quando nenhuma versão antiga estiver mais em execução a coluna antiga é removida, numa implantação posterior. É o padrão que torna o esquema compatível com as duas versões do código ao mesmo tempo, que é a condição para qualquer publicação sem interrupção. Renomear a coluna no mesmo passo quebra a versão antiga no instante da mudança, que é exatamente o problema. Aplicar a mudança depois de todas as instâncias atualizadas inverte a ordem e quebra a versão nova enquanto espera. E interromper o serviço durante a alteração atende ao esquema, mas abandona o requisito declarado de não interromper.",
       "opcoes": [
-        { "texto": "Expandir e contrair: acrescentar a coluna nova, escrever nas duas, migrar o código e só depois remover a antiga.", "correta": true },
-        { "texto": "Renomear a coluna e publicar o código novo na mesma janela de implantação.", "correta": false },
-        { "texto": "Publicar o código novo primeiro e renomear a coluna quando todas as instâncias estiverem atualizadas.", "correta": false },
-        { "texto": "Interromper o serviço por alguns minutos, aplicar a alteração e retomar.", "correta": false }
+        {
+          "texto": "Expandir e contrair: acrescentar a coluna nova, escrever nas duas, migrar o código e só depois remover a antiga.",
+          "correta": true
+        },
+        {
+          "texto": "Renomear a coluna e publicar o código novo na mesma janela de implantação.",
+          "correta": false
+        },
+        {
+          "texto": "Publicar o código novo primeiro e renomear a coluna quando todas as instâncias estiverem atualizadas.",
+          "correta": false
+        },
+        {
+          "texto": "Interromper o serviço por alguns minutos, aplicar a alteração e retomar.",
+          "correta": false
+        }
       ]
     },
     {
@@ -178,11 +334,26 @@
       "enunciado": "Uma revisão de segurança encontrou uma chave de API impressa no log de uma execução de pipeline, vinda de um script que ecoava as variáveis de ambiente para depuração. A equipe precisa reduzir a chance de isso se repetir. Quais duas medidas atacam diretamente esse risco? Selecione duas.",
       "explicacao": "Marcar a variável como secreta faz o serviço mascarar o valor na saída, de modo que mesmo um script que a imprima produza a máscara em vez do segredo — é a defesa direta contra o vazamento por log. Habilitar a varredura de segredos no repositório e nos logs é a segunda: ela detecta credencial exposta e permite revogá-la rápido, o que importa porque nenhuma prevenção é perfeita e o tempo entre vazar e revogar é o que determina o dano. Rotacionar a chave é necessário depois deste incidente, mas não reduz a chance de repetição — é remediação, não controle. Reduzir a retenção dos logs diminui a janela de exposição sem impedir o vazamento, e alguém pode ter lido no minuto seguinte. E remover os scripts de depuração dos pipelines é razoável como higiene, porém depende de disciplina contínua e não protege quando o próximo script for escrito.",
       "opcoes": [
-        { "texto": "Marcar a variável como secreta, para que o valor seja mascarado na saída.", "correta": true },
-        { "texto": "Habilitar a varredura de segredos no repositório e nos logs, para detectar e revogar rápido.", "correta": true },
-        { "texto": "Rotacionar a chave de API comprometida.", "correta": false },
-        { "texto": "Reduzir a retenção dos logs de execução para sete dias.", "correta": false },
-        { "texto": "Proibir por política a existência de scripts de depuração nos pipelines.", "correta": false }
+        {
+          "texto": "Marcar a variável como secreta, para que o valor seja mascarado na saída.",
+          "correta": true
+        },
+        {
+          "texto": "Habilitar a varredura de segredos no repositório e nos logs, para detectar e revogar rápido.",
+          "correta": true
+        },
+        {
+          "texto": "Rotacionar a chave de API comprometida.",
+          "correta": false
+        },
+        {
+          "texto": "Reduzir a retenção dos logs de execução para sete dias.",
+          "correta": false
+        },
+        {
+          "texto": "Proibir por política a existência de scripts de depuração nos pipelines.",
+          "correta": false
+        }
       ]
     },
     {
@@ -192,11 +363,26 @@
       "enunciado": "Um serviço com milhões de usuários precisa reduzir o raio de alcance de uma implantação problemática: se a versão nova tiver defeito, no máximo uma fração pequena dos usuários deve ser afetada, e a reversão precisa ser rápida. A equipe não quer manter dois ambientes de produção completos. Quais duas estratégias atendem à restrição? Selecione duas.",
       "explicacao": "A implantação canário atende: a versão nova recebe uma fração pequena do tráfego, o comportamento é medido e a exposição só cresce se as métricas se mantiverem — e reverter é redirecionar aquela fração de volta. Os sinalizadores de funcionalidade também atendem, e por um caminho diferente: o código novo já está publicado em todas as instâncias, porém desligado, e o comportamento é ativado para um subconjunto de usuários e desligado em segundos se preciso, sem publicar nada. Nenhuma das duas exige um segundo ambiente completo. A implantação azul-verde reduz o risco e reverte rápido, mas exige exatamente o que a restrição proíbe: dois ambientes de produção completos no momento da troca. A implantação com recriação derruba a versão antiga e sobe a nova, expondo todos os usuários de uma vez. E aumentar a cobertura de testes reduz a probabilidade do defeito, sem limitar o alcance quando ele acontece.",
       "opcoes": [
-        { "texto": "Implantação canário, com fração pequena do tráfego na versão nova.", "correta": true },
-        { "texto": "Sinalizadores de funcionalidade, ativando o comportamento para um subconjunto de usuários.", "correta": true },
-        { "texto": "Implantação azul-verde, com troca de todo o tráfego de uma vez.", "correta": false },
-        { "texto": "Implantação com recriação, substituindo todas as instâncias na janela de manutenção.", "correta": false },
-        { "texto": "Elevar a cobertura de testes automatizados antes de liberar a versão.", "correta": false }
+        {
+          "texto": "Implantação canário, com fração pequena do tráfego na versão nova.",
+          "correta": true
+        },
+        {
+          "texto": "Sinalizadores de funcionalidade, ativando o comportamento para um subconjunto de usuários.",
+          "correta": true
+        },
+        {
+          "texto": "Implantação azul-verde, com troca de todo o tráfego de uma vez.",
+          "correta": false
+        },
+        {
+          "texto": "Implantação com recriação, substituindo todas as instâncias na janela de manutenção.",
+          "correta": false
+        },
+        {
+          "texto": "Elevar a cobertura de testes automatizados antes de liberar a versão.",
+          "correta": false
+        }
       ]
     },
     {
@@ -206,11 +392,26 @@
       "enunciado": "A equipe adotou Bicep para provisionar ambientes e quer que erros de infraestrutura sejam detectados antes de chegar a produção, dentro do próprio pipeline. Quais duas práticas entregam essa verificação sem depender de alguém revisar manualmente? Selecione duas.",
       "explicacao": "Executar a operação de simulação e falhar o pipeline diante de mudanças não esperadas é uma das duas: ela mostra exatamente o que seria criado, alterado ou removido antes de aplicar, e é a única forma automatizada de perceber que uma alteração inocente removeria um recurso. A outra é a validação com análise estática do arquivo, que pega erro de sintaxe, referência inválida e violação de regra antes mesmo de qualquer chamada de implantação. As duas rodam no pipeline e não dependem de revisão humana, que é a restrição declarada. Exigir dois revisores é justamente a revisão manual que o enunciado descarta. Implantar primeiro em um ambiente descartável ajuda, mas é verificação por consequência e mais lenta que as duas anteriores — e ainda assim não avisa sobre remoção em produção. E congelar a versão do provedor melhora reprodutibilidade sem verificar nada sobre o conteúdo do arquivo.",
       "opcoes": [
-        { "texto": "Executar a operação de simulação (what-if) e falhar o pipeline diante de mudanças inesperadas.", "correta": true },
-        { "texto": "Validar o arquivo com análise estática antes da etapa de implantação.", "correta": true },
-        { "texto": "Exigir dois revisores na solicitação de alteração que toca arquivos de infraestrutura.", "correta": false },
-        { "texto": "Implantar sempre primeiro em um ambiente descartável criado a cada execução.", "correta": false },
-        { "texto": "Congelar a versão das ferramentas de implantação usadas pelo agente.", "correta": false }
+        {
+          "texto": "Executar a operação de simulação (what-if) e falhar o pipeline diante de mudanças inesperadas.",
+          "correta": true
+        },
+        {
+          "texto": "Validar o arquivo com análise estática antes da etapa de implantação.",
+          "correta": true
+        },
+        {
+          "texto": "Exigir dois revisores na solicitação de alteração que toca arquivos de infraestrutura.",
+          "correta": false
+        },
+        {
+          "texto": "Implantar sempre primeiro em um ambiente descartável criado a cada execução.",
+          "correta": false
+        },
+        {
+          "texto": "Congelar a versão das ferramentas de implantação usadas pelo agente.",
+          "correta": false
+        }
       ]
     },
     {
@@ -220,8 +421,14 @@
       "enunciado": "Uma equipe marcou como secretas as variáveis que guardam credenciais nos pipelines e concluiu que, a partir disso, não há mais risco de exposição — inclusive para pipelines disparados por solicitações de alteração vindas de colaboradores externos. Avalie a afirmação: marcar a variável como secreta é suficiente para impedir que um colaborador externo obtenha o valor.",
       "explicacao": "A afirmação é falsa. Marcar como secreta faz o serviço mascarar o valor na saída e não o expõe diretamente, mas não impede que código executado pelo pipeline leia a variável e a exfiltre — basta transformá-la, por exemplo codificando-a ou enviando-a a um endereço externo, e a máscara não reconhece o valor transformado. Como uma solicitação de alteração vinda de fora traz código que o pipeline vai executar, permitir que esse gatilho tenha acesso a segredos é o risco real. As defesas que faltam são de fluxo: não expor segredos a execuções disparadas por solicitações de alteração de origem externa, exigir aprovação antes de executar esse tipo de gatilho e usar credenciais federadas de curta duração em vez de segredo estático. Máscara em log é uma camada, e das mais fracas — é útil contra vazamento acidental, não contra código hostil.",
       "opcoes": [
-        { "texto": "Sim", "correta": false },
-        { "texto": "Não", "correta": true }
+        {
+          "texto": "Sim",
+          "correta": false
+        },
+        {
+          "texto": "Não",
+          "correta": true
+        }
       ]
     },
     {
@@ -231,8 +438,14 @@
       "enunciado": "Ao migrar um pipeline clássico para YAML, um engenheiro declarou no arquivo do pipeline a lista de aprovadores do estágio de produção, argumentando que assim a regra fica versionada junto com o código e visível na revisão. Avalie a afirmação: declarar aprovadores no YAML é uma forma válida de exigir aprovação antes da implantação em produção.",
       "explicacao": "A afirmação é falsa. Aprovações e demais verificações não são declaradas no YAML: elas são configuradas no ambiente ou no recurso protegido, e são avaliadas pelo serviço antes de liberar o trabalho de implantação. A razão é de segurança, e é o argumento que derruba a intuição do engenheiro: se a regra morasse no arquivo, qualquer pessoa capaz de alterar o repositório poderia removê-la no mesmo commit que dispara a implantação — a proteção seria contornável por quem ela deveria conter. Ao viver fora do YAML, a regra é governada por quem administra o ambiente, e o autor do código não pode dispensá-la. O desejo de versionar a regra é legítimo, e o caminho para isso é gerir a configuração do ambiente como código à parte, com o próprio controle de acesso — e não trazê-la para dentro do pipeline que ela existe para governar.",
       "opcoes": [
-        { "texto": "Sim", "correta": false },
-        { "texto": "Não", "correta": true }
+        {
+          "texto": "Sim",
+          "correta": false
+        },
+        {
+          "texto": "Não",
+          "correta": true
+        }
       ]
     },
     {
@@ -242,10 +455,22 @@
       "enunciado": "Cada restrição abaixo decide uma estratégia de implantação diferente. Associe cada restrição à estratégia adequada.",
       "explicacao": "Trocar todo o tráfego de uma vez, com reversão imediata e aceitando manter dois ambientes completos, é azul-verde. Limitar a fração de usuários exposta a uma versão nova e crescer conforme as métricas é canário. Atualizar por grupos sucessivos de instâncias, sem duplicar o ambiente e sem derrubar o serviço, é implantação em rodízio. E publicar o código desligado, ativando o comportamento depois para um subconjunto e desligando em segundos, é sinalizador de funcionalidade — a única que separa publicar de ativar. A exposição progressiva por anéis está no painel porque é uma estratégia real e próxima do canário: ela promove por grupos de usuários definidos, tipicamente time interno, depois adotantes iniciais, depois todos. É a resposta certa quando a pergunta fala em anéis de usuários, e não em fração de tráfego — nenhum dos quatro requisitos acima a descreve.",
       "associacoes": [
-        { "alvo": "Trocar todo o tráfego de uma vez, com reversão imediata, aceitando dois ambientes completos", "item": "Azul-verde" },
-        { "alvo": "Limitar a fração de usuários exposta à versão nova e crescer conforme as métricas", "item": "Canário" },
-        { "alvo": "Atualizar por grupos sucessivos de instâncias, sem duplicar o ambiente", "item": "Implantação em rodízio" },
-        { "alvo": "Publicar o código desligado e ativar o comportamento depois, revertendo em segundos", "item": "Sinalizador de funcionalidade" }
+        {
+          "alvo": "Trocar todo o tráfego de uma vez, com reversão imediata, aceitando dois ambientes completos",
+          "item": "Azul-verde"
+        },
+        {
+          "alvo": "Limitar a fração de usuários exposta à versão nova e crescer conforme as métricas",
+          "item": "Canário"
+        },
+        {
+          "alvo": "Atualizar por grupos sucessivos de instâncias, sem duplicar o ambiente",
+          "item": "Implantação em rodízio"
+        },
+        {
+          "alvo": "Publicar o código desligado e ativar o comportamento depois, revertendo em segundos",
+          "item": "Sinalizador de funcionalidade"
+        }
       ],
       "itensExtras": [
         "Exposição progressiva por anéis"
@@ -258,10 +483,22 @@
       "enunciado": "Cada risco abaixo é reduzido por um tipo de teste diferente no pipeline. Associe cada risco ao tipo de teste adequado.",
       "explicacao": "Uma função de cálculo devolvendo resultado errado para um caso de borda é o que teste unitário pega, rápido e sem dependências. Dois serviços que funcionam isolados e falham ao conversar entre si é teste de integração, que exercita o contrato entre eles. Degradação de tempo de resposta sob volume alto, que nenhum teste funcional revela, é teste de carga. E um fluxo completo do usuário quebrando por causa de uma mudança de interface é teste de ponta a ponta. A análise de cobertura de código está no painel porque é medida junto com os testes e costuma ser confundida com um tipo de teste: ela informa quanto do código foi exercitado, o que é métrica sobre a suíte e não detecta defeito nenhum por conta própria — cobertura alta com asserções fracas não reduz risco algum.",
       "associacoes": [
-        { "alvo": "Uma função de cálculo devolve resultado errado num caso de borda", "item": "Teste unitário" },
-        { "alvo": "Dois serviços funcionam isolados e falham ao conversar entre si", "item": "Teste de integração" },
-        { "alvo": "O tempo de resposta degrada sob volume alto, sem erro funcional", "item": "Teste de carga" },
-        { "alvo": "Um fluxo completo do usuário quebra após mudança na interface", "item": "Teste de ponta a ponta" }
+        {
+          "alvo": "Uma função de cálculo devolve resultado errado num caso de borda",
+          "item": "Teste unitário"
+        },
+        {
+          "alvo": "Dois serviços funcionam isolados e falham ao conversar entre si",
+          "item": "Teste de integração"
+        },
+        {
+          "alvo": "O tempo de resposta degrada sob volume alto, sem erro funcional",
+          "item": "Teste de carga"
+        },
+        {
+          "alvo": "Um fluxo completo do usuário quebra após mudança na interface",
+          "item": "Teste de ponta a ponta"
+        }
       ],
       "itensExtras": [
         "Análise de cobertura de código"
@@ -274,10 +511,22 @@
       "enunciado": "Para cada necessidade de autenticação na automação, a equipe precisa escolher o mecanismo com o menor risco que atenda. Associe cada necessidade ao mecanismo.",
       "explicacao": "Um pipeline que implanta no Azure sem guardar segredo de longa duração usa federação de identidade de carga de trabalho, com token de curta duração validado por OpenID Connect. Uma aplicação em execução dentro do Azure que acessa outros recursos usa identidade gerenciada, em que a própria plataforma cuida da credencial. Um fluxo dentro do GitHub Actions que precisa agir no repositório da própria execução usa o token da execução, emitido automaticamente e com escopo limitado àquela execução. E uma integração que precisa se apresentar como aplicação a vários locatários usa entidade de serviço com credencial federada, quando não há como usar identidade gerenciada. O token de acesso pessoal está no painel porque continua sendo o caminho mais rápido e por isso o mais usado: ele carrega a identidade de uma pessoa, expira em data distante e sobrevive à saída dela da empresa — é o mecanismo que todas as quatro escolhas acima existem para substituir.",
       "associacoes": [
-        { "alvo": "Pipeline que implanta no Azure sem guardar segredo de longa duração", "item": "Federação de identidade de carga de trabalho (OIDC)" },
-        { "alvo": "Aplicação em execução dentro do Azure acessando outros recursos", "item": "Identidade gerenciada" },
-        { "alvo": "Fluxo do GitHub Actions agindo no repositório da própria execução", "item": "Token da execução (GITHUB_TOKEN)" },
-        { "alvo": "Integração que se apresenta como aplicação para vários locatários", "item": "Entidade de serviço com credencial federada" }
+        {
+          "alvo": "Pipeline que implanta no Azure sem guardar segredo de longa duração",
+          "item": "Federação de identidade de carga de trabalho (OIDC)"
+        },
+        {
+          "alvo": "Aplicação em execução dentro do Azure acessando outros recursos",
+          "item": "Identidade gerenciada"
+        },
+        {
+          "alvo": "Fluxo do GitHub Actions agindo no repositório da própria execução",
+          "item": "Token da execução (GITHUB_TOKEN)"
+        },
+        {
+          "alvo": "Integração que se apresenta como aplicação para vários locatários",
+          "item": "Entidade de serviço com credencial federada"
+        }
       ],
       "itensExtras": [
         "Token de acesso pessoal"
@@ -290,13 +539,277 @@
       "enunciado": "Cada sintoma abaixo aponta para uma causa e uma ação diferentes na manutenção de pipelines. Associe cada sintoma à ação adequada.",
       "explicacao": "Builds esperando muito na fila enquanto a execução em si é rápida é falta de concorrência: a ação é aumentar os trabalhos paralelos ou acrescentar agentes. Falhas intermitentes em testes diferentes a cada execução, que passam ao reexecutar, são testes instáveis: a ação é medi-los e colocá-los em quarentena. Restauração de dependências lenta e sujeita a indisponibilidade externa se resolve com feed interno com origem upstream, que passa a servir a cópia local. E artefatos antigos consumindo armazenamento sem serem usados pedem política de retenção. A migração de pipeline clássico para YAML está no painel porque é uma tarefa frequente de manutenção e costuma ser proposta como resposta genérica a qualquer problema de pipeline: ela melhora versionamento e reuso, mas não resolve fila, teste instável, dependência externa nem retenção — nenhum dos quatro sintomas acima.",
       "associacoes": [
-        { "alvo": "Builds esperam muito na fila, embora cada execução seja rápida", "item": "Aumentar a concorrência ou acrescentar agentes" },
-        { "alvo": "Falhas intermitentes em testes diferentes, que passam ao reexecutar", "item": "Medir testes instáveis e colocá-los em quarentena" },
-        { "alvo": "Restauração de dependências lenta e sujeita a indisponibilidade externa", "item": "Feed interno com origem upstream" },
-        { "alvo": "Artefatos antigos consumindo armazenamento sem serem usados", "item": "Política de retenção de artefatos" }
+        {
+          "alvo": "Builds esperam muito na fila, embora cada execução seja rápida",
+          "item": "Aumentar a concorrência ou acrescentar agentes"
+        },
+        {
+          "alvo": "Falhas intermitentes em testes diferentes, que passam ao reexecutar",
+          "item": "Medir testes instáveis e colocá-los em quarentena"
+        },
+        {
+          "alvo": "Restauração de dependências lenta e sujeita a indisponibilidade externa",
+          "item": "Feed interno com origem upstream"
+        },
+        {
+          "alvo": "Artefatos antigos consumindo armazenamento sem serem usados",
+          "item": "Política de retenção de artefatos"
+        }
       ],
       "itensExtras": [
         "Migrar o pipeline de clássico para YAML"
+      ]
+    },
+    {
+      "id": "az400-pipe-cache-dependencias-23",
+      "topico": "Manutenção de pipelines",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cada execução do pipeline gasta seis dos oito minutos totais restaurando as mesmas dependências, que mudam poucas vezes por mês. Os agentes são efêmeros, então nada sobrevive entre execuções. A equipe quer reduzir o tempo sem abrir mão de agentes descartáveis nem fixar dependências desatualizadas. O que recomendar?",
+      "explicacao": "Armazenar em cache o diretório de dependências, com chave derivada do arquivo de bloqueio, é a recomendação: a chave muda exatamente quando as dependências mudam, então a restauração completa só ocorre nessas poucas vezes por mês e as demais execuções reaproveitam o cache. O agente continua efêmero, porque o cache é serviço do próprio sistema de pipeline e não estado do agente — que é a restrição declarada. Migrar para agentes persistentes resolveria o tempo e abandona o descarte, além de reintroduzir contaminação entre execuções. Fixar todas as versões melhora reprodutibilidade e não reduz o tempo de download, que é a etapa cara. E remover dependências não usadas ajuda na margem, sem atacar a causa, que é baixar tudo de novo a cada execução.",
+      "opcoes": [
+        {
+          "texto": "Armazenar em cache o diretório de dependências, com chave derivada do arquivo de bloqueio.",
+          "correta": true
+        },
+        {
+          "texto": "Migrar para agentes persistentes, que preservam o diretório entre execuções.",
+          "correta": false
+        },
+        {
+          "texto": "Fixar todas as versões de dependência para evitar resolução a cada execução.",
+          "correta": false
+        },
+        {
+          "texto": "Remover as dependências não utilizadas do arquivo de projeto.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-matriz-24",
+      "topico": "Design de pipelines",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma biblioteca precisa ser compilada e testada em três versões de runtime e em dois sistemas operacionais, totalizando seis combinações. Hoje existem seis blocos quase idênticos no arquivo do pipeline, e acrescentar uma versão nova significa copiar e ajustar um sétimo bloco. Qual recurso elimina a duplicação?",
+      "explicacao": "Uma estratégia de matriz é o recurso: declara-se uma vez o conjunto de etapas e as dimensões que variam, e o serviço expande em uma execução paralela por combinação. Acrescentar uma versão de runtime passa a ser acrescentar um valor à dimensão, e não copiar um bloco inteiro — que é exatamente a queixa. Templates YAML reutilizáveis reduziriam duplicação entre pipelines diferentes e continuariam exigindo seis invocações neste caso. Um laço dentro de um script resolveria por dentro de um único trabalho, perdendo o paralelismo e misturando os resultados de teste numa execução só. E seis pipelines separados multiplicam a manutenção em vez de reduzi-la.",
+      "opcoes": [
+        {
+          "texto": "Estratégia de matriz, expandindo as dimensões em execuções paralelas.",
+          "correta": true
+        },
+        {
+          "texto": "Template YAML reutilizável, invocado uma vez para cada combinação.",
+          "correta": false
+        },
+        {
+          "texto": "Laço dentro de um script que itera as combinações num único trabalho.",
+          "correta": false
+        },
+        {
+          "texto": "Seis pipelines separados, um por combinação de runtime e sistema operacional.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-dependencia-estagios-25",
+      "topico": "Design de pipelines",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um pipeline multiestágio implanta um serviço de banco de dados, um serviço de API que depende dele e dois serviços de front-end que dependem da API. Hoje tudo roda em sequência e leva quarenta minutos, embora os dois front-ends não dependam um do outro. Como reduzir o tempo total sem quebrar a ordem exigida?",
+      "explicacao": "Declarar explicitamente as dependências entre estágios é a resposta: o serviço de pipeline executa em paralelo tudo o que não tem dependência declarada entre si e respeita a ordem onde ela existe. Os dois front-ends passam a rodar simultaneamente após a API, encurtando o total sem violar a sequência banco, API, front-ends — que é a restrição. Remover a ordenação e rodar tudo em paralelo quebra a dependência real e produz falhas intermitentes, difíceis de diagnosticar. Juntar os quatro num único estágio elimina o paralelismo e piora. E aumentar os trabalhos paralelos disponíveis dá capacidade e não altera nada se o pipeline continuar declarando execução sequencial — capacidade ociosa não acelera trabalho serializado.",
+      "opcoes": [
+        {
+          "texto": "Declarar as dependências entre estágios, deixando o serviço paralelizar o que é independente.",
+          "correta": true
+        },
+        {
+          "texto": "Remover a ordenação e executar os quatro estágios em paralelo.",
+          "correta": false
+        },
+        {
+          "texto": "Consolidar os quatro serviços em um único estágio de implantação.",
+          "correta": false
+        },
+        {
+          "texto": "Aumentar a quantidade de trabalhos paralelos contratada pela organização.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-gatilho-caminho-26",
+      "topico": "Design de pipelines",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um repositório contém seis serviços em pastas separadas. Qualquer commit dispara os seis pipelines, mesmo quando a alteração tocou apenas a documentação ou um único serviço. A fila vive congestionada e a equipe espera por builds que não precisavam existir. Qual configuração recomendar?",
+      "explicacao": "Filtros de caminho no gatilho de cada pipeline são a recomendação: cada um passa a ser disparado apenas quando arquivos da pasta correspondente forem alterados, e commits de documentação deixam de disparar qualquer um. Isso ataca a causa — execuções desnecessárias — em vez de tratar a fila que elas produzem. Aumentar os trabalhos paralelos acomoda o desperdício, pagando por capacidade para executar builds que não deveriam existir. Disparar apenas em solicitação de alteração reduz o volume e desliga a integração contínua na linha principal, perdendo a verificação de cada integração. E agendar os pipelines para a madrugada troca desperdício por atraso de retorno, que é o pior dos dois mundos em integração contínua.",
+      "opcoes": [
+        {
+          "texto": "Filtros de caminho no gatilho, disparando cada pipeline apenas pela própria pasta.",
+          "correta": true
+        },
+        {
+          "texto": "Aumentar a quantidade de trabalhos paralelos para absorver a fila.",
+          "correta": false
+        },
+        {
+          "texto": "Disparar os pipelines apenas em solicitações de alteração, não em commits na principal.",
+          "correta": false
+        },
+        {
+          "texto": "Agendar os seis pipelines para execução única na madrugada.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-retencao-artefatos-27",
+      "topico": "Manutenção de pipelines",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O armazenamento de artefatos cresceu para vários terabytes, com builds de anos guardados indefinidamente. A equipe precisa reduzir o volume, mas uma norma exige poder reimplantar exatamente qualquer versão que esteve em produção nos últimos dois anos. Qual política recomendar?",
+      "explicacao": "Reter por período curto os artefatos de execuções comuns e reter indefinidamente — ou pelos dois anos exigidos — apenas os que foram efetivamente implantados em produção é a política: ela ataca a maior parte do volume, que vem de builds intermediários nunca publicados, e preserva exatamente o conjunto que a norma exige. Marcar retenção diferenciada por implantação é o mecanismo padrão para isso. Reter tudo por dois anos atende à norma e mal reduz o volume, porque a esmagadora maioria dos artefatos nunca foi para produção. Reter tudo por trinta dias reduz muito e viola a norma. E reconstruir a partir do código quando necessário parece elegante e não garante artefato idêntico, já que dependências e ferramentas mudam com o tempo.",
+      "opcoes": [
+        {
+          "texto": "Retenção curta para execuções comuns e retenção longa apenas para artefatos implantados em produção.",
+          "correta": true
+        },
+        {
+          "texto": "Retenção de dois anos para todos os artefatos de todas as execuções.",
+          "correta": false
+        },
+        {
+          "texto": "Retenção de trinta dias para todos os artefatos, sem exceção.",
+          "correta": false
+        },
+        {
+          "texto": "Retenção curta para tudo, reconstruindo do código quando for preciso reimplantar.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-ambiente-recurso-28",
+      "topico": "Verificações e aprovações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe precisa que apenas dois pipelines específicos possam implantar no ambiente de produção, e que qualquer pipeline novo seja explicitamente autorizado antes de conseguir usá-lo. Hoje qualquer pipeline do projeto consegue referenciar o ambiente e implantar. Qual configuração atende?",
+      "explicacao": "Restringir, no próprio ambiente, quais pipelines têm permissão de usá-lo é a configuração: o ambiente é um recurso protegido, e essa permissão é avaliada pelo serviço antes de liberar o trabalho de implantação, de modo que um pipeline novo precisa ser autorizado explicitamente. É governança do recurso, não do arquivo — e por isso não pode ser contornada por quem edita o YAML. Uma verificação de aprovação manual introduz pessoa no caminho e não restringe quais pipelines podem tentar. Renomear o ambiente é segurança por obscuridade e falha assim que alguém lê o YAML de outro pipeline. E uma política de branch protege a integração de código, sem qualquer efeito sobre quem implanta em um ambiente.",
+      "opcoes": [
+        {
+          "texto": "Restringir no ambiente quais pipelines têm permissão de usá-lo, exigindo autorização explícita.",
+          "correta": true
+        },
+        {
+          "texto": "Adicionar uma verificação de aprovação manual ao ambiente de produção.",
+          "correta": false
+        },
+        {
+          "texto": "Renomear o ambiente para um nome não óbvio, conhecido apenas pelos dois pipelines.",
+          "correta": false
+        },
+        {
+          "texto": "Criar uma política de branch exigindo revisores na linha principal.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-multi-tempo-execucao-29",
+      "topico": "Manutenção de pipelines",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um pipeline leva vinte e dois minutos: nove restaurando dependências, oito executando a suíte completa de testes e cinco compilando. A equipe quer retorno em menos de dez minutos para cada solicitação de alteração, sem abrir mão de rodar a suíte completa em algum momento. Quais duas mudanças atendem? Selecione duas.",
+      "explicacao": "Armazenar em cache as dependências ataca os nove minutos que dominam o tempo, e é a mudança de maior efeito isolado. Separar os testes em duas camadas — rápidos na solicitação de alteração, suíte completa na linha principal ou em execução agendada — ataca os oito minutos de teste sem abandonar a cobertura, que é a ressalva explícita do enunciado. Juntas, elas cabem folgadamente na meta de dez minutos. Remover a etapa de compilação não é possível, já que é ela que produz o artefato. Reduzir a suíte permanentemente sacrifica cobertura, exatamente o que o enunciado proíbe. E executar o pipeline apenas na integração à principal elimina o retorno na solicitação de alteração, que é o momento em que ele mais vale.",
+      "opcoes": [
+        {
+          "texto": "Armazenar em cache o diretório de dependências entre execuções.",
+          "correta": true
+        },
+        {
+          "texto": "Separar os testes: rápidos na solicitação de alteração, suíte completa depois.",
+          "correta": true
+        },
+        {
+          "texto": "Remover a etapa de compilação do pipeline de solicitação de alteração.",
+          "correta": false
+        },
+        {
+          "texto": "Reduzir permanentemente a suíte de testes às verificações essenciais.",
+          "correta": false
+        },
+        {
+          "texto": "Executar o pipeline apenas quando a alteração for integrada à linha principal.",
+          "correta": false
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-simnao-artefato-30",
+      "topico": "Design de pipelines",
+      "tipo": "SimNao",
+      "enunciado": "Um pipeline compila o código em cada estágio a partir do mesmo commit, e o responsável afirma que isso é equivalente a compilar uma vez e promover o artefato, porque o commit é o mesmo e o processo de build é determinístico. Avalie a afirmação: recompilar do mesmo commit equivale a promover o mesmo artefato.",
+      "explicacao": "A afirmação é falsa. Duas compilações do mesmo commit só produzem binários idênticos sob condições estritas de build reprodutível, que quase nenhum projeto sustenta por acidente: versão de dependência resolvida por faixa, versão de ferramenta instalada no agente, variáveis presentes no ambiente e até carimbos de tempo embutidos fazem os artefatos divergirem. A consequência prática é que o objeto testado em homologação deixa de ser o objeto publicado em produção, e falhas que aparecem só do lado de lá ficam sem explicação — o commit é o mesmo, então ninguém suspeita do binário. Compilar uma vez, publicar o artefato e promovê-lo por todos os estágios elimina a classe inteira de problema, e é por isso que a prática é regra e não preferência.",
+      "opcoes": [
+        {
+          "texto": "Sim",
+          "correta": false
+        },
+        {
+          "texto": "Não",
+          "correta": true
+        }
+      ]
+    },
+    {
+      "id": "az400-pipe-assoc-otimizacao-31",
+      "topico": "Manutenção de pipelines",
+      "tipo": "Associacao",
+      "enunciado": "Cada sintoma de pipeline abaixo tem uma causa e uma correção próprias. Associe cada sintoma à correção adequada.",
+      "explicacao": "Boa parte do tempo gasta baixando as mesmas dependências é cache de dependências, com chave derivada do arquivo de bloqueio. Seis blocos quase idênticos variando runtime e sistema operacional é estratégia de matriz, que declara as dimensões uma vez. Pipelines disparando por alterações que não os afetam são filtros de caminho no gatilho. E estágios independentes executando em sequência é declarar as dependências entre estágios, deixando o serviço paralelizar o resto. O aumento de trabalhos paralelos está no painel porque é a resposta reflexa a qualquer lentidão de pipeline: ele resolve fila — quando o trabalho está parado esperando executor livre — e não acelera nenhum dos quatro sintomas acima, que são de desperdício e de serialização declarada, não de falta de capacidade.",
+      "associacoes": [
+        {
+          "alvo": "Boa parte do tempo é gasta baixando as mesmas dependências",
+          "item": "Cache de dependências"
+        },
+        {
+          "alvo": "Seis blocos quase idênticos, variando runtime e sistema operacional",
+          "item": "Estratégia de matriz"
+        },
+        {
+          "alvo": "Pipelines disparam por alterações que não os afetam",
+          "item": "Filtros de caminho no gatilho"
+        },
+        {
+          "alvo": "Estágios independentes entre si executam em sequência",
+          "item": "Dependências declaradas entre estágios"
+        }
+      ],
+      "itensExtras": [
+        "Aumento dos trabalhos paralelos"
+      ]
+    },
+    {
+      "id": "az400-pipe-assoc-recurso-protegido-32",
+      "topico": "Verificações e aprovações",
+      "tipo": "Associacao",
+      "enunciado": "Cada garantia sobre uma implantação é produzida por uma configuração diferente, e nenhuma delas mora no arquivo do pipeline. Associe cada garantia à configuração adequada.",
+      "explicacao": "Ninguém implanta em produção sem aprovação de responsáveis designados é a verificação de aprovação no ambiente. Só pipelines autorizados conseguem usar o ambiente é a restrição de permissão do próprio ambiente. A promoção só ocorre se as métricas estiverem saudáveis depois de um tempo de espera é o portão que consulta a integridade no monitoramento. E a credencial de implantação não fica guardada em lugar nenhum é a conexão de serviço com credencial federada. As quatro vivem fora do YAML de propósito: se morassem nele, quem altera o repositório removeria a proteção no mesmo commit que implanta. A variável secreta do pipeline está no painel porque também é configuração ligada a implantação e a mais lembrada quando se fala em segurança de pipeline: ela protege um valor contra aparecer no log e não produz nenhuma das quatro garantias acima.",
+      "associacoes": [
+        {
+          "alvo": "Ninguém implanta em produção sem aprovação de responsáveis designados",
+          "item": "Verificação de aprovação no ambiente"
+        },
+        {
+          "alvo": "Só pipelines autorizados conseguem usar o ambiente de produção",
+          "item": "Restrição de permissão do ambiente"
+        },
+        {
+          "alvo": "A promoção só ocorre se as métricas estiverem saudáveis após uma espera",
+          "item": "Portão consultando o monitoramento"
+        },
+        {
+          "alvo": "A credencial de implantação não fica guardada em lugar nenhum",
+          "item": "Conexão de serviço com credencial federada"
+        }
+      ],
+      "itensExtras": [
+        "Variável secreta do pipeline"
       ]
     }
   ]

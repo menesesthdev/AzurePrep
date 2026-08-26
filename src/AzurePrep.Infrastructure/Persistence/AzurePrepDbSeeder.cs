@@ -244,6 +244,35 @@ public static class AzurePrepDbSeeder
                 vazios.Count == 1 ? "dele" : "deles");
         }
 
+        // Domínio que não sustenta a PRÓPRIA cota é mais sutil que domínio vazio e igualmente
+        // silencioso: o sorteio corta a cota dele para o que existe e redistribui a diferença entre
+        // os demais (RedistribuirExcedente), então a prova sai completa, do tamanho certo, com o
+        // blueprint distorcido. Aparece sobretudo em exame com um domínio muito pesado — no AZ-400,
+        // 'pipelines' vale 52,5% e sozinho pede mais da metade dos itens.
+        var pesoTotal = exam.SkillAreas.Sum(a => a.WeightPercent);
+        if (pesoTotal > 0m)
+        {
+            foreach (var area in exam.SkillAreas)
+            {
+                var cota = (int)Math.Ceiling(area.WeightPercent / pesoTotal * definicao.TotalQuestions);
+                var disponiveis = exam.Questions.Count(q => q.IsActive && q.SkillAreaId == area.Id);
+
+                if (disponiveis > 0 && disponiveis < cota)
+                {
+                    logger?.Log(
+                        definicao.Publicado ? LogLevel.Warning : LogLevel.Information,
+                        "Exame {Codigo}: o domínio {Dominio} tem {Disponiveis} questões para uma cota " +
+                        "de {Cota} itens ({Peso}% do blueprint). O sorteio redistribui a diferença " +
+                        "entre os demais domínios, distorcendo a repartição da prova.",
+                        definicao.Code,
+                        area.Key,
+                        disponiveis,
+                        cota,
+                        area.WeightPercent);
+                }
+            }
+        }
+
         if (ativas >= definicao.TotalQuestions)
         {
             return;

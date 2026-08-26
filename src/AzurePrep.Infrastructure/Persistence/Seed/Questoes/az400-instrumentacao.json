@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-400",
+  "area": "instrumentacao",
+  "questoes": [
+    {
+      "id": "az400-instr-teste-disponibilidade-01",
+      "topico": "Telemetria de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Duas vezes no último trimestre a aplicação ficou fora do ar durante a madrugada e a equipe só soube quando o primeiro usuário reclamou, horas depois. Não houve pico de erro nos registros, porque a aplicação sequer respondia. A equipe quer detectar essa condição em minutos, inclusive quando não há tráfego real. Qual recurso recomendar?",
+      "explicacao": "Um teste de disponibilidade é o recurso adequado: ele envia requisições sintéticas a partir de vários pontos geográficos, em intervalo regular, e alerta quando um número configurado de origens deixa de obter resposta. Como o tráfego é gerado pelo próprio teste, a detecção independe de haver usuário acessando — que é exatamente a condição da madrugada descrita. As várias origens ainda distinguem indisponibilidade real de problema de rede num único ponto. Um alerta sobre a taxa de erro não dispara quando a aplicação não responde, porque não há telemetria sendo enviada: é justamente o que o enunciado observa ao dizer que não houve pico nos registros. Um alerta sobre uso de CPU do servidor pode indicar sintomas correlatos e não mede se o serviço responde. E um painel revisado toda manhã é detecção humana, com a latência que se quer eliminar.",
+      "opcoes": [
+        { "texto": "Teste de disponibilidade com requisições sintéticas de várias origens, com alerta.", "correta": true },
+        { "texto": "Alerta de métrica sobre a taxa de requisições com erro da aplicação.", "correta": false },
+        { "texto": "Alerta de métrica sobre o uso de CPU dos servidores da aplicação.", "correta": false },
+        { "texto": "Painel de saúde da aplicação, revisado pela equipe no início de cada dia.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-anotacao-release-02",
+      "topico": "Instrumentação da entrega",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe implanta várias vezes ao dia e, quando um gráfico de latência ou de erro muda de patamar, gasta tempo cruzando horários com o histórico de implantações para descobrir se alguma versão nova é a causa. O objetivo é que essa correlação seja visual e imediata no próprio gráfico de telemetria. Qual configuração recomendar?",
+      "explicacao": "As anotações de release são a configuração: o pipeline publica um marcador no recurso de telemetria a cada implantação, e ele aparece como uma marca vertical sobre os gráficos, de modo que a mudança de patamar fica visualmente ancorada à versão que a precedeu. A correlação deixa de ser um exercício de cruzar horários e passa a ser leitura direta, que é o objetivo declarado. Um painel separado com o histórico de implantações ao lado do gráfico de telemetria melhora um pouco e mantém o cruzamento manual, que é o trabalho a eliminar. Registrar a versão no log da aplicação ajuda a investigar depois e não marca nada no gráfico. E um alerta a cada implantação avisa que ela ocorreu, sem relacioná-la a comportamento nenhum.",
+      "opcoes": [
+        { "texto": "Anotações de release publicadas pelo pipeline no recurso de telemetria.", "correta": true },
+        { "texto": "Painel separado com o histórico de implantações, exibido ao lado dos gráficos.", "correta": false },
+        { "texto": "Registro da versão implantada no log da aplicação a cada inicialização.", "correta": false },
+        { "texto": "Alerta disparado a cada conclusão de implantação em produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-amostragem-03",
+      "topico": "Custo e volume de telemetria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O custo de ingestão de telemetria triplicou depois que o tráfego cresceu, e a maior parte do volume vem de requisições bem-sucedidas e repetitivas. A equipe precisa reduzir custo mantendo a capacidade de investigar falhas e de acompanhar tendências de desempenho. Qual configuração recomendar?",
+      "explicacao": "A amostragem adaptativa é a configuração: ela reduz o volume enviado conservando itens representativos, prioriza a retenção do que é excepcional — falhas e itens correlacionados a elas — e mantém a proporcionalidade necessária para acompanhar tendência, porque cada item amostrado carrega o peso que representa. Investigar falha e ver tendência continuam funcionando, que são as duas capacidades a preservar. Desligar a coleta fora do horário comercial economiza justamente nas janelas em que um problema passaria despercebido. Reduzir o nível de log para apenas erros elimina o contexto que torna uma falha diagnosticável — sem os passos anteriores, sobra o sintoma. E substituir a telemetria por gravação em arquivo no servidor troca uma plataforma de consulta e alerta por arquivos espalhados em instâncias efêmeras, o que é retrocesso operacional disfarçado de economia.",
+      "opcoes": [
+        { "texto": "Amostragem adaptativa, preservando itens excepcionais e a proporcionalidade das tendências.", "correta": true },
+        { "texto": "Desligar a coleta de telemetria fora do horário comercial.", "correta": false },
+        { "texto": "Reduzir o nível de log da aplicação para registrar apenas erros.", "correta": false },
+        { "texto": "Substituir a telemetria por gravação de log em arquivo no próprio servidor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-metrica-pre-agregada-04",
+      "topico": "Custo e volume de telemetria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de habilitar amostragem, a equipe percebeu que um alerta baseado em consulta de log, que contava requisições com erro, passou a disparar de forma inconsistente: às vezes o número consultado difere do que a investigação manual encontra. É preciso um alerta confiável sobre taxa de falha. Qual abordagem recomendar?",
+      "explicacao": "Alertar sobre a métrica pré-agregada de falha de requisições é a abordagem: essas métricas padrão são calculadas antes da amostragem, na própria instrumentação, e por isso permanecem exatas independentemente de quanto volume foi descartado. Consultas de log sobre dados amostrados devolvem estimativas — corretas em proporção quando a extrapolação é aplicada, e sujeitas a variação quando não é, que é a inconsistência observada. É a distinção que decide onde alertar num ambiente com amostragem. Desligar a amostragem devolveria exatidão ao log e traria de volta o custo que motivou a mudança. Aumentar a janela de avaliação suaviza a variação sem eliminá-la e atrasa o alerta. E dobrar o limiar para compensar é ajustar um número contra um erro cuja magnitude não é constante.",
+      "opcoes": [
+        { "texto": "Alertar sobre a métrica pré-agregada de falha, calculada antes da amostragem.", "correta": true },
+        { "texto": "Desabilitar a amostragem para que as consultas de log voltem a ser exatas.", "correta": false },
+        { "texto": "Aumentar a janela de avaliação do alerta de log para reduzir a variação.", "correta": false },
+        { "texto": "Dobrar o limiar do alerta de log para compensar o efeito da amostragem.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-evento-personalizado-05",
+      "topico": "Telemetria de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O time de produto quer saber quantas pessoas distintas usaram uma funcionalidade nova por semana, quais delas concluíram o fluxo até o fim e onde a maioria abandona. A funcionalidade já está em produção e a aplicação envia telemetria padrão de requisições e dependências. O que acrescentar à instrumentação?",
+      "explicacao": "Eventos personalizados nos pontos significativos do fluxo são o que falta: cada etapa relevante passa a emitir um evento nomeado, com propriedades que identificam o contexto, e isso permite contar pessoas distintas por semana, medir conclusão e localizar o ponto de abandono. Telemetria padrão registra requisições e dependências técnicas, que não sabem o que é uma etapa de negócio — por isso ela existe e ainda assim não responde à pergunta. Aumentar o nível de detalhe dos registros produz volume, custo e nenhuma estrutura para agregar. Um teste de disponibilidade verifica se o serviço responde, o que não tem relação com uso. E um painel sobre a telemetria existente só pode mostrar o que já foi coletado, e o dado necessário ainda não está sendo emitido — que é o ponto da questão.",
+      "opcoes": [
+        { "texto": "Eventos personalizados nas etapas significativas do fluxo, com propriedades de contexto.", "correta": true },
+        { "texto": "Elevar o nível de detalhe dos registros de log em toda a aplicação.", "correta": false },
+        { "texto": "Um teste de disponibilidade cobrindo o caminho da funcionalidade nova.", "correta": false },
+        { "texto": "Um painel construído sobre a telemetria padrão já coletada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-nome-funcao-06",
+      "topico": "Telemetria de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cinco serviços de um mesmo produto enviam telemetria para o mesmo recurso de Application Insights. Nas consultas e no mapa da aplicação tudo aparece misturado, e não há como saber qual serviço originou uma requisição lenta. Trocar para cinco recursos separados foi descartado, porque a equipe quer manter o rastreamento entre serviços num só lugar. O que configurar?",
+      "explicacao": "Definir o nome de função de nuvem em cada serviço é o que resolve: esse valor identifica o componente que emitiu cada item de telemetria, passa a separar os nós no mapa da aplicação e fica disponível como campo nas consultas, permitindo filtrar e agrupar por serviço. Mantém-se o recurso único, o que preserva o rastreamento entre serviços — que é a restrição declarada. Uma propriedade personalizada com o nome do serviço ajudaria nas consultas e não é reconhecida pelo mapa da aplicação, que usa especificamente o nome de função. Separar por chave de instrumentação é justamente a divisão em cinco recursos que foi descartada. E filtrar pelo nome da operação não distingue serviços, já que operações com o mesmo nome podem existir em mais de um.",
+      "opcoes": [
+        { "texto": "Definir o nome de função de nuvem em cada um dos cinco serviços.", "correta": true },
+        { "texto": "Acrescentar uma propriedade personalizada com o nome do serviço em cada item.", "correta": false },
+        { "texto": "Separar a telemetria por chave de instrumentação distinta para cada serviço.", "correta": false },
+        { "texto": "Filtrar as consultas pelo nome da operação de cada requisição.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-metricas-ao-vivo-07",
+      "topico": "Instrumentação da entrega",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma implantação canário, a equipe precisa acompanhar segundo a segundo se a fração de tráfego que recebeu a versão nova começa a apresentar falhas, para reverter em menos de um minuto se necessário. A ingestão da telemetria consultável tem alguns minutos de atraso, o que é longo demais para essa decisão. O que usar?",
+      "explicacao": "O painel de métricas ao vivo é o adequado: ele exibe requisições, falhas e desempenho com latência de cerca de um segundo, transmitidos diretamente das instâncias, sem passar pelo caminho de ingestão e indexação que introduz os minutos de atraso. É exatamente a ferramenta para acompanhar uma janela curta de decisão, como a de um canário. Uma consulta de log atualizada a cada trinta segundos continua limitada pelo atraso de ingestão, então repetir a consulta não torna o dado mais recente. Um alerta de métrica é mais rápido que log e ainda assim opera em janelas de minutos, além de ser reativo em vez de observacional. E acompanhar o log de execução do pipeline mostra o progresso da implantação, não o comportamento da aplicação sob tráfego real.",
+      "opcoes": [
+        { "texto": "Painel de métricas ao vivo, com latência de cerca de um segundo.", "correta": true },
+        { "texto": "Consulta de log sobre falhas, atualizada automaticamente a cada trinta segundos.", "correta": false },
+        { "texto": "Alerta de métrica sobre taxa de falha, com a menor granularidade disponível.", "correta": false },
+        { "texto": "Acompanhamento do log de execução do pipeline de implantação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-alerta-pipeline-08",
+      "topico": "Monitoramento do fluxo de entrega",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer ser avisada no canal do Teams sempre que o pipeline de implantação em produção falhar, sem receber aviso das dezenas de execuções de pipelines de validação que rodam o dia inteiro. Hoje ninguém é avisado de nada e as falhas são descobertas por acaso. Qual configuração recomendar?",
+      "explicacao": "Configurar uma assinatura de evento restrita ao pipeline de produção e ao resultado de falha, entregando no canal do Teams, é a configuração: ela liga exatamente o sinal desejado ao destino desejado, sem trazer junto as execuções de validação. A precisão do filtro é o ponto — assinar tudo e pedir que as pessoas ignorem o irrelevante é como se chega a um canal que ninguém lê. Assinar todas as execuções e filtrar visualmente devolve o trabalho para quem lê e produz exatamente esse resultado. Um relatório diário consolidado é agregação com latência de um dia, longe do aviso imediato pedido. E um painel de saúde dos pipelines é consulta ativa: alguém precisa olhar, e o enunciado descreve justamente o problema de ninguém estar olhando.",
+      "opcoes": [
+        { "texto": "Assinatura de evento restrita ao pipeline de produção e ao resultado de falha, entregue no canal.", "correta": true },
+        { "texto": "Assinatura de todas as execuções de pipeline, com filtro visual no canal.", "correta": false },
+        { "texto": "Relatório diário consolidado com o resultado de todas as execuções.", "correta": false },
+        { "texto": "Painel de saúde dos pipelines, fixado no canal da equipe.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-container-insights-09",
+      "topico": "Insights por tipo de carga",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação roda em um cluster de Kubernetes gerenciado. A equipe precisa acompanhar consumo de CPU e memória por nó e por pod, identificar contêineres reiniciando em laço e consultar os registros de saída dos contêineres, sem instalar e manter uma pilha de monitoramento própria. Qual solução recomendar?",
+      "explicacao": "O Container Insights é a solução: ele coleta métricas de nós e de pods, expõe o estado dos contêineres — incluindo reinicializações em laço — e recolhe a saída padrão dos contêineres para consulta, tudo gerenciado, que é a restrição de não manter pilha própria. É o insight desenhado para essa carga. O VM Insights trata de máquinas virtuais e entrega desempenho e mapa de dependências no nível do sistema operacional, sem noção de pod ou contêiner — ele enxergaria os nós, não a carga dentro deles. O Application Insights instrumenta a aplicação e responde sobre requisições e dependências, não sobre a plataforma que a hospeda. E montar uma pilha própria de coleta e visualização é justamente o trabalho que o enunciado descarta.",
+      "opcoes": [
+        { "texto": "Container Insights, com métricas de nós e pods e coleta dos registros dos contêineres.", "correta": true },
+        { "texto": "VM Insights nos nós do cluster, com mapa de dependências.", "correta": false },
+        { "texto": "Application Insights instrumentando a aplicação hospedada no cluster.", "correta": false },
+        { "texto": "Pilha própria de coleta e visualização implantada no próprio cluster.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-deteccao-inteligente-10",
+      "topico": "Análise de telemetria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer ser avisada quando a taxa de falha da aplicação sair do comportamento normal, sem precisar definir e manter limiares fixos — que hoje ou disparam à toa nos picos previsíveis de segunda-feira, ou passam batido nos períodos de tráfego baixo. Qual recurso recomendar?",
+      "explicacao": "A detecção inteligente de anomalias de falha é o recurso: ela aprende o padrão histórico da aplicação e alerta quando a taxa de falha se desvia desse padrão, sem exigir limiar configurado. É isso que resolve o dilema descrito, em que um número fixo é alto demais para o período calmo e baixo demais para o pico previsível. Um alerta de métrica com limiar estático é exatamente o que já existe e produz os dois problemas. Um alerta de log com consulta agendada tem a mesma limitação de limiar, somada ao atraso de ingestão. E um alerta com limiar dinâmico é a resposta mais próxima e legítima — ele calcula a faixa esperada a partir do histórico — e continua exigindo configuração e ajuste por métrica, enquanto a detecção inteligente já vem ativa e cobre o cenário de falha sem configuração alguma.",
+      "opcoes": [
+        { "texto": "Detecção inteligente de anomalias de falha, baseada no padrão histórico da aplicação.", "correta": true },
+        { "texto": "Alerta de métrica com limiar estático, ajustado periodicamente pela equipe.", "correta": false },
+        { "texto": "Alerta de log com consulta agendada comparando com a semana anterior.", "correta": false },
+        { "texto": "Teste de disponibilidade com alerta quando duas origens falharem.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-ambientes-separados-11",
+      "topico": "Custo e volume de telemetria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Produção e homologação enviam telemetria para o mesmo recurso de Application Insights. Um engenheiro propôs manter esse arranjo e apenas filtrar por uma propriedade de ambiente nas consultas e nos alertas. A engenheira de plataforma discorda. Qual é o argumento mais forte contra a proposta?",
+      "explicacao": "Alerta e limiar são propriedades do recurso e do comportamento observado, e os dois ambientes têm perfis muito diferentes: um teste de carga em homologação move as métricas agregadas do recurso e pode disparar alertas de produção, enquanto o ruído de homologação distorce as linhas de base usadas pela detecção de anomalias. Some-se a isso que retenção, custo e controle de acesso passam a ser comuns, então quem investiga homologação enxerga telemetria de produção — que pode conter dado sensível. Recursos separados por ambiente são a recomendação, e filtrar por propriedade não desfaz nenhuma dessas misturas. Dizer que não é possível distinguir os ambientes está errado, porque a propriedade funciona para consulta. Preocupar-se apenas com o volume de homologação reduz o problema a custo. E afirmar que o mapa de aplicação não suporta dois ambientes desloca o argumento para um detalhe secundário.",
+      "opcoes": [
+        { "texto": "Alertas, linhas de base, retenção e acesso passam a ser comuns; o comportamento de um ambiente contamina o outro.", "correta": true },
+        { "texto": "Não há como distinguir os dois ambientes nas consultas depois que a telemetria é ingerida.", "correta": false },
+        { "texto": "O volume de homologação aumentaria demais o custo de ingestão do recurso.", "correta": false },
+        { "texto": "O mapa de aplicação não consegue representar dois ambientes no mesmo recurso.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-kql-contagem-12",
+      "topico": "Análise de telemetria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma investigação, a equipe precisa saber quantas requisições falharam a cada hora nas últimas vinte e quatro horas, para descobrir se a degradação começou junto com a implantação da tarde. Qual construção de consulta produz esse resultado?",
+      "explicacao": "Filtrar as requisições com falha e agregar a contagem em intervalos de uma hora sobre o campo de tempo é a construção correta: o filtro restringe ao que interessa e a agregação por intervalo produz uma série temporal com um ponto por hora, que é o formato necessário para comparar com o horário da implantação. É a combinação mais comum de investigação em telemetria. Contar todas as requisições sem filtrar mistura sucesso e falha, e a variação do total esconde a do erro. Ordenar as requisições com falha pela duração responde \"quais foram as mais lentas\", que é outra pergunta. E listar as requisições com falha sem agregação devolve linhas individuais — potencialmente milhares —, deixando a contagem por hora para quem estiver lendo.",
+      "opcoes": [
+        { "texto": "Filtrar as requisições com falha e agregar a contagem em intervalos de uma hora.", "correta": true },
+        { "texto": "Agregar a contagem de todas as requisições em intervalos de uma hora, sem filtrar.", "correta": false },
+        { "texto": "Filtrar as requisições com falha e ordená-las pela duração, decrescente.", "correta": false },
+        { "texto": "Filtrar e listar as requisições com falha das últimas vinte e quatro horas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-github-insights-13",
+      "topico": "Monitoramento do fluxo de entrega",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A liderança de engenharia quer entender, sem construir nada sob medida, quais fluxos de trabalho do GitHub Actions consomem mais minutos de execução, quais falham com mais frequência e como esses números evoluíram nos últimos meses. Onde obter isso?",
+      "explicacao": "Os painéis de insights do próprio GitHub são a resposta: eles expõem uso e desempenho dos fluxos de trabalho — minutos consumidos, taxa de falha e evolução ao longo do tempo — sem exigir instrumentação nem construção de painel, que é a restrição declarada. É a ferramenta nativa para a pergunta feita. O Application Insights instrumenta a aplicação em produção e não observa a execução dos fluxos de trabalho. Uma consulta ao log de auditoria da organização registra ações administrativas, como alterações de permissão, e não métricas de execução. E exportar o histórico pela API para uma planilha produz o número uma vez, com trabalho recorrente para manter, exatamente o \"construir sob medida\" que se quer evitar.",
+      "opcoes": [
+        { "texto": "Os painéis de insights do próprio GitHub, com uso e desempenho dos fluxos de trabalho.", "correta": true },
+        { "texto": "Application Insights, instrumentando as execuções dos fluxos de trabalho.", "correta": false },
+        { "texto": "Consulta ao log de auditoria da organização no GitHub.", "correta": false },
+        { "texto": "Exportação do histórico de execuções pela API para uma planilha mensal.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-multi-correlacao-14",
+      "topico": "Instrumentação da entrega",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Depois de um aumento de erros em produção, a equipe precisa determinar em minutos se ele começou com uma implantação específica e qual versão está envolvida. Hoje a telemetria não carrega nenhuma informação de versão e nada marca as implantações nos gráficos. Quais duas medidas, juntas, entregam essa capacidade? Selecione duas.",
+      "explicacao": "Publicar anotações de release a partir do pipeline marca cada implantação sobre os gráficos de telemetria, o que responde visualmente \"o degrau começou depois de qual implantação\". Incluir a versão do artefato como propriedade em toda a telemetria responde \"qual versão está envolvida\" e permite comparar o comportamento entre versões numa consulta, inclusive durante uma implantação gradual em que duas convivem. As duas atacam metades diferentes da pergunta, e é por isso que ambas são necessárias. Aumentar a retenção da telemetria preserva histórico sem acrescentar a informação que falta. Um alerta a cada implantação avisa que ela ocorreu, sem correlacionar comportamento. E elevar o nível de detalhe do log aumenta volume e custo sem carregar versão nenhuma.",
+      "opcoes": [
+        { "texto": "Publicar anotações de release a partir do pipeline de implantação.", "correta": true },
+        { "texto": "Incluir a versão do artefato como propriedade em toda a telemetria enviada.", "correta": true },
+        { "texto": "Aumentar a retenção da telemetria para noventa dias.", "correta": false },
+        { "texto": "Configurar um alerta disparado a cada implantação concluída em produção.", "correta": false },
+        { "texto": "Elevar o nível de detalhe dos registros de log da aplicação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-multi-degradacao-15",
+      "topico": "Instrumentação da entrega",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A equipe quer saber em minutos, e não em horas, que uma implantação degradou o serviço — tanto no caso em que a aplicação passa a errar quanto no caso em que ela para de responder por completo. Quais duas configurações cobrem esses dois casos? Selecione duas.",
+      "explicacao": "Um alerta de métrica sobre a taxa de falha de requisições cobre o primeiro caso: a aplicação responde e passa a errar, então há telemetria chegando e a métrica se move. Um teste de disponibilidade com alerta cobre o segundo: quando a aplicação para de responder, nenhuma telemetria é enviada e a métrica de falha não se move — só o tráfego sintético percebe o silêncio. É justamente por serem casos com assinaturas opostas que as duas configurações são necessárias, e é o erro comum confiar apenas na primeira. Um painel revisado a cada manhã é detecção humana com latência de um dia. Um relatório semanal de incidentes é posterior por definição. E aumentar a retenção da telemetria ajuda a investigar depois, sem acelerar a percepção.",
+      "opcoes": [
+        { "texto": "Alerta de métrica sobre a taxa de falha de requisições.", "correta": true },
+        { "texto": "Teste de disponibilidade com alerta quando as origens deixarem de obter resposta.", "correta": true },
+        { "texto": "Painel de saúde revisado pela equipe no início de cada dia.", "correta": false },
+        { "texto": "Relatório semanal consolidando os incidentes de produção.", "correta": false },
+        { "texto": "Aumento da retenção da telemetria para facilitar a investigação posterior.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-multi-custo-16",
+      "topico": "Custo e volume de telemetria",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "O custo de telemetria precisa cair sem que a equipe perca a capacidade de alertar com precisão sobre taxa de falha nem de investigar incidentes recentes. Quais duas medidas atendem a essa combinação? Selecione duas.",
+      "explicacao": "A amostragem adaptativa reduz o volume ingerido preservando itens excepcionais e a proporcionalidade, o que mantém a investigação viável. Alertar sobre métricas pré-agregadas mantém a precisão apesar da amostragem, porque elas são calculadas antes dela — as duas medidas se completam, e é essa combinação que permite economizar sem degradar o alerta. Desligar a coleta em ambientes que não são produção economiza e remove a telemetria justamente de onde os problemas deveriam ser encontrados antes de chegar ao usuário. Reduzir a retenção para dois dias corta custo e inviabiliza investigar um incidente descoberto no fim de semana. E remover a instrumentação de dependências elimina a parte da telemetria que costuma explicar a lentidão, deixando o sintoma sem causa.",
+      "opcoes": [
+        { "texto": "Habilitar amostragem adaptativa na instrumentação da aplicação.", "correta": true },
+        { "texto": "Basear os alertas de taxa de falha em métricas pré-agregadas.", "correta": true },
+        { "texto": "Desligar a coleta de telemetria nos ambientes que não são produção.", "correta": false },
+        { "texto": "Reduzir a retenção da telemetria para dois dias.", "correta": false },
+        { "texto": "Remover a instrumentação das chamadas a dependências externas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-instr-simnao-amostragem-17",
+      "topico": "Custo e volume de telemetria",
+      "tipo": "SimNao",
+      "enunciado": "Depois de habilitar a amostragem adaptativa, um engenheiro construiu um relatório de conformidade que conta, por consulta de log, o número exato de transações processadas por dia, e afirma que o número é confiável porque vem diretamente da telemetria da aplicação. Avalie a afirmação: com amostragem habilitada, a contagem obtida por consulta de log é exata.",
+      "explicacao": "A afirmação é falsa. Com amostragem, apenas parte dos itens é efetivamente enviada e armazenada: a plataforma guarda em cada item o peso que ele representa, e as consultas precisam usar esse peso para estimar o total — o resultado é uma estimativa estatisticamente próxima, não uma contagem exata. Para tendência e proporção isso é perfeitamente adequado, e é o que torna a amostragem uma boa troca. Para um relatório de conformidade que precisa do número exato de transações, telemetria com amostragem é a fonte errada por construção: o dado deve vir do sistema que registra a transação de forma autoritativa, tipicamente o banco de dados da aplicação. Vale lembrar ainda que as métricas padrão pré-agregadas são calculadas antes da amostragem e permanecem exatas, o que as torna a fonte certa para alerta — mas elas medem requisições, não transações de negócio.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-instr-simnao-erro-silencio-18",
+      "topico": "Instrumentação da entrega",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe monitora a aplicação apenas com um alerta de métrica sobre a taxa de requisições com erro, configurado para disparar quando ela ultrapassar cinco por cento. O responsável afirma que essa configuração cobre qualquer indisponibilidade, porque toda falha aparece como erro. Avalie a afirmação: um alerta sobre taxa de erro é suficiente para detectar indisponibilidade.",
+      "explicacao": "A afirmação é falsa, e o modo de falha é traiçoeiro justamente por ser silencioso. Quando a aplicação para de responder por completo — processo morto, instância sem subir, entrada de rede quebrada —, nenhuma telemetria chega à plataforma: não há requisições com erro, há ausência de requisições. A taxa de erro pode inclusive cair para zero, porque o denominador desapareceu, e um alerta configurado para disparar acima de um limiar permanece calado durante toda a indisponibilidade. É por isso que a cobertura exige um sinal gerado de fora, tipicamente um teste de disponibilidade com tráfego sintético, que percebe o silêncio porque não depende de haver usuário nem de a aplicação conseguir reportar. Uma segunda camada útil é alertar sobre queda anômala do volume de requisições, que também detecta ausência em vez de erro.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-instr-assoc-recurso-appinsights-19",
+      "topico": "Telemetria de aplicação",
+      "tipo": "Associacao",
+      "enunciado": "Cada necessidade abaixo é atendida por um recurso diferente da telemetria de aplicação. Associe cada necessidade ao recurso adequado.",
+      "explicacao": "Detectar que o serviço parou de responder, mesmo sem tráfego real, é o teste de disponibilidade, que gera tráfego sintético de várias origens. Acompanhar o comportamento segundo a segundo durante uma implantação é o painel de métricas ao vivo, que transmite direto das instâncias sem passar pela ingestão. Medir quantas pessoas usaram uma funcionalidade e onde abandonam o fluxo são eventos personalizados, porque telemetria técnica não conhece etapa de negócio. E ser avisado quando a taxa de falha sai do padrão histórico, sem definir limiar, é a detecção inteligente de anomalias. A amostragem adaptativa está no painel porque é uma configuração central da telemetria e a mais lembrada quando se fala do assunto: ela governa quanto volume é coletado e a que custo, e não responde a nenhuma das quatro necessidades — no máximo afeta a precisão com que algumas delas são consultadas depois.",
+      "associacoes": [
+        { "alvo": "Detectar que o serviço parou de responder, mesmo sem tráfego real", "item": "Teste de disponibilidade" },
+        { "alvo": "Acompanhar o comportamento segundo a segundo durante uma implantação", "item": "Painel de métricas ao vivo" },
+        { "alvo": "Medir quantas pessoas usaram uma funcionalidade e onde abandonam o fluxo", "item": "Eventos personalizados" },
+        { "alvo": "Ser avisado quando a taxa de falha sai do padrão histórico, sem definir limiar", "item": "Detecção inteligente de anomalias" }
+      ],
+      "itensExtras": [
+        "Amostragem adaptativa"
+      ]
+    },
+    {
+      "id": "az400-instr-assoc-insights-carga-20",
+      "topico": "Insights por tipo de carga",
+      "tipo": "Associacao",
+      "enunciado": "Cada carga abaixo tem uma solução de insights própria. Associe cada carga à solução adequada.",
+      "explicacao": "Nós e pods de um cluster de Kubernetes, com estado dos contêineres e seus registros, é o Container Insights. Desempenho do sistema operacional de máquinas virtuais e o mapa de dependências entre elas é o VM Insights. Requisições, dependências e exceções de dentro da aplicação é o Application Insights. E capacidade, latência e taxa de erro de uma conta de armazenamento é o insight de armazenamento. O Network Watcher está no painel porque também é observabilidade e é a resposta reflexa para qualquer problema que envolva rede: ele diagnostica caminho e conectividade — regra que bloqueia, próximo salto, latência entre pontos — e não é uma solução de insights sobre a saúde de uma carga, que é o eixo das quatro necessidades acima.",
+      "associacoes": [
+        { "alvo": "Nós e pods de um cluster de Kubernetes, com estado e registros dos contêineres", "item": "Container Insights" },
+        { "alvo": "Desempenho do sistema operacional de máquinas virtuais e dependências entre elas", "item": "VM Insights" },
+        { "alvo": "Requisições, dependências e exceções de dentro da aplicação", "item": "Application Insights" },
+        { "alvo": "Capacidade, latência e taxa de erro de uma conta de armazenamento", "item": "Insight de armazenamento" }
+      ],
+      "itensExtras": [
+        "Network Watcher"
+      ]
+    },
+    {
+      "id": "az400-instr-assoc-kql-21",
+      "topico": "Análise de telemetria",
+      "tipo": "Associacao",
+      "enunciado": "Cada pergunta de investigação exige uma operação diferente sobre a telemetria consultada. Associe cada pergunta à operação adequada.",
+      "explicacao": "Contar erros por hora ao longo do dia é agregar a contagem em intervalos de tempo, o que produz a série temporal necessária para comparar com o horário de uma implantação. Restringir a análise apenas às requisições que falharam é filtrar por condição. Descobrir as dez operações mais lentas é ordenar pela duração e limitar o resultado. E juntar a telemetria de uma requisição com a das dependências que ela chamou é combinar as duas tabelas pelo identificador de operação, que é o campo que correlaciona itens da mesma execução. A renderização como gráfico de tempo está no painel porque costuma aparecer no fim de quase toda consulta de investigação: ela transforma o resultado em visualização e não produz nem restringe dado nenhum — sem a agregação correta antes dela, o gráfico simplesmente não tem o que mostrar.",
+      "associacoes": [
+        { "alvo": "Contar erros por hora ao longo do dia", "item": "Agregar a contagem em intervalos de tempo" },
+        { "alvo": "Restringir a análise apenas às requisições que falharam", "item": "Filtrar por condição" },
+        { "alvo": "Descobrir as dez operações mais lentas", "item": "Ordenar pela duração e limitar o resultado" },
+        { "alvo": "Juntar a telemetria de uma requisição com a das dependências que ela chamou", "item": "Combinar tabelas pelo identificador de operação" }
+      ],
+      "itensExtras": [
+        "Renderizar o resultado como gráfico de tempo"
+      ]
+    },
+    {
+      "id": "az400-instr-assoc-fluxo-entrega-22",
+      "topico": "Monitoramento do fluxo de entrega",
+      "tipo": "Associacao",
+      "enunciado": "Cada pergunta sobre o próprio processo de entrega é respondida por um instrumento diferente. Associe cada pergunta ao instrumento adequado.",
+      "explicacao": "Quais fluxos de trabalho consomem mais minutos e falham mais são os painéis de insights do GitHub, nativos e sem construção. Ser avisado quando o pipeline de produção falhar é uma assinatura de evento restrita àquele pipeline e ao resultado de falha. Saber se a implantação recém-concluída degradou o serviço é o alerta de métrica sobre a aplicação — o pipeline pode terminar com sucesso e ainda assim publicar algo ruim, e é essa distinção que o instrumento cobre. E localizar visualmente qual implantação precedeu um degrau no gráfico é a anotação de release. O log de auditoria da organização está no painel porque também registra o que aconteceu e é confundido com telemetria de entrega: ele guarda ações administrativas, como alteração de permissão ou de configuração, e não mede execução, falha nem desempenho de nada.",
+      "associacoes": [
+        { "alvo": "Quais fluxos de trabalho consomem mais minutos e falham com mais frequência", "item": "Painéis de insights do GitHub" },
+        { "alvo": "Ser avisado quando o pipeline de produção falhar", "item": "Assinatura de evento do pipeline" },
+        { "alvo": "Saber se a implantação recém-concluída degradou o serviço", "item": "Alerta de métrica sobre a aplicação" },
+        { "alvo": "Localizar no gráfico qual implantação precedeu um degrau de erro", "item": "Anotação de release" }
+      ],
+      "itensExtras": [
+        "Log de auditoria da organização"
+      ]
+    }
+  ]
+}

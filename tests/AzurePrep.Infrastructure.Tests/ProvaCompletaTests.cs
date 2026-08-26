@@ -188,23 +188,28 @@ public sealed class ProvaCompletaTests : IDisposable
     }
 
     /// <summary>
-    /// Os quatro formatos chegam à prova — em especial o arrastar e soltar.
+    /// O <b>banco</b> de cada exame oferece os quatro formatos.
     /// </summary>
     /// <remarks>
-    /// É o formato com maior superfície para falhar em silêncio: ele não existe como linha própria
-    /// no banco, e sim como todas as combinações de alvo com item. Se a expansão quebrasse, a
-    /// questão continuaria sendo sorteada e apresentada — só nunca poderia ser acertada.
+    /// ⚠️ Esta asserção já foi escrita sobre a prova sorteada, e estava errada — foi corrigida
+    /// depois de falhar. Conter os quatro formatos é propriedade da composição do banco, não de um
+    /// sorteio: com o AZ-900 tendo 11 questões de arrastar em 285 (3,9%), uma prova de 40 itens tem
+    /// esperança de ~1,5 delas, e sortear zero é resultado normal. A versão anterior passava por
+    /// acidente enquanto só existiam exames com proporção saudável, e quebrou ao entrar um exame
+    /// cujo banco é desequilibrado — que é justamente o defeito que ela deveria ter denunciado, e
+    /// denunciava pelo lugar errado.
+    ///
+    /// O formato de arrastar e soltar é o que mais justifica o teste: ele não existe como linha
+    /// própria no banco, e sim como todas as combinações de alvo com item.
     /// </remarks>
     [Theory]
     [MemberData(nameof(ExamesCompletos))]
-    public async Task Prova_ContemOsQuatroFormatos(string codigo)
+    public async Task Banco_OfereceOsQuatroFormatos(string codigo)
     {
-        var attemptId = await IniciarAsync(codigo);
-
         using var ctx = CreateContext();
-        var tipos = await ctx.ExamAttemptQuestions
-            .Where(q => q.ExamAttemptId == attemptId)
-            .Join(ctx.Questions, a => a.QuestionId, q => q.Id, (_, q) => q.Type)
+        var tipos = await ctx.Questions
+            .Where(q => q.IsActive && ctx.Exams.Any(e => e.Id == q.ExamId && e.Code == codigo))
+            .Select(q => q.Type)
             .Distinct()
             .ToListAsync();
 
@@ -323,8 +328,9 @@ public sealed class ProvaCompletaTests : IDisposable
         });
 
         // Nas de arrastar, a revisão mostra o alvo de cada par — sem isso o gabarito fica ilegível.
+        // Sem exigir que existam: quantas caem numa prova depende do sorteio, e o banco do AZ-900
+        // tem poucas o bastante para uma prova de 40 itens sair sem nenhuma.
         var arrastar = resultado.Questions.Where(q => q.Type == TipoDeQuestao.Associacao).ToList();
-        Assert.NotEmpty(arrastar);
         Assert.All(arrastar, q => Assert.All(q.Options, o =>
             Assert.False(string.IsNullOrWhiteSpace(o.TargetText))));
     }

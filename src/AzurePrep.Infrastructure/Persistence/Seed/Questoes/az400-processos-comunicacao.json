@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-400",
+  "area": "processos-comunicacao",
+  "questoes": [
+    {
+      "id": "az400-proc-rastreabilidade-boards-01",
+      "topico": "Rastreabilidade do trabalho",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso mantém o código no GitHub e o planejamento no Azure Boards. A exigência é que, ao abrir um item de trabalho, a equipe veja os commits e as solicitações de alteração que o implementaram, sem que ninguém preencha campo manualmente. A conexão entre os dois produtos já foi criada. O que falta configurar no fluxo de trabalho da equipe?",
+      "explicacao": "Falta a equipe passar a referenciar o item de trabalho no próprio commit ou na solicitação de alteração, usando a sintaxe de menção que a integração reconhece — tipicamente o identificador precedido do prefixo definido pela integração. É essa menção que o serviço captura para criar o vínculo automaticamente e exibi-lo no item de trabalho; a conexão entre os produtos é o pré-requisito, e sozinha não gera vínculo nenhum, que é exatamente o estado descrito. Anexar manualmente o endereço do commit ao item produz o vínculo e contraria o requisito de não preencher campo à mão. Migrar o código para o Azure Repos resolveria com integração nativa e é mudança de ferramenta, muito além do que se pediu. E uma política de branch exigindo item de trabalho vinculado é um bom reforço, mas ela verifica que o vínculo existe — não é o que o cria.",
+      "opcoes": [
+        { "texto": "Referenciar o identificador do item de trabalho no commit ou na solicitação de alteração, com a sintaxe que a integração reconhece.", "correta": true },
+        { "texto": "Anexar manualmente o endereço de cada commit ao item de trabalho correspondente.", "correta": false },
+        { "texto": "Migrar o código do GitHub para o Azure Repos, que tem integração nativa com o Boards.", "correta": false },
+        { "texto": "Criar uma política de branch exigindo item de trabalho vinculado em cada solicitação de alteração.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-lead-vs-cycle-02",
+      "topico": "Métricas de fluxo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria perguntou quanto tempo passa entre o cliente pedir uma funcionalidade e ela estar disponível. A equipe respondeu com uma média de três dias, medida a partir do momento em que alguém começa a trabalhar no item até ele ser concluído. A diretoria estranhou, porque a percepção dos clientes é de semanas. O que explica a divergência e qual métrica responde à pergunta feita?",
+      "explicacao": "A equipe mediu o tempo de ciclo, que conta a partir do momento em que o item entra em execução; a pergunta da diretoria é sobre o tempo de espera, que começa quando o item é criado. A diferença entre os dois é exatamente o tempo em que o pedido ficou parado na fila esperando alguém pegá-lo — e é isso que o cliente percebe como semanas. A métrica que responde à pergunta feita é o tempo de espera. Dizer que a divergência vem de itens grandes divididos não explica um desvio dessa ordem e não muda qual métrica responde à pergunta. Atribuir a diferença ao tempo de implantação inverte a escala: implantar leva minutos ou horas, não semanas. E supor que as duas métricas são a mesma coisa medida de formas diferentes é justamente o engano que produziu a resposta errada à diretoria.",
+      "opcoes": [
+        { "texto": "A equipe mediu tempo de ciclo; a pergunta é sobre tempo de espera, que inclui a fila antes do trabalho começar.", "correta": true },
+        { "texto": "A divergência vem de itens grandes que foram divididos, contando cada parte separadamente.", "correta": false },
+        { "texto": "A diferença é o tempo de implantação, que não está incluído no tempo de ciclo.", "correta": false },
+        { "texto": "Tempo de ciclo e tempo de espera são a mesma medida; a percepção do cliente é subjetiva.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-cfd-gargalo-03",
+      "topico": "Métricas de fluxo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe entrega menos do que planeja há três sprints, sem que ninguém identifique por quê. A suspeita é de que o trabalho fica parado em alguma etapa do quadro, mas ninguém sabe qual. É preciso enxergar, ao longo do tempo, quanto trabalho se acumula em cada coluna. Qual visualização recomendar?",
+      "explicacao": "O diagrama de fluxo cumulativo é a visualização adequada: ele mostra, dia a dia, a quantidade de itens em cada estado do quadro, e uma faixa que se alarga ao longo do tempo denuncia exatamente a etapa em que o trabalho se acumula — que é literalmente o que a equipe precisa enxergar. Ele também deixa visível o tempo de espera e o trabalho em andamento sem exigir cálculo. O gráfico de burndown mostra o trabalho restante da iteração contra o tempo e diz se a equipe vai fechar o compromisso, sem discriminar onde o trabalho está parado. O gráfico de velocidade compara o entregue por iteração, o que confirma o sintoma que a equipe já conhece e não aponta a causa. E um painel de tempo de ciclo por item revela que a duração total está alta, sem mostrar em qual etapa ela foi consumida.",
+      "opcoes": [
+        { "texto": "Diagrama de fluxo cumulativo, que mostra o acúmulo em cada estado ao longo do tempo.", "correta": true },
+        { "texto": "Gráfico de burndown da iteração, comparando trabalho restante com o tempo.", "correta": false },
+        { "texto": "Gráfico de velocidade, comparando o entregue em cada uma das últimas iterações.", "correta": false },
+        { "texto": "Painel de tempo de ciclo por item concluído, ordenado do maior para o menor.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-metrica-estabilidade-04",
+      "topico": "Métricas de DevOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de automatizar o pipeline, a equipe passou de duas implantações por mês para quinze por semana. A liderança quer saber se esse ganho de ritmo veio às custas da qualidade, e pediu uma métrica que responda a essa pergunta específica. Qual recomendar?",
+      "explicacao": "A taxa de falha de mudança é a métrica que responde: ela mede a proporção de implantações que resultam em degradação e exigem correção, reversão ou correção emergencial. Se ela permaneceu estável enquanto a frequência subiu, o ganho de ritmo não custou qualidade; se subiu junto, custou. É exatamente a pergunta feita. A frequência de implantação é a métrica que já foi medida e é justamente a que motivou a dúvida — repeti-la não responde nada. O tempo de espera para mudanças mede quanto tempo o código leva do commit à produção, que é outra dimensão de velocidade e não de qualidade. E a velocidade da equipe mede quanto trabalho planejado é concluído por iteração, uma medida de planejamento interno que não diz nada sobre o que acontece em produção depois da implantação.",
+      "opcoes": [
+        { "texto": "Taxa de falha de mudança.", "correta": true },
+        { "texto": "Frequência de implantação.", "correta": false },
+        { "texto": "Tempo de espera para mudanças.", "correta": false },
+        { "texto": "Velocidade da equipe por iteração.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-tempo-restaurar-05",
+      "topico": "Métricas de DevOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer medir quanto tempo o serviço leva para voltar ao normal depois de um incidente em produção, e usar esse número para justificar investimento em automação de reversão. Hoje os incidentes são registrados como itens de trabalho de um tipo específico, com data de abertura e de fechamento. Qual abordagem produz a métrica pedida?",
+      "explicacao": "Calcular o tempo médio entre a abertura e o fechamento dos itens de incidente é a abordagem: o tempo para restaurar o serviço é medido exatamente assim, e os dados já existem no formato necessário. A métrica então pode ser acompanhada num painel ao longo do tempo, que é o que sustenta o argumento de investimento — número isolado não mostra tendência. Medir o tempo entre o commit que causou o defeito e a correção mede outra coisa: quanto tempo o defeito existiu no código, e não quanto tempo o serviço ficou degradado, que é a pergunta. Contar a quantidade de incidentes por mês mede frequência, não duração. E medir o tempo de execução do pipeline de reversão mede a ferramenta, não o resultado — o serviço pode continuar fora do ar por muito tempo antes de alguém decidir reverter, e é justamente esse intervalo que o investimento em automação pretende reduzir.",
+      "opcoes": [
+        { "texto": "Tempo médio entre abertura e fechamento dos itens de incidente, acompanhado ao longo do tempo.", "correta": true },
+        { "texto": "Tempo médio entre o commit que introduziu o defeito e o commit que o corrigiu.", "correta": false },
+        { "texto": "Quantidade de incidentes registrados por mês, comparada entre trimestres.", "correta": false },
+        { "texto": "Tempo médio de execução do pipeline de reversão para produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-webhook-06",
+      "topico": "Integração e comunicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema interno de inventário precisa reagir sempre que uma solicitação de alteração for concluída, e a reação deve ocorrer em segundos. A equipe do inventário propôs consultar a API a cada cinco minutos para descobrir novidades. A equipe de plataforma quer reduzir latência e carga. Qual abordagem recomendar?",
+      "explicacao": "Configurar um webhook — nos Azure DevOps chamados de ganchos de serviço — que envia uma requisição ao sistema de inventário no momento em que o evento ocorre é a recomendação: a reação passa a acontecer em segundos, e a carga desaparece porque não há mais consulta periódica. O modelo muda de puxar para empurrar, que é exatamente o que resolve os dois problemas declarados. Reduzir o intervalo de consulta para trinta segundos diminui a latência e multiplica a carga por dez, indo contra metade do requisito. Consultar a API só em horário comercial reduz carga e piora a latência fora dele, sem atender a nenhum dos dois de forma consistente. E receber notificação por e-mail e processá-la é um caminho frágil e indireto para uma integração entre sistemas, com formato instável e sem garantia de ordem.",
+      "opcoes": [
+        { "texto": "Configurar um webhook que envia o evento ao sistema de inventário no momento em que ele ocorre.", "correta": true },
+        { "texto": "Reduzir o intervalo de consulta à API de cinco minutos para trinta segundos.", "correta": false },
+        { "texto": "Manter a consulta periódica, restringindo-a ao horário comercial para reduzir carga.", "correta": false },
+        { "texto": "Assinar a notificação por e-mail do evento e processar a mensagem no sistema de inventário.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-wiki-codigo-07",
+      "topico": "Documentação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A documentação técnica de um serviço vive desatualizada: quem altera o código raramente lembra de editar a página correspondente. A equipe quer que a documentação passe pela mesma revisão da mudança de código, fique versionada junto com ela e possa ser exigida na aprovação da solicitação de alteração. Qual abordagem recomendar?",
+      "explicacao": "Publicar como wiki uma pasta de arquivos Markdown que vive no próprio repositório de código é a abordagem: as páginas passam a ser arquivos versionados junto com o código, alteradas na mesma solicitação de alteração e revisadas pelos mesmos revisores — e por isso a atualização da documentação pode ser exigida na aprovação, que é o terceiro requisito. É a diferença estrutural entre documentação que acompanha o código e documentação que mora ao lado dele. Um wiki provisionado à parte é ótimo para conteúdo de projeto e mora em outro repositório, editado no navegador, fora do fluxo de revisão do código — que é exatamente o arranjo que produziu o problema. Um item de trabalho recorrente para revisar a documentação é processo apoiado em disciplina, e disciplina é o que já falhou. E gerar a documentação a partir de comentários resolve referência de API e não cobre a documentação técnica em geral.",
+      "opcoes": [
+        { "texto": "Publicar como wiki uma pasta de Markdown do próprio repositório de código.", "correta": true },
+        { "texto": "Criar um wiki provisionado para o projeto e treinar a equipe para mantê-lo.", "correta": false },
+        { "texto": "Criar um item de trabalho recorrente de revisão da documentação a cada iteração.", "correta": false },
+        { "texto": "Gerar toda a documentação automaticamente a partir dos comentários do código.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-notas-de-versao-08",
+      "topico": "Documentação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer gerar automaticamente as notas de versão a partir do histórico do Git, separando correções de defeitos, funcionalidades novas e mudanças incompatíveis. Hoje as mensagens de commit são livres, no estilo \"ajustes\" e \"correções do review\". Qual é o pré-requisito para a automação funcionar?",
+      "explicacao": "O pré-requisito é adotar uma convenção estruturada de mensagem de commit, com tipo declarado e marcação explícita de mudança incompatível, aplicada por verificação automática na integração. A automação lê o histórico e só consegue classificar o que estiver classificado na origem — sem convenção, ela produz uma lista de \"ajustes\" que não separa nada, e é por isso que a disciplina de commit vem antes da ferramenta. Escolher a ferramenta de geração é o passo seguinte e não resolve a ausência de dado estruturado. Passar a marcar cada versão com uma tag delimita o intervalo do histórico e é necessário para saber o que entrou em cada versão, mas não classifica os itens. E escrever as notas manualmente na solicitação de alteração é justamente a alternativa que a automação pretende substituir.",
+      "opcoes": [
+        { "texto": "Adotar uma convenção estruturada de mensagem de commit, verificada automaticamente na integração.", "correta": true },
+        { "texto": "Escolher a ferramenta de geração de notas de versão adequada ao formato do repositório.", "correta": false },
+        { "texto": "Passar a marcar cada versão publicada com uma tag no repositório.", "correta": false },
+        { "texto": "Exigir que cada solicitação de alteração descreva no corpo o texto que irá para as notas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-github-flow-09",
+      "topico": "Fluxo de trabalho",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de seis pessoas mantém um serviço web com uma única versão em produção, implanta várias vezes ao dia e usa sinalizadores de funcionalidade para esconder trabalho incompleto. O fluxo atual tem branches de desenvolvimento, release e hotfix, e a equipe reclama de merges demorados e conflitos frequentes. Qual fluxo recomendar?",
+      "explicacao": "O fluxo do GitHub é o encaixe: branches curtas criadas a partir da linha principal, solicitação de alteração, revisão e retorno rápido para a principal, de onde se implanta. Ele existe justamente para equipes pequenas com uma versão em produção e implantação frequente, e os sinalizadores de funcionalidade que a equipe já usa são o que permite integrar trabalho incompleto sem esconder atrás de branch de longa duração — que é a origem dos merges demorados e dos conflitos. O fluxo com branches de desenvolvimento e release é o que a equipe usa hoje e faz sentido quando há várias versões em produção simultâneas, o que não é o caso. Aumentar a frequência de merge da branch de desenvolvimento alivia o sintoma sem tocar na estrutura que o causa. E branches de longa duração por pessoa multiplica o problema, transformando cada integração num evento.",
+      "opcoes": [
+        { "texto": "Fluxo do GitHub: branches curtas a partir da principal, solicitação de alteração e implantação a partir dela.", "correta": true },
+        { "texto": "Manter o fluxo atual, aumentando a frequência de merge da branch de desenvolvimento.", "correta": false },
+        { "texto": "Adotar branches de longa duração por pessoa, integradas ao fim de cada iteração.", "correta": false },
+        { "texto": "Manter branches de release e criar uma branch de integração adicional antes da principal.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-ruido-notificacao-10",
+      "topico": "Integração e comunicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um canal do Teams recebe notificação de toda execução de pipeline, toda alteração de item de trabalho e todo commit de doze repositórios. A equipe passou a ignorar o canal, e uma falha de produção só foi percebida quarenta minutos depois porque a mensagem se perdeu no meio. Qual mudança recomendar?",
+      "explicacao": "Restringir as assinaturas aos eventos sobre os quais alguém precisa agir — falha de pipeline na linha principal, implantação em produção, solicitação de alteração aguardando revisão — e mandar o restante para canais separados é a mudança que ataca a causa. O problema não é volume de mensagem em si, e sim a proporção entre sinal e ruído: quando quase tudo é ignorável, o canal deixa de ser lido e a mensagem que importava se perde junto. Aumentar a retenção do canal preserva o histórico e não faz ninguém ler no momento certo. Criar um item de trabalho a cada falha registra o evento e não acelera a percepção, além de acrescentar mais ruído em outro lugar. E designar um plantonista para monitorar o canal é resolver com pessoa um problema de configuração, e a pessoa vai enfrentar exatamente a mesma enxurrada.",
+      "opcoes": [
+        { "texto": "Restringir as assinaturas aos eventos acionáveis e mover o restante para canais separados.", "correta": true },
+        { "texto": "Aumentar a retenção de mensagens do canal para facilitar a busca posterior.", "correta": false },
+        { "texto": "Criar automaticamente um item de trabalho a cada falha de pipeline em produção.", "correta": false },
+        { "texto": "Designar um plantonista para acompanhar o canal em tempo integral.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-fechar-item-11",
+      "topico": "Rastreabilidade do trabalho",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer que o item de trabalho seja movido para concluído automaticamente quando a solicitação de alteração que o implementa for integrada à linha principal, para eliminar o passo manual que hoje é esquecido com frequência. Qual configuração atende?",
+      "explicacao": "Vincular o item de trabalho à solicitação de alteração e usar a menção com a palavra-chave de transição — a sintaxe que instrui o serviço a mover o item ao concluir a integração — é o que atende: o vínculo dá a rastreabilidade e a palavra-chave dispara a transição de estado no momento do merge. É uma configuração do próprio fluxo, sem automação a escrever. Uma política de branch exigindo item vinculado garante que o vínculo exista e não move estado nenhum — ela verifica, não age. Um item de trabalho recorrente para revisar pendências é processo manual disfarçado de automação. E fechar o item ao criar a solicitação de alteração inverte a ordem: o trabalho não está concluído quando a revisão começa, e itens fechados prematuramente destroem a confiança nas métricas de fluxo.",
+      "opcoes": [
+        { "texto": "Vincular o item à solicitação de alteração usando a menção com palavra-chave de transição de estado.", "correta": true },
+        { "texto": "Criar uma política de branch que exija item de trabalho vinculado em cada solicitação.", "correta": false },
+        { "texto": "Criar um item recorrente de revisão de pendências ao fim de cada iteração.", "correta": false },
+        { "texto": "Configurar o fechamento do item no momento em que a solicitação de alteração é aberta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-mermaid-12",
+      "topico": "Documentação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os diagramas de arquitetura da equipe são imagens exportadas de uma ferramenta de desenho e anexadas ao wiki. Quando a arquitetura muda, quase sempre a imagem fica desatualizada, e ninguém consegue revisar o que mudou entre duas versões do diagrama. Qual abordagem resolve os dois problemas?",
+      "explicacao": "Escrever os diagramas como texto, em sintaxe Mermaid dentro das páginas Markdown do wiki, resolve os dois: o diagrama passa a ser código versionado, cuja diferença entre versões é legível numa revisão, e alterá-lo deixa de exigir abrir uma ferramenta externa e reexportar — o atrito que produz o desatualizado. Guardar o arquivo-fonte da ferramenta junto da imagem preserva a possibilidade de editar e não torna a diferença revisável, porque o formato binário não produz diferença legível. Padronizar a ferramenta de desenho resolve consistência visual e nenhum dos dois problemas descritos. E gerar o diagrama a partir da infraestrutura implantada produz um retrato do que existe, útil por outro motivo, mas não substitui o diagrama de intenção que a equipe revisa antes de construir.",
+      "opcoes": [
+        { "texto": "Escrever os diagramas em sintaxe Mermaid nas páginas Markdown do wiki.", "correta": true },
+        { "texto": "Guardar o arquivo-fonte da ferramenta de desenho ao lado da imagem exportada.", "correta": false },
+        { "texto": "Padronizar uma única ferramenta de desenho para toda a organização.", "correta": false },
+        { "texto": "Gerar automaticamente o diagrama a partir da infraestrutura implantada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-painel-liderança-13",
+      "topico": "Métricas de DevOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A liderança pediu um painel único que mostre a saúde de entrega de oito equipes. Uma proposta compara a velocidade de cada equipe lado a lado, para identificar quais estão produzindo mais. A engenheira responsável discorda da proposta. Qual é o argumento correto?",
+      "explicacao": "Velocidade é uma medida interna de calibração de planejamento, expressa em pontos que cada equipe estima com a própria régua — comparar equipes por ela não mede produtividade e produz o incentivo de inflar estimativas, corrompendo justamente a métrica que serve para planejar. Para comparar saúde de entrega entre equipes, as medidas comparáveis são as que se expressam em unidades objetivas: frequência de implantação, tempo de espera para mudanças, taxa de falha de mudança e tempo para restaurar o serviço. Dizer que a velocidade só vale para equipes do mesmo tamanho mantém o erro de fundo, porque o problema é a régua e não o tamanho. Afirmar que velocidade é uma boa métrica desde que normalizada por pessoa piora, ao acrescentar comparação individual. E propor substituí-la pela quantidade de commits troca uma métrica ruim por outra pior, que premia fragmentar trabalho.",
+      "opcoes": [
+        { "texto": "Velocidade é interna e não comparável entre equipes; a comparação deve usar métricas em unidades objetivas de entrega.", "correta": true },
+        { "texto": "Velocidade só é comparável entre equipes de tamanho semelhante, o que não é o caso.", "correta": false },
+        { "texto": "Velocidade é adequada desde que normalizada pela quantidade de pessoas de cada equipe.", "correta": false },
+        { "texto": "Velocidade deve ser substituída pela quantidade de commits por equipe, que é objetiva.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-multi-estabilidade-14",
+      "topico": "Métricas de DevOps",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um relatório de engenharia precisa separar as métricas que medem ritmo de entrega das que medem estabilidade do que é entregue, para evitar a leitura de que entregar mais é sempre melhor. Quais duas métricas pertencem ao eixo de estabilidade? Selecione duas.",
+      "explicacao": "A taxa de falha de mudança e o tempo para restaurar o serviço formam o eixo de estabilidade: a primeira mede a proporção de implantações que degradam o serviço, a segunda mede quanto tempo se leva para voltar ao normal quando isso acontece. Elas respondem \"o que entregamos se sustenta?\". A frequência de implantação e o tempo de espera para mudanças formam o eixo de ritmo, respondendo \"com que velocidade entregamos?\" — são exatamente as métricas que, lidas sozinhas, produzem a distorção que o relatório quer evitar. A velocidade da equipe não pertence a nenhum dos dois eixos: é medida interna de planejamento, em unidade que cada equipe define, e não descreve o que acontece em produção. A separação entre os dois eixos é o que torna o relatório honesto, porque melhorar ritmo às custas de estabilidade deixa de parecer progresso.",
+      "opcoes": [
+        { "texto": "Taxa de falha de mudança.", "correta": true },
+        { "texto": "Tempo para restaurar o serviço.", "correta": true },
+        { "texto": "Frequência de implantação.", "correta": false },
+        { "texto": "Tempo de espera para mudanças.", "correta": false },
+        { "texto": "Velocidade da equipe por iteração.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-multi-rastreabilidade-15",
+      "topico": "Rastreabilidade do trabalho",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Após um defeito em produção, a equipe levou horas para descobrir qual alteração o introduziu e qual item de trabalho a motivou. A exigência é que, a partir de qualquer versão publicada, seja possível chegar em minutos aos commits e aos itens de trabalho correspondentes. Quais duas práticas, juntas, entregam essa rastreabilidade? Selecione duas.",
+      "explicacao": "As duas práticas são vincular commits e solicitações de alteração aos itens de trabalho, pela sintaxe de menção que a integração reconhece, e registrar em cada implantação a versão exata do artefato publicado, com o commit de origem. A primeira liga código a intenção; a segunda liga o que está em produção ao código. Sem a segunda, sabe-se o que cada commit fazia e não se sabe qual deles está no ar; sem a primeira, chega-se ao commit e não se sabe por que ele existiu. A rastreabilidade só é completa com as duas pontas. Aumentar a retenção dos logs de pipeline preserva evidência de execução, sem ligar versão a código. Exigir dois revisores melhora a qualidade da revisão e não cria rastro. E padronizar o nome das branches ajuda a organizar e não sobrevive ao merge, quando a branch deixa de existir.",
+      "opcoes": [
+        { "texto": "Vincular commits e solicitações de alteração aos itens de trabalho, pela sintaxe de menção.", "correta": true },
+        { "texto": "Registrar em cada implantação a versão exata do artefato publicado e o commit de origem.", "correta": true },
+        { "texto": "Aumentar a retenção dos logs de execução dos pipelines para um ano.", "correta": false },
+        { "texto": "Exigir dois revisores em toda solicitação de alteração para a linha principal.", "correta": false },
+        { "texto": "Padronizar o nome das branches com o identificador do item de trabalho.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-multi-feedback-16",
+      "topico": "Integração e comunicação",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe de produto quer encurtar o ciclo entre um usuário relatar um problema e a equipe agir sobre ele. Hoje os relatos chegam por vários caminhos informais, se perdem, e ninguém sabe quantos existem nem em que estado estão. Quais duas medidas atacam diretamente a causa? Selecione duas.",
+      "explicacao": "Centralizar os relatos em um único canal rastreável, com modelo que exige as informações mínimas para triagem, é a primeira medida: ela elimina os caminhos informais e faz cada relato virar um registro com estado, o que responde \"quantos existem e em que estado estão\". A segunda é integrar esse canal ao acompanhamento de trabalho da equipe, para que um relato triado vire item no mesmo quadro em que a equipe planeja — sem isso, os relatos ficam num sistema paralelo e competem por atenção com o que já está planejado. Aumentar a frequência de reuniões com o usuário melhora a relação e não cria registro. Notificar o canal do time a cada relato acrescenta ruído sem estado. E medir a satisfação por pesquisa trimestral mede o resultado do problema, com atraso, sem encurtar ciclo nenhum.",
+      "opcoes": [
+        { "texto": "Centralizar os relatos em um canal rastreável, com modelo exigindo as informações de triagem.", "correta": true },
+        { "texto": "Integrar esse canal ao acompanhamento de trabalho, para que o relato triado vire item do quadro.", "correta": true },
+        { "texto": "Aumentar a frequência das reuniões de acompanhamento com os usuários.", "correta": false },
+        { "texto": "Notificar o canal do time no Teams a cada novo relato recebido.", "correta": false },
+        { "texto": "Medir a satisfação dos usuários por pesquisa trimestral.", "correta": false }
+      ]
+    },
+    {
+      "id": "az400-proc-simnao-velocidade-17",
+      "topico": "Métricas de DevOps",
+      "tipo": "SimNao",
+      "enunciado": "Uma diretora propôs incluir no painel executivo um ranking das oito equipes de engenharia pela velocidade média das últimas seis iterações, para orientar a distribuição de investimento. Avalie a afirmação: a velocidade é uma medida adequada para comparar a produtividade entre equipes diferentes.",
+      "explicacao": "A afirmação é falsa. Velocidade é expressa em pontos de estimativa, e cada equipe define a própria régua ao estimar — uma equipe pode chamar de cinco o que outra chama de treze, sem que isso diga nada sobre o trabalho entregue. Comparar equipes por essa unidade compara réguas, não resultados. Pior: transformada em ranking com investimento em jogo, a métrica cria o incentivo direto de inflar estimativas, o que destrói justamente a função para a qual ela existe, que é ajudar a própria equipe a planejar a iteração seguinte. As medidas que suportam comparação entre equipes são as que se expressam em unidades objetivas — frequência de implantação, tempo de espera para mudanças, taxa de falha de mudança e tempo para restaurar o serviço —, e mesmo elas pedem contexto, porque equipes que operam sistemas de criticidade diferente não deveriam ser lidas na mesma linha.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-proc-simnao-vinculo-18",
+      "topico": "Rastreabilidade do trabalho",
+      "tipo": "SimNao",
+      "enunciado": "Uma equipe passou a exigir, por política de branch, que toda solicitação de alteração tenha um item de trabalho vinculado. O responsável concluiu que, com isso, será possível descobrir rapidamente qual alteração introduziu qualquer defeito encontrado em produção. Avalie a afirmação: vincular solicitações de alteração a itens de trabalho é suficiente para essa rastreabilidade.",
+      "explicacao": "A afirmação é falsa. O vínculo entre solicitação de alteração e item de trabalho liga código a intenção — responde por que uma alteração foi feita —, e não diz qual versão está em produção no momento do defeito. Falta a outra ponta: registrar, em cada implantação, a versão exata do artefato publicado e o commit de origem. Sem isso, sabe-se o que cada alteração pretendia e não se sabe quais delas já estão no ar, o que obriga a reconstruir o histórico manualmente — exatamente a demora que se quer eliminar. As duas pontas juntas fecham o caminho: da versão em produção para o commit, do commit para a solicitação de alteração e dela para o item de trabalho. A política de branch é uma boa prática e cobre metade do percurso, que é a razão de a conclusão parecer correta.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az400-proc-assoc-metrica-19",
+      "topico": "Métricas de DevOps",
+      "tipo": "Associacao",
+      "enunciado": "Cada pergunta da liderança é respondida por uma métrica diferente. Associe cada pergunta à métrica adequada.",
+      "explicacao": "\"Com que frequência conseguimos colocar mudança em produção\" é a frequência de implantação. \"Quanto tempo passa entre o código pronto e ele estar rodando em produção\" é o tempo de espera para mudanças. \"Que proporção das nossas implantações causa problema\" é a taxa de falha de mudança. E \"quanto tempo levamos para o serviço voltar ao normal depois de um incidente\" é o tempo para restaurar o serviço. As duas primeiras medem ritmo, as duas últimas medem estabilidade, e ler os dois eixos juntos é o que impede a conclusão de que entregar mais é sempre melhor. A velocidade da equipe está no painel porque é a métrica mais citada em reunião de planejamento e a mais usada indevidamente em comparação entre equipes: ela ajuda a própria equipe a dimensionar a iteração seguinte, em unidade que só vale para ela, e não responde a nenhuma das quatro perguntas acima.",
+      "associacoes": [
+        { "alvo": "Com que frequência conseguimos colocar mudança em produção", "item": "Frequência de implantação" },
+        { "alvo": "Quanto tempo passa entre o código pronto e ele rodando em produção", "item": "Tempo de espera para mudanças" },
+        { "alvo": "Que proporção das nossas implantações causa problema", "item": "Taxa de falha de mudança" },
+        { "alvo": "Quanto tempo levamos para o serviço voltar ao normal após um incidente", "item": "Tempo para restaurar o serviço" }
+      ],
+      "itensExtras": [
+        "Velocidade da equipe"
+      ]
+    },
+    {
+      "id": "az400-proc-assoc-visualizacao-20",
+      "topico": "Métricas de fluxo",
+      "tipo": "Associacao",
+      "enunciado": "Cada dúvida sobre o fluxo de trabalho é respondida por uma visualização diferente. Associe cada dúvida à visualização adequada.",
+      "explicacao": "\"Em qual etapa do quadro o trabalho está se acumulando ao longo do tempo\" é o diagrama de fluxo cumulativo, cuja faixa que se alarga aponta o gargalo. \"Vamos fechar o compromisso desta iteração no prazo\" é o gráfico de burndown, que compara o trabalho restante com o tempo disponível. \"Quanto tempo, em média, um item leva de quando começa a quando termina\" é o painel de tempo de ciclo. E \"quanto a equipe tem entregue por iteração, para dimensionar a próxima\" é o gráfico de velocidade — usado para o que ele serve, que é planejamento interno. O quadro Kanban está no painel porque é onde tudo isso acontece e por isso parece responder a qualquer pergunta: ele mostra o estado do trabalho **agora**, e nenhuma das quatro dúvidas acima é sobre o instante presente — todas são sobre tendência ao longo do tempo.",
+      "associacoes": [
+        { "alvo": "Em qual etapa do quadro o trabalho vem se acumulando ao longo do tempo", "item": "Diagrama de fluxo cumulativo" },
+        { "alvo": "Vamos fechar o compromisso desta iteração no prazo", "item": "Gráfico de burndown" },
+        { "alvo": "Quanto tempo um item leva, em média, de quando começa a quando termina", "item": "Painel de tempo de ciclo" },
+        { "alvo": "Quanto a equipe tem entregue por iteração, para dimensionar a próxima", "item": "Gráfico de velocidade" }
+      ],
+      "itensExtras": [
+        "Quadro Kanban"
+      ]
+    },
+    {
+      "id": "az400-proc-assoc-comunicacao-21",
+      "topico": "Integração e comunicação",
+      "tipo": "Associacao",
+      "enunciado": "Cada necessidade de comunicação ou documentação abaixo pede um mecanismo diferente. Associe cada necessidade ao mecanismo adequado.",
+      "explicacao": "Fazer um sistema externo reagir em segundos a um evento é um webhook, que empurra o evento no momento em que ocorre. Avisar a equipe no canal onde ela já conversa, sobre falhas que exigem ação, é a integração com o Microsoft Teams. Manter documentação técnica revisada junto com o código e versionada com ele é publicar como wiki uma pasta de Markdown do próprio repositório. E produzir a lista de mudanças de cada versão sem escrevê-la à mão são as notas de versão geradas do histórico do Git, que dependem de convenção de commit. A notificação por e-mail configurada individualmente está no painel porque é o mecanismo mais antigo e ainda o mais usado: funciona para preferência pessoal de acompanhamento e é péssimo como integração entre sistemas e como comunicação de equipe, porque não tem estado, não tem garantia de leitura e produz caixa de entrada cheia — que é a versão pessoal do canal ignorado.",
+      "associacoes": [
+        { "alvo": "Fazer um sistema externo reagir em segundos a um evento", "item": "Webhook" },
+        { "alvo": "Avisar a equipe, no canal onde ela conversa, sobre falhas que exigem ação", "item": "Integração com o Microsoft Teams" },
+        { "alvo": "Manter documentação técnica revisada e versionada junto com o código", "item": "Wiki publicado a partir do repositório de código" },
+        { "alvo": "Produzir a lista de mudanças de cada versão sem escrevê-la à mão", "item": "Notas de versão geradas do histórico do Git" }
+      ],
+      "itensExtras": [
+        "Notificação por e-mail configurada individualmente"
+      ]
+    },
+    {
+      "id": "az400-proc-assoc-estrategia-branch-22",
+      "topico": "Fluxo de trabalho",
+      "tipo": "Associacao",
+      "enunciado": "Cada situação abaixo decide uma estratégia de ramificação diferente. Associe cada situação à estratégia adequada.",
+      "explicacao": "Equipe pequena, uma versão em produção e várias implantações por dia é o fluxo do GitHub: branches curtas a partir da principal, revisão e retorno rápido. Necessidade de manter várias versões em produção ao mesmo tempo, com correção aplicada em cada uma, é a estratégia com branches de release, que existem justamente para sustentar linhas paralelas. Trabalho exploratório e longo, que não pode desestabilizar a linha principal enquanto amadurece, é a branch de funcionalidade — e vale lembrar que quanto mais ela dura, maior o custo de integração. Commits pequenos e frequentes direto na linha principal, com trabalho incompleto escondido atrás de sinalizador, é o desenvolvimento baseado em tronco. O fluxo por fork está no painel porque é uma estratégia real e é a que sustenta contribuição em projetos de código aberto, onde quem contribui não tem permissão de escrita no repositório — nenhuma das quatro situações acima descreve esse contexto.",
+      "associacoes": [
+        { "alvo": "Equipe pequena, uma versão em produção, várias implantações por dia", "item": "Fluxo do GitHub" },
+        { "alvo": "Várias versões em produção ao mesmo tempo, com correção aplicada em cada uma", "item": "Branches de release" },
+        { "alvo": "Trabalho exploratório e longo, que não pode desestabilizar a linha principal", "item": "Branch de funcionalidade" },
+        { "alvo": "Commits pequenos direto na linha principal, com trabalho incompleto atrás de sinalizador", "item": "Desenvolvimento baseado em tronco" }
+      ],
+      "itensExtras": [
+        "Fluxo por fork do repositório"
+      ]
+    }
+  ]
+}
