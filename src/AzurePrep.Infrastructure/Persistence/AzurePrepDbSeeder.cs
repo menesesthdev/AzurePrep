@@ -67,6 +67,42 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("rede-virtual", "Implementar e gerenciar rede virtual", 17.5m),
                 new AreaDeExame("monitoramento", "Monitorar e manter recursos do Azure", 12.5m)
             ],
+            Publicado: false),
+
+        // Pesos conferidos no study guide oficial (skills measured de 17/04/2026). Somam 100 —
+        // é o único dos quatro exames cujas faixas fecham exatamente no ponto médio.
+        new DefinicaoDeExame(
+            Code: "AZ-305",
+            Name: "Designing Microsoft Azure Infrastructure Solutions",
+            TimeLimitMinutes: 120,
+            PassingScorePercent: 70,
+            TotalQuestions: 50,
+            Areas:
+            [
+                new AreaDeExame("identidade-governanca-monitoramento", "Projetar soluções de identidade, governança e monitoramento", 27.5m),
+                new AreaDeExame("armazenamento-dados", "Projetar soluções de armazenamento de dados", 22.5m),
+                new AreaDeExame("continuidade", "Projetar soluções de continuidade de negócios", 17.5m),
+                new AreaDeExame("infraestrutura", "Projetar soluções de infraestrutura", 32.5m)
+            ],
+            Publicado: false),
+
+        // Pesos conferidos no study guide oficial (skills measured de 27/07/2026).
+        // ⚠️ 'pipelines' vale 50–55% sozinho: metade da prova sai de um domínio só, e é por ele que
+        // o banco tem de começar. Um banco equilibrado entre os cinco daria uma prova enviesada.
+        new DefinicaoDeExame(
+            Code: "AZ-400",
+            Name: "Designing and Implementing Microsoft DevOps Solutions",
+            TimeLimitMinutes: 120,
+            PassingScorePercent: 70,
+            TotalQuestions: 50,
+            Areas:
+            [
+                new AreaDeExame("processos-comunicacao", "Projetar e implementar processos e comunicação", 12.5m),
+                new AreaDeExame("controle-codigo", "Projetar e implementar estratégia de controle de código-fonte", 12.5m),
+                new AreaDeExame("pipelines", "Projetar e implementar pipelines de build e release", 52.5m),
+                new AreaDeExame("seguranca-conformidade", "Desenvolver plano de segurança e conformidade", 12.5m),
+                new AreaDeExame("instrumentacao", "Implementar estratégia de instrumentação", 7.5m)
+            ],
             Publicado: false)
     ];
 

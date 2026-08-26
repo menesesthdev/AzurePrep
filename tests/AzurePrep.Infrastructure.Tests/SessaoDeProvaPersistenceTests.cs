@@ -80,10 +80,19 @@ public sealed class SessaoDeProvaPersistenceTests : IDisposable
         public Random Criar() => new(20260726);
     }
 
+    /// <summary>
+    /// O exame AZ-900, explicitamente. Esta classe é sobre o banco de questões dele.
+    /// </summary>
+    /// <remarks>
+    /// Era <c>FirstAsync()</c> sem filtro, o que funcionava por acidente enquanto havia um exame
+    /// só. Com o seed multi-exame, qual linha vem primeiro passa a depender da ordem de inserção —
+    /// e o dia em que viesse o AZ-104 estes testes falhariam por um motivo que não tem nada a ver
+    /// com o que eles verificam (ele está em construção e recusa tentativa).
+    /// </remarks>
     private async Task<Guid> GetSeededExamIdAsync()
     {
         using var ctx = CreateContext();
-        return (await ctx.Exams.FirstAsync()).Id;
+        return (await ctx.Exams.SingleAsync(e => e.Code == "AZ-900")).Id;
     }
 
     public void Dispose() => _connection.Dispose();

@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-305",
+  "area": "infraestrutura",
+  "questoes": [
+    {
+      "id": "az305-infra-lote-noturno-spot-01",
+      "topico": "Computação para processamento em lote",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso processa todas as noites um lote de renderização que leva de quatro a seis horas, é dividido em milhares de tarefas independentes e pode ser reiniciado do zero sem prejuízo. O requisito declarado é o menor custo possível de computação, e a área de negócio aceita que o lote termine mais tarde em algumas noites. A equipe precisa recomendar a base de computação. Qual proposta atende melhor à restrição declarada?",
+      "explicacao": "Máquinas Spot em um conjunto de dimensionamento são a resposta porque a restrição declarada é custo, e as duas características que normalmente desqualificam Spot — despejo com aviso curto e disponibilidade não garantida — foram explicitamente aceitas pelo enunciado: as tarefas são independentes, o lote é reiniciável e o atraso é tolerado. É esse encaixe entre a restrição e a natureza da carga que decide. Instâncias reservadas reduzem custo de forma significativa, mas exigem compromisso de um a três anos com capacidade contínua, o que é caro para uma carga que roda seis horas por dia — paga-se as vinte e quatro. Um conjunto de dimensionamento com máquinas sob demanda e escala automática é a recomendação correta quando o prazo é rígido, e é justamente o requisito que aqui foi afrouxado. Container Apps com escala por fila resolveria elegantemente a orquestração, mas não ataca o eixo de custo com a mesma força e ainda supõe que a carga esteja em contêiner, o que o enunciado não informa.",
+      "opcoes": [
+        { "texto": "Conjunto de dimensionamento com máquinas Spot, aceitando despejo e reinício das tarefas.", "correta": true },
+        { "texto": "Conjunto de dimensionamento com máquinas sob demanda e escala automática por fila.", "correta": false },
+        { "texto": "Máquinas com instâncias reservadas de um ano, dimensionadas para o pico do lote.", "correta": false },
+        { "texto": "Azure Container Apps com escala orientada por profundidade de fila.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-mensageria-ordem-02",
+      "topico": "Arquitetura de mensageria",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema de pedidos precisa que os eventos de um mesmo cliente sejam processados na ordem em que foram emitidos, que nenhuma mensagem se perca mesmo com o consumidor fora do ar por horas, e que uma mensagem que falhe repetidamente saia do fluxo para análise sem travar as demais. O volume é moderado. Qual serviço de mensageria atende aos três requisitos sem código adicional?",
+      "explicacao": "O Service Bus atende aos três de forma nativa: sessões garantem ordenação por chave, permitindo processar em ordem os eventos de um mesmo cliente sem serializar o sistema inteiro; a entrega é persistente e sobrevive ao consumidor fora do ar; e a fila de mensagens mortas retira automaticamente a mensagem que excede as tentativas, que é o terceiro requisito. As Filas do Storage também são persistentes e baratas, mas não oferecem ordenação garantida nem fila de mensagens mortas nativa — seria preciso construir os dois. O Event Hubs preserva ordem dentro de uma partição e é excelente para telemetria em alto volume, mas é um fluxo de eventos com retenção por janela de tempo, e o padrão de consumo por deslocamento não entrega o descarte seletivo de mensagem problemática. O Event Grid é distribuição de notificações por assinatura, sem ordenação e sem o modelo de consumo com bloqueio que o cenário pressupõe.",
+      "opcoes": [
+        { "texto": "Azure Service Bus, com sessões para ordenação e fila de mensagens mortas.", "correta": true },
+        { "texto": "Filas do Azure Storage, com política de novas tentativas na aplicação.", "correta": false },
+        { "texto": "Azure Event Hubs, com uma partição por cliente.", "correta": false },
+        { "texto": "Azure Event Grid, com assinatura por tipo de evento e reentrega automática.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-conectividade-latencia-03",
+      "topico": "Conectividade híbrida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai migrar um sistema financeiro que troca dados continuamente com um mainframe que permanece no datacenter próprio. Os requisitos declarados são: latência estável e previsível, banda contratada de um gigabit por segundo e nenhum tráfego trafegando pela internet pública, inclusive durante falhas. O orçamento foi aprovado para atender a esses requisitos. Qual solução de conectividade recomendar?",
+      "explicacao": "O ExpressRoute com circuito redundante é o que atende: ele é um circuito privado por um provedor de conectividade, com banda contratada e latência estável, e não trafega pela internet pública em nenhum momento. A redundância importa porque o requisito de não usar a internet vale \"inclusive durante falhas\" — é essa frase que descarta as combinações com VPN. Uma VPN site a site sobre internet funcionaria tecnicamente e é bem mais barata, mas viola dois requisitos de uma vez: a latência depende da internet e o tráfego passa por ela. A combinação de ExpressRoute com VPN de contingência é uma arquitetura legítima e comum, e é exatamente a armadilha aqui: no momento em que o circuito cair, o tráfego passa a sair pela internet, o que o enunciado proíbe. O Virtual WAN é um modelo de topologia que organiza a conectividade em escala, e não substitui a decisão sobre o transporte — ele hospedaria o próprio ExpressRoute.",
+      "opcoes": [
+        { "texto": "ExpressRoute com par de circuitos redundantes, sem caminho pela internet.", "correta": true },
+        { "texto": "ExpressRoute com uma VPN site a site como caminho de contingência.", "correta": false },
+        { "texto": "VPN site a site com túneis ativo-ativo e roteamento por BGP.", "correta": false },
+        { "texto": "Azure Virtual WAN com hubs em duas regiões e conexões VPN.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-cache-sessao-04",
+      "topico": "Cache de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo web hospedado em App Service com seis instâncias mantém estado de sessão em memória, e os usuários são deslogados de forma aparentemente aleatória. A equipe quer externalizar a sessão, com leitura em poucos milissegundos, expiração automática por inatividade e sem impacto quando o número de instâncias mudar. Qual recomendação atende?",
+      "explicacao": "O Azure Cache for Redis é a recomendação: ele externaliza a sessão para um repositório em memória compartilhado por todas as instâncias, com latência de poucos milissegundos e expiração por tempo de vida nativa, que é o requisito de inatividade. Como o estado deixa de morar na instância, escalar para mais ou menos instâncias deixa de derrubar sessão — que é a causa do sintoma. A afinidade de sessão no balanceador resolveria o sintoma sem resolver o problema: o estado continua na instância, e qualquer reinício ou redução de escala perde a sessão de quem estava naquela réplica. Um banco relacional guardaria a sessão de forma durável, mas paga latência de disco e cria carga de escrita para um dado efêmero, além de exigir limpeza dos registros expirados. E o armazenamento em blob é ainda mais lento para um acesso que ocorre a cada requisição.",
+      "opcoes": [
+        { "texto": "Azure Cache for Redis como repositório de sessão, com tempo de vida por chave.", "correta": true },
+        { "texto": "Habilitar afinidade de sessão no balanceamento do App Service.", "correta": false },
+        { "texto": "Guardar a sessão em uma tabela do Azure SQL Database, com coluna de expiração.", "correta": false },
+        { "texto": "Guardar a sessão em blobs, com política de ciclo de vida removendo os antigos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-migracao-avaliacao-05",
+      "topico": "Migração",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Antes de migrar quatrocentos servidores locais, a diretoria pediu uma estimativa de custo mensal no Azure e a identificação de quais servidores dependem uns dos outros, para agrupar as ondas de migração. Nenhum inventário confiável existe, e a equipe não pode instalar agente em todos os servidores num primeiro momento. O que recomendar como primeiro passo?",
+      "explicacao": "O Azure Migrate com descoberta sem agente é o primeiro passo: ele inventaria as máquinas a partir do ambiente de virtualização, dimensiona e estima o custo mensal no Azure, e faz análise de dependências — o que responde às duas perguntas da diretoria antes de qualquer compromisso. A descoberta sem agente é justamente o que contorna a restrição declarada de não instalar agente em todos os servidores num primeiro momento. O Site Recovery replica cargas para continuidade e pode ser usado em migração, mas replicar quatrocentos servidores sem saber quais são e como se relacionam é começar pela etapa errada e cara. A calculadora de preços produz estimativa, porém a partir de números que alguém precisa fornecer — e o enunciado diz que não há inventário confiável, que é exatamente o insumo que falta. E o mapa de dependências do Insights de máquinas virtuais resolve dependências, mas só de máquinas que já estejam no Azure com agente instalado.",
+      "opcoes": [
+        { "texto": "Azure Migrate com descoberta sem agente, para inventário, dimensionamento de custo e análise de dependências.", "correta": true },
+        { "texto": "Azure Site Recovery, replicando os servidores para o Azure e avaliando o custo depois.", "correta": false },
+        { "texto": "Calculadora de preços do Azure, preenchida com o inventário levantado pelas equipes de infraestrutura.", "correta": false },
+        { "texto": "Mapa de dependências do Insights de máquinas virtuais sobre os servidores locais.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-serverless-longa-06",
+      "topico": "Computação sem servidor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rotina disparada por mensagem em fila precisa executar um processamento que leva de vinte a quarenta minutos por item, com picos de centenas de itens simultâneos e longos períodos sem nenhum item. A equipe quer pagar apenas pelo uso e não administrar servidor. Uma proposta sugere Azure Functions no plano de Consumo. Qual observação está correta?",
+      "explicacao": "O plano de Consumo tem limite de tempo de execução por invocação, e um processamento de vinte a quarenta minutos ultrapassa o teto padrão desse plano — a função seria interrompida no meio, de forma intermitente e difícil de diagnosticar. Os caminhos que preservam o modelo sem servidor e a escala por fila são o plano Premium, que remove esse limite e ainda elimina a partida a frio, ou o Container Apps com escala orientada por fila, que também escala a partir de zero. Dizer que o plano de Consumo não escala por fila está errado: o gatilho de fila é um dos mais usados nele. Afirmar que o limite se resolve aumentando a memória confunde eixos, porque a memória não altera o teto de tempo. E propor um conjunto de dimensionamento com máquinas resolve o processamento, mas abandona os dois requisitos declarados: passa a haver servidor para administrar e o custo deixa de acompanhar o uso nos longos períodos ociosos.",
+      "opcoes": [
+        { "texto": "O tempo de execução excede o limite do plano de Consumo; o plano Premium ou o Container Apps atendem sem abrir mão do modelo.", "correta": true },
+        { "texto": "O plano de Consumo não oferece gatilho por fila, então seria preciso consultar a fila por agendamento.", "correta": false },
+        { "texto": "O limite de execução é resolvido aumentando a memória alocada à função.", "correta": false },
+        { "texto": "A proposta é inadequada e o correto é um conjunto de dimensionamento com máquinas processando a fila.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-front-door-vs-lb-07",
+      "topico": "Balanceamento e roteamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo web será servido a partir de três regiões, em continentes diferentes. Os requisitos: o usuário deve ser atendido pela região mais próxima, o conteúdo estático deve ser servido de borda, deve haver filtragem de requisições maliciosas antes de o tráfego chegar às regiões, e a falha de uma região deve tirar aquela região do rodízio automaticamente. Qual solução atende ao conjunto?",
+      "explicacao": "O Azure Front Door atende a todos os quatro: roteia por proximidade na rede de borda da Microsoft, faz cache de conteúdo estático na borda, integra firewall de aplicativo web filtrando antes de o tráfego alcançar a origem, e usa sondas de integridade para tirar de rodízio a região que falhar. É o único da lista que cobre camada de aplicação, borda e segurança ao mesmo tempo. O Traffic Manager roteia por DNS e faz balanceamento global com método por desempenho, mas atua só na resolução de nomes: não termina conexão, não faz cache e não filtra requisição — e a mudança de destino depende da expiração do registro no cliente. O Application Gateway traz o firewall de aplicativo, porém é regional e não resolve distribuição entre continentes. E o balanceador de carga padrão opera em camada quatro, sem cache nem inspeção de requisição.",
+      "opcoes": [
+        { "texto": "Azure Front Door com firewall de aplicativo web e cache de borda.", "correta": true },
+        { "texto": "Traffic Manager com método de roteamento por desempenho.", "correta": false },
+        { "texto": "Application Gateway com firewall de aplicativo web em cada região.", "correta": false },
+        { "texto": "Balanceador de carga padrão com endereço IP público entre regiões.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-aks-vs-container-apps-08",
+      "topico": "Soluções em contêiner",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de doze pessoas vai publicar oito microsserviços HTTP em contêiner, com escala automática por requisição, implantação azul-verde e comunicação interna entre eles. Ninguém no time tem experiência com Kubernetes, e o requisito declarado é reduzir ao máximo o esforço operacional contínuo. Não há necessidade de controladores de admissão personalizados nem de operadores. Qual recomendação atende?",
+      "explicacao": "O Azure Container Apps atende: entrega escala automática por requisição, revisões com divisão de tráfego — que é o que implementa azul-verde e canário sem construir nada —, descoberta de serviço interna entre os aplicativos do ambiente, e não expõe nó nenhum para administrar. Como o enunciado declara que não há necessidade de controladores de admissão nem de operadores, o poder extra do Kubernetes não é requisito e vira custo. O Serviço de Kubernetes do Azure entregaria tudo isso e mais, mas contraria a restrição declarada, que é reduzir esforço operacional num time sem experiência na plataforma. O Container Instances executa contêineres sem orquestrador e não oferece escala por requisição nem implantação progressiva. E o App Service para contêineres hospedaria os oito, mas a divisão de tráfego por slot é mais limitada e a comunicação interna entre aplicativos não tem a descoberta nativa do modelo de ambiente.",
+      "opcoes": [
+        { "texto": "Azure Container Apps, com revisões e divisão de tráfego.", "correta": true },
+        { "texto": "Serviço de Kubernetes do Azure, com um controlador de entrada e implantações azul-verde.", "correta": false },
+        { "texto": "Azure Container Instances, um grupo de contêineres por microsserviço.", "correta": false },
+        { "texto": "App Service para contêineres, um aplicativo por microsserviço com slots.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-configuracao-flags-09",
+      "topico": "Configuração de aplicação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação distribuída em quatro serviços precisa que uma funcionalidade nova seja ligada para dez por cento dos usuários e desligada em segundos caso apareça problema, sem nova implantação. A mesma aplicação também guarda cadeias de conexão e certificados. A arquiteta precisa recomendar onde cada coisa fica. Qual proposta está correta?",
+      "explicacao": "Sinalizadores de funcionalidade ficam no Azure App Configuration, que tem o gerenciador de sinalizadores com filtros de porcentagem e permite ligar e desligar sem implantar; segredos e certificados ficam no Key Vault, que é o serviço desenhado para material sensível, com controle de acesso e auditoria próprios. A separação é o ponto da questão: os dois serviços parecem intercambiáveis por ambos guardarem configuração, e não são. Guardar tudo no Key Vault funcionaria para os segredos e seria ruim para os sinalizadores, porque ele não oferece filtro de porcentagem nem o modelo de atualização dinâmica que o cenário exige. Guardar tudo no App Configuration é pior, porque coloca segredo em um serviço que não é cofre — inclusive o próprio produto recomenda referenciar o Key Vault a partir dele. E colocar sinalizadores em variáveis de ambiente do App Service exige reiniciar ou reimplantar para mudar, que é justamente o que se quer evitar.",
+      "opcoes": [
+        { "texto": "Sinalizadores no Azure App Configuration, com filtro de porcentagem; segredos e certificados no Key Vault.", "correta": true },
+        { "texto": "Sinalizadores e segredos no Key Vault, com versionamento por segredo.", "correta": false },
+        { "texto": "Sinalizadores e segredos no Azure App Configuration, com rótulos por ambiente.", "correta": false },
+        { "texto": "Sinalizadores em variáveis de ambiente do App Service; segredos no Key Vault.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-api-management-10",
+      "topico": "Integração de APIs",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso vai expor a parceiros externos seis APIs internas, hoje sem autenticação porque só eram chamadas dentro da rede. Os requisitos: cota de chamadas por parceiro, chave por parceiro, uma documentação única, e capacidade de mudar o endereço interno de um serviço sem que os parceiros percebam. Qual recomendação atende ao conjunto?",
+      "explicacao": "O API Management atende aos quatro: assinaturas dão chave por parceiro, políticas de cota e limitação controlam o volume, o portal do desenvolvedor entrega documentação única, e a indireção entre a fachada publicada e o back-end permite trocar o endereço interno sem impacto para quem consome. É o serviço desenhado exatamente para o conjunto de preocupações desse cenário. O Application Gateway com firewall de aplicativo protege e roteia, mas não tem noção de assinante, cota nem catálogo de APIs. O Front Door resolve distribuição, borda e filtragem, e igualmente desconhece o conceito de parceiro com chave e cota. E colocar autenticação em cada uma das seis APIs resolveria a identidade, mas espalha a regra por seis bases de código, não entrega cota nem documentação única, e mantém os parceiros acoplados ao endereço interno — que é o quarto requisito.",
+      "opcoes": [
+        { "texto": "Azure API Management, com assinaturas, políticas de cota e portal do desenvolvedor.", "correta": true },
+        { "texto": "Application Gateway com firewall de aplicativo web na frente das seis APIs.", "correta": false },
+        { "texto": "Azure Front Door com regras de roteamento por caminho para cada API.", "correta": false },
+        { "texto": "Autenticação com Microsoft Entra implementada individualmente em cada uma das seis APIs.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-eventos-vs-mensagens-11",
+      "topico": "Arquitetura orientada a eventos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Sempre que um blob é gravado em um contêiner, três sistemas independentes precisam reagir: um gera miniatura, outro indexa metadados e o terceiro registra auditoria. Novos consumidores devem poder ser acrescentados sem alterar o produtor, e cada consumidor pode falhar sem afetar os demais. Qual arquitetura de integração recomendar?",
+      "explicacao": "O Event Grid é o encaixe: ele publica o evento de criação de blob e entrega a múltiplos assinantes independentes, cada um com as próprias novas tentativas e a própria fila de mensagens mortas, de modo que a falha de um não afeta os outros. Acrescentar um quarto consumidor é criar uma assinatura, sem tocar no produtor — que é o requisito de extensibilidade. Uma fila do Service Bus tem um consumidor lógico por mensagem; para atender aos três seria preciso um tópico com assinaturas, e mesmo assim o produtor teria de publicar explicitamente, em vez de reagir ao evento nativo do armazenamento. O Event Hubs é para fluxo de telemetria em alto volume, com consumo por deslocamento, e não para notificação discreta a sistemas heterogêneos. E fazer o produtor chamar os três por HTTP é o acoplamento que o cenário existe para evitar: cada consumidor novo vira alteração no produtor, e a falha de um propaga para a gravação.",
+      "opcoes": [
+        { "texto": "Event Grid publicando o evento de criação de blob, com uma assinatura por consumidor.", "correta": true },
+        { "texto": "Fila do Service Bus recebendo a notificação, consumida pelos três sistemas.", "correta": false },
+        { "texto": "Event Hubs recebendo o evento, com um grupo de consumidores por sistema.", "correta": false },
+        { "texto": "O produtor chamando diretamente os três sistemas por HTTP após a gravação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-implantacao-automatizada-12",
+      "topico": "Implantação automatizada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso quer que cada ambiente — desenvolvimento, homologação e produção — seja criado a partir da mesma definição, com diferenças apenas de dimensionamento e nomes, e que qualquer alteração manual feita no portal seja desfeita na próxima implantação. A equipe já usa Bicep. Qual abordagem atende ao segundo requisito?",
+      "explicacao": "Implantar com Bicep parametrizado por ambiente e usar o modo de implantação Complete no escopo do grupo de recursos é o que atende: o modo Complete faz o grupo refletir exatamente o arquivo, removendo o que foi criado por fora — que é precisamente \"desfazer alteração manual\". É uma escolha deliberada e perigosa, e por isso deve vir acompanhada da operação de simulação antes de aplicar. O modo Incremental, que é o padrão, acrescenta e atualiza mas nunca remove: recurso criado à mão no portal sobreviveria a todas as implantações, que é exatamente o problema descrito. Uma política com efeito Deny impediria criações fora do padrão dali em diante, o que é complementar e não desfaz o que já existe. E revisar manualmente antes de cada implantação é processo, não mecanismo — não sobrevive a pressa nem a plantão.",
+      "opcoes": [
+        { "texto": "Bicep parametrizado por ambiente, implantado no modo Complete.", "correta": true },
+        { "texto": "Bicep parametrizado por ambiente, implantado no modo Incremental.", "correta": false },
+        { "texto": "Bicep no modo Incremental, com uma política de efeito Deny bloqueando recursos fora do padrão.", "correta": false },
+        { "texto": "Bicep no modo Incremental, com revisão manual do grupo de recursos antes de cada implantação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-migracao-banco-downtime-13",
+      "topico": "Migração",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco SQL Server local de dois terabytes será migrado para o Azure SQL Managed Instance. A janela de indisponibilidade aceita pelo negócio é de quinze minutos, e o banco recebe escritas continuamente até o momento do corte. A equipe precisa recomendar o método de migração. Qual atende à restrição de janela?",
+      "explicacao": "A migração online do Database Migration Service é o que cabe na janela: ela faz a carga inicial e depois mantém a sincronização contínua das alterações, de modo que a indisponibilidade se reduz ao corte final, quando a aplicação é apontada para o destino. É a restrição de quinze minutos com escrita contínua que elimina as demais opções. Backup e restauração de um banco de dois terabytes consome horas só na cópia e no restore, muito além da janela, e ainda perderia tudo o que fosse escrito depois do backup. A migração offline do mesmo serviço tem o mesmo problema: ela não acompanha as alterações posteriores à carga. E exportar para arquivo e importar no destino é o caminho mais lento dos três, além de ser pensado para bancos pequenos e não preservar tudo o que uma instância gerenciada recebe numa migração nativa.",
+      "opcoes": [
+        { "texto": "Migração online com o Azure Database Migration Service, com sincronização contínua até o corte.", "correta": true },
+        { "texto": "Backup completo, cópia para o armazenamento e restauração na instância gerenciada.", "correta": false },
+        { "texto": "Migração offline com o Azure Database Migration Service, executada na madrugada.", "correta": false },
+        { "texto": "Exportação para arquivo de pacote de dados e importação na instância gerenciada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-multi-escolha-rede-14",
+      "topico": "Otimização de rede",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A arquitetura de uma aplicação de três camadas em uma única rede virtual precisa garantir que a camada de dados nunca seja alcançável a partir da internet e que o tráfego entre a camada de aplicação e o banco de dados PaaS não saia para a internet pública. O time quer o menor número possível de componentes novos. Quais duas medidas, juntas, atendem? Selecione duas.",
+      "explicacao": "As duas medidas são o endpoint privado para o banco de dados PaaS, que lhe dá um endereço na própria rede virtual e permite desligar o acesso público, e a network security group na sub-rede de dados negando explicitamente a marca de serviço Internet na entrada. A primeira resolve o caminho do tráfego para o serviço gerenciado; a segunda resolve o isolamento da sub-rede, e as duas juntas cobrem os dois requisitos com o mínimo de componentes. Um firewall do Azure com rotas forçadas atende ao objetivo, mas acrescenta um componente relevante em custo e operação, contrariando a restrição declarada de minimizar peças novas. Um gateway de aplicativo protege a entrada da camada web e não tem relação com o acesso ao banco. E colocar a camada de dados em outra rede virtual emparelhada não isola nada por si: emparelhamento conecta, e o isolamento continuaria dependendo de regra de segurança.",
+      "opcoes": [
+        { "texto": "Endpoint privado para o banco de dados PaaS, com acesso público desabilitado.", "correta": true },
+        { "texto": "Network security group na sub-rede de dados negando a entrada da marca de serviço Internet.", "correta": true },
+        { "texto": "Azure Firewall no hub, com rotas forçadas para todo o tráfego da rede virtual.", "correta": false },
+        { "texto": "Application Gateway com firewall de aplicativo web na frente da camada de dados.", "correta": false },
+        { "texto": "Mover a camada de dados para outra rede virtual, emparelhada com a atual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-multi-escolha-compute-15",
+      "topico": "Escolha de computação",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma aplicação legada em .NET Framework depende de componentes registrados no sistema operacional Windows e de um serviço que roda como serviço do Windows, e precisa migrar para o Azure em três meses, sem reescrita. O time quer o mínimo de mudança no código. Quais duas opções de hospedagem são viáveis para essa carga? Selecione duas.",
+      "explicacao": "As duas viáveis são máquinas virtuais Windows, que entregam o sistema operacional inteiro e aceitam qualquer componente registrado e qualquer serviço do Windows, e contêineres Windows, que preservam o mesmo modelo de execução em imagem e podem rodar em plataformas de contêiner que suportem esse tipo de imagem. As duas atendem ao requisito de não reescrever. O App Service em Linux está descartado porque a carga depende de componentes do Windows. Azure Functions no plano de Consumo exige reescrever a aplicação no modelo de funções, o que contraria diretamente a restrição de não reescrita, além de não hospedar serviço do Windows de execução contínua. E Container Apps executa contêineres Linux, o que esbarra na mesma dependência de plataforma da primeira alternativa descartada.",
+      "opcoes": [
+        { "texto": "Máquinas virtuais Windows no Azure.", "correta": true },
+        { "texto": "Contêineres Windows.", "correta": true },
+        { "texto": "App Service no plano Linux.", "correta": false },
+        { "texto": "Azure Functions no plano de Consumo.", "correta": false },
+        { "texto": "Azure Container Apps.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-multi-escolha-armazenamento-16",
+      "topico": "Escolha de computação",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um cluster de processamento científico com trinta nós precisa que todos leiam e gravem no mesmo sistema de arquivos, com semântica POSIX e permissões de arquivo do Linux, e com desempenho previsível. A equipe precisa recomendar o armazenamento compartilhado. Quais duas opções atendem aos requisitos? Selecione duas.",
+      "explicacao": "As duas que atendem são o Azure NetApp Files, que entrega compartilhamento NFS com desempenho previsível por nível de serviço e semântica POSIX completa, e o Azure Files no protocolo NFS com nível premium, que também expõe compartilhamento NFS com desempenho provisionado. As duas satisfazem os três requisitos: acesso simultâneo, semântica POSIX e previsibilidade. O Azure Files no protocolo SMB é a escolha natural para Windows, mas não entrega a semântica POSIX que o enunciado exige. O armazenamento de blobs não é um sistema de arquivos montável com permissões POSIX no sentido pedido, e o acesso por API muda o modelo de programação da carga. E disco gerenciado premium anexado a cada nó dá desempenho, porém é armazenamento por nó — não é compartilhado, que é o requisito central.",
+      "opcoes": [
+        { "texto": "Azure NetApp Files, com volumes NFS.", "correta": true },
+        { "texto": "Azure Files premium com protocolo NFS.", "correta": true },
+        { "texto": "Azure Files standard com protocolo SMB.", "correta": false },
+        { "texto": "Armazenamento de blobs acessado pela API REST.", "correta": false },
+        { "texto": "Disco gerenciado premium anexado a cada um dos trinta nós.", "correta": false }
+      ]
+    },
+    {
+      "id": "az305-infra-simnao-front-door-17",
+      "topico": "Balanceamento e roteamento",
+      "tipo": "SimNao",
+      "enunciado": "Uma arquiteta propôs usar o Azure Traffic Manager para distribuir tráfego entre duas regiões e afirmou que, quando a região primária ficar indisponível, os usuários que já estão navegando serão redirecionados para a região secundária em poucos segundos. Avalie a afirmação: o Traffic Manager redireciona sessões em andamento para a região saudável em poucos segundos.",
+      "explicacao": "A afirmação é falsa. O Traffic Manager atua na resolução de nomes: ele devolve o endereço da região escolhida e sai do caminho — o tráfego vai direto do cliente para o destino, sem passar por ele. Por isso ele não tem como redirecionar uma sessão em andamento, e a mudança só chega ao cliente quando o registro DNS em cache expira, o que depende do tempo de vida configurado e do respeito de cada resolvedor a esse valor, tipicamente bem mais que poucos segundos. Quem responde Sim está descrevendo o comportamento de um proxy de camada sete, como o Azure Front Door: esse sim termina a conexão do cliente e pode mudar a origem imediatamente, sem depender de cache de DNS. É exatamente essa diferença que decide entre os dois numa arquitetura multirregião com requisito de tempo de recuperação curto.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-infra-simnao-peering-global-18",
+      "topico": "Conectividade híbrida",
+      "tipo": "SimNao",
+      "enunciado": "Uma proposta de arquitetura conecta a vnet-hub-brs, em Brazil South, à vnet-hub-eus, em East US, por emparelhamento global, e prevê que as máquinas de East US usem o gateway de VPN que existe apenas no hub de Brazil South para alcançar o datacenter local. Avalie a afirmação: com trânsito de gateway habilitado, o emparelhamento global permite que as máquinas de East US usem o gateway do outro hub.",
+      "explicacao": "A afirmação é falsa. O emparelhamento global conecta redes virtuais de regiões diferentes e transporta tráfego entre elas, mas não suporta trânsito de gateway: a opção de usar gateway remoto vale para emparelhamento dentro da mesma região, e não entre regiões. A consequência prática é que cada região precisa do próprio gateway, ou a topologia precisa mudar para algo que ofereça trânsito entre regiões nativamente, como o Azure Virtual WAN — que existe em boa medida para resolver exatamente esse limite. Quem responde Sim costuma generalizar o comportamento do emparelhamento local, onde a combinação de permitir trânsito no hub e usar gateway remoto no spoke funciona. É um erro de projeto caro, porque só aparece na implantação, depois que a topologia já foi desenhada e aprovada.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az305-infra-assoc-integracao-19",
+      "topico": "Arquitetura orientada a eventos",
+      "tipo": "Associacao",
+      "enunciado": "A arquiteta precisa escolher o serviço de integração adequado para cada requisito abaixo. Associe cada requisito ao serviço.",
+      "explicacao": "Notificar vários sistemas independentes sobre um fato ocorrido, permitindo acrescentar consumidores sem tocar no produtor, é Event Grid — distribuição de eventos discretos por assinatura. Processar comandos em ordem por cliente, com garantia de entrega e descarte da mensagem problemática, é Service Bus, pelas sessões e pela fila de mensagens mortas. Ingerir milhões de eventos de telemetria por minuto para análise posterior é Event Hubs, um fluxo particionado com retenção por janela. E orquestrar um processo de negócio com etapas, esperas e conectores para sistemas externos é Logic Apps, que é fluxo de trabalho e não transporte. O Azure Relay está no painel porque também é integração: ele expõe um serviço local sem abrir porta no firewall, resolvendo conectividade híbrida ponto a ponto — problema real, mas nenhum dos quatro descritos.",
+      "associacoes": [
+        { "alvo": "Notificar vários sistemas independentes sobre um fato, sem tocar no produtor ao acrescentar consumidores", "item": "Event Grid" },
+        { "alvo": "Processar comandos em ordem por cliente, com entrega garantida e descarte do que falha", "item": "Service Bus" },
+        { "alvo": "Ingerir milhões de eventos de telemetria por minuto para análise posterior", "item": "Event Hubs" },
+        { "alvo": "Orquestrar um processo de negócio com etapas, esperas e conectores externos", "item": "Logic Apps" }
+      ],
+      "itensExtras": [
+        "Azure Relay"
+      ]
+    },
+    {
+      "id": "az305-infra-assoc-computacao-20",
+      "topico": "Escolha de computação",
+      "tipo": "Associacao",
+      "enunciado": "Cada carga abaixo tem uma restrição que decide a hospedagem. Associe cada carga ao serviço de computação adequado.",
+      "explicacao": "Aplicação legada que exige componentes registrados no sistema operacional e acesso administrativo ao servidor só cabe em máquina virtual, a única opção que entrega o sistema inteiro. Microsserviços HTTP em contêiner, com escala por requisição e time sem experiência em Kubernetes, é Container Apps, pelo modelo gerenciado com revisões. Plataforma de contêineres com necessidade de operadores, controladores de admissão e malha de serviço é Serviço de Kubernetes do Azure, e é a restrição de extensibilidade que o justifica — sem ela, ele seria custo operacional sem contrapartida. Rotina curta disparada por evento, com longos períodos ociosos e cobrança por execução, é Azure Functions. O App Service está no painel porque hospeda aplicação web muito bem e é a resposta certa de uma pergunta vizinha — publicar um site ou API sem administrar servidor —, mas não atende a nenhuma das quatro restrições declaradas acima.",
+      "associacoes": [
+        { "alvo": "Aplicação legada que exige componentes do sistema operacional e acesso administrativo ao servidor", "item": "Máquina virtual" },
+        { "alvo": "Microsserviços HTTP em contêiner, com escala por requisição e time sem experiência em Kubernetes", "item": "Azure Container Apps" },
+        { "alvo": "Plataforma de contêineres que exige operadores, controladores de admissão e malha de serviço", "item": "Serviço de Kubernetes do Azure" },
+        { "alvo": "Rotina curta disparada por evento, com longos períodos ociosos e cobrança por execução", "item": "Azure Functions" }
+      ],
+      "itensExtras": [
+        "App Service"
+      ]
+    },
+    {
+      "id": "az305-infra-assoc-conectividade-21",
+      "topico": "Conectividade híbrida",
+      "tipo": "Associacao",
+      "enunciado": "Para cada requisito de conectividade abaixo, a arquiteta precisa recomendar a solução adequada. Associe cada requisito à solução.",
+      "explicacao": "Circuito privado com banda contratada e latência estável, sem passar pela internet, é ExpressRoute. Conectar filiais e redes virtuais em várias regiões sob uma topologia gerenciada, com trânsito entre regiões, é Azure Virtual WAN — e é ele que resolve o limite de trânsito de gateway do emparelhamento global. Conectar um escritório pequeno ao Azure por túnel criptografado sobre a internet, ao menor custo, é VPN site a site. E dar a um consultor acesso à rede virtual a partir do próprio notebook, sem equipamento no meio, é VPN ponto a site. O emparelhamento de rede virtual está no painel porque é a peça de conectividade mais usada do Azure e a resposta reflexa a \"conectar duas coisas\": ele liga redes virtuais entre si com latência de backbone, mas não alcança rede local nem dispositivo de usuário, que é o eixo dos quatro requisitos acima.",
+      "associacoes": [
+        { "alvo": "Circuito privado com banda contratada e latência estável, sem passar pela internet", "item": "ExpressRoute" },
+        { "alvo": "Topologia gerenciada ligando filiais e redes virtuais de várias regiões, com trânsito entre elas", "item": "Azure Virtual WAN" },
+        { "alvo": "Escritório pequeno conectado por túnel criptografado sobre a internet, ao menor custo", "item": "VPN site a site" },
+        { "alvo": "Consultor acessando a rede virtual do próprio notebook, sem equipamento no meio", "item": "VPN ponto a site" }
+      ],
+      "itensExtras": [
+        "Emparelhamento de rede virtual"
+      ]
+    },
+    {
+      "id": "az305-infra-assoc-implantacao-22",
+      "topico": "Implantação automatizada",
+      "tipo": "Associacao",
+      "enunciado": "Cada estratégia de publicação abaixo atende a uma preocupação diferente. Associe cada preocupação à estratégia adequada.",
+      "explicacao": "Publicar a versão nova em paralelo e trocar todo o tráfego de uma vez, com reversão imediata, é azul-verde — o custo é manter dois ambientes completos no momento da troca. Expor a versão nova a uma fração pequena de usuários e aumentar aos poucos, medindo, é canário. Publicar por grupos sucessivos de instâncias, sem derrubar o serviço e sem duplicar o ambiente, é implantação em rodízio. E ligar ou desligar um comportamento sem publicar nada, inclusive para um subconjunto de usuários, é sinalizador de funcionalidade — a única das quatro que separa a publicação do código da ativação do comportamento. A implantação recreate está no painel porque também é uma estratégia real e é a mais simples de todas: derruba a versão antiga e sobe a nova, aceitando indisponibilidade — nenhum dos quatro requisitos acima a admite.",
+      "associacoes": [
+        { "alvo": "Trocar todo o tráfego de uma vez, com reversão imediata se algo der errado", "item": "Azul-verde" },
+        { "alvo": "Expor a versão nova a uma fração de usuários e aumentar aos poucos, medindo", "item": "Canário" },
+        { "alvo": "Atualizar por grupos sucessivos de instâncias, sem duplicar o ambiente", "item": "Implantação em rodízio" },
+        { "alvo": "Ligar e desligar um comportamento sem publicar nada, para um subconjunto de usuários", "item": "Sinalizador de funcionalidade" }
+      ],
+      "itensExtras": [
+        "Implantação com recriação (recreate)"
+      ]
+    }
+  ]
+}
