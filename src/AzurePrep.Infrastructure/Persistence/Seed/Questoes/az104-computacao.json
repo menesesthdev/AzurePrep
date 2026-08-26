@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-104",
+  "area": "computacao",
+  "questoes": [
+    {
+      "id": "az104-comp-arm-modo-complete-01",
+      "topico": "Templates ARM e Bicep",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O rg-app-brs contém uma máquina virtual, uma conta de armazenamento e uma rede virtual, criadas ao longo de meses por pessoas diferentes. Um engenheiro implantou nesse grupo de recursos um template que declara apenas a rede virtual, usando o modo de implantação Complete. Depois da implantação, a equipe percebe que a máquina virtual e a conta de armazenamento desapareceram. O que aconteceu?",
+      "explicacao": "O modo Complete exclui do grupo de recursos tudo o que não está declarado no template. Ele não é um modo de \"implantação completa\" no sentido de caprichada: ele torna o grupo de recursos um espelho exato do arquivo, e é por isso que qualquer recurso criado fora dele é removido. É a operação mais destrutiva do gerenciador de recursos e a razão de o modo padrão ser Incremental, que acrescenta e atualiza sem remover nada. Supor que os recursos foram apenas desassociados descreve algo que não existe: recurso não fica órfão, ou está no grupo ou foi excluído. Imaginar que foram movidos para outro grupo também não procede, porque implantação não move recurso. E atribuir a exclusão a uma política com efeito Deny inverte o que esse efeito faz: ele recusa criações e atualizações fora do padrão, e nunca exclui recurso existente. A recuperação, aqui, depende de backup ou de reimplantação — não há desfazer.",
+      "opcoes": [
+        { "texto": "O modo Complete excluiu os recursos do grupo que não estavam declarados no template.", "correta": true },
+        { "texto": "Os recursos foram desassociados do grupo e continuam existindo sem grupo de recursos.", "correta": false },
+        { "texto": "O modo Complete moveu para outro grupo de recursos tudo o que não estava no template.", "correta": false },
+        { "texto": "Uma política com efeito Deny foi acionada pela implantação e removeu os recursos não conformes.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-conjunto-disponibilidade-existente-02",
+      "topico": "Zonas e conjuntos de disponibilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A VM-APP-03 está em execução há meses no rg-producao-brs, fora de qualquer conjunto de disponibilidade. Depois de um incidente de manutenção, a equipe decidiu colocá-la no conjunto avset-app-brs, junto com as outras duas máquinas do mesmo serviço. Ao abrir as propriedades da máquina, não há como selecionar o conjunto. Qual é o caminho para atingir o objetivo?",
+      "explicacao": "O conjunto de disponibilidade só pode ser definido no momento da criação da máquina virtual, e não há como associar uma máquina existente depois — por isso a propriedade não é editável. O caminho é recriar a máquina dentro do conjunto, reaproveitando os discos: captura-se ou reanexa-se o disco gerenciado existente a uma máquina nova criada já no conjunto, o que preserva os dados e o sistema operacional. Desalocar a máquina não destrava a propriedade, porque a limitação não é de estado e sim de criação — desalocar permite mudar tamanho, não conjunto. Adicionar a máquina a um conjunto de dimensionamento é outra coisa: conjunto de dimensionamento gerencia instâncias segundo um modelo próprio e não é o mecanismo pedido. E mover a máquina para outro grupo de recursos não tem relação nenhuma com conjuntos de disponibilidade, que são independentes do grupo em que a máquina está.",
+      "opcoes": [
+        { "texto": "Recriar a máquina dentro do conjunto, reaproveitando os discos gerenciados existentes.", "correta": true },
+        { "texto": "Desalocar a máquina e então selecionar o conjunto de disponibilidade nas propriedades.", "correta": false },
+        { "texto": "Adicionar a máquina existente a um conjunto de dimensionamento com orquestração Uniform.", "correta": false },
+        { "texto": "Mover a máquina para o mesmo grupo de recursos do conjunto, o que faz a associação automaticamente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-redimensionar-cluster-03",
+      "topico": "Tamanhos de máquina virtual",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A VM-SQL-02 está em execução e precisa passar para um tamanho maior de outra família. Ao abrir a lista de tamanhos disponíveis com a máquina ligada, o tamanho desejado não aparece, embora a documentação confirme que ele existe naquela região. Um colega afirma que o tamanho está esgotado na região. Qual é a explicação mais provável e o que fazer?",
+      "explicacao": "O tamanho desejado não é oferecido pelo cluster de hardware onde a máquina está alocada no momento. Com a máquina ligada, a lista mostra apenas os tamanhos que aquele cluster suporta, porque a mudança acontece sem sair do lugar. Desalocar a máquina a libera do cluster atual: no próximo início ela é colocada em um cluster que atenda ao tamanho escolhido, e por isso a lista de tamanhos disponíveis fica maior com a máquina desalocada. Esse é o procedimento padrão para mudar de família. A hipótese de esgotamento na região é possível em tese, mas não é a explicação mais provável e não é o que a lista filtrada indica — além de não ser algo que o administrador resolva. Recriar a máquina funciona, mas é desnecessariamente destrutivo quando desalocar resolve. E redimensionar o disco do sistema operacional não tem relação com o tamanho da máquina, que é definido por CPU e memória.",
+      "opcoes": [
+        { "texto": "O cluster atual não oferece esse tamanho; desalocar a máquina e redimensionar depois resolve.", "correta": true },
+        { "texto": "O tamanho está esgotado na região e é preciso abrir solicitação de aumento de cota.", "correta": false },
+        { "texto": "Mudar de família exige recriar a máquina; o redimensionamento só vale dentro da mesma família.", "correta": false },
+        { "texto": "É preciso primeiro expandir o disco do sistema operacional para comportar o tamanho maior.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-mover-regiao-04",
+      "topico": "Movimentação de máquinas virtuais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso precisa transferir a VM-WEB-04, hoje em Brazil South, para a região East US, mantendo a mesma assinatura. Um administrador abriu a máquina no portal, clicou em Mover e percebeu que as opções oferecidas são apenas outro grupo de recursos e outra assinatura. Qual abordagem realiza o objetivo?",
+      "explicacao": "A operação Mover altera apenas o grupo de recursos ou a assinatura do recurso; ela nunca muda a região, porque o recurso continua fisicamente onde foi criado — o que muda é a que contêiner lógico ele pertence. Trocar de região exige replicar a máquina para o destino com uma ferramenta de movimentação entre regiões, como o Azure Resource Mover, que orquestra a replicação e a recriação dos recursos dependentes e finaliza com um corte para o destino. Alterar a região nas propriedades não é possível, porque a região é imutável depois da criação. Mover a máquina para um grupo de recursos que esteja em East US também não funciona, e é o erro conceitual mais comum aqui: a região do grupo de recursos vale apenas para os metadados dele e não arrasta os recursos consigo. Redimensionar a máquina não tem relação nenhuma com localização geográfica.",
+      "opcoes": [
+        { "texto": "Replicar a máquina para East US com uma ferramenta de movimentação entre regiões, como o Azure Resource Mover.", "correta": true },
+        { "texto": "Alterar a região diretamente nas propriedades da máquina, com ela desalocada.", "correta": false },
+        { "texto": "Mover a máquina para um grupo de recursos cuja região seja East US.", "correta": false },
+        { "texto": "Redimensionar a máquina para um tamanho oferecido em East US, o que dispara a transferência.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-slot-configuracao-05",
+      "topico": "Slots de implantação do App Service",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O app-contoso-web tem os slots producao e homologacao. A configuração ConnectionStringPedidos aponta para o banco de homologação no slot homologacao e para o banco de produção no slot producao, e foi marcada como configuração de slot de implantação nos dois. Depois de um swap entre os slots, a equipe verifica qual valor cada slot está usando. O que acontece com essa configuração?",
+      "explicacao": "Configurações marcadas como configuração de slot de implantação ficam presas ao slot e não acompanham o swap: cada slot continua com o próprio valor, de modo que o código promovido para produção passa a usar a cadeia de produção, e o que foi para homologação passa a usar a de homologação. É exatamente para isso que a marcação existe — sem ela, o swap levaria junto a configuração e o app em produção acabaria apontando para o banco de homologação, que é o acidente clássico desse recurso. Dizer que os valores trocam de lugar descreve o comportamento das configurações não marcadas, que de fato acompanham o conteúdo. Supor que a configuração é apagada não corresponde a nada do mecanismo. E afirmar que o swap é bloqueado inverte a lógica: a marcação existe justamente para permitir o swap com segurança, e não para impedi-lo.",
+      "opcoes": [
+        { "texto": "Cada slot mantém o próprio valor; a configuração não acompanha o swap.", "correta": true },
+        { "texto": "Os valores trocam de lugar junto com o conteúdo, seguindo o código promovido.", "correta": false },
+        { "texto": "A configuração é removida dos dois slots e precisa ser recriada após o swap.", "correta": false },
+        { "texto": "O swap é bloqueado enquanto houver configuração marcada como de slot nos dois lados.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-plano-app-service-compartilhado-06",
+      "topico": "Planos do App Service",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O plano asp-contoso-brs, no nível Standard com duas instâncias, hospeda quatro aplicativos web. Depois que um deles passou a receber muito tráfego, os outros três começaram a responder devagar, embora nada tenha mudado neles. Um analista sugere aumentar o número de instâncias do aplicativo problemático apenas. O que explica o sintoma e qual é a observação correta sobre a sugestão?",
+      "explicacao": "Todos os aplicativos de um mesmo plano compartilham as instâncias de computação do plano: a mesma CPU e a mesma memória atendem aos quatro, então o consumo de um afeta diretamente os demais. Também por isso a sugestão não é aplicável como foi formulada — não existe escalar um aplicativo isoladamente dentro de um plano, porque a escala é uma propriedade do plano e vale para tudo o que ele hospeda. As saídas reais são escalar o plano inteiro, o que beneficia todos e aumenta o custo de todos, ou mover o aplicativo barulhento para um plano próprio, isolando-o. Dizer que cada aplicativo tem instâncias próprias descreve um isolamento que o plano não oferece. Atribuir a lentidão a limite de conexões do banco ignora que nada mudou nos outros três. E supor que o nível Standard limita o número de aplicativos por plano não corresponde ao sintoma, que é de desempenho e não de recusa de criação.",
+      "opcoes": [
+        { "texto": "Os quatro aplicativos dividem as mesmas instâncias do plano, e a escala é do plano — não há como escalar um aplicativo isoladamente.", "correta": true },
+        { "texto": "Cada aplicativo tem instâncias próprias dentro do plano; basta escalar o aplicativo afetado.", "correta": false },
+        { "texto": "A lentidão vem do limite de conexões simultâneas do banco de dados compartilhado pelos aplicativos.", "correta": false },
+        { "texto": "O nível Standard limita a quantidade de aplicativos por plano, e o limite foi atingido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-aci-politica-reinicio-07",
+      "topico": "Azure Container Instances",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe criou um grupo de contêineres no Azure Container Instances para executar um processamento em lote que roda uma vez, grava o resultado e encerra com código de saída zero. Nos registros, o contêiner aparece executando o processamento repetidamente, várias vezes por hora, e a fatura do recurso está muito acima do previsto. A imagem e o comando estão corretos. Qual configuração explica o comportamento?",
+      "explicacao": "A política de reinício está como Always, que é o padrão quando nada é informado na criação. Com ela, o Azure reinicia o contêiner sempre que o processo termina, inclusive quando termina com sucesso — o que transforma uma tarefa de execução única em um laço infinito e explica tanto a repetição quanto o custo, já que o recurso nunca chega ao estado encerrado que interrompe a cobrança. Para tarefa que roda uma vez, a política adequada é OnFailure, que reinicia só em falha, ou Never. A hipótese de o contêiner estar sendo encerrado por falta de memória não se sustenta porque o enunciado diz que ele completa o processamento e sai com código zero. Sondagem de integridade mal configurada derrubaria o contêiner antes de concluir, o que também não é o caso. E dimensionamento automático não existe no Container Instances, que executa o que foi declarado sem escalar sozinho.",
+      "opcoes": [
+        { "texto": "A política de reinício está como Always, que reinicia o contêiner mesmo após término bem-sucedido.", "correta": true },
+        { "texto": "O contêiner está sendo encerrado por falta de memória e reiniciado pela plataforma.", "correta": false },
+        { "texto": "A sondagem de integridade está falhando e provoca a recriação do contêiner.", "correta": false },
+        { "texto": "O dimensionamento automático do Container Instances está criando novas execuções a cada carga.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-container-apps-escala-zero-08",
+      "topico": "Azure Container Apps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um serviço HTTP interno é usado apenas em horário comercial e fica completamente ocioso à noite e nos fins de semana. A equipe quer executá-lo em contêiner, pagar o mínimo possível nos períodos sem uso e não administrar nós de cluster. Aceita-se que a primeira requisição após um período ocioso demore um pouco mais. Qual serviço atende melhor ao requisito?",
+      "explicacao": "O Azure Container Apps atende porque escala até zero réplicas quando não há requisições e volta a criar réplica quando chega a primeira — é exatamente o comportamento que o enunciado descreve ao aceitar a latência inicial, e é o que elimina o custo de computação nos períodos ociosos, sem exigir administração de nós. O Container Instances executa o contêiner que foi declarado e cobra enquanto ele existe: para chegar a custo zero seria preciso excluí-lo e recriá-lo por fora, com automação escrita à mão, que é justamente o trabalho que se quer evitar. O Serviço de Kubernetes do Azure entrega o controle mais fino de todos, mas exige administrar o pool de nós e os nós continuam custando mesmo sem carga — o oposto do requisito. E máquinas virtuais com Docker somam o custo contínuo do Container Instances ao trabalho operacional do Kubernetes, sem nenhuma vantagem no cenário.",
+      "opcoes": [
+        { "texto": "Azure Container Apps, que escala até zero réplica quando não há requisições.", "correta": true },
+        { "texto": "Azure Container Instances, que encerra o grupo de contêineres automaticamente quando fica ocioso.", "correta": false },
+        { "texto": "Serviço de Kubernetes do Azure, com o pool de nós configurado para dimensionamento automático.", "correta": false },
+        { "texto": "Máquinas virtuais executando Docker, desligadas por agendamento fora do horário comercial.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-vmss-orquestracao-09",
+      "topico": "Conjuntos de dimensionamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa de um conjunto de dimensionamento que agrupe instâncias com tamanhos diferentes, permita adicionar ao conjunto máquinas virtuais criadas individualmente e distribua as instâncias por zonas de disponibilidade. Qual modo de orquestração atende, e qual é a diferença essencial em relação ao outro?",
+      "explicacao": "O modo Flexible atende. Ele trata as instâncias como máquinas virtuais comuns, o que permite tamanhos e configurações diferentes no mesmo conjunto e admite anexar máquinas criadas individualmente, além de distribuir por zonas. O modo Uniform segue o caminho oposto: as instâncias são idênticas e derivadas de um modelo único mantido pelo conjunto, o que dá escala mais rápida e homogênea e é o adequado para cargas realmente iguais entre si — mas não aceita instância criada por fora nem heterogeneidade. Dizer que Uniform aceita máquinas individuais inverte a distinção entre os dois modos. Afirmar que apenas Uniform suporta zonas está errado, porque os dois suportam. E supor que a escolha só afeta a cobrança ignora que ela muda o que é possível fazer com as instâncias, que é o ponto do cenário.",
+      "opcoes": [
+        { "texto": "Flexible, porque trata as instâncias como máquinas comuns e admite heterogeneidade; Uniform exige instâncias idênticas vindas de um modelo único.", "correta": true },
+        { "texto": "Uniform, porque é o único que aceita anexar máquinas virtuais criadas individualmente ao conjunto.", "correta": false },
+        { "texto": "Uniform, porque é o único que distribui instâncias por zonas de disponibilidade.", "correta": false },
+        { "texto": "Qualquer um dos dois, porque a orquestração afeta apenas o modelo de cobrança das instâncias.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-criptografia-no-host-10",
+      "topico": "Discos e criptografia",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A área de segurança exigiu que os dados da VM-FIN-01 sejam criptografados também no disco temporário e nos caches de disco, e não apenas nos discos gerenciados em repouso. A equipe decidiu habilitar a criptografia no host. Ao tentar ativar a opção na máquina em execução, a operação é recusada. Quais são as duas condições para habilitar esse recurso?",
+      "explicacao": "É preciso registrar o recurso de criptografia no host na assinatura e ter a máquina desalocada no momento de habilitá-lo. O registro na assinatura é uma habilitação prévia, feita uma vez por assinatura, sem a qual a opção sequer é aceita; e a desalocação é necessária porque a mudança altera como o host trata o armazenamento efêmero e os caches, o que não pode ser feito com a máquina em execução. Criptografia no host é o mecanismo que cobre o disco temporário e os caches, ponto que a criptografia de disco tradicional dentro do sistema operacional não resolve da mesma forma. Adicionar chave em cofre de chaves e conceder acesso é o caminho de chaves gerenciadas pelo cliente, que é outro eixo e não é o que a recusa indica. Instalar extensão no sistema operacional descreve a criptografia de disco baseada em agente, não a do host. E redimensionar a máquina não tem relação com o recurso.",
+      "opcoes": [
+        { "texto": "Registrar o recurso na assinatura e desalocar a máquina antes de habilitá-lo.", "correta": true },
+        { "texto": "Criar uma chave no cofre de chaves e conceder acesso à identidade da máquina.", "correta": false },
+        { "texto": "Instalar a extensão de criptografia no sistema operacional convidado e reiniciar a máquina.", "correta": false },
+        { "texto": "Redimensionar a máquina para um tamanho da série que oferece computação confidencial.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-bicep-transpilacao-11",
+      "topico": "Templates ARM e Bicep",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe que hoje mantém templates ARM em JSON quer migrar para Bicep. Antes de decidir, a liderança pergunta o que muda no que o Azure efetivamente recebe e se será necessário manter um arquivo de estado com o que já foi implantado, como acontece em outras ferramentas de infraestrutura como código. Qual resposta está correta?",
+      "explicacao": "Bicep é uma linguagem de autoria que é transpilada para o mesmo JSON do gerenciador de recursos: o Azure continua recebendo um template ARM, e por isso não há diferença de capacidade entre os dois — o que muda é a legibilidade e a ergonomia de escrita. E não existe arquivo de estado a manter, porque o gerenciador de recursos compara o template com o estado real dos recursos no momento da implantação; o estado é o próprio Azure, e é isso que torna a implantação idempotente sem nenhum artefato local. Dizer que Bicep usa uma API separada está errado e levaria a supor incompatibilidade entre os dois formatos, quando na prática é possível converter nos dois sentidos. Afirmar que Bicep exige arquivo de estado transporta para ele um conceito de outra ferramenta. E dizer que Bicep só serve para recursos novos ignora que ele implanta exatamente o mesmo conjunto de recursos que o JSON.",
+      "opcoes": [
+        { "texto": "Bicep é transpilado para o JSON do ARM e não usa arquivo de estado; o estado é o próprio Azure.", "correta": true },
+        { "texto": "Bicep usa uma API de implantação separada da do ARM, com recursos próprios não disponíveis em JSON.", "correta": false },
+        { "texto": "Bicep exige um arquivo de estado versionado junto ao código para saber o que já foi implantado.", "correta": false },
+        { "texto": "Bicep só pode declarar recursos novos; alterações em recursos existentes continuam exigindo JSON.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-dominio-personalizado-12",
+      "topico": "Domínios e certificados do App Service",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O aplicativo app-contoso-loja precisa responder em loja.contoso.com.br, com HTTPS. Ele está hoje em um plano do nível Gratuito. A equipe já tem controle do domínio no provedor de DNS externo. Quais passos são necessários, na ordem correta, para atender ao requisito?",
+      "explicacao": "É preciso primeiro escalar o plano, porque o nível Gratuito não suporta domínio personalizado com TLS — a opção nem é oferecida enquanto o plano não for elevado. Em seguida vêm os dois registros no provedor de DNS: um registro de verificação, que prova ao Azure que quem está configurando controla o domínio, e o registro que aponta o nome para o aplicativo, tipicamente CNAME. Só então o domínio pode ser adicionado e o certificado vinculado. Criar apenas o CNAME e adicionar o domínio pula a verificação e falha na validação. Adicionar o domínio antes de escalar o plano esbarra na limitação do nível e é o primeiro obstáculo real do cenário. E vincular o certificado antes de o domínio existir no aplicativo não é possível, porque o vínculo é feito para um nome já registrado ali — a ordem importa e é justamente onde a configuração costuma travar.",
+      "opcoes": [
+        { "texto": "Escalar o plano para um nível pago, criar o registro de verificação e o CNAME no DNS, adicionar o domínio e vincular o certificado.", "correta": true },
+        { "texto": "Criar o CNAME no DNS, adicionar o domínio ao aplicativo e vincular o certificado, mantendo o plano Gratuito.", "correta": false },
+        { "texto": "Adicionar o domínio ao aplicativo, escalar o plano em seguida e só então criar os registros no DNS.", "correta": false },
+        { "texto": "Vincular primeiro o certificado gerenciado ao aplicativo e depois apontar o CNAME para ele.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-imagem-generalizada-13",
+      "topico": "Imagens de máquina virtual",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe preparou a VM-MODELO-01 com todos os agentes e configurações padrão da empresa e capturou uma imagem dela para servir de base a dezenas de máquinas novas. As máquinas criadas a partir da imagem sobem com o mesmo nome de host e o mesmo identificador de máquina da original, e o ingresso no domínio falha em todas. Qual passo foi omitido?",
+      "explicacao": "Faltou generalizar a máquina antes da captura — executar o Sysprep no Windows ou o comando de desprovisionamento do agente no Linux. Esse passo remove nome de host, identificadores exclusivos e contas locais criadas na preparação, de modo que cada máquina criada a partir da imagem receba identidade própria na primeira inicialização. Sem ele, a captura produz uma imagem especializada, que preserva a identidade da máquina original — útil para restaurar aquela máquina específica, e imprópria para servir de modelo, que é exatamente o sintoma descrito. Desalocar a máquina é parte do procedimento, mas sozinho não remove identidade nenhuma. Publicar a imagem numa galeria de computação melhora distribuição, versionamento e replicação entre regiões, sem corrigir uma imagem especializada. E o problema não se resolve renomeando cada máquina depois, porque o identificador duplicado é o que quebra o ingresso no domínio.",
+      "opcoes": [
+        { "texto": "Generalizar a máquina antes da captura, com Sysprep no Windows ou desprovisionamento do agente no Linux.", "correta": true },
+        { "texto": "Desalocar a máquina antes da captura, o que remove os identificadores exclusivos.", "correta": false },
+        { "texto": "Publicar a imagem em uma galeria de computação do Azure em vez de usar imagem gerenciada.", "correta": false },
+        { "texto": "Renomear cada máquina criada logo na primeira inicialização, antes do ingresso no domínio.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-plano-capacidade-14",
+      "topico": "Planos do App Service",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "O plano asp-contoso-brs, no nível Standard, está com uso de CPU alto e os aplicativos hospedados nele respondem devagar nos horários de pico. A equipe quer aumentar a capacidade de atendimento sem trocar de tecnologia nem reescrever o aplicativo. Quais duas ações aumentam efetivamente a capacidade do plano? Selecione duas.",
+      "explicacao": "Aumentar o número de instâncias do plano é escala horizontal: mais réplicas atendendo em paralelo, com o balanceamento embutido do serviço distribuindo as requisições. Mudar o plano para um nível com mais CPU e memória por instância é escala vertical, que dá mais capacidade a cada réplica e é o caminho quando a carga não paraleliza bem. As duas atacam a causa por eixos diferentes e ambas funcionam. Criar slots de implantação adicionais não acrescenta capacidade nenhuma: slots compartilham as mesmas instâncias do plano, e é por isso que testar carga em um slot afeta a produção. Habilitar Sempre Ativado evita que o aplicativo seja descarregado por inatividade, o que melhora a primeira requisição depois de um período ocioso e não tem efeito sobre pico de CPU. E mover aplicativos para outro plano dentro da mesma assinatura ajudaria se o objetivo fosse isolar um vizinho barulhento, mas não aumenta a capacidade deste plano, que é o que o enunciado pede.",
+      "opcoes": [
+        { "texto": "Aumentar o número de instâncias do plano.", "correta": true },
+        { "texto": "Mudar o plano para um nível com mais CPU e memória por instância.", "correta": true },
+        { "texto": "Criar slots de implantação adicionais para distribuir as requisições.", "correta": false },
+        { "texto": "Habilitar a configuração Sempre Ativado nos aplicativos do plano.", "correta": false },
+        { "texto": "Habilitar o dimensionamento automático apenas no aplicativo mais acessado do plano.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-acr-premium-15",
+      "topico": "Azure Container Registry",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso mantém um registro de contêiner no SKU Standard. Duas novas exigências chegaram: as imagens precisam ser servidas localmente a partir de três regiões, para reduzir latência de pull, e o registro não pode mais ser alcançável pela internet pública, sendo acessado apenas de dentro das redes virtuais. Quais duas capacidades exigem a mudança para o SKU Premium? Selecione duas.",
+      "explicacao": "Geo-replicação e link privado são capacidades exclusivas do SKU Premium, e são exatamente as duas exigências do cenário. A geo-replicação mantém réplicas do mesmo registro em várias regiões sob um único nome, o que é o que reduz a latência de pull sem obrigar cada região a apontar para um registro diferente. O link privado é o que permite expor o registro por endpoint privado e desligar o acesso público. Webhooks estão disponíveis também nos níveis inferiores e não têm relação com nenhuma das duas exigências. As tarefas de build do registro também não são exclusivas do Premium e resolvem outro problema, o de construir imagem sem servidor de build próprio. E a autenticação com identidades do Microsoft Entra funciona em todos os SKUs — quem a marca costuma associar \"segurança\" ao nível mais caro, sem perceber que o que muda no Premium é o isolamento de rede, não a forma de autenticar.",
+      "opcoes": [
+        { "texto": "Geo-replicação do registro entre várias regiões.", "correta": true },
+        { "texto": "Acesso por link privado, com o acesso público desabilitado.", "correta": true },
+        { "texto": "Webhooks disparados a cada envio de imagem.", "correta": false },
+        { "texto": "Tarefas de construção de imagem executadas pelo próprio registro.", "correta": false },
+        { "texto": "Autenticação com identidades do Microsoft Entra ID.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-vmss-autoescala-16",
+      "topico": "Conjuntos de dimensionamento",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "O conjunto vmss-web-brs foi criado com contagem fixa de duas instâncias e precisa passar a acompanhar a carga automaticamente, crescendo quando a CPU média das instâncias ficar alta e encolhendo quando ela baixar. A equipe quer evitar que o conjunto fique alternando entre criar e remover instâncias em poucos minutos. Quais dois elementos são necessários na configuração de dimensionamento automático? Selecione duas.",
+      "explicacao": "É preciso um par de regras baseadas na métrica de CPU — uma de aumento e outra de redução, cada uma com o próprio limite — e é preciso definir os limites mínimo e máximo de instâncias do perfil, que delimitam até onde a escala pode ir nos dois sentidos. Sem o limite máximo, um pico prolongado cresce sem teto e a fatura acompanha; sem o mínimo, a redução pode levar o serviço a uma capacidade insuficiente. Sobre a alternância rápida entre criar e remover, o que a evita é a combinação de limites de aumento e de redução suficientemente distantes um do outro com o período de resfriamento entre ações — daí a importância de as duas regras não terem limites vizinhos. Um endereço IP público por instância não tem relação com escala. Trocar a orquestração para Flexible não é requisito de dimensionamento automático, que funciona nos dois modos. E converter o conjunto em conjunto de disponibilidade eliminaria justamente a capacidade de escalar.",
+      "opcoes": [
+        { "texto": "Regras de aumento e de redução baseadas na métrica de CPU, com limites distintos entre si.", "correta": true },
+        { "texto": "Limites mínimo e máximo de instâncias definidos no perfil de dimensionamento.", "correta": true },
+        { "texto": "Um endereço IP público atribuído a cada instância do conjunto.", "correta": false },
+        { "texto": "A troca do modo de orquestração do conjunto para Flexible.", "correta": false },
+        { "texto": "A conversão do conjunto de dimensionamento em um conjunto de disponibilidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-comp-disco-reduzir-17",
+      "topico": "Discos e criptografia",
+      "tipo": "SimNao",
+      "enunciado": "Um disco gerenciado de dados de 1 TiB anexado à VM-APP-05 está com apenas 90 GiB ocupados, e a equipe quer reduzir o custo mensal diminuindo o tamanho provisionado para 256 GiB. Avalie a afirmação: é possível reduzir o tamanho do disco gerenciado diretamente, desde que o espaço em uso caiba no novo tamanho.",
+      "explicacao": "A afirmação é falsa. Discos gerenciados só podem ser expandidos, nunca reduzidos, independentemente de quanto espaço está efetivamente ocupado — a operação de redução simplesmente não existe no serviço. Para chegar a um disco menor é preciso criar um disco novo do tamanho desejado, copiar os dados para ele, anexá-lo à máquina e então remover o antigo, o que envolve janela de manutenção e cuidado com letras de unidade e pontos de montagem. Quem responde Sim costuma raciocinar por analogia com o redimensionamento de partição dentro do sistema operacional, que de fato encolhe — mas isso reduz a partição, e não o disco provisionado no Azure, então a cobrança continua igual. É justamente essa diferença que faz o superdimensionamento inicial de disco virar custo permanente, e é por isso que a escolha do tamanho na criação merece atenção.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-comp-plano-gratuito-escala-18",
+      "topico": "Planos do App Service",
+      "tipo": "SimNao",
+      "enunciado": "Um aplicativo de demonstração está hospedado em um plano do App Service no nível Gratuito. Antes de um evento, a equipe quer aumentar a contagem de instâncias do plano para três, a fim de suportar mais acessos simultâneos durante a apresentação. Avalie a afirmação: é possível escalar horizontalmente esse plano para três instâncias mantendo o nível Gratuito.",
+      "explicacao": "A afirmação é falsa. O nível Gratuito não oferece escala horizontal: ele executa em infraestrutura compartilhada, fica limitado a uma única instância e ainda impõe cotas de tempo de CPU que interrompem o aplicativo quando excedidas. Para aumentar a contagem de instâncias é preciso mudar o plano para um nível que suporte escala horizontal, e o dimensionamento automático por métrica exige nível mais alto ainda — a escala manual aparece antes da automática conforme se sobe de nível. Quem responde Sim costuma confundir escala horizontal com escala vertical, ou supor que a limitação do nível Gratuito é apenas de recursos por instância e não de quantidade de instâncias. Para o caso descrito, o caminho é escalar o plano antes do evento e, se o custo for a preocupação, voltar ao nível anterior depois, já que a mudança de nível é reversível.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-comp-assoc-servico-computacao-19",
+      "topico": "Escolha de serviço de computação",
+      "tipo": "Associacao",
+      "enunciado": "A Contoso precisa escolher o serviço de computação adequado para cada carga descrita, sempre o mais gerenciado que atenda ao requisito. Associe cada carga ao serviço adequado.",
+      "explicacao": "Um sistema legado que exige acesso ao sistema operacional, agentes próprios e software que só instala no servidor pede máquina virtual, o único serviço da lista que entrega o servidor inteiro. Um conjunto grande de instâncias idênticas que precisa crescer e encolher conforme a carga é conjunto de dimensionamento, feito exatamente para tratar muitas cópias iguais como uma unidade. Um aplicativo web em linguagem suportada, que a equipe quer publicar com slot de validação e certificado gerenciado sem administrar servidor, é App Service. E um serviço em contêiner com tráfego intermitente, que deve custar zero quando ocioso, é Container Apps, pela escala até zero. O Container Instances está no painel porque é a resposta reflexa para \"rodar um contêiner\": ele executa contêiner sem orquestrador, mas não escala sozinho nem chega a custo zero enquanto o grupo existir — é a escolha certa para tarefa pontual e de curta duração, e não para nenhuma das quatro cargas acima.",
+      "associacoes": [
+        { "alvo": "Sistema legado que exige acesso ao sistema operacional e instalação de software no servidor", "item": "Máquina virtual" },
+        { "alvo": "Muitas instâncias idênticas que precisam crescer e encolher conforme a carga", "item": "Conjunto de dimensionamento" },
+        { "alvo": "Aplicativo web em linguagem suportada, com slot de validação e sem administrar servidor", "item": "App Service" },
+        { "alvo": "Serviço em contêiner com tráfego intermitente, que deve custar zero quando ocioso", "item": "Azure Container Apps" }
+      ],
+      "itensExtras": [
+        "Azure Container Instances"
+      ]
+    },
+    {
+      "id": "az104-comp-assoc-tipo-de-disco-20",
+      "topico": "Discos e criptografia",
+      "tipo": "Associacao",
+      "enunciado": "Para cada requisito de armazenamento em bloco abaixo, a equipe precisa escolher o tipo de disco gerenciado adequado, ao menor custo que atenda. Associe cada requisito ao tipo de disco.",
+      "explicacao": "Banco de dados sensível a latência, com necessidade de definir taxa de transferência e IOPS de forma independente do tamanho, é o Ultra Disk — o único que permite ajustar desempenho sem trocar o disco de tamanho. Carga de produção com desempenho consistente e uso de cache é Premium SSD, o padrão para servidores de produção. Ambiente de desenvolvimento e teste com acesso moderado é Standard SSD, que entrega latência melhor que disco rotacional a custo bem menor que o Premium. E arquivos acessados raramente, em que o custo por gigabyte importa mais que a latência, é Standard HDD. O disco temporário está no painel porque parece a opção mais rápida e barata para dados de trabalho: ele existe em muitos tamanhos de máquina e tem bom desempenho, mas o conteúdo é perdido quando a máquina é desalocada ou migra de host, o que o desqualifica para qualquer um dos quatro requisitos — ele serve para arquivo de paginação e dados descartáveis.",
+      "associacoes": [
+        { "alvo": "Banco sensível a latência, com IOPS e taxa de transferência ajustáveis sem mudar o tamanho", "item": "Ultra Disk" },
+        { "alvo": "Servidor de produção com desempenho consistente e uso de cache de leitura", "item": "Premium SSD" },
+        { "alvo": "Ambiente de desenvolvimento e teste com acesso moderado e custo contido", "item": "Standard SSD" },
+        { "alvo": "Arquivos acessados raramente, em que o custo por gigabyte importa mais que a latência", "item": "Standard HDD" }
+      ],
+      "itensExtras": [
+        "Disco temporário da máquina"
+      ]
+    },
+    {
+      "id": "az104-comp-assoc-recurso-app-service-21",
+      "topico": "Slots de implantação do App Service",
+      "tipo": "Associacao",
+      "enunciado": "Cada necessidade abaixo é atendida por um recurso diferente do App Service. Associe cada necessidade ao recurso que a resolve.",
+      "explicacao": "Validar uma versão nova em um endereço próprio e promovê-la sem derrubar a aplicação é o slot de implantação, cujo swap troca o conteúdo já aquecido. Acrescentar e remover instâncias sozinho conforme a CPU é o dimensionamento automático, configurado no plano e disponível a partir dos níveis mais altos. Voltar conteúdo e configuração a um ponto anterior é o backup do App Service, que captura os dois. E responder em um endereço da própria empresa é o domínio personalizado, com o registro de verificação e o apontamento no DNS. Sempre Ativado está no painel porque costuma ser confundido com desempenho: ele apenas impede que o aplicativo seja descarregado após um período de inatividade, o que ajuda a primeira requisição depois da ociosidade e é indispensável para trabalhos em segundo plano — mas não acrescenta capacidade, não promove versão, não restaura nada e não muda endereço.",
+      "associacoes": [
+        { "alvo": "Validar uma versão nova em endereço próprio e promovê-la sem derrubar a aplicação", "item": "Slot de implantação" },
+        { "alvo": "Acrescentar e remover instâncias sozinho conforme a CPU sobe e desce", "item": "Dimensionamento automático" },
+        { "alvo": "Voltar o conteúdo e a configuração do aplicativo a um ponto anterior", "item": "Backup do App Service" },
+        { "alvo": "Fazer o aplicativo responder em um endereço da própria empresa", "item": "Domínio personalizado" }
+      ],
+      "itensExtras": [
+        "Sempre Ativado"
+      ]
+    },
+    {
+      "id": "az104-comp-assoc-implantacao-arm-22",
+      "topico": "Templates ARM e Bicep",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de implantação precisa da opção certa do gerenciador de recursos para cada intenção abaixo. Associe cada intenção à opção adequada.",
+      "explicacao": "Fazer o grupo de recursos refletir exatamente o arquivo, removendo o que não estiver declarado nele, é o modo de implantação Complete — poderoso e destrutivo, e por isso nunca o padrão. Acrescentar e atualizar recursos sem remover nada do que já existe é o modo Incremental, que é o comportamento padrão. Gerar um arquivo a partir de recursos que já foram criados pelo portal é exportar o template, caminho comum para transformar em código um ambiente construído à mão. E converter um arquivo JSON existente para a sintaxe mais enxuta é decompilar para Bicep, operação que roda localmente na ferramenta de linha de comando. A operação de simulação está no painel porque é a resposta reflexa para qualquer dúvida sobre implantação: ela mostra o que mudaria antes de aplicar, o que é excelente prática — sobretudo antes de usar o modo Complete — mas não realiza nenhuma das quatro intenções listadas, porque não altera nem gera arquivo nenhum.",
+      "associacoes": [
+        { "alvo": "Fazer o grupo de recursos refletir exatamente o arquivo, removendo o que não estiver nele", "item": "Modo de implantação Complete" },
+        { "alvo": "Acrescentar e atualizar recursos sem remover nada do que já existe", "item": "Modo de implantação Incremental" },
+        { "alvo": "Gerar um arquivo a partir de recursos já criados manualmente pelo portal", "item": "Exportar template" },
+        { "alvo": "Converter um arquivo JSON existente para a sintaxe declarativa mais enxuta", "item": "Decompilar para Bicep" }
+      ],
+      "itensExtras": [
+        "Operação de simulação (what-if)"
+      ]
+    }
+  ]
+}

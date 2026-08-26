@@ -185,6 +185,27 @@ public static class AzurePrepDbSeeder
     {
         var ativas = exam.Questions.Count(q => q.IsActive);
 
+        // Domínio sem questão é pior que pool pequeno e não aparece na contagem total: o sorteio
+        // ignora a área vazia e redistribui a cota dela entre as demais, produzindo prova do
+        // tamanho certo em que uma fatia inteira do blueprint não aparece. Por isso a checagem por
+        // domínio vem ANTES do retorno antecipado — senão o aviso sumiria justamente quando o
+        // total já passou do exigido e o exame continua impublicável.
+        var vazios = exam.SkillAreas
+            .Where(area => !exam.Questions.Any(q => q.IsActive && q.SkillAreaId == area.Id))
+            .Select(area => area.Key)
+            .ToList();
+
+        if (vazios.Count > 0)
+        {
+            logger?.Log(
+                definicao.Publicado ? LogLevel.Warning : LogLevel.Information,
+                "Exame {Codigo}: os domínios {Dominios} não têm nenhuma questão ativa. O sorteio " +
+                "redistribui a cota deles entre os demais, então a prova sai completa com parte do " +
+                "blueprint ausente.",
+                definicao.Code,
+                string.Join(", ", vazios));
+        }
+
         if (ativas >= definicao.TotalQuestions)
         {
             return;

@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-104",
+  "area": "identidade-governanca",
+  "questoes": [
+    {
+      "id": "az104-idgov-bloqueio-readonly-chaves-01",
+      "topico": "Bloqueios de recurso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para proteger a conta de armazenamento stcontosodocs01, um administrador aplicou a ela um bloqueio do tipo Somente Leitura. Dias depois, a equipe de aplicação relata que não consegue mais obter a cadeia de conexão da conta pelo portal nem pela linha de comando, embora todos tenham a função Colaborador na assinatura e a leitura dos blobs continue funcionando normalmente. Qual é a causa?",
+      "explicacao": "Listar as chaves de acesso da conta é classificado como operação de escrita, e não de leitura, porque é feita por uma chamada POST à ação listKeys. O bloqueio Somente Leitura barra qualquer operação de escrita no recurso, então ele impede obter as chaves — e, por consequência, a cadeia de conexão — mesmo para quem tem permissão de sobra. É o efeito colateral mais surpreendente desse tipo de bloqueio, porque a leitura dos dados em si continua funcionando e nada indica que o bloqueio seja o culpado. A ideia de que falta permissão está errada e é a primeira suspeita de todo mundo: bloqueio e RBAC são camadas independentes, e o bloqueio vence mesmo o Proprietário, então conceder mais função não resolveria. Também não é caso de rotação de chaves, que geraria falha nas conexões já existentes e não na consulta às chaves. E o firewall da conta filtra a origem do tráfego de dados, não a chamada de gerenciamento que lista as chaves.",
+      "opcoes": [
+        { "texto": "Listar as chaves é uma operação de escrita, e o bloqueio Somente Leitura a impede independentemente da função atribuída.", "correta": true },
+        { "texto": "A função Colaborador não inclui permissão para listar chaves de contas de armazenamento.", "correta": false },
+        { "texto": "As chaves foram rotacionadas automaticamente e precisam ser regeneradas antes de aparecerem.", "correta": false },
+        { "texto": "O firewall da conta de armazenamento está bloqueando a chamada de gerenciamento que lista as chaves.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-colaborador-concede-acesso-02",
+      "topico": "Funções internas do Azure",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Ana tem a função Colaborador atribuída no grupo de recursos rg-financeiro-brs. Ela precisa conceder à Beatriz a função Leitor nesse mesmo grupo de recursos, sem envolver a equipe central de nuvem. Ao tentar criar a atribuição pelo portal, Ana recebe erro de autorização. Qual é a menor alteração de permissão que resolve o caso de Ana?",
+      "explicacao": "Atribuir a Ana a função Administrador de Acesso do Usuário no grupo de recursos é a menor alteração que resolve. Colaborador permite criar, alterar e excluir recursos, mas não conceder acesso a outras pessoas — essa capacidade fica em Microsoft.Authorization/roleAssignments/write, que Colaborador explicitamente não tem, e é justamente a separação que impede quem administra recursos de ampliar sozinho o próprio alcance. Administrador de Acesso do Usuário entrega exatamente essa permissão e nada além dela. Promover Ana a Proprietário também funcionaria, mas concede junto todo o poder de Colaborador de novo, o que viola o menor privilégio pedido no enunciado. Atribuir Colaborador no escopo da assinatura só amplia o alcance da mesma função, que continua sem poder conceder acesso — mais escopo não cria permissão que a função não tem. E Leitor com escopo de assinatura é ainda mais restrito e não concede nada.",
+      "opcoes": [
+        { "texto": "Atribuir a Ana a função Administrador de Acesso do Usuário no rg-financeiro-brs.", "correta": true },
+        { "texto": "Atribuir a Ana a função Proprietário no rg-financeiro-brs.", "correta": false },
+        { "texto": "Atribuir a Ana a função Colaborador no escopo da assinatura, em vez do grupo de recursos.", "correta": false },
+        { "texto": "Atribuir a Ana a função Leitor no escopo da assinatura, somando-a à que ela já tem.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-rbac-aditivo-03",
+      "topico": "Atribuições em escopos diferentes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Carlos tem a função Leitor atribuída no escopo da assinatura Contoso-Prod e a função Colaborador atribuída no grupo de recursos rg-dados-brs, que pertence a essa assinatura. Não existe nenhuma atribuição de negação no ambiente. O que Carlos consegue fazer no rg-dados-brs e no restante da assinatura?",
+      "explicacao": "As permissões do RBAC do Azure são aditivas: valem simultaneamente todas as atribuições que alcançam o recurso, e o efetivo é a união delas. Por isso Carlos age como Colaborador dentro do rg-dados-brs — a atribuição no grupo de recursos soma-se à de Leitor, e a soma é o conjunto maior — e continua apenas como Leitor no restante da assinatura, onde só a primeira atribuição alcança. A ideia de que a atribuição de escopo menor substitui a de escopo maior descreve um modelo de sobreposição que o Azure não usa; ela levaria à mesma resposta dentro do grupo de recursos, mas pelo motivo errado, e erraria o restante da assinatura. A ideia oposta, de que o escopo mais amplo prevalece, tornaria inútil qualquer atribuição em grupo de recursos. E a ideia de que a mais restritiva vence confunde RBAC com atribuição de negação, que é o único mecanismo que de fato subtrai permissão — e o enunciado diz que não há nenhuma.",
+      "opcoes": [
+        { "texto": "Age como Colaborador dentro do rg-dados-brs e como Leitor no restante da assinatura, porque as atribuições são aditivas.", "correta": true },
+        { "texto": "Age como Colaborador apenas no rg-dados-brs e perde qualquer acesso ao restante da assinatura, porque a atribuição mais específica substitui a mais ampla.", "correta": false },
+        { "texto": "Age como Leitor em toda a assinatura, inclusive no rg-dados-brs, porque a atribuição de escopo mais amplo prevalece.", "correta": false },
+        { "texto": "Age como Leitor em toda a assinatura, porque entre atribuições concorrentes vence sempre a mais restritiva.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-bloqueio-heranca-proprietario-04",
+      "topico": "Bloqueios de recurso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A assinatura Contoso-Prod tem um bloqueio do tipo Não Pode Excluir aplicado no escopo da própria assinatura. Daniela é Proprietária do grupo de recursos rg-piloto-brs, criado dentro dessa assinatura, e precisa excluir esse grupo de recursos ao fim do piloto. Ela tenta excluir e a operação é recusada. O que Daniela precisa fazer?",
+      "explicacao": "Bloqueios são herdados do escopo pai para todos os escopos filhos, e o bloqueio da assinatura alcança o rg-piloto-brs. Como a exclusão está bloqueada, é preciso remover o bloqueio herdado no escopo em que ele foi criado — a assinatura — e para isso são necessárias as permissões de gerenciamento de bloqueios, presentes em Proprietário e em Administrador de Acesso do Usuário no escopo da assinatura. Daniela ser Proprietária do grupo de recursos não basta, porque o bloqueio não está lá. Criar um bloqueio de tipo diferente no grupo de recursos não anula o herdado: quando há vários bloqueios alcançando o mesmo recurso, o mais restritivo prevalece, e nenhum bloqueio filho cancela um bloqueio pai. Pedir mais funções no próprio grupo de recursos também não adianta, porque bloqueio não é permissão — ele barra até o Proprietário, e essa é exatamente a razão de existir. E excluir os recursos um a um esbarraria no mesmo bloqueio herdado.",
+      "opcoes": [
+        { "texto": "Remover o bloqueio no escopo da assinatura, onde ele foi criado, o que exige permissão nesse escopo.", "correta": true },
+        { "texto": "Criar no rg-piloto-brs um bloqueio do tipo Somente Leitura, que substitui o herdado da assinatura.", "correta": false },
+        { "texto": "Solicitar a função Administrador de Acesso do Usuário no rg-piloto-brs e repetir a exclusão.", "correta": false },
+        { "texto": "Excluir individualmente cada recurso do grupo e depois excluir o grupo de recursos vazio.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-tags-nao-herdam-05",
+      "topico": "Marcações de recursos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de finanças aplicou a marcação centroDeCusto=FIN-204 ao grupo de recursos rg-financeiro-brs, esperando que o relatório de custos passasse a separar por centro de custo cada recurso dentro dele. Ao abrir a análise de custos agrupada por essa marcação, quase todos os recursos aparecem como não marcados. Os recursos foram criados antes da marcação. Qual abordagem corrige a situação de forma duradoura?",
+      "explicacao": "Marcações não são herdadas: aplicar uma marcação ao grupo de recursos não a propaga para os recursos dentro dele, e é por isso que eles aparecem como não marcados na análise agrupada por marcação. A correção duradoura é uma política do Azure com efeito Modify, que passa a acrescentar a marcação nos recursos criados dali em diante, mais uma tarefa de remediação para alcançar os que já existem — sem a remediação, os recursos antigos continuariam fora do relatório. Aplicar a marcação manualmente em cada recurso resolve o retrato de hoje e não impede que o próximo recurso criado nasça sem ela, o que faz o problema voltar. Uma política com efeito Deny exigindo a marcação impediria criações futuras sem ela, mas não corrige nada do que já existe e ainda quebra implantações legítimas enquanto o parque não estiver ajustado. E recriar os recursos dentro de um grupo novo é caro, arriscado e não muda o fato de que a marcação continuaria não sendo herdada.",
+      "opcoes": [
+        { "texto": "Atribuir uma política com efeito Modify que aplique a marcação, e executar uma tarefa de remediação para os recursos existentes.", "correta": true },
+        { "texto": "Aplicar a marcação manualmente em cada recurso do grupo, já que a herança leva algumas horas para propagar.", "correta": false },
+        { "texto": "Atribuir uma política com efeito Deny que exija a marcação centroDeCusto em todos os recursos.", "correta": false },
+        { "texto": "Recriar os recursos dentro de um grupo de recursos novo que já tenha a marcação definida na criação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-policy-deny-existentes-06",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso atribuiu à assinatura Contoso-Prod uma política com efeito Deny que permite apenas os tamanhos de máquina virtual de uma lista aprovada. No momento da atribuição já existiam sete máquinas virtuais em tamanhos fora da lista, em execução. Passadas algumas horas, a equipe verifica o painel de conformidade. O que aconteceu com essas sete máquinas?",
+      "explicacao": "Elas continuam em execução e aparecem como não conformes. O efeito Deny atua no momento da criação ou da atualização de um recurso, avaliando a requisição antes que ela seja aceita — ele não age retroativamente e nunca exclui nem desliga nada. O que a avaliação periódica faz com os recursos já existentes é marcá-los como não conformes, o que dá visibilidade sem interromper a operação. Imaginar que as máquinas seriam excluídas atribui à política um poder destrutivo que ela não tem, e seria um comportamento intolerável numa assinatura de produção. Imaginar que seriam desligadas confunde Deny com uma automação de remediação, que exigiria efeito DeployIfNotExists e uma ação escrita para isso. E supor que ficam conformes por serem anteriores à atribuição descreve uma isenção que não existe por padrão — recurso antigo é avaliado igual; o que existe para abrir exceção deliberada são as exclusões de escopo e as isenções, que precisam ser criadas explicitamente.",
+      "opcoes": [
+        { "texto": "Continuam em execução e passam a ser listadas como não conformes na avaliação da política.", "correta": true },
+        { "texto": "São excluídas automaticamente na primeira avaliação após a atribuição da política.", "correta": false },
+        { "texto": "São desligadas automaticamente até que alguém as redimensione para um tamanho aprovado.", "correta": false },
+        { "texto": "Permanecem conformes, porque a política só avalia recursos criados após a atribuição.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-grupo-gerenciamento-heranca-07",
+      "topico": "Grupos de gerenciamento",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso organizou o ambiente com o grupo de gerenciamento mg-corporativo no topo e, abaixo dele, os grupos mg-producao e mg-desenvolvimento. A assinatura Contoso-Prod está sob mg-producao. Uma política que restringe as regiões permitidas foi atribuída em mg-corporativo. A equipe quer confirmar o alcance dessa atribuição e saber se a mesma assinatura pode ser incluída também em mg-desenvolvimento, para receber outra política. O que é verdadeiro?",
+      "explicacao": "A política atribuída em mg-corporativo é herdada por toda a hierarquia abaixo dele, incluindo mg-producao e a assinatura Contoso-Prod, e uma assinatura pertence a exatamente um grupo de gerenciamento por vez. A hierarquia é uma árvore, e não um grafo: cada assinatura tem um único pai, o que é justamente o que torna previsível o conjunto de políticas herdadas. Dizer que a assinatura pode estar nos dois grupos descreveria herança múltipla, com dois conjuntos concorrentes de políticas e nenhuma regra clara de precedência. Dizer que a atribuição alcança apenas os grupos filhos, e não as assinaturas, esvaziaria o recurso, já que política só produz efeito quando chega aos recursos. E afirmar que é preciso reatribuir a política em cada assinatura nega a herança, que é a razão de existir dos grupos de gerenciamento — o objetivo deles é exatamente evitar a repetição de atribuição assinatura a assinatura.",
+      "opcoes": [
+        { "texto": "A política é herdada por mg-producao e pela assinatura, e a assinatura só pode pertencer a um grupo de gerenciamento por vez.", "correta": true },
+        { "texto": "A política é herdada por mg-producao e pela assinatura, e a assinatura pode ser incluída também em mg-desenvolvimento.", "correta": false },
+        { "texto": "A política alcança apenas os grupos de gerenciamento filhos; as assinaturas precisam de atribuição própria.", "correta": false },
+        { "texto": "A política precisa ser reatribuída em cada assinatura, porque a herança vale só para permissões e não para políticas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-grupo-dinamico-membro-08",
+      "topico": "Usuários e grupos do Microsoft Entra",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O grupo grp-vendas-brs foi criado no Microsoft Entra ID com tipo de associação dinâmica e uma regra que inclui os usuários cujo departamento é Vendas. Um administrador precisa acrescentar ao grupo a usuária Helena, que é do departamento de Marketing mas participará de um projeto de vendas por três meses. Ao abrir o grupo, a opção de adicionar membro está indisponível. O que explica isso e qual é o caminho correto?",
+      "explicacao": "Em um grupo com associação dinâmica, os membros são calculados exclusivamente pela regra: não é possível adicionar nem remover ninguém manualmente, e é por isso que a opção aparece indisponível. As saídas legítimas são alterar a regra para que ela também alcance Helena — por exemplo, incluindo um atributo que a descreva — ou ajustar o atributo dela para que passe a satisfazer a regra existente. Converter o grupo para associação atribuída também destravaria a adição manual, mas com um custo alto e desproporcional: todos os membros calculados passariam a ser fixos e a automação que mantinha o grupo em dia deixaria de existir. A ideia de que falta permissão está errada, porque nem o Administrador Global adiciona membro manualmente em grupo dinâmico. E supor que a adição fica pendente até a próxima avaliação da regra descreve um comportamento que não existe: a adição não é enfileirada, ela simplesmente não é oferecida.",
+      "opcoes": [
+        { "texto": "Grupo dinâmico não aceita adição manual; é preciso ajustar a regra de associação ou o atributo da usuária.", "correta": true },
+        { "texto": "Falta ao administrador a função adequada; com Administrador Global a adição manual passa a ser possível.", "correta": false },
+        { "texto": "A adição fica pendente até a próxima avaliação da regra, quando é aplicada automaticamente.", "correta": false },
+        { "texto": "É preciso primeiro remover a regra de associação, adicionar a usuária e depois recriar a regra.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-convidado-b2b-09",
+      "topico": "Usuários externos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso convidou o consultor externo joao@fabrikam.com para o próprio tenant do Microsoft Entra ID, e ele aceitou o convite. Ele recebeu a função Leitor no grupo de recursos rg-auditoria-brs. A equipe de segurança da Contoso pergunta onde a senha desse consultor fica armazenada e o que acontece se a conta dele for desabilitada na Fabrikam. Qual descrição está correta?",
+      "explicacao": "A colaboração B2B não cria credencial no tenant que convida: o objeto de usuário convidado é uma referência, e a autenticação acontece sempre no tenant de origem, a Fabrikam. Por isso a senha nunca fica armazenada na Contoso e, se a conta na Fabrikam for desabilitada, o consultor deixa de conseguir autenticar e perde o acesso na prática, mesmo que o objeto convidado e a atribuição de função continuem existindo na Contoso. É esse desenho que faz a governança de identidade permanecer com a organização de origem. Dizer que a senha é copiada para a Contoso descreve a criação de uma conta local, que é outra coisa. Supor que ele mantém o acesso porque a atribuição continua válida confunde autorização com autenticação: a atribuição segue lá, mas ele não consegue provar quem é. E afirmar que o convidado precisa de licença na Contoso para autenticar inverte o modelo, já que a licença o segue no tenant de origem.",
+      "opcoes": [
+        { "texto": "A autenticação ocorre no tenant da Fabrikam; desabilitar a conta lá impede o acesso, ainda que a atribuição na Contoso continue existindo.", "correta": true },
+        { "texto": "A senha é copiada para o tenant da Contoso no aceite do convite, e o acesso continua funcionando normalmente.", "correta": false },
+        { "texto": "O acesso continua funcionando, porque a atribuição de função na Contoso é independente do estado da conta de origem.", "correta": false },
+        { "texto": "O convidado perde o acesso apenas se a Contoso deixar de atribuir a ele uma licença do Microsoft Entra ID.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-mover-recurso-bloqueio-10",
+      "topico": "Grupos de recursos e assinaturas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa mover a VM-WEB-01 do rg-legado-brs para o rg-producao-brs, dentro da mesma assinatura. A operação falha na validação. O rg-legado-brs tem um bloqueio do tipo Não Pode Excluir aplicado, e o usuário que executa a operação é Proprietário dos dois grupos de recursos. O que precisa ser feito para a movimentação ser possível?",
+      "explicacao": "É preciso remover o bloqueio do grupo de recursos de origem antes de mover. A movimentação é implementada como remoção do recurso na origem e criação no destino, então qualquer bloqueio que impeça exclusão na origem — ou alteração no destino — faz a validação falhar, mesmo para Proprietário. Vale notar que a movimentação leva junto todos os recursos dependentes, como a interface de rede e os discos, e que o identificador do recurso muda, o que quebra referências fixas e atribuições feitas no escopo antigo. Trocar o bloqueio para Somente Leitura piora: além de continuar barrando a operação, esse tipo impede também alterações. Conceder função adicional não resolve, porque bloqueio não é permissão e vence independentemente da função. E desligar a máquina não é exigência da movimentação entre grupos de recursos, que funciona com a máquina em execução — desligá-la não remove o obstáculo, que é o bloqueio.",
+      "opcoes": [
+        { "texto": "Remover o bloqueio do rg-legado-brs antes de executar a movimentação.", "correta": true },
+        { "texto": "Trocar o bloqueio do rg-legado-brs de Não Pode Excluir para Somente Leitura.", "correta": false },
+        { "texto": "Conceder ao usuário a função Administrador de Acesso do Usuário nos dois grupos de recursos.", "correta": false },
+        { "texto": "Desligar e desalocar a VM-WEB-01 antes de iniciar a movimentação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-orcamento-nao-bloqueia-11",
+      "topico": "Gestão de custos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A diretoria pediu que o gasto mensal da assinatura Contoso-Dev nunca ultrapasse um valor definido. Um administrador criou um orçamento no Cost Management com esse valor e configurou alertas em 80% e 100%. No fim do mês, o gasto ultrapassou o valor e nada foi interrompido. A diretoria questiona por que o orçamento não funcionou. Qual é a explicação e o que atenderia ao pedido?",
+      "explicacao": "Orçamento no Azure é instrumento de notificação, não de contenção: ao atingir o limite ele dispara alerta e, se configurado, aciona um grupo de ações — mas nunca interrompe consumo por conta própria. Atender ao pedido exige acoplar ao orçamento uma automação que execute a ação desejada, tipicamente um runbook que desligue ou desaloque recursos, o que é uma decisão deliberada por causa do impacto. É a confusão mais cara desse domínio, porque a falsa sensação de teto só é descoberta na fatura. Dizer que faltou marcar uma opção de imposição descreve um recurso que não existe. Culpar o alerta de 100% por chegar tarde erra o alvo: mesmo um alerta em 50% não interromperia nada, já que nenhum alerta interrompe. E supor que o orçamento vale apenas para grupos de recursos está errado — ele pode ser criado em vários escopos, e o escopo não é o motivo de nada ter sido interrompido.",
+      "opcoes": [
+        { "texto": "Orçamento apenas notifica; conter o gasto exige acionar um grupo de ações que dispare uma automação, como um runbook que desaloque recursos.", "correta": true },
+        { "texto": "Faltou marcar a opção de imposição do orçamento, que bloqueia novas implantações ao atingir o valor definido.", "correta": false },
+        { "texto": "O alerta de 100% é avaliado tarde demais; configurando o limite em 50% o consumo teria sido interrompido a tempo.", "correta": false },
+        { "texto": "Orçamentos só produzem efeito quando criados no escopo de grupo de recursos, e não no de assinatura.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-local-grupo-recursos-12",
+      "topico": "Grupos de recursos e assinaturas",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador criou o rg-analytics-brs na região Brazil South e precisa implantar nele uma conta de armazenamento na região East US, por causa da proximidade com um serviço parceiro. Um colega afirma que isso não é permitido, porque os recursos precisam ficar na mesma região do grupo de recursos. Quem está certo, e qual é o papel da região do grupo de recursos?",
+      "explicacao": "A implantação é permitida. Um grupo de recursos pode conter recursos de qualquer região, e a região escolhida para ele determina apenas onde ficam armazenados os metadados do grupo — o inventário de quais recursos pertencem a ele. A consequência prática dessa escolha aparece num cenário raro: se a região dos metadados ficar indisponível, operações de gerenciamento sobre o grupo podem ser afetadas, ainda que os recursos em outras regiões continuem funcionando. Afirmar que os recursos precisam acompanhar a região do grupo é a suposição do colega e não corresponde ao comportamento do Azure. Dizer que a região do grupo define onde os dados dos recursos ficam armazenados confunde metadados com dados: quem determina a residência dos dados é a região de cada recurso. E supor que é preciso habilitar alguma opção de multirregião descreve uma configuração inexistente — o comportamento já é esse por padrão.",
+      "opcoes": [
+        { "texto": "A implantação é permitida; a região do grupo de recursos define apenas onde ficam os metadados do grupo.", "correta": true },
+        { "texto": "O colega está certo; todos os recursos de um grupo precisam estar na mesma região declarada no grupo.", "correta": false },
+        { "texto": "A implantação é permitida, mas os dados da conta de armazenamento passarão a residir em Brazil South.", "correta": false },
+        { "texto": "A implantação exige habilitar previamente a opção de recursos multirregião no grupo de recursos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-isencao-policy-13",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma iniciativa de política está atribuída no escopo da assinatura Contoso-Prod e exige criptografia em um formato que o rg-laboratorio-brs não consegue atender durante uma prova de conceito de sessenta dias. A equipe de governança quer liberar apenas esse grupo de recursos, manter o restante da assinatura sob a iniciativa e garantir que a liberação termine sozinha ao fim do prazo. Qual mecanismo atende?",
+      "explicacao": "Uma isenção criada no escopo do rg-laboratorio-brs é o mecanismo adequado, porque ela é o único que aceita data de expiração — a liberação termina sozinha, sem depender de alguém lembrar de revertê-la, que é exatamente o requisito do enunciado. A exclusão de escopo na atribuição também tiraria o grupo de recursos do alcance da iniciativa, mas é permanente e silenciosa: não guarda prazo nem motivo, e é assim que exceção temporária vira exceção esquecida. Remover a atribuição da assinatura e reatribuí-la grupo a grupo atende ao objetivo imediato pelo caminho mais frágil possível, porque qualquer grupo de recursos criado depois nasceria fora da iniciativa, sem ninguém perceber. E trocar o efeito para Audit rebaixaria a exigência na assinatura inteira, transformando um controle que impede em um controle que apenas registra — bem além do que se pediu, que era liberar um grupo de recursos.",
+      "opcoes": [
+        { "texto": "Criar uma isenção da atribuição no escopo do rg-laboratorio-brs, com data de expiração.", "correta": true },
+        { "texto": "Adicionar o rg-laboratorio-brs como exclusão de escopo na atribuição da iniciativa.", "correta": false },
+        { "texto": "Remover a atribuição da assinatura e reatribuir a iniciativa individualmente nos demais grupos de recursos.", "correta": false },
+        { "texto": "Alterar o efeito das políticas da iniciativa de Deny para Audit enquanto durar a prova de conceito.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-rbac-diagnostico-14",
+      "topico": "Atribuições em escopos diferentes",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Rafael afirma ter a função Colaborador e mesmo assim recebe erro ao tentar criar uma máquina virtual no rg-producao-brs. Outras pessoas da mesma equipe conseguem criar recursos nesse grupo. O painel de acesso mostra que Rafael tem, sim, uma atribuição de Colaborador. Quais duas causas explicam o sintoma e devem ser verificadas primeiro? Selecione duas.",
+      "explicacao": "A primeira causa a verificar é o escopo da atribuição: ter Colaborador não diz nada se a atribuição foi feita em outro grupo de recursos ou em outra assinatura, porque permissão só vale onde foi concedida — e o painel de acesso mostra a atribuição sem que ela alcance o recurso em questão. A segunda é uma política do Azure com efeito Deny alcançando aquele escopo, que recusa a criação independentemente da função: política e RBAC são camadas distintas, e a política é avaliada mesmo com permissão de sobra, o que explica por que outras pessoas conseguem criar recursos que atendem à regra e Rafael não, se o tamanho ou a região que ele escolheu estiverem fora do permitido. Colaborador não incluir criação de máquina virtual é falso — ela cria qualquer tipo de recurso, e o que a função não faz é conceder acesso. Um bloqueio Não Pode Excluir não impede criação, apenas exclusão. E a existência de outra atribuição de Leitor não subtrai permissão, porque o RBAC é aditivo.",
+      "opcoes": [
+        { "texto": "A atribuição de Colaborador de Rafael está em outro escopo, que não alcança o rg-producao-brs.", "correta": true },
+        { "texto": "Uma política do Azure com efeito Deny alcança esse escopo e recusa a criação com os parâmetros escolhidos.", "correta": true },
+        { "texto": "A função Colaborador não inclui a criação de máquinas virtuais, apenas a alteração das existentes.", "correta": false },
+        { "texto": "Um bloqueio do tipo Não Pode Excluir no grupo de recursos está impedindo a criação.", "correta": false },
+        { "texto": "Rafael também tem uma atribuição de Leitor, que subtrai as permissões de Colaborador.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-deployifnotexists-remediacao-15",
+      "topico": "Azure Policy",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A governança atribuiu uma política com efeito DeployIfNotExists para garantir que toda conta de armazenamento tenha configurações de diagnóstico enviando logs a um workspace central. Recursos criados após a atribuição passaram a ficar conformes, mas as dezenas de contas que já existiam continuam não conformes. Quais dois elementos são necessários para tornar essas contas existentes conformes? Selecione duas.",
+      "explicacao": "São necessários uma identidade gerenciada associada à atribuição, com permissão suficiente no escopo alvo, e uma tarefa de remediação executada sobre a atribuição. A identidade existe porque a política vai criar recurso em nome de alguém, e o Azure não permite implantação sem uma identidade com função adequada — tipicamente Colaborador ou uma função mais específica no escopo. A tarefa de remediação é o que faz o efeito agir sobre o que já existe: sem ela, DeployIfNotExists atua apenas nas avaliações disparadas por criação ou atualização, que é exatamente o comportamento observado no enunciado. Mudar o efeito para Deny não corrigiria nada, apenas impediria criações futuras e deixaria as contas antigas como estão. Reatribuir a política no escopo do grupo de recursos não altera o alcance temporal do efeito e o problema se repetiria. E excluir e recriar cada conta é destrutivo e desnecessário quando existe remediação.",
+      "opcoes": [
+        { "texto": "Uma identidade gerenciada na atribuição, com função suficiente no escopo alvo.", "correta": true },
+        { "texto": "Uma tarefa de remediação executada sobre a atribuição existente.", "correta": true },
+        { "texto": "Alterar o efeito da política de DeployIfNotExists para Deny.", "correta": false },
+        { "texto": "Reatribuir a política no escopo de cada grupo de recursos que contenha contas de armazenamento.", "correta": false },
+        { "texto": "Excluir e recriar as contas de armazenamento existentes para que a política as avalie na criação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-funcao-personalizada-16",
+      "topico": "Funções internas do Azure",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A equipe de suporte precisa de uma função personalizada que permita apenas reiniciar máquinas virtuais, e essa função deve poder ser atribuída em duas assinaturas específicas da Contoso. Nenhuma função interna atende sem conceder permissão excedente. Quais dois elementos da definição da função personalizada são obrigatórios para atender ao requisito? Selecione duas.",
+      "explicacao": "São obrigatórios a operação de reinício declarada em Actions e a lista AssignableScopes contendo as duas assinaturas. Actions define o que a função permite fazer, e sem a operação específica de reinício a função não autoriza nada de útil. AssignableScopes define onde a função pode ser atribuída, é obrigatório em toda definição personalizada e precisa incluir os dois escopos pretendidos — se listar apenas um, a atribuição na outra assinatura é recusada. Declarar NotActions com as demais operações de computação é desnecessário e enganoso: funções personalizadas partem do princípio de que nada é permitido, e NotActions serve para subtrair de um conjunto amplo já concedido, não para restringir uma lista que já é mínima. DataActions trata de operações sobre dados dentro do recurso, como blobs, e reiniciar máquina é operação de plano de gerenciamento. E não é preciso clonar Colaborador de Máquina Virtual: partir dele traria de volta o excedente que o requisito quer evitar.",
+      "opcoes": [
+        { "texto": "A operação de reinício de máquina virtual declarada em Actions.", "correta": true },
+        { "texto": "As duas assinaturas listadas em AssignableScopes.", "correta": true },
+        { "texto": "As demais operações de computação declaradas em NotActions.", "correta": false },
+        { "texto": "A operação de reinício também declarada em DataActions.", "correta": false },
+        { "texto": "A definição criada obrigatoriamente a partir de uma cópia da função Colaborador de Máquina Virtual.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-bloqueio-heranca-afirmacao-17",
+      "topico": "Bloqueios de recurso",
+      "tipo": "SimNao",
+      "enunciado": "Um administrador aplicou um bloqueio do tipo Somente Leitura ao grupo de recursos rg-auditoria-brs, que já contém uma conta de armazenamento, uma máquina virtual e uma rede virtual. Avalie a afirmação: os três recursos existentes dentro do grupo passam a se comportar como somente leitura por herança do bloqueio.",
+      "explicacao": "A afirmação é verdadeira. Bloqueios aplicados a um escopo são herdados por todos os recursos contidos nele, e valem tanto para os recursos que já existiam quanto para os criados depois — não é preciso reaplicar o bloqueio recurso a recurso. Quando mais de um bloqueio alcança o mesmo recurso, prevalece o mais restritivo, de modo que Somente Leitura vence Não Pode Excluir. Quem responde Não costuma raciocinar por analogia com marcações, que de fato não são herdadas do grupo de recursos para os recursos — e é justamente esse contraste que torna o par confuso na prática: bloqueio herda, marcação não. Vale lembrar que Somente Leitura tem efeitos colaterais além do óbvio, como impedir operações classificadas como escrita ainda que pareçam consulta, e por isso costuma ser aplicado com mais cautela que Não Pode Excluir.",
+      "opcoes": [
+        { "texto": "Sim", "correta": true },
+        { "texto": "Não", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-idgov-remover-atribuicao-heranca-18",
+      "topico": "Atribuições em escopos diferentes",
+      "tipo": "SimNao",
+      "enunciado": "Sofia tem a função Colaborador atribuída no escopo da assinatura Contoso-Prod e também uma atribuição de Colaborador criada diretamente no grupo de recursos rg-vendas-brs. Um administrador remove a atribuição feita no grupo de recursos. Avalie a afirmação: depois dessa remoção, Sofia perde o acesso de Colaborador ao rg-vendas-brs.",
+      "explicacao": "A afirmação é falsa. Remover uma atribuição feita no grupo de recursos elimina apenas aquela atribuição; a que existe no escopo da assinatura continua alcançando todos os grupos de recursos dentro dela, inclusive o rg-vendas-brs, e Sofia segue como Colaboradora ali. Para efetivamente retirar o acesso dela àquele grupo de recursos seria preciso remover a atribuição no escopo em que ela foi criada — a assinatura — o que afetaria toda a assinatura, ou recorrer a uma atribuição de negação, que é o único mecanismo que subtrai permissão de forma pontual. Quem responde Sim está aplicando a intuição de que a configuração mais específica manda, que descreve precedência e não união. É um engano com consequência prática séria: o administrador acredita ter revogado um acesso, o painel mostra a atribuição removida, e o acesso permanece.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-idgov-assoc-ferramenta-governanca-19",
+      "topico": "Grupos de gerenciamento",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de governança da Contoso precisa escolher o mecanismo adequado para cada objetivo abaixo, sempre o mais direto que o atenda. Associe cada objetivo ao mecanismo adequado.",
+      "explicacao": "Impedir que recursos sejam criados fora das regiões aprovadas é controle sobre a forma do recurso, e isso é Azure Policy com efeito Deny. Permitir que a equipe de suporte consulte todos os recursos sem alterar nada é controle sobre quem faz o quê, ou seja, uma atribuição de função do RBAC — no caso, Leitor. Impedir a exclusão acidental de um recurso crítico mesmo por quem é Proprietário só se consegue com bloqueio de recurso, que é a única camada que vence o RBAC e barra até o Proprietário. E separar o custo mensal por centro de custo no relatório de cobrança é o papel das marcações, que são a dimensão pela qual a análise de custos agrupa o gasto. O grupo de gerenciamento está no painel porque é a resposta certa de uma pergunta vizinha e muito próxima: ele é o escopo em que se aplica a mesma política ou atribuição a várias assinaturas de uma vez — é onde o controle é colocado, e não o controle em si.",
+      "associacoes": [
+        { "alvo": "Impedir que recursos sejam criados fora das regiões aprovadas", "item": "Azure Policy" },
+        { "alvo": "Permitir que o suporte consulte todos os recursos sem alterar nada", "item": "Atribuição de função do RBAC" },
+        { "alvo": "Impedir a exclusão acidental de um recurso crítico, mesmo por um Proprietário", "item": "Bloqueio de recurso" },
+        { "alvo": "Separar o custo mensal por centro de custo no relatório de cobrança", "item": "Marcações" }
+      ],
+      "itensExtras": [
+        "Grupo de gerenciamento"
+      ]
+    },
+    {
+      "id": "az104-idgov-assoc-efeito-policy-20",
+      "topico": "Azure Policy",
+      "tipo": "Associacao",
+      "enunciado": "Ao escrever as políticas de uma iniciativa, a equipe precisa escolher o efeito correto para cada intenção. Associe cada intenção ao efeito que a realiza.",
+      "explicacao": "Recusar a implantação de um recurso fora do padrão, no momento em que ela é submetida, é o efeito Deny. Registrar o desvio no painel de conformidade sem impedir nada é o efeito Audit, usado para medir o parque antes de endurecer a regra. Substituir o valor de uma marcação já presente no recurso é o efeito Modify, e a escolha aqui é fina: o efeito Append apenas acrescenta campos ausentes e não consegue alterar valor existente, motivo pelo qual ele está no painel como distrator — é a resposta certa para \"adicionar uma marcação que falta\", e errada para \"substituir a que já está lá\". Implantar um recurso auxiliar quando ele não existir, alcançando também os recursos já criados por meio de remediação, é o efeito DeployIfNotExists, o único da lista que cria recurso e por isso o único que exige identidade gerenciada na atribuição.",
+      "associacoes": [
+        { "alvo": "Recusar a implantação de um recurso fora do padrão no momento da submissão", "item": "Deny" },
+        { "alvo": "Registrar o desvio no painel de conformidade sem impedir a implantação", "item": "Audit" },
+        { "alvo": "Substituir o valor de uma marcação já presente no recurso", "item": "Modify" },
+        { "alvo": "Implantar um recurso auxiliar ausente, alcançando também os já existentes por remediação", "item": "DeployIfNotExists" }
+      ],
+      "itensExtras": [
+        "Append"
+      ]
+    },
+    {
+      "id": "az104-idgov-assoc-funcao-interna-21",
+      "topico": "Funções internas do Azure",
+      "tipo": "Associacao",
+      "enunciado": "Cada pessoa abaixo precisa do menor conjunto de permissões que atenda à sua necessidade na assinatura Contoso-Prod. Associe cada necessidade à função interna adequada.",
+      "explicacao": "Quem precisa criar e configurar recursos sem poder conceder acesso a outras pessoas recebe Colaborador — a função cobre todo o plano de gerenciamento dos recursos e exclui deliberadamente a escrita de atribuições de função. Quem precisa conceder e revogar acesso sem mexer nos recursos recebe Administrador de Acesso do Usuário, que é o espelho da anterior. Quem só consulta configuração recebe Leitor. E quem precisa das duas coisas, criar recursos e conceder acesso, recebe Proprietário, que é a união das outras. Colaborador de Máquina Virtual está no painel porque é a resposta certa de uma necessidade mais estreita — administrar apenas máquinas virtuais — e é a escolha reflexa de quem lê \"criar e configurar recursos\" pensando só em computação: ela não permitiria criar uma conta de armazenamento nem uma rede virtual, e por isso não atende a nenhuma das necessidades listadas.",
+      "associacoes": [
+        { "alvo": "Criar e configurar qualquer recurso, sem poder conceder acesso a outras pessoas", "item": "Colaborador" },
+        { "alvo": "Conceder e revogar o acesso de outras pessoas, sem poder alterar recursos", "item": "Administrador de Acesso do Usuário" },
+        { "alvo": "Consultar a configuração de todos os recursos, sem alterar nada", "item": "Leitor" },
+        { "alvo": "Criar e configurar recursos e também conceder acesso a outras pessoas", "item": "Proprietário" }
+      ],
+      "itensExtras": [
+        "Colaborador de Máquina Virtual"
+      ]
+    },
+    {
+      "id": "az104-idgov-assoc-custos-22",
+      "topico": "Gestão de custos",
+      "tipo": "Associacao",
+      "enunciado": "A equipe de operações precisa da ferramenta certa para cada necessidade de custo abaixo, sem construir nada sob medida. Associe cada necessidade à ferramenta adequada.",
+      "explicacao": "Ser avisado quando o gasto do mês ultrapassar um valor definido é a função de um orçamento no Cost Management, que dispara alerta nos percentuais configurados. Receber recomendações de redimensionamento de máquinas subutilizadas é o Azure Advisor, que analisa a telemetria de uso e aponta oportunidades. Analisar o gasto já incorrido, agrupado por marcação e por grupo de recursos, é a análise de custos, a visão exploratória do que já foi consumido. E executar automaticamente uma ação ao atingir o limite é o grupo de ações acionado pelo orçamento — é essa peça que transforma o alerta em automação, porque o orçamento sozinho apenas notifica. O bloqueio de recurso está no painel porque é a resposta reflexa de quem lê \"impedir gasto\": ele impede exclusão ou alteração de recursos, o que não tem relação com consumo, e um recurso bloqueado continua gerando custo exatamente igual.",
+      "associacoes": [
+        { "alvo": "Ser avisado quando o gasto do mês ultrapassar um valor definido", "item": "Orçamento do Cost Management" },
+        { "alvo": "Receber recomendações de redimensionamento de máquinas subutilizadas", "item": "Azure Advisor" },
+        { "alvo": "Analisar o gasto já incorrido, agrupado por marcação e por grupo de recursos", "item": "Análise de custos" },
+        { "alvo": "Executar automaticamente uma ação quando o limite de gasto for atingido", "item": "Grupo de ações acionado pelo orçamento" }
+      ],
+      "itensExtras": [
+        "Bloqueio de recurso"
+      ]
+    }
+  ]
+}

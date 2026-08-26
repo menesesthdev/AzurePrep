@@ -1,0 +1,274 @@
+{
+  "exameCode": "AZ-104",
+  "area": "monitoramento",
+  "questoes": [
+    {
+      "id": "az104-mon-metrica-convidado-01",
+      "topico": "Métricas do Azure Monitor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe quer criar um alerta que dispare quando a memória disponível da VM-APP-01 cair abaixo de um limite. Ao abrir a criação da regra de alerta e escolher a máquina como escopo, a lista de sinais mostra percentual de CPU, operações de disco e tráfego de rede, mas nenhuma métrica de memória. A máquina está em execução e saudável. Por quê?",
+      "explicacao": "As métricas de plataforma de uma máquina virtual são coletadas do lado do host e enxergam apenas o que o host observa: CPU, disco e rede. Memória disponível é uma informação do sistema operacional convidado, que o host não tem como medir, e por isso ela só existe depois que um agente coleta de dentro da máquina — hoje o Azure Monitor Agent, configurado por uma regra de coleta de dados que declara quais contadores enviar e para qual workspace. Sem isso, a métrica não aparece porque não existe. Supor que a máquina precisa de diagnóstico de inicialização confunde recursos: aquilo captura tela e log de console para depurar boot. Achar que o alerta precisa ser do tipo log para memória inverte a ordem — mesmo um alerta de log depende de o dado ter sido coletado. E não é questão de tamanho de máquina: nenhum tamanho publica métrica de memória sem agente.",
+      "opcoes": [
+        { "texto": "Memória é métrica do sistema operacional convidado; exige o Azure Monitor Agent e uma regra de coleta de dados.", "correta": true },
+        { "texto": "É preciso habilitar o diagnóstico de inicialização da máquina para que a memória seja publicada.", "correta": false },
+        { "texto": "Alertas de memória só podem ser criados como alerta de log, não como alerta de métrica.", "correta": false },
+        { "texto": "O tamanho da máquina não oferece métricas de memória; é preciso mudar para uma série com monitoramento estendido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-configuracao-diagnostico-02",
+      "topico": "Configurações de diagnóstico",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de um incidente, a equipe abriu o workspace do Log Analytics para investigar os registros de operação de um gateway de aplicativo e não encontrou nenhuma linha referente ao recurso, embora o workspace receba dados de outros serviços há meses. O gateway está em produção desde o ano passado. Qual é a causa mais provável?",
+      "explicacao": "Os registros de recurso não são coletados por padrão: cada recurso precisa de uma configuração de diagnóstico que declare quais categorias enviar e para qual destino — workspace do Log Analytics, conta de armazenamento ou hub de eventos. Sem essa configuração, o recurso funciona normalmente e simplesmente não publica registro nenhum, que é exatamente o cenário descrito. E, como a coleta não é retroativa, o que aconteceu antes de a configuração existir está perdido: criar agora só resolve dos próximos eventos em diante, e essa é a parte cara de descobrir isso durante um incidente. Falta de permissão produziria erro de consulta, não resultado vazio para um recurso e cheio para os outros. Retenção expirada não explica ausência total desde sempre. E a existência de um workspace por região é possível, mas o enunciado indica que o time olhou o workspace que recebe os demais dados.",
+      "opcoes": [
+        { "texto": "Falta uma configuração de diagnóstico no gateway enviando as categorias de registro ao workspace.", "correta": true },
+        { "texto": "Falta à equipe a função de leitura no workspace, o que faz a consulta retornar vazia.", "correta": false },
+        { "texto": "A retenção do workspace expirou e removeu apenas os registros desse recurso.", "correta": false },
+        { "texto": "Registros de recurso só podem ser consultados no próprio recurso, nunca no workspace.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-log-de-atividades-03",
+      "topico": "Log de atividades",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma máquina virtual crítica desapareceu do rg-producao-brs e ninguém assume a exclusão. A equipe precisa descobrir qual identidade executou a operação e quando. Também precisa garantir que, daqui em diante, esse tipo de registro fique disponível por três anos para auditoria. Qual combinação atende às duas necessidades?",
+      "explicacao": "Quem responde \"quem fez o quê e quando\" no plano de gerenciamento é o log de atividades da assinatura, que registra as operações de escrita e exclusão sobre recursos com a identidade que as executou. Ele fica retido por noventa dias por padrão, e essa retenção não é configurável no próprio log — para guardar por três anos é preciso uma configuração de diagnóstico que exporte o log de atividades para um workspace do Log Analytics ou para uma conta de armazenamento, onde a retenção é definida por quem recebe. As duas peças respondem a coisas diferentes e por isso ambas são necessárias. Registros de recurso descrevem o que aconteceu dentro do recurso e não teriam sobrevivido à exclusão dele. O log do próprio recurso desaparece com ele. E aumentar a retenção diretamente no log de atividades não é possível, o que torna essa a alternativa que parece mais simples e é justamente a que não existe.",
+      "opcoes": [
+        { "texto": "Consultar o log de atividades da assinatura e criar uma configuração de diagnóstico exportando-o para retenção longa.", "correta": true },
+        { "texto": "Consultar os registros de recurso da máquina excluída e aumentar a retenção deles para três anos.", "correta": false },
+        { "texto": "Consultar o log de atividades e alterar a retenção dele de noventa dias para três anos nas configurações.", "correta": false },
+        { "texto": "Consultar as métricas de plataforma da máquina, que preservam o histórico de operações por três anos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-cofre-redundancia-04",
+      "topico": "Cofre dos Serviços de Recuperação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O cofre rsv-producao-brs foi criado com as opções padrão e há três meses protege doze máquinas virtuais. Uma nova diretriz exige que as cópias de backup sobrevivam à perda da região, e a equipe tenta alterar a redundância de armazenamento do cofre para geográfica. A opção aparece esmaecida e não pode ser alterada. Qual é o motivo e o caminho?",
+      "explicacao": "A redundância de armazenamento de um cofre só pode ser definida enquanto ele não tiver nenhum item protegido: assim que o primeiro backup é configurado, a opção é congelada. Como o cofre já protege doze máquinas há meses, o caminho é criar um cofre novo com a redundância desejada e passar a proteger as máquinas nele, aceitando que o histórico do cofre antigo permanece onde está — é uma migração, não um ajuste. Vale registrar que o padrão do cofre já é geograficamente redundante, então esse impasse costuma aparecer no sentido oposto, de quem quer baratear mudando para local e descobre tarde. Parar os backups temporariamente não destrava a opção, porque o que a congela é a existência de itens protegidos e não a execução. Excluir os pontos de recuperação destruiria o histórico e ainda assim não liberaria a alteração. E função adicional não muda uma limitação que não é de permissão.",
+      "opcoes": [
+        { "texto": "A redundância só pode ser definida antes do primeiro item protegido; é preciso criar um cofre novo e migrar a proteção.", "correta": true },
+        { "texto": "É preciso pausar temporariamente os trabalhos de backup para que a opção fique editável.", "correta": false },
+        { "texto": "É preciso excluir os pontos de recuperação existentes, o que libera a alteração da redundância.", "correta": false },
+        { "texto": "Falta ao usuário a função Colaborador de Backup no cofre, que é quem pode alterar a redundância.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-cofre-regiao-05",
+      "topico": "Cofre dos Serviços de Recuperação",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso mantém o cofre rsv-central-brs em Brazil South e quer usá-lo também para proteger seis máquinas virtuais recém-criadas em East US, para centralizar a administração de backup. Ao abrir o cofre e tentar configurar a proteção, as máquinas de East US não aparecem na lista de itens disponíveis. Qual é a explicação?",
+      "explicacao": "Um cofre dos Serviços de Recuperação só protege máquinas virtuais que estejam na mesma região que ele — a lista de itens disponíveis é filtrada por região, e por isso as máquinas de East US não aparecem. Centralizar a administração de backup em um único cofre para várias regiões não é possível dessa forma; o que se faz é um cofre por região, com padronização por política e visão consolidada pelos relatórios de backup. Supor que falta emparelhamento de rede confunde caminho de rede com escopo do serviço: o backup de máquina virtual não trafega pela rede virtual do cliente. Achar que é preciso registrar o provedor de recursos na outra região descreve um passo que não existe nesse fluxo. E mudar a redundância do cofre trata de onde as cópias ficam guardadas, não de quais máquinas podem ser protegidas.",
+      "opcoes": [
+        { "texto": "O cofre só protege máquinas da própria região; é preciso um cofre em East US para aquelas máquinas.", "correta": true },
+        { "texto": "É preciso emparelhar as redes virtuais das duas regiões para que o cofre alcance as máquinas.", "correta": false },
+        { "texto": "É preciso registrar o provedor de recursos de backup na região East US antes de listar as máquinas.", "correta": false },
+        { "texto": "É preciso mudar a redundância do cofre para geográfica, o que estende o alcance a outras regiões.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-exclusao-temporaria-backup-06",
+      "topico": "Backup do Azure",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma limpeza, alguém interrompeu a proteção da VM-FIN-02 escolhendo excluir os dados de backup. Dois dias depois, a auditoria informou que os pontos de recuperação daquela máquina ainda seriam necessários. A equipe teme que os dados tenham sido destruídos definitivamente. Qual é a situação e o que fazer?",
+      "explicacao": "A exclusão temporária de backup é habilitada por padrão no cofre: quando alguém exclui os dados de backup de um item, eles não são removidos de imediato — ficam retidos por um período de carência, tipicamente catorze dias, durante o qual o item aparece em estado de exclusão temporária e pode ter a exclusão desfeita, restabelecendo os pontos de recuperação. É uma proteção deliberada contra exclusão maliciosa ou acidental, e por isso não pode ser burlada por quem excluiu. Passados os dois dias descritos, ainda há prazo. Supor que os dados foram destruídos na hora ignora essa retenção e leva a esforços de recuperação desnecessários. Abrir chamado de suporte não é o caminho para algo que a própria equipe desfaz no portal. E reconfigurar a proteção da máquina cria um item novo, sem trazer de volta os pontos antigos — que é justamente o que a auditoria precisa.",
+      "opcoes": [
+        { "texto": "Os dados estão em exclusão temporária e a exclusão pode ser desfeita dentro do período de carência.", "correta": true },
+        { "texto": "Os dados foram destruídos no momento da exclusão e só o suporte da Microsoft pode recuperá-los.", "correta": false },
+        { "texto": "Basta reconfigurar a proteção da máquina no mesmo cofre para que os pontos antigos voltem a aparecer.", "correta": false },
+        { "texto": "Os pontos permanecem para sempre no cofre; interromper a proteção apenas para de criar novos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-asr-teste-failover-07",
+      "topico": "Azure Site Recovery",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso replica dez máquinas de Brazil South para East US com o Azure Site Recovery. A área de continuidade exige um exercício semestral comprovando que as máquinas sobem na região secundária. A equipe de produção não aceita nenhuma interrupção do ambiente atual durante o exercício. Qual operação atende, e qual é o efeito sobre a produção?",
+      "explicacao": "O teste de failover é feito exatamente para esse caso: ele cria as máquinas na região de destino, isoladamente e de preferência em uma rede separada, sem interromper as máquinas de origem e sem parar a replicação em curso. Ao fim, a limpeza do teste remove os recursos criados e o ambiente volta ao estado anterior — é a única operação do Site Recovery que valida o plano sem consequências para produção. O failover comum promove o destino e interrompe a produção, sendo operação de contingência real. O failover planejado também transfere a carga, ainda que de forma ordenada, e portanto não serve para exercício. E desabilitar a replicação para testar destrói o trabalho de replicação acumulado e exigiria replicar tudo de novo — além de deixar o ambiente sem proteção justamente durante o teste.",
+      "opcoes": [
+        { "texto": "Teste de failover, que cria as máquinas no destino sem interromper a origem nem a replicação.", "correta": true },
+        { "texto": "Failover, seguido de reproteção, que é a única forma de comprovar que as máquinas sobem.", "correta": false },
+        { "texto": "Failover planejado, que transfere a carga de forma ordenada e sem impacto para os usuários.", "correta": false },
+        { "texto": "Desabilitar a replicação, criar as máquinas manualmente no destino e reabilitar depois.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-grupo-de-acoes-08",
+      "topico": "Alertas e grupos de ações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma regra de alerta de métrica foi criada para disparar quando a CPU da VM-WEB-01 passar de oitenta por cento por cinco minutos. No painel de alertas, a equipe vê várias ocorrências disparadas ao longo da semana, com o estado correto, mas ninguém recebeu aviso nenhum. A regra está habilitada e a condição está claramente sendo satisfeita. O que está faltando?",
+      "explicacao": "Falta associar um grupo de ações à regra. A regra de alerta é responsável por avaliar a condição e registrar a ocorrência; quem notifica ou executa algo é o grupo de ações, que reúne os destinos — e-mail, SMS, notificação por aplicativo, webhook, runbook, função. Sem ele, o alerta dispara corretamente e permanece apenas no painel, que é exatamente o comportamento observado. Essa separação entre avaliar e notificar é o que permite reaproveitar um mesmo grupo de ações em dezenas de regras. Baixar o limiar faria a regra disparar mais vezes, sem resolver a notificação. Trocar para alerta de log mudaria a forma de avaliar a condição e continuaria sem notificar por falta do grupo. E gravidade não define destino de notificação: ela classifica a ocorrência para triagem, e alerta de qualquer gravidade notifica se houver grupo de ações.",
+      "opcoes": [
+        { "texto": "Associar um grupo de ações à regra, que é o componente responsável por notificar.", "correta": true },
+        { "texto": "Reduzir o limiar da condição, porque abaixo de noventa por cento a notificação não é enviada.", "correta": false },
+        { "texto": "Trocar a regra de alerta de métrica por alerta de log, que é o único tipo que envia e-mail.", "correta": false },
+        { "texto": "Elevar a gravidade do alerta, porque apenas gravidade zero e um geram notificação.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-regra-processamento-alerta-09",
+      "topico": "Alertas e grupos de ações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Toda madrugada de sábado a Contoso executa uma janela de manutenção que reinicia dezenas de máquinas, e isso gera uma enxurrada de notificações no plantão. A equipe quer suspender as notificações apenas durante essa janela, para os recursos de um grupo de recursos específico, sem desabilitar as regras nem perder o registro das ocorrências no painel. O que atende?",
+      "explicacao": "A regra de processamento de alertas é feita exatamente para isso: aplicada a um escopo, com agendamento recorrente, ela suprime as notificações durante a janela sem tocar nas regras de alerta — as ocorrências continuam sendo avaliadas e registradas no painel, e apenas o envio aos grupos de ações é suspenso. Isso preserva o histórico, que é o que a equipe pede. Desabilitar as regras e reabilitar depois atende ao silêncio, mas apaga o registro do período e ainda depende de alguém lembrar de reativar, com o risco óbvio de a manutenção terminar e o ambiente ficar sem alerta. Remover os destinatários do grupo de ações afeta todas as regras que usam aquele grupo, o tempo todo, e não só na janela. E elevar o limiar altera a semântica da regra de forma permanente e não tem relação com horário.",
+      "opcoes": [
+        { "texto": "Criar uma regra de processamento de alertas que suprima notificações no escopo e no horário definidos.", "correta": true },
+        { "texto": "Desabilitar as regras de alerta antes da janela e reabilitá-las depois, por automação.", "correta": false },
+        { "texto": "Remover temporariamente os destinatários do grupo de ações usado por essas regras.", "correta": false },
+        { "texto": "Elevar o limiar das regras para um valor que a manutenção não atinja.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-alerta-metrica-vs-log-10",
+      "topico": "Alertas e grupos de ações",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa ser avisada em cerca de um minuto quando a latência de um serviço ultrapassar um limite, usando um valor que já existe como métrica de plataforma do recurso. Um colega sugere criar um alerta de log com uma consulta que leia a mesma informação no workspace. Qual observação está correta sobre a escolha?",
+      "explicacao": "O alerta de métrica é o adequado quando o dado já existe como métrica de plataforma: ele avalia perto do tempo real, com latência baixa, e não depende de o dado ser ingerido em um workspace. O alerta de log é avaliado em intervalos agendados e soma a esse intervalo o tempo de ingestão dos dados, o que o torna naturalmente mais lento — e também mais caro, porque cada execução roda uma consulta. Ele é insubstituível quando a condição exige correlacionar registros ou aplicar lógica que a métrica não expressa, que não é o caso aqui. Dizer que alerta de métrica não permite limiar personalizado está errado, pois é justamente o que ele configura. Afirmar que só o alerta de log aciona grupo de ações também está errado, porque os dois acionam. E supor que métricas de plataforma precisam de configuração de diagnóstico para gerar alerta inverte o mecanismo: a configuração é necessária para exportá-las, não para alertar sobre elas.",
+      "opcoes": [
+        { "texto": "O alerta de métrica é preferível: avalia perto do tempo real, enquanto o de log soma intervalo de execução e tempo de ingestão.", "correta": true },
+        { "texto": "O alerta de log é preferível, porque o alerta de métrica não permite definir limiar personalizado.", "correta": false },
+        { "texto": "É indiferente, porque apenas o alerta de log consegue acionar um grupo de ações.", "correta": false },
+        { "texto": "O alerta de métrica não funcionaria, porque métricas de plataforma exigem configuração de diagnóstico para alertar.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-restauracao-substituir-11",
+      "topico": "Restauração de máquinas virtuais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma atualização de aplicação corrompeu os dados da VM-APP-07. A equipe quer voltar ao ponto de recuperação de ontem preservando o nome da máquina, o endereço IP privado, a associação de rede e as atribuições de função já feitas sobre ela, porque vários sistemas referenciam esse recurso pelo identificador. Qual opção de restauração atende?",
+      "explicacao": "Substituir a máquina existente é a opção adequada: ela troca os discos da máquina atual pelos do ponto de recuperação, mantendo o próprio recurso de máquina virtual — e com ele o nome, o identificador, a interface de rede com o endereço já atribuído e as atribuições de função feitas naquele escopo. É exatamente o requisito de quem tem outros sistemas apontando para o recurso. Criar uma máquina nova a partir do ponto de recuperação gera outro recurso, com outro identificador, o que quebraria essas referências e exigiria refazer as atribuições. Restaurar apenas os discos entrega os discos soltos e deixa a montagem por conta da equipe, servindo para inspeção e não para voltar rápido ao ar. E recuperação de arquivos individuais resolve quando faltam poucos arquivos, e não quando é preciso reverter o estado inteiro da máquina.",
+      "opcoes": [
+        { "texto": "Substituir a máquina existente, que troca os discos preservando o recurso e suas referências.", "correta": true },
+        { "texto": "Criar uma máquina virtual nova a partir do ponto de recuperação e desligar a antiga.", "correta": false },
+        { "texto": "Restaurar apenas os discos e anexá-los manualmente à máquina atual.", "correta": false },
+        { "texto": "Usar a recuperação de arquivos individuais para trazer de volta o conteúdo corrompido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-insights-dependencias-12",
+      "topico": "Insights do Azure Monitor",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de herdar um ambiente sem documentação, a equipe precisa descobrir quais processos rodam em cada máquina virtual e com quais outros servidores e portas cada uma se comunica, para planejar uma migração. Não há inventário e ninguém conhece as dependências. Qual recurso do Azure Monitor entrega isso diretamente?",
+      "explicacao": "O Insights de máquinas virtuais entrega o mapa de dependências: com o agente instalado, ele descobre os processos em execução e desenha as conexões de saída e de entrada de cada máquina, com portas e contrapartes, que é precisamente o inventário que falta para planejar migração. É o caso de uso clássico desse recurso, e ele resolve o problema sem exigir que alguém entre máquina a máquina. O monitor de conexão do Network Watcher mede continuamente a conectividade e a latência entre pontos que já se conhece — ele confirma um caminho, mas não descobre dependências desconhecidas. O log de atividades registra operações no plano de gerenciamento, e não tráfego entre servidores. E métricas de plataforma da máquina mostram volume agregado de rede, sem dizer com quem a máquina conversa nem por qual porta.",
+      "opcoes": [
+        { "texto": "Insights de máquinas virtuais, que descobre processos e desenha o mapa de dependências.", "correta": true },
+        { "texto": "Monitor de conexão do Network Watcher, que descobre automaticamente as contrapartes de cada máquina.", "correta": false },
+        { "texto": "Log de atividades da assinatura, que registra as conexões estabelecidas entre os recursos.", "correta": false },
+        { "texto": "Métricas de plataforma de rede da máquina, que discriminam o tráfego por destino e porta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-coleta-convidado-requisitos-13",
+      "topico": "Métricas do Azure Monitor",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso precisa coletar contadores de desempenho do sistema operacional e registros de eventos de quarenta máquinas virtuais, enviando tudo para um workspace do Log Analytics, de forma padronizada e sem configurar máquina a máquina. Quais dois elementos são necessários? Selecione duas.",
+      "explicacao": "São necessários o Azure Monitor Agent instalado nas máquinas, que é quem lê de dentro do sistema operacional, e uma regra de coleta de dados associada a elas, que declara quais contadores e quais registros de evento coletar e para qual workspace enviar. A regra é o que torna a configuração padronizada e escalável: ela é definida uma vez e associada a muitas máquinas, inclusive por política, o que atende ao requisito de não configurar máquina a máquina. Configuração de diagnóstico é o mecanismo dos registros do próprio recurso no plano da plataforma, e não coleta nada de dentro do convidado. Endpoint privado trata de caminho de rede e não é requisito da coleta. E uma conta de armazenamento por máquina descreve o modelo do agente de diagnóstico antigo, que foi substituído justamente pelo par agente mais regra de coleta.",
+      "opcoes": [
+        { "texto": "O Azure Monitor Agent instalado nas máquinas virtuais.", "correta": true },
+        { "texto": "Uma regra de coleta de dados associada às máquinas, declarando o que coletar e para onde enviar.", "correta": true },
+        { "texto": "Uma configuração de diagnóstico em cada máquina virtual apontando para o workspace.", "correta": false },
+        { "texto": "Um endpoint privado do workspace do Log Analytics em cada rede virtual.", "correta": false },
+        { "texto": "Uma conta de armazenamento dedicada por máquina para receber os contadores.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-retencao-log-atividades-14",
+      "topico": "Log de atividades",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma exigência de conformidade determina que os registros de operações administrativas da assinatura Contoso-Prod fiquem disponíveis por cinco anos. Hoje nada foi configurado além do padrão. Quais dois destinos podem ser usados em uma configuração de diagnóstico do log de atividades para atender ao requisito? Selecione duas.",
+      "explicacao": "Um workspace do Log Analytics e uma conta de armazenamento são destinos válidos e atendem ao requisito por caminhos diferentes: o workspace mantém os dados consultáveis com a linguagem de consulta, com retenção configurável, e é a escolha quando alguém vai investigar; a conta de armazenamento é a opção mais barata para retenção longa, adequada quando o objetivo é guardar para eventual auditoria, e a retenção ali é governada por regras de ciclo de vida. Vale lembrar que a coleta não é retroativa: os noventa dias já existentes no log de atividades não são exportados ao criar a configuração. Um cofre dos Serviços de Recuperação protege cargas de trabalho, não é destino de registro. Um grupo de ações é destino de notificação de alerta, e não de dados. E uma conta do Azure Automation executa runbooks, sem armazenar registros de atividade.",
+      "opcoes": [
+        { "texto": "Um workspace do Log Analytics.", "correta": true },
+        { "texto": "Uma conta de armazenamento.", "correta": true },
+        { "texto": "Um cofre dos Serviços de Recuperação.", "correta": false },
+        { "texto": "Um grupo de ações do Azure Monitor.", "correta": false },
+        { "texto": "Uma conta do Azure Automation.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-restauracao-entre-regioes-15",
+      "topico": "Backup do Azure",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A área de continuidade quer poder restaurar máquinas virtuais protegidas pelo cofre rsv-producao-brs em uma região diferente, caso a região primária fique indisponível, usando o próprio backup e sem depender de replicação contínua. Quais duas condições precisam estar atendidas no cofre? Selecione duas.",
+      "explicacao": "São necessárias a redundância geográfica do armazenamento do cofre e a restauração entre regiões habilitada. A redundância geográfica é o que faz existir uma cópia dos dados de backup na região emparelhada; a restauração entre regiões é a configuração que permite usar essa cópia como origem de uma restauração feita pelo cliente, quando quiser, sem precisar de failover do serviço. As duas andam juntas: uma sem a outra não entrega a capacidade. E convém lembrar que a redundância só pode ser definida antes do primeiro item protegido, o que faz dessa uma decisão de criação do cofre. Um cofre adicional na região secundária não é requisito e recriaria o problema de onde estão os dados. Site Recovery é replicação contínua, justamente o que o enunciado descarta. E exclusão temporária protege contra remoção indevida, sem relação com região.",
+      "opcoes": [
+        { "texto": "Armazenamento do cofre com redundância geográfica.", "correta": true },
+        { "texto": "Restauração entre regiões habilitada no cofre.", "correta": true },
+        { "texto": "Um segundo cofre criado na região secundária.", "correta": false },
+        { "texto": "Replicação das máquinas configurada no Azure Site Recovery.", "correta": false },
+        { "texto": "Exclusão temporária habilitada com período de carência estendido.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-mon-simnao-teste-failover-16",
+      "topico": "Azure Site Recovery",
+      "tipo": "SimNao",
+      "enunciado": "A Contoso replica máquinas de produção para outra região com o Azure Site Recovery e precisa executar o exercício semestral de continuidade. A equipe planeja rodar um teste de failover em uma rede virtual isolada da região de destino, durante o horário comercial. Avalie a afirmação: executar o teste de failover interrompe as máquinas de origem e pausa a replicação enquanto durar o teste.",
+      "explicacao": "A afirmação é falsa. O teste de failover foi desenhado para ser executado sem impacto: as máquinas de origem continuam em execução atendendo aos usuários, a replicação segue acontecendo normalmente, e as máquinas de teste são criadas em paralelo na região de destino, de preferência em uma rede isolada para não conflitar com endereços nem com serviços de produção. Ao concluir, a limpeza do teste remove os recursos criados. É por isso que ele pode ser rodado em horário comercial e é a operação recomendada para exercício de continuidade. Quem responde Sim está descrevendo o failover comum, que de fato promove o destino e interrompe a origem, e é operação de contingência real — não de exercício. A confusão entre os dois é justamente o que leva equipes a evitar testar, e plano de continuidade nunca testado costuma falhar no dia em que é necessário.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-mon-simnao-diagnostico-retroativo-17",
+      "topico": "Configurações de diagnóstico",
+      "tipo": "SimNao",
+      "enunciado": "Investigando um incidente ocorrido há duas semanas, a equipe descobriu que o recurso envolvido nunca teve configuração de diagnóstico. Um analista cria agora a configuração enviando as categorias de registro ao workspace do Log Analytics. Avalie a afirmação: depois de alguns minutos, os registros das duas semanas anteriores estarão disponíveis para consulta no workspace.",
+      "explicacao": "A afirmação é falsa. A configuração de diagnóstico passa a valer do momento em que é criada em diante e não tem efeito retroativo: o que aconteceu antes dela simplesmente não foi coletado e não existe em lugar nenhum para ser recuperado. É a razão de configurar diagnóstico ser tarefa de provisionamento, e não de investigação — quem só lembra dela durante um incidente descobre que a informação de que precisa não existe. Uma exceção parcial vale para o log de atividades, que é retido por noventa dias por padrão no próprio serviço e portanto ainda pode ser consultado nesse período mesmo sem exportação, mas isso cobre operações no plano de gerenciamento e não os registros internos do recurso. Para não repetir o problema, o caminho é aplicar as configurações de diagnóstico por política, com efeito DeployIfNotExists e remediação, de modo que todo recurso novo já nasça coletando.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-mon-assoc-ferramenta-monitor-18",
+      "topico": "Insights do Azure Monitor",
+      "tipo": "Associacao",
+      "enunciado": "Cada pergunta abaixo é respondida por uma fonte diferente do Azure Monitor. Associe cada pergunta à fonte que a responde diretamente.",
+      "explicacao": "\"Quem excluiu este recurso e quando\" é o log de atividades, que registra as operações do plano de gerenciamento com a identidade que as executou. \"Qual foi o percentual de CPU deste recurso nos últimos trinta minutos\" são as métricas de plataforma, séries numéricas coletadas do host e disponíveis perto do tempo real. \"Quantas vezes esta mensagem de erro apareceu, correlacionada com outros eventos\" são os registros no workspace do Log Analytics, consultados com a linguagem de consulta — é o único lugar em que se cruza informação de origens diferentes. E \"quais processos rodam nesta máquina e com quem ela conversa\" é o Insights de máquinas virtuais, com o mapa de dependências. O Service Health está no painel porque parece responder a tudo sobre saúde: ele informa incidentes e manutenções da plataforma do Azure que afetam a assinatura, ou seja, problemas do provedor — e não diz nada sobre o comportamento dos recursos do cliente.",
+      "associacoes": [
+        { "alvo": "Quem excluiu este recurso, e quando", "item": "Log de atividades" },
+        { "alvo": "Qual foi o percentual de CPU deste recurso nos últimos trinta minutos", "item": "Métricas de plataforma" },
+        { "alvo": "Quantas vezes esta mensagem de erro apareceu, cruzada com outros eventos", "item": "Registros no workspace do Log Analytics" },
+        { "alvo": "Quais processos rodam nesta máquina e com quais servidores ela conversa", "item": "Insights de máquinas virtuais" }
+      ],
+      "itensExtras": [
+        "Service Health"
+      ]
+    },
+    {
+      "id": "az104-mon-assoc-recurso-recuperacao-19",
+      "topico": "Backup do Azure",
+      "tipo": "Associacao",
+      "enunciado": "Para cada objetivo de recuperação abaixo, a equipe precisa escolher o serviço adequado, ao menor custo operacional que o atenda. Associe cada objetivo ao serviço.",
+      "explicacao": "Voltar uma máquina virtual ao estado de um dia específico das últimas semanas é Backup do Azure, que guarda pontos de recuperação segundo a política e é feito para recuperação pontual no tempo. Manter uma réplica contínua em outra região, com perda de minutos e pronta para assumir, é Azure Site Recovery, que replica de forma contínua e é a ferramenta de continuidade, não de histórico. Capturar o estado de um disco imediatamente antes de uma atualização arriscada, para reverter em minutos, é o instantâneo de disco, que é barato, pontual e não exige política. E impedir que alguém exclua os próprios dados de backup por engano é a exclusão temporária do cofre, que retém o que foi excluído por um período de carência. O bloqueio de recurso está no painel porque é a resposta reflexa para \"impedir exclusão\": ele protege o recurso do Azure de ser removido, mas não protege o conteúdo dentro do cofre nem recupera estado nenhum.",
+      "associacoes": [
+        { "alvo": "Voltar uma máquina ao estado de um dia específico das últimas semanas", "item": "Backup do Azure" },
+        { "alvo": "Manter réplica contínua em outra região, pronta para assumir com perda de minutos", "item": "Azure Site Recovery" },
+        { "alvo": "Capturar o estado de um disco antes de uma atualização arriscada, para reverter em minutos", "item": "Instantâneo de disco" },
+        { "alvo": "Impedir que alguém exclua por engano os dados de backup já guardados", "item": "Exclusão temporária do cofre" }
+      ],
+      "itensExtras": [
+        "Bloqueio de recurso"
+      ]
+    },
+    {
+      "id": "az104-mon-assoc-opcao-restauracao-20",
+      "topico": "Restauração de máquinas virtuais",
+      "tipo": "Associacao",
+      "enunciado": "A partir de um ponto de recuperação de máquina virtual, cada necessidade abaixo é atendida por uma opção diferente de restauração. Associe cada necessidade à opção.",
+      "explicacao": "Voltar a máquina ao estado anterior mantendo nome, identificador, interface de rede e atribuições de função é substituir a existente, que troca os discos preservando o recurso. Validar um ponto de recuperação antigo sem encostar na máquina em produção é criar uma máquina nova a partir dele, isolada. Obter os discos para montá-los em outra máquina e inspecionar o conteúdo é restaurar discos, que entrega os discos sem criar máquina. E trazer de volta alguns arquivos específicos de dentro do backup, sem restaurar nada além deles, é a recuperação de arquivos individuais, que monta o ponto de recuperação como unidade temporária. A restauração instantânea está no painel porque soa como uma opção de restauração: ela é a camada de instantâneos mantida junto ao ponto de recuperação para acelerar as restaurações, e não uma escolha que se faz no assistente — ela beneficia as quatro opções acima em vez de substituir qualquer uma delas.",
+      "associacoes": [
+        { "alvo": "Voltar a máquina ao estado anterior mantendo nome, identificador e atribuições de função", "item": "Substituir a máquina existente" },
+        { "alvo": "Validar um ponto de recuperação antigo sem encostar na máquina de produção", "item": "Criar uma máquina virtual nova" },
+        { "alvo": "Obter os discos para montá-los em outra máquina e inspecionar o conteúdo", "item": "Restaurar discos" },
+        { "alvo": "Trazer de volta apenas alguns arquivos de dentro do backup", "item": "Recuperação de arquivos individuais" }
+      ],
+      "itensExtras": [
+        "Camada de restauração instantânea"
+      ]
+    }
+  ]
+}

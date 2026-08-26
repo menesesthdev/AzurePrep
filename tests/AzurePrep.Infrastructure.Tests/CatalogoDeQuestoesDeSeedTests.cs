@@ -106,27 +106,46 @@ public class CatalogoDeQuestoesDeSeedTests
     }
 
     /// <summary>
-    /// Exame em construção não pode vazar para o catálogo nem aceitar tentativa.
+    /// Exame publicado precisa ter questões em <b>todos</b> os domínios que declara.
     /// </summary>
     /// <remarks>
-    /// Guarda de sanidade sobre a própria definição: marcar <c>Publicado: true</c> por descuido
-    /// num exame sem banco é o erro que o flag existe para evitar, e ele não quebraria nada — só
-    /// publicaria uma prova de meia dúzia de itens. O teste acima cobre o caso; este documenta o
-    /// pareamento entre os dois estados para quem for adicionar o próximo exame.
+    /// Contar o total não basta, e este teste existe porque a contagem sozinha deixa passar o caso
+    /// pior. <c>SorteioDeQuestoes.DistribuirCotas</c> só considera as áreas que têm questão no pool
+    /// e redistribui a cota das demais entre elas: um exame com dois dos cinco domínios vazios
+    /// monta provas completas, do tamanho certo, em que 30% do blueprint simplesmente não aparece —
+    /// e nada reclama, porque a prova sai com a contagem esperada. É a falha calada mais cara que
+    /// este banco pode ter, já que fidelidade ao Skills Measured é o produto.
     /// </remarks>
     [Fact]
-    public void ExamesEmConstrucao_EstaoDeclaradosComoNaoPublicados()
+    public void ExamesPublicados_TemQuestoesEmTodosOsDominiosDeclarados()
     {
-        var questoesPorExame = CatalogoDeQuestoesDeSeed.Carregar()
-            .GroupBy(a => a.ExameCode, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count), StringComparer.OrdinalIgnoreCase);
+        var porExameEArea = CatalogoDeQuestoesDeSeed.Carregar()
+            .GroupBy(a => (a.ExameCode, a.Area), TuplaSemDiferenciarMaiusculas)
+            .ToDictionary(g => g.Key, g => g.Sum(a => a.Questoes.Count), TuplaSemDiferenciarMaiusculas);
 
-        Assert.All(
-            AzurePrepDbSeeder.Exames,
-            e => Assert.True(
-                e.Publicado == questoesPorExame.GetValueOrDefault(e.Code) >= e.TotalQuestions,
-                $"{e.Code}: Publicado={e.Publicado} mas tem {questoesPorExame.GetValueOrDefault(e.Code)} " +
-                $"questões para uma prova de {e.TotalQuestions}."));
+        var vazios = AzurePrepDbSeeder.Exames
+            .Where(e => e.Publicado)
+            .SelectMany(e => e.Areas.Select(a => (e.Code, a.Key)))
+            .Where(par => porExameEArea.GetValueOrDefault(par) == 0)
+            .Select(par => $"{par.Code}/{par.Key}")
+            .ToList();
+
+        Assert.True(vazios.Count == 0, "Domínio sem questão em exame publicado: " + string.Join(", ", vazios));
+    }
+
+    private static readonly IEqualityComparer<(string, string)> TuplaSemDiferenciarMaiusculas =
+        new ComparadorDeTupla();
+
+    private sealed class ComparadorDeTupla : IEqualityComparer<(string, string)>
+    {
+        public bool Equals((string, string) x, (string, string) y)
+            => StringComparer.OrdinalIgnoreCase.Equals(x.Item1, y.Item1)
+               && StringComparer.OrdinalIgnoreCase.Equals(x.Item2, y.Item2);
+
+        public int GetHashCode((string, string) obj)
+            => HashCode.Combine(
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item1),
+                StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item2));
     }
 
     // ----------------------------------------------------------------- escopo de área por exame

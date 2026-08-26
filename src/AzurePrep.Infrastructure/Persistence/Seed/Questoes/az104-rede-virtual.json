@@ -1,0 +1,300 @@
+{
+  "exameCode": "AZ-104",
+  "area": "rede-virtual",
+  "questoes": [
+    {
+      "id": "az104-rede-peering-transitividade-01",
+      "topico": "Peering de rede virtual",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso mantém a vnet-hub-brs emparelhada com a vnet-spoke-app e com a vnet-spoke-dados, na mesma região. Os dois emparelhamentos aparecem com status Conectado e o tráfego entre cada spoke e o hub funciona. A equipe relata que a VM-APP-01, em vnet-spoke-app, não alcança a VM-SQL-01, em vnet-spoke-dados, por endereço IP privado. Não há appliance virtual de rede implantado no hub. Qual ação faz as duas máquinas se comunicarem?",
+      "explicacao": "O emparelhamento de rede virtual não é transitivo: A emparelhada com B e B emparelhada com C não faz A enxergar C. Como não existe appliance de rede no hub para encaminhar o tráfego, a única ação da lista que cria o caminho é emparelhar os dois spokes diretamente. Marcar \"Permitir tráfego encaminhado\" é a resposta certa de uma pergunta vizinha: essa opção autoriza o hub a receber tráfego cuja origem não é a rede emparelhada, o que só importa quando existe um appliance encaminhando e uma rota definida pelo usuário apontando para ele — sozinha, ela não cria rota nenhuma e nada muda. \"Permitir trânsito de gateway\" e \"Usar gateways remotos\" resolvem outro problema: dão aos spokes acesso ao gateway de VPN ou ExpressRoute do hub, ou seja, à rede local, não a outro spoke. E adicionar regra de network security group não tem efeito porque o tráfego não está sendo bloqueado por filtro: ele não tem rota até o destino, e regra de segurança só decide sobre pacote que chega.",
+      "opcoes": [
+        { "texto": "Criar um emparelhamento direto entre a vnet-spoke-app e a vnet-spoke-dados.", "correta": true },
+        { "texto": "Marcar \"Permitir tráfego encaminhado\" nos dois emparelhamentos do lado do hub.", "correta": false },
+        { "texto": "Marcar \"Permitir trânsito de gateway\" no hub e \"Usar gateways remotos\" nos dois spokes.", "correta": false },
+        { "texto": "Adicionar em cada spoke uma regra de network security group que permita o intervalo de endereços do outro spoke.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-nsg-duas-camadas-02",
+      "topico": "Regras efetivas de NSG",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A VM-WEB-01 está na sub-rede snet-web, que tem a nsg-snet-web associada. A interface de rede da máquina tem, além disso, a nsg-nic-web01 associada diretamente. A nsg-snet-web contém uma regra de entrada que permite TCP 443 de qualquer origem, com prioridade 200. A nsg-nic-web01 não tem nenhuma regra de entrada personalizada. Um cliente na internet tenta abrir uma conexão HTTPS com o endereço IP público da máquina. O que acontece?",
+      "explicacao": "A conexão é bloqueada. Quando existem duas network security groups no caminho de entrada, ambas são avaliadas em sequência — primeiro a da sub-rede, depois a da interface de rede — e o pacote só chega à máquina se as duas permitirem. A nsg-snet-web permite, mas a nsg-nic-web01 não tem regra personalizada, então vale a regra padrão DenyAllInBound, que descarta o pacote. \"Basta uma das duas permitir\" é a suposição mais comum e está errada justamente por isso: a avaliação é conjuntiva na entrada, não alternativa. A ideia de que a regra de menor número de prioridade vence entre as duas também está errada: prioridade ordena regras dentro da mesma network security group, e não decide entre grupos diferentes, que são camadas independentes. E a network security group da interface não substitui a da sub-rede — as duas coexistem, e é exatamente essa coexistência que produz o bloqueio aqui.",
+      "opcoes": [
+        { "texto": "É bloqueada, porque a network security group da interface de rede não permite 443 e a regra padrão DenyAllInBound se aplica.", "correta": true },
+        { "texto": "É permitida, porque basta que uma das duas network security groups do caminho permita o tráfego.", "correta": false },
+        { "texto": "É permitida, porque entre as duas network security groups vence a regra com o menor número de prioridade.", "correta": false },
+        { "texto": "É bloqueada, porque associar uma network security group à interface de rede substitui a da sub-rede, que deixa de valer.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-rota-prefixo-mais-longo-03",
+      "topico": "Rotas efetivas e rotas definidas pelo usuário",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A sub-rede snet-app, na vnet-spoke-app (10.20.0.0/16), tem uma tabela de rotas associada com uma única entrada: 0.0.0.0/0 com próximo salto para o appliance virtual 10.20.9.4. A vnet-spoke-app está emparelhada com a vnet-hub-brs (10.10.0.0/16). A VM-APP-01, em snet-app, abre uma conexão para 10.10.3.25, que fica no hub. Por onde o pacote sai?",
+      "explicacao": "O pacote vai direto pelo emparelhamento. O Azure escolhe a rota pelo prefixo mais longo que casa com o destino: o emparelhamento cria uma rota de sistema para 10.10.0.0/16, que é mais específica que o 0.0.0.0/0 da rota definida pelo usuário, então é ela que vence. A ideia de que rota definida pelo usuário sempre vence rota de sistema descreve apenas o critério de desempate, aplicado quando duas rotas têm o mesmo prefixo — e não é o caso aqui, porque os prefixos têm comprimentos diferentes. Dizer que 0.0.0.0/0 tem prioridade sobre rotas de emparelhamento inverte a regra: a rota padrão é a menos específica que existe e é sempre a última a ser considerada. Já a afirmação de que rotas de emparelhamento não podem ser sobrescritas chega ao destino certo pelo motivo errado: elas podem, sim — bastaria a tabela de rotas trazer uma entrada 10.10.0.0/16, ou mais específica, apontando para o appliance, e aí o tráfego passaria por ele.",
+      "opcoes": [
+        { "texto": "Direto pelo emparelhamento, porque a rota de sistema 10.10.0.0/16 é mais específica que 0.0.0.0/0.", "correta": true },
+        { "texto": "Para o appliance 10.20.9.4, porque rota definida pelo usuário sempre vence rota de sistema.", "correta": false },
+        { "texto": "Para o appliance 10.20.9.4, porque a rota 0.0.0.0/0 cobre todos os destinos fora da própria rede virtual.", "correta": false },
+        { "texto": "Direto pelo emparelhamento, porque rotas criadas por emparelhamento não podem ser sobrescritas por tabela de rotas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-endpoint-privado-onprem-04",
+      "topico": "Endpoints de serviço e endpoints privados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A conta de armazenamento stcontosodocs01 deve parar de aceitar tráfego da internet pública. O acesso precisa continuar funcionando a partir da sub-rede snet-app, na vnet-spoke-app, e também a partir do datacenter da empresa, que se conecta ao Azure por ExpressRoute com peering privado. A equipe quer a solução que atenda aos dois caminhos sem publicar nada na internet. Qual configuração atende?",
+      "explicacao": "Um endpoint privado cria uma interface de rede com endereço IP privado da própria rede virtual apontando para a conta de armazenamento, e esse endereço é alcançável tanto de dentro da rede virtual quanto da rede local que chega por ExpressRoute com peering privado — por isso ele atende aos dois caminhos. A zona DNS privada é parte da resposta, e não um detalhe: sem ela o nome público continua resolvendo para o endereço público e a conexão não usa o endpoint. O endpoint de serviço com regra de firewall é a resposta certa para o cenário que tem só a rede virtual: ele mantém o endereço público da conta e apenas passa a apresentar o endereço privado da sub-rede como origem, o que não funciona para tráfego vindo da rede local — o endereço de origem de lá não é o da sub-rede. Combinar endpoint de serviço com rota definida pelo usuário no lado local não resolve pelo mesmo motivo: o problema não é de roteamento, é de qual origem a conta reconhece. E liberar no firewall da conta o intervalo público de saída do datacenter continua expondo o serviço à internet, que é exatamente o que se quer eliminar.",
+      "opcoes": [
+        { "texto": "Criar um endpoint privado para a conta na snet-app e vincular a zona DNS privada privatelink.blob.core.windows.net à rede virtual.", "correta": true },
+        { "texto": "Habilitar o endpoint de serviço Microsoft.Storage na snet-app e liberar essa sub-rede no firewall da conta.", "correta": false },
+        { "texto": "Habilitar o endpoint de serviço Microsoft.Storage na snet-app e criar uma rota definida pelo usuário no roteador do datacenter.", "correta": false },
+        { "texto": "Manter o acesso público e liberar no firewall da conta apenas o intervalo de endereços públicos de saída do datacenter.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-endpoint-privado-dns-05",
+      "topico": "Endpoints de serviço e endpoints privados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe criou um endpoint privado para a conta stcontosodocs01 na sub-rede snet-app e desabilitou o acesso de rede pública na conta. O endpoint aparece como Aprovado e recebeu o endereço 10.20.1.36. A partir da VM-APP-01, na mesma rede virtual, o comando de resolução de nomes para stcontosodocs01.blob.core.windows.net devolve um endereço IP público, e as conexões falham. Qual é a causa mais provável?",
+      "explicacao": "Falta vincular a zona DNS privada privatelink.blob.core.windows.net à rede virtual. O endpoint privado cria o registro nessa zona, mas quem faz a máquina usar o registro é o vínculo entre a zona e a rede virtual: sem ele, a consulta segue para o DNS público, que responde com o endereço público da conta — e como o acesso público foi desabilitado, a conexão falha. É a falha mais comum de endpoint privado justamente porque tudo o mais aparece saudável no portal. A aprovação pendente não é a causa: o enunciado diz que o endpoint está Aprovado, e nesse estado ele já funciona. Regra de network security group também não explica o sintoma: filtro de segurança bloqueia a conexão, mas não muda o endereço devolvido pela resolução de nomes, e aqui o problema aparece já na resolução. E não é preciso rota definida pelo usuário para alcançar um endpoint privado na própria rede virtual — o endereço 10.20.1.36 está dentro do intervalo da rede e é alcançado por rota de sistema.",
+      "opcoes": [
+        { "texto": "A zona DNS privada privatelink.blob.core.windows.net não está vinculada à rede virtual.", "correta": true },
+        { "texto": "A conexão do endpoint privado está pendente de aprovação no lado da conta de armazenamento.", "correta": false },
+        { "texto": "A network security group da snet-app não permite saída na porta 443 para o endereço do endpoint.", "correta": false },
+        { "texto": "Falta uma rota definida pelo usuário na snet-app apontando 10.20.1.36 para o endpoint privado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-lb-standard-saida-06",
+      "topico": "Balanceador de carga",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um conjunto de máquinas virtuais sem endereço IP público ficava atrás de um balanceador de carga interno de SKU Básico e conseguia baixar atualizações da internet. Durante uma padronização, a equipe recriou o balanceador com SKU Standard, manteve o mesmo pool de back-end e as mesmas regras. O tráfego de entrada continua funcionando, mas as máquinas perderam completamente o acesso de saída à internet. Qual é a explicação?",
+      "explicacao": "O balanceador de carga Standard não fornece acesso de saída padrão. No SKU Básico, máquinas sem endereço IP público recebiam tradução de endereço de saída implícita; o Standard é seguro por padrão e exige que a saída seja declarada — por gateway NAT na sub-rede, por regra de saída num balanceador público ou por endereço IP público na própria máquina. Como o balanceador do cenário é interno, ele não tem como fornecer saída de jeito nenhum, o que torna o gateway NAT o caminho natural. Atribuir endereço IP público a cada máquina resolveria o sintoma, mas é justamente o que a arquitetura evita e multiplica superfície exposta. Não é problema de network security group: a regra padrão AllowInternetOutBound continua permitindo a saída, e o que falta não é permissão e sim tradução de endereço. E o sondador de integridade governa quais instâncias recebem tráfego de entrada, não a capacidade de iniciar conexões para fora — tanto que a entrada, que depende dele, continua funcionando.",
+      "opcoes": [
+        { "texto": "O balanceador Standard não dá acesso de saída padrão; é preciso um gateway NAT na sub-rede ou outra forma explícita de saída.", "correta": true },
+        { "texto": "O balanceador Standard exige que cada máquina do pool tenha o próprio endereço IP público.", "correta": false },
+        { "texto": "A network security group da sub-rede passou a bloquear a saída ao ser reavaliada pelo SKU Standard.", "correta": false },
+        { "texto": "O sondador de integridade do SKU Standard precisa estar íntegro para liberar as conexões de saída das instâncias.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-lb-sonda-nsg-07",
+      "topico": "Balanceador de carga",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um balanceador de carga público distribui tráfego para três máquinas na sub-rede snet-web. O aplicativo responde normalmente quando acessado direto pelo endereço privado de cada máquina, mas todas aparecem como não íntegras no balanceador e nenhuma recebe tráfego. Um administrador adicionou recentemente à nsg-snet-web uma regra de entrada com prioridade 100 que nega todo o tráfego de qualquer origem, e depois uma regra de prioridade 110 permitindo TCP 80 da internet. Qual mudança corrige o problema?",
+      "explicacao": "O sondador de integridade parte do endereço 168.63.129.16, e é preciso permiti-lo com prioridade menor que a da regra de negação. A regra de prioridade 100 que nega tudo é avaliada antes de qualquer outra e descarta também o tráfego do sondador — por isso as instâncias aparecem não íntegras mesmo com o aplicativo funcionando. A regra padrão AllowAzureLoadBalancerInBound existe, mas tem prioridade 65001 e por isso perde para qualquer regra personalizada de número menor, que é exatamente o que aconteceu. Apenas subir a prioridade da regra que permite TCP 80 resolveria o tráfego dos clientes, e não o do sondador, que usa a marca de serviço AzureLoadBalancer e continuaria negado. Trocar o protocolo do sondador para HTTP não muda nada porque o bloqueio é de rede e ocorre antes de qualquer protocolo de aplicação. E recriar o pool de back-end não tem efeito sobre uma regra de filtro: as instâncias voltariam ao mesmo estado assim que fossem sondadas de novo.",
+      "opcoes": [
+        { "texto": "Permitir a origem AzureLoadBalancer com prioridade menor que 100 na nsg-snet-web.", "correta": true },
+        { "texto": "Mudar a prioridade da regra que permite TCP 80 para um número menor que 100.", "correta": false },
+        { "texto": "Trocar o sondador de integridade de TCP para HTTP e apontá-lo para a raiz do aplicativo.", "correta": false },
+        { "texto": "Remover e recriar o pool de back-end, adicionando as três máquinas novamente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-udr-ip-forwarding-08",
+      "topico": "Rotas efetivas e rotas definidas pelo usuário",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe implantou o appliance virtual de firewall NVA-FW-01 em 10.20.9.4 e associou à sub-rede snet-app uma tabela de rotas com a entrada 0.0.0.0/0 apontando para o tipo de próximo salto Appliance virtual, endereço 10.20.9.4. As máquinas de snet-app deixaram de alcançar a internet. Na própria NVA-FW-01, o acesso à internet funciona e o serviço de firewall está em execução. Qual configuração está faltando?",
+      "explicacao": "Falta habilitar o encaminhamento de IP na interface de rede da NVA-FW-01. Por padrão o Azure descarta pacotes cujo endereço de destino não seja o da própria interface, o que impede qualquer máquina de atuar como roteador; é a opção de encaminhamento de IP, definida na interface dentro do Azure, que autoriza esse comportamento. É a causa clássica de appliance que aparece saudável e ainda assim não encaminha nada — o próprio appliance navega porque esse tráfego tem ele mesmo como origem e destino. Habilitar o encaminhamento dentro do sistema operacional é necessário também, mas não basta: sem a autorização na plataforma, o pacote nem chega à pilha do sistema. Associar a tabela de rotas à sub-rede do appliance é caminho para laço de roteamento, não solução: o tráfego que sai dele voltaria a apontar para ele mesmo. E network security group não é o ponto, porque o tráfego está sendo descartado pela plataforma antes de qualquer avaliação de regra na entrega ao appliance.",
+      "opcoes": [
+        { "texto": "Habilitar o encaminhamento de IP na interface de rede da NVA-FW-01, dentro do Azure.", "correta": true },
+        { "texto": "Associar a mesma tabela de rotas também à sub-rede onde está a NVA-FW-01.", "correta": false },
+        { "texto": "Criar na nsg-snet-app uma regra de saída permitindo qualquer destino a partir de 10.20.9.4.", "correta": false },
+        { "texto": "Trocar o tipo de próximo salto de Appliance virtual para Rede virtual na tabela de rotas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-asg-mesma-vnet-09",
+      "topico": "Grupos de segurança de aplicativo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso usa os grupos de segurança de aplicativo asg-web e asg-sql para simplificar as regras da nsg-producao. O asg-web reúne as interfaces das máquinas de front-end na vnet-prod-brs. A equipe tenta criar uma regra de entrada com origem asg-web e destino asg-bi, sendo que as interfaces do asg-bi estão em outra rede virtual, a vnet-analytics-brs. A criação da regra é recusada. Por quê?",
+      "explicacao": "Todos os grupos de segurança de aplicativo usados como origem e destino de uma mesma regra precisam pertencer à mesma rede virtual. O grupo é um rótulo aplicado a interfaces de rede e só faz sentido dentro do escopo em que a network security group avalia o tráfego; referenciar um grupo de outra rede virtual não teria como ser resolvido, e por isso a criação é recusada. Não existe limitação de usar grupo dos dois lados da regra — pelo contrário, origem e destino ambos como grupo é o uso mais idiomático do recurso, e é o que dispensa manter listas de endereços. Também não é o caso de exigir emparelhamento: mesmo com as redes emparelhadas a regra continuaria inválida, porque emparelhamento conecta redes mas não estende o escopo dos grupos. E a quantidade de interfaces de cada grupo é irrelevante para a validação; um grupo pode inclusive estar vazio no momento em que a regra é escrita.",
+      "opcoes": [
+        { "texto": "Os grupos de segurança de aplicativo referenciados na mesma regra precisam estar na mesma rede virtual.", "correta": true },
+        { "texto": "Uma regra de network security group aceita grupo de segurança de aplicativo apenas na origem, nunca no destino.", "correta": false },
+        { "texto": "As duas redes virtuais precisam estar emparelhadas antes de um grupo poder ser referenciado pela outra.", "correta": false },
+        { "texto": "Os dois grupos precisam conter a mesma quantidade de interfaces de rede para a regra ser válida.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-subrede-enderecos-reservados-10",
+      "topico": "Redes virtuais e sub-redes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa criar a sub-rede snet-gestao para hospedar cinco máquinas virtuais, cada uma com uma interface de rede e um endereço IP privado. O espaço de endereçamento disponível na vnet-prod-brs é escasso e a orientação é reservar o menor prefixo possível que comporte as cinco máquinas, sem previsão de crescimento. Qual prefixo atende ao requisito?",
+      "explicacao": "O menor prefixo que serve é o /28. Em toda sub-rede do Azure, cinco endereços de cada bloco ficam indisponíveis para as máquinas: o primeiro identifica a rede, os três seguintes são usados pela plataforma para o gateway padrão e para mapeamento de DNS, e o último é o de difusão. Num /29, que tem oito endereços, sobram apenas três utilizáveis — não cabem as cinco máquinas, e essa é justamente a conta que costuma ser feita errada por quem aplica o raciocínio de rede local, onde sobrariam seis. O /28 tem dezesseis endereços e onze utilizáveis, o que atende com folga. O /27 também atenderia, mas desperdiça espaço num cenário em que o enunciado pede o menor prefixo possível e declara que não há previsão de crescimento. O /30 é menor ainda e não sobra endereço utilizável nenhum depois da reserva da plataforma.",
+      "opcoes": [
+        { "texto": "/28", "correta": true },
+        { "texto": "/29", "correta": false },
+        { "texto": "/27", "correta": false },
+        { "texto": "/30", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-bastion-subrede-11",
+      "topico": "Azure Bastion",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador tenta implantar o Azure Bastion na vnet-prod-brs para acessar máquinas que não têm endereço IP público. Ele criou previamente uma sub-rede chamada snet-bastion com o prefixo 10.30.7.0/27 e selecionou essa sub-rede no assistente. A implantação é recusada antes mesmo de começar a provisionar. O que precisa mudar?",
+      "explicacao": "A sub-rede precisa se chamar exatamente AzureBastionSubnet e ter prefixo de pelo menos /26. O nome não é convenção e sim requisito: a plataforma localiza a sub-rede dedicada pelo nome, e qualquer outro é recusado na validação. O prefixo /27 também não serve, porque o serviço reserva endereços para as próprias instâncias e para o escalonamento. Os dois problemas existem ao mesmo tempo neste cenário, e corrigir só o nome faria a implantação falhar de novo — motivo pelo qual a alternativa que troca apenas o nome está errada. Associar uma network security group não é obrigatório para implantar o Bastion; ela é opcional e, quando existe, precisa liberar um conjunto específico de fluxos, o que é um cuidado posterior e não a causa da recusa aqui. E delegar a sub-rede a Microsoft.Network é exigência de outros recursos, como instâncias de contêiner e gateways de aplicativo com injeção em rede virtual, não do Bastion.",
+      "opcoes": [
+        { "texto": "Renomear a sub-rede para AzureBastionSubnet e ampliar o prefixo para /26 ou maior.", "correta": true },
+        { "texto": "Renomear a sub-rede para AzureBastionSubnet, mantendo o prefixo /27.", "correta": false },
+        { "texto": "Associar à sub-rede uma network security group permitindo RDP e SSH de origem Internet.", "correta": false },
+        { "texto": "Delegar a sub-rede ao serviço Microsoft.Network antes de executar o assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-ip-publico-standard-12",
+      "topico": "Endereços IP públicos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa associar um endereço IP público novo ao front-end de um balanceador de carga de SKU Standard, em uma região que oferece zonas de disponibilidade. O endereço não pode mudar em nenhuma hipótese, porque está registrado em uma zona de DNS externa gerenciada por um parceiro. Qual configuração de endereço IP público atende ao requisito?",
+      "explicacao": "É preciso um endereço IP público de SKU Standard com atribuição estática, e é o único da lista que serve. O SKU tem de casar com o do balanceador: um balanceador Standard não aceita endereço Básico, e a associação é recusada. A atribuição estática é o que garante que o endereço não mude, requisito explícito do cenário por causa do registro externo — e vale notar que no SKU Standard a atribuição estática é a única disponível, então as duas exigências se resolvem juntas. O endereço Básico com atribuição estática atenderia à estabilidade, mas esbarra no SKU incompatível. O Básico dinâmico falha nos dois pontos ao mesmo tempo, porque endereço dinâmico é liberado quando o recurso associado é parado e pode voltar diferente. E \"Standard com atribuição dinâmica\" é uma combinação que sequer existe, o que a torna o distrator de quem memorizou os dois eixos sem perceber que eles não são independentes.",
+      "opcoes": [
+        { "texto": "SKU Standard com atribuição estática.", "correta": true },
+        { "texto": "SKU Básico com atribuição estática.", "correta": false },
+        { "texto": "SKU Básico com atribuição dinâmica.", "correta": false },
+        { "texto": "SKU Standard com atribuição dinâmica.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-dns-privado-autoregistro-13",
+      "topico": "Azure DNS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A zona DNS privada contoso.interno está vinculada à vnet-prod-brs, e o vínculo foi criado com o registro automático habilitado. A equipe vincula a mesma zona à vnet-dev-brs, dessa vez sem registro automático. Depois disso, cria a VM-DEV-05 na vnet-dev-brs. Qual é o comportamento esperado quanto aos registros e à resolução de nomes?",
+      "explicacao": "A VM-DEV-05 não ganha registro automático, mas as máquinas dela conseguem resolver os nomes da zona, inclusive os das máquinas da vnet-prod-brs. Registro automático e resolução são funções separadas do vínculo: o vínculo sempre habilita a consulta à zona a partir da rede virtual, e a caixa de registro automático apenas decide se a plataforma cria e remove os registros A das máquinas daquela rede. É o arranjo típico de ambientes que resolvem nomes de um domínio central sem poluí-lo com nomes efêmeros. Dizer que a máquina não resolve nada da zona confunde as duas funções e tornaria o vínculo sem registro automático inútil, o que não é o caso. A ideia de que o registro é criado mesmo assim ignora o que a opção controla. E a afirmação de que uma zona só pode ter um vínculo com registro automático por vez está invertida: o limite é por rede virtual — uma rede virtual pode participar de vários vínculos, mas com registro automático em apenas uma zona.",
+      "opcoes": [
+        { "texto": "A VM-DEV-05 não recebe registro automático, mas resolve os nomes da zona, inclusive os das máquinas da vnet-prod-brs.", "correta": true },
+        { "texto": "A VM-DEV-05 não recebe registro automático e também não consegue resolver nenhum nome da zona.", "correta": false },
+        { "texto": "A VM-DEV-05 recebe registro automático assim mesmo, porque a zona já tem registro automático em outro vínculo.", "correta": false },
+        { "texto": "O segundo vínculo é recusado, porque uma zona DNS privada aceita apenas um vínculo com registro automático.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-nsg-prioridade-14",
+      "topico": "Regras efetivas de NSG",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A nsg-snet-dados tem, entre as regras de entrada, uma que nega TCP 1433 vindo de 10.20.0.0/16 com prioridade 4000 e outra que permite TCP 1433 vindo de 10.20.4.0/24 com prioridade 300. Uma máquina em 10.20.4.15 tenta abrir conexão na porta 1433 com uma máquina da sub-rede snet-dados. Qual é o resultado e por quê?",
+      "explicacao": "A conexão é permitida, porque a regra de prioridade 300 é avaliada antes da de prioridade 4000 e o processamento para na primeira regra que casa com o fluxo. Em network security group, número menor significa prioridade maior, e a avaliação é sequencial: assim que uma regra corresponde à combinação de origem, destino, porta e protocolo, a decisão dela vale e as demais nem são consideradas. É por isso que a resposta não depende de a regra ser de permissão ou de negação — não existe precedência de negação sobre permissão, ao contrário do que muita gente supõe por analogia com outros sistemas de política. A ideia de que o prefixo mais específico vence descreve escolha de rota, não avaliação de regra de segurança; aqui o /24 ser mais específico que o /16 é irrelevante, o que decide é a prioridade. E a conexão não é bloqueada por conflito: regras conflitantes são a situação normal, e a prioridade existe exatamente para resolvê-las.",
+      "opcoes": [
+        { "texto": "Permitida, porque a regra de prioridade 300 é avaliada primeiro e a avaliação para na primeira correspondência.", "correta": true },
+        { "texto": "Negada, porque em network security group uma regra de negação sempre prevalece sobre uma de permissão.", "correta": false },
+        { "texto": "Permitida, porque entre regras concorrentes vence a que tem o prefixo de origem mais específico.", "correta": false },
+        { "texto": "Negada, porque duas regras para a mesma porta configuram conflito e a network security group aplica o padrão restritivo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-gateway-transito-15",
+      "topico": "Peering de rede virtual",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A vnet-hub-brs tem um gateway de VPN conectado ao datacenter da Contoso. A vnet-spoke-app está emparelhada com o hub, e as máquinas do spoke precisam alcançar servidores da rede local através desse gateway, sem que um segundo gateway seja implantado. Quais duas configurações de emparelhamento tornam isso possível? Selecione duas.",
+      "explicacao": "É preciso marcar \"Permitir trânsito de gateway\" no emparelhamento do lado do hub e \"Usar gateways remotos\" no emparelhamento do lado do spoke. As duas andam juntas e em lados opostos: a primeira autoriza o hub a oferecer o próprio gateway às redes emparelhadas, e a segunda faz o spoke efetivamente usar esse gateway em vez de exigir um próprio. Configurar apenas uma delas não produz efeito nenhum, e é o erro mais comum nesse cenário. \"Permitir tráfego encaminhado\" no spoke resolve outro problema: ela aceita tráfego cuja origem não é a rede emparelhada diretamente, o que importa em topologias com appliance encaminhando, e não é o que habilita o trânsito de gateway. Implantar um gateway também no spoke é justamente o que o requisito proíbe, além de ser incompatível com \"Usar gateways remotos\", que não pode ser marcada quando a rede já tem gateway próprio. E desabilitar o acesso à rede virtual remota cortaria a comunicação do spoke com o hub, indo na direção oposta do objetivo.",
+      "opcoes": [
+        { "texto": "Marcar \"Permitir trânsito de gateway\" no emparelhamento configurado no hub.", "correta": true },
+        { "texto": "Marcar \"Usar gateways remotos\" no emparelhamento configurado no spoke.", "correta": true },
+        { "texto": "Marcar \"Permitir tráfego encaminhado\" no emparelhamento configurado no spoke.", "correta": false },
+        { "texto": "Implantar um gateway de VPN também na vnet-spoke-app.", "correta": false },
+        { "texto": "Desabilitar \"Permitir acesso à rede virtual\" no emparelhamento do spoke.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-conectividade-diagnostico-16",
+      "topico": "Solução de problemas de conectividade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A VM-APP-01 não consegue abrir conexão TCP 443 com um endereço de outra sub-rede. A equipe precisa determinar, sem instalar nada no sistema operacional da máquina e sem depender de captura de tráfego, se o bloqueio vem de uma regra de segurança ou de um desvio de roteamento. Quais dois recursos do Network Watcher respondem diretamente a essas duas perguntas? Selecione duas.",
+      "explicacao": "A verificação de fluxo IP responde se alguma regra de network security group permite ou nega um fluxo específico, e nomeia a regra responsável — é a resposta direta para a parte de segurança. O próximo salto informa para onde o Azure encaminha um pacote saindo daquela interface para aquele destino, e é o que revela desvio de roteamento, como uma tabela de rotas mandando o tráfego para um appliance inesperado. Os dois são consultas de plano de controle e não exigem nada dentro da máquina, que é a restrição do enunciado. A captura de pacotes é útil, mas depende da extensão de agente na máquina e é justamente o caminho que o cenário exclui. Os logs de fluxo de network security group registram fluxos permitidos e negados continuamente, o que serve para investigar depois e não para responder a uma pergunta pontual agora. E a topologia apenas desenha os recursos da rede virtual, sem avaliar regra nem rota.",
+      "opcoes": [
+        { "texto": "Verificação de fluxo IP.", "correta": true },
+        { "texto": "Próximo salto.", "correta": true },
+        { "texto": "Captura de pacotes.", "correta": false },
+        { "texto": "Logs de fluxo de network security group.", "correta": false },
+        { "texto": "Topologia.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-rede-endpoint-servico-afirmacao-17",
+      "topico": "Endpoints de serviço e endpoints privados",
+      "tipo": "SimNao",
+      "enunciado": "A equipe habilitou o endpoint de serviço Microsoft.Storage na sub-rede snet-app e liberou essa sub-rede nas regras de rede da conta stcontosodocs01. Avalie a afirmação: depois dessa configuração, a conta de armazenamento passa a ser acessada por um endereço IP privado pertencente ao intervalo da vnet-spoke-app.",
+      "explicacao": "A afirmação é falsa. O endpoint de serviço não dá endereço privado ao serviço de destino: a conta de armazenamento continua sendo alcançada pelo próprio endpoint público, e o que muda é o caminho e a identidade da origem. O tráfego deixa de sair pela internet e passa a trafegar pelo backbone do Azure, e a conta passa a enxergar como origem o endereço privado da sub-rede, o que é justamente o que torna possível a regra de rede que libera aquela sub-rede. Quem responde Sim normalmente está descrevendo o endpoint privado, que é o recurso que de fato cria uma interface com endereço IP privado dentro da rede virtual apontando para o serviço — e é essa diferença que decide qual dos dois usar quando existe rede local envolvida, já que o endereço de origem de uma rede local não é o da sub-rede e por isso não é reconhecido pela regra do endpoint de serviço.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-rede-peering-espaco-sobreposto-18",
+      "topico": "Peering de rede virtual",
+      "tipo": "SimNao",
+      "enunciado": "A vnet-fusao-brs usa o espaço de endereçamento 10.20.0.0/16 e a vnet-prod-brs usa 10.20.0.0/16 também, por terem sido criadas por equipes diferentes após uma aquisição. As duas estão na mesma região e na mesma assinatura. Avalie a afirmação: é possível emparelhar as duas redes virtuais, desde que as sub-redes utilizadas dentro de cada uma não se sobreponham entre si.",
+      "explicacao": "A afirmação é falsa. O emparelhamento é recusado quando os espaços de endereçamento das redes virtuais se sobrepõem, independentemente de quais sub-redes estejam efetivamente em uso dentro de cada uma. A validação é feita sobre o espaço declarado na rede virtual, não sobre a ocupação real, porque é o espaço declarado que produz as rotas de sistema — com prefixos idênticos dos dois lados não haveria como decidir o destino de um pacote. Quem responde Sim costuma raciocinar pela ocupação, imaginando que basta não haver colisão prática entre as máquinas existentes. As saídas reais são reendereçar uma das redes virtuais, ou conectar as duas por um caminho que faça tradução de endereços, tipicamente um appliance virtual de rede — e não uma condição sobre as sub-redes.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-rede-assoc-conectividade-19",
+      "topico": "Redes virtuais e sub-redes",
+      "tipo": "Associacao",
+      "enunciado": "A arquiteta da Contoso precisa escolher o recurso de conectividade adequado para cada requisito abaixo, sempre pelo caminho mais simples que o atenda. Associe cada requisito ao recurso adequado.",
+      "explicacao": "Conectar a rede local ao Azure por um circuito privado dedicado, sem passar pela internet, é o que o ExpressRoute entrega. Administrar uma máquina sem endereço IP público e sem instalar cliente de VPN, direto pelo navegador, é exatamente o caso do Azure Bastion, que faz a sessão terminar num serviço gerenciado dentro da rede virtual. Dar saída para a internet a máquinas sem endereço IP público, com tradução de endereços previsível e sem expor porta de entrada, é a função do gateway NAT — e é também a peça que passa a ser necessária quando se troca um balanceador Básico por um Standard. Ligar duas redes virtuais da mesma região com latência de backbone e sem gateway é emparelhamento. O gateway de VPN ponto a site está no painel porque é a resposta reflexa para \"acessar a máquina remotamente\": ele resolveria o acesso, mas exige justamente o cliente de VPN que o requisito descarta, e continua sendo a escolha certa quando o que se quer é conectar o dispositivo inteiro à rede, e não abrir uma sessão administrativa.",
+      "associacoes": [
+        { "alvo": "Conectar o datacenter ao Azure por circuito privado dedicado, sem trafegar pela internet", "item": "ExpressRoute" },
+        { "alvo": "Abrir sessão administrativa em uma máquina sem IP público, pelo navegador e sem cliente de VPN", "item": "Azure Bastion" },
+        { "alvo": "Dar saída à internet a máquinas sem IP público, com tradução de endereços previsível", "item": "Gateway NAT" },
+        { "alvo": "Ligar duas redes virtuais da mesma região com latência de backbone, sem gateway", "item": "Emparelhamento de rede virtual" }
+      ],
+      "itensExtras": [
+        "Gateway de VPN ponto a site"
+      ]
+    },
+    {
+      "id": "az104-rede-assoc-network-watcher-20",
+      "topico": "Solução de problemas de conectividade",
+      "tipo": "Associacao",
+      "enunciado": "Cada situação abaixo exige uma resposta diferente do Network Watcher. Associe cada situação ao recurso que a responde diretamente, sem depender de outra ferramenta.",
+      "explicacao": "Saber se uma regra de network security group permite ou nega um fluxo específico, e qual regra decidiu, é o que a verificação de fluxo IP responde. Descobrir para onde o Azure encaminha um pacote saindo de uma interface para um destino é o próximo salto, que é como se identifica tabela de rotas desviando tráfego para um appliance. Manter registro contínuo dos fluxos permitidos e negados, para análise posterior de um incidente, são os logs de fluxo de network security group — a diferença deles para a verificação de fluxo IP é temporal: um responde sobre o passado, o outro sobre uma pergunta pontual agora. Medir latência e perda de pacotes de forma contínua entre uma máquina e um destino é o monitor de conexão. A captura de pacotes está no painel porque parece responder a todas: ela mostra o tráfego real, mas depende da extensão de agente instalada na máquina e entrega bytes brutos, não o veredito sobre regra ou rota que cada uma dessas situações pede.",
+      "associacoes": [
+        { "alvo": "Saber se uma regra de segurança está bloqueando um fluxo específico, e qual regra é", "item": "Verificação de fluxo IP" },
+        { "alvo": "Descobrir para onde o Azure encaminha o tráfego de uma interface para um destino", "item": "Próximo salto" },
+        { "alvo": "Ter registro contínuo dos fluxos permitidos e negados, para analisar um incidente depois", "item": "Logs de fluxo de NSG" },
+        { "alvo": "Medir latência e perda de pacotes de forma contínua até um destino", "item": "Monitor de conexão" }
+      ],
+      "itensExtras": [
+        "Captura de pacotes"
+      ]
+    },
+    {
+      "id": "az104-rede-assoc-proximo-salto-21",
+      "topico": "Rotas efetivas e rotas definidas pelo usuário",
+      "tipo": "Associacao",
+      "enunciado": "Ao escrever a tabela de rotas rt-snet-app, a equipe precisa escolher o tipo de próximo salto correto para cada intenção de roteamento. Associe cada intenção ao tipo de próximo salto que a realiza.",
+      "explicacao": "Encaminhar tráfego para outra sub-rede da mesma rede virtual, ou para uma rede emparelhada, é o tipo Rede virtual — é o que as rotas de sistema já fazem, e é o que se declara quando se quer devolver ao comportamento padrão um prefixo que estava desviado. Mandar tráfego para a rede local através do gateway de VPN ou do ExpressRoute é o tipo Gateway de rede virtual. Fazer o tráfego passar por um firewall implantado como máquina virtual é o tipo Appliance virtual, o único que pede um endereço IP junto e o único que exige encaminhamento de IP habilitado na interface do appliance. E descartar silenciosamente o tráfego de um prefixo é o tipo Nenhum, que existe justamente para criar um buraco negro de rota sem depender de regra de segurança — a diferença prática é que a network security group rejeita o pacote na avaliação de filtro, enquanto aqui ele simplesmente não tem para onde ir. O tipo Internet está no painel porque é o destino reflexo de qualquer tráfego de saída: ele encaminha para a internet ou para os endpoints públicos dos serviços do Azure, e não responde a nenhuma das quatro intenções acima.",
+      "associacoes": [
+        { "alvo": "Encaminhar o tráfego para outra sub-rede da mesma rede virtual ou para uma rede emparelhada", "item": "Rede virtual" },
+        { "alvo": "Encaminhar o tráfego para a rede local através do gateway de VPN", "item": "Gateway de rede virtual" },
+        { "alvo": "Fazer o tráfego passar por um firewall implantado como máquina virtual", "item": "Appliance virtual" },
+        { "alvo": "Descartar silenciosamente todo o tráfego destinado a um prefixo", "item": "Nenhum" }
+      ],
+      "itensExtras": [
+        "Internet"
+      ]
+    },
+    {
+      "id": "az104-rede-snat-exaustao-22",
+      "topico": "Balanceador de carga",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "As máquinas da sub-rede snet-lote ficam atrás de um balanceador de carga público de SKU Standard e fazem, em horários de pico, um grande volume de conexões curtas para o mesmo endpoint externo. Nesses períodos, novas conexões de saída passam a falhar por tempo esgotado, enquanto as conexões já estabelecidas seguem funcionando. O diagnóstico apontou exaustão de portas de tradução de endereços de saída. Quais duas ações atacam diretamente essa causa? Selecione duas.",
+      "explicacao": "Implantar um gateway NAT na sub-rede é a correção mais direta: ele passa a fornecer a saída, oferece um conjunto muito maior de portas e as aloca sob demanda, em vez de fixá-las por instância. Aumentar as portas alocadas por instância na regra de saída do balanceador é a outra ação que ataca a causa, e é a saída quando não se quer acrescentar recurso novo — o preço é reduzir o número de instâncias que cabem no mesmo endereço IP público. Aumentar o tamanho das máquinas não muda nada, porque a quantidade de portas de tradução não depende de CPU nem de memória; é a resposta reflexa de quem trata todo problema de pico como falta de capacidade. Habilitar o acelerador de rede reduz latência e uso de CPU no caminho de dados, mas não cria porta nenhuma. E voltar para o SKU Básico pioraria a situação de outra forma: além de perder recursos do Standard, a saída implícita do Básico também é limitada e não é configurável, então o problema voltaria sem nem sequer haver como ajustá-lo.",
+      "opcoes": [
+        { "texto": "Implantar um gateway NAT na sub-rede snet-lote.", "correta": true },
+        { "texto": "Aumentar o número de portas de saída alocadas por instância na regra de saída do balanceador.", "correta": true },
+        { "texto": "Aumentar o tamanho das máquinas virtuais do pool de back-end.", "correta": false },
+        { "texto": "Habilitar o acelerador de rede nas interfaces de rede das máquinas.", "correta": false },
+        { "texto": "Trocar o balanceador de carga para o SKU Básico.", "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,303 @@
+{
+  "exameCode": "AZ-104",
+  "area": "armazenamento",
+  "questoes": [
+    {
+      "id": "az104-armaz-politica-acesso-armazenada-01",
+      "topico": "SAS e políticas de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A Contoso entregou a um parceiro uma assinatura de acesso compartilhado com validade de trinta dias para um contêiner da stcontosodocs01. Após uma semana o contrato foi encerrado e o acesso precisa cessar imediatamente. A conta é usada por vários sistemas internos que dependem das chaves de acesso atuais, e derrubá-los não é aceitável. O que permite revogar apenas o acesso do parceiro?",
+      "explicacao": "Só é possível revogar uma assinatura antes do vencimento se ela tiver sido gerada vinculada a uma política de acesso armazenada: a assinatura passa a herdar prazo e permissões da política, e apagar ou alterar a política invalida todas as assinaturas ligadas a ela, sem tocar em chave nenhuma. É por isso que assinatura de longa duração para terceiro deve nascer vinculada a uma política — a decisão é tomada na emissão, e não dá para vincular depois. Rotacionar a chave que assinou a assinatura de fato a invalida, mas invalida também tudo o mais assinado com aquela chave, o que derrubaria os sistemas internos que o enunciado protege explicitamente. Excluir o contêiner elimina o acesso e os dados junto, o que não é revogar e sim destruir. E alterar a regra de firewall só ajudaria se o parceiro acessasse de um endereço fixo conhecido, o que o enunciado não informa, e não revoga a credencial: ela continuaria válida de qualquer outra origem permitida.",
+      "opcoes": [
+        { "texto": "Ter emitido a assinatura vinculada a uma política de acesso armazenada e então excluir a política.", "correta": true },
+        { "texto": "Rotacionar a chave de acesso que assinou a assinatura entregue ao parceiro.", "correta": false },
+        { "texto": "Excluir o contêiner e recriá-lo com o mesmo nome, o que invalida a assinatura.", "correta": false },
+        { "texto": "Adicionar uma regra de firewall na conta negando o endereço de origem do parceiro.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-rotacao-chave-sas-02",
+      "topico": "Chaves de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um administrador suspeita que a chave primária da stcontosodocs01 vazou e a rotaciona imediatamente. Depois disso, além das aplicações que usavam a cadeia de conexão, várias integrações que usavam assinaturas de acesso compartilhado com validade de meses também pararam de funcionar. A equipe não esperava esse efeito. Qual é a explicação?",
+      "explicacao": "Toda assinatura de acesso compartilhado de serviço ou de conta é assinada criptograficamente com uma das duas chaves da conta. Rotacionar a chave usada na assinatura invalida de uma vez todas as assinaturas geradas com ela, independentemente do prazo de validade que carregavam — é justamente esse acoplamento que torna a rotação uma operação de impacto amplo, e é a razão de existirem duas chaves: rotaciona-se uma, migram-se os consumidores, depois rotaciona-se a outra. Dizer que assinaturas continuam válidas até o vencimento descreve o comportamento esperado por quem não sabe que elas dependem da chave. Atribuir a parada ao firewall não explica nada, porque rotacionar chave não altera regra de rede. E a exclusão temporária protege blobs excluídos; não tem relação com credencial.",
+      "opcoes": [
+        { "texto": "As assinaturas são assinadas com a chave da conta, então rotacioná-la invalida todas as que foram geradas com ela.", "correta": true },
+        { "texto": "As assinaturas continuam válidas até o vencimento; a parada foi causada por outro fator.", "correta": false },
+        { "texto": "A rotação de chave reativa o firewall padrão da conta, bloqueando origens externas.", "correta": false },
+        { "texto": "A rotação apaga as políticas de exclusão temporária, o que impede a leitura dos blobs.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-firewall-portal-03",
+      "topico": "Firewall e redes da conta",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Depois de configurar o firewall da stcontosodocs01 para permitir acesso apenas de redes selecionadas, adicionando a sub-rede snet-app, o administrador abre o portal do Azure na própria estação de trabalho e tenta navegar pelos blobs do contêiner. O portal exibe erro de autorização ao listar o conteúdo, embora ele seja Proprietário da assinatura. Qual é a causa?",
+      "explicacao": "A navegação pelos blobs no portal é feita a partir do navegador do administrador, com origem no endereço público da estação de trabalho — e esse endereço não está na lista de redes permitidas. O firewall da conta é avaliado no plano de dados independentemente da função no plano de gerenciamento, por isso ser Proprietário não ajuda: RBAC diz o que a pessoa pode fazer, e o firewall diz de onde. A correção é adicionar o endereço público do cliente às regras, ou acessar a partir de uma máquina dentro da sub-rede permitida. Falta de função no plano de dados é uma causa possível de erro parecido em outros cenários, mas não explica um erro que apareceu logo após mudar o firewall. Marcar serviços confiáveis da Microsoft libera serviços do Azure agindo em nome do cliente, não o navegador de uma pessoa. E chave de acesso desabilitada produziria falha em ferramentas que usam chave, não no portal com credencial do Entra.",
+      "opcoes": [
+        { "texto": "O endereço público da estação não está nas redes permitidas, e o firewall é avaliado independentemente da função.", "correta": true },
+        { "texto": "Falta ao administrador uma função de plano de dados, como Colaborador de Dados do Storage Blob.", "correta": false },
+        { "texto": "A exceção de serviços confiáveis da Microsoft não foi marcada, e o portal depende dela.", "correta": false },
+        { "texto": "O acesso por chave de acesso foi desabilitado na conta, o que impede o portal de listar blobs.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-archive-reidratacao-04",
+      "topico": "Camadas de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um lote de relatórios antigos foi movido para a camada Archive há seis meses para reduzir custo. A auditoria pediu três desses arquivos com urgência. Um analista tenta baixá-los diretamente pelo Storage Explorer e recebe erro informando que a operação não é permitida para o nível de acesso do blob. Qual é o procedimento correto?",
+      "explicacao": "A camada Archive é offline: o blob permanece armazenado, mas seus dados não podem ser lidos enquanto estiverem ali. É preciso reidratá-lo, mudando a camada para Hot ou Cool ou copiando-o para um novo blob em camada online, e a operação leva horas — há prioridade padrão e prioridade alta, que reduz o tempo mas custa mais. Por isso o Archive só é adequado quando a recuperação em horas é aceitável, e é isso que precisa ser combinado antes de arquivar. Conceder função de plano de dados não resolve, porque o erro não é de permissão e sim do estado do blob. Refazer o download com outra ferramenta dá o mesmo erro, já que a restrição é do serviço e não do cliente. E desabilitar a regra de ciclo de vida evita que novos blobs sejam arquivados no futuro, mas não traz de volta o que já está lá — o blob já arquivado continua exigindo reidratação.",
+      "opcoes": [
+        { "texto": "Reidratar os blobs para uma camada online, o que leva horas e admite prioridade alta a custo maior.", "correta": true },
+        { "texto": "Conceder ao analista a função Leitor de Dados do Storage Blob e repetir o download.", "correta": false },
+        { "texto": "Refazer o download com o AzCopy, que lê a camada Archive diretamente.", "correta": false },
+        { "texto": "Desabilitar a regra de gerenciamento de ciclo de vida, o que devolve os blobs à camada Hot.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-soft-delete-container-05",
+      "topico": "Proteção de dados de blob",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A stcontosodocs01 tem exclusão temporária de blob habilitada com retenção de catorze dias. Um script mal parametrizado excluiu o contêiner inteiro chamado relatorios, com todos os blobs dentro. A equipe abre a conta esperando encontrar o conteúdo na lista de itens excluídos e não encontra nada. Por quê?",
+      "explicacao": "Exclusão temporária de blob protege blobs excluídos individualmente; ela não cobre a exclusão do contêiner, que é uma operação de nível acima e leva junto tudo o que estava dentro. A proteção para esse caso é a exclusão temporária de contêiner, que é uma configuração separada e precisa ser habilitada explicitamente — e a distinção entre as duas é exatamente o que costuma faltar até o dia do acidente. Dizer que a retenção precisa ser maior não muda nada, porque o problema não é prazo e sim escopo. Versionamento também não salvaria: ele guarda versões anteriores de cada blob, mas as versões pertencem ao contêiner e desaparecem com ele. E supor que os blobs continuam recuperáveis por chamada direta ignora que sem o contêiner não há caminho para eles — o que existe, quando a exclusão temporária de contêiner está ligada, é restaurar o contêiner e com ele o conteúdo.",
+      "opcoes": [
+        { "texto": "Exclusão temporária de blob não cobre exclusão de contêiner; seria preciso ter habilitado a de contêiner.", "correta": true },
+        { "texto": "A retenção de catorze dias é curta demais para exclusões em lote feitas por script.", "correta": false },
+        { "texto": "Faltou habilitar o versionamento de blob, que é o que preserva o conteúdo de contêineres excluídos.", "correta": false },
+        { "texto": "Os blobs continuam recuperáveis por chamada direta ao endereço de cada um, embora não apareçam na lista.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-grs-secundario-06",
+      "topico": "Redundância",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A stcontosorel01 está configurada com armazenamento com redundância geográfica. A equipe de relatórios quer ler os dados a partir da região secundária, para não competir com a carga de produção na região primária, sem executar failover. Ao tentar montar a consulta, não encontra o endereço secundário disponível. O que explica isso e o que precisa mudar?",
+      "explicacao": "Na redundância geográfica simples, a réplica secundária existe e é mantida atualizada de forma assíncrona, mas não é legível: ela serve para recuperação e só se torna acessível depois de um failover de conta. Para ler do secundário em operação normal é preciso habilitar o acesso de leitura, passando a configuração para redundância geográfica com acesso de leitura, que expõe um endereço com o sufixo de secundário. Vale lembrar que essa leitura pode devolver dados ligeiramente defasados, por causa da replicação assíncrona — o que é aceitável para relatório e não seria para transação. Dizer que é preciso failover atende ao objetivo pelo caminho errado e destrutivo: failover promove o secundário e é operação de contingência, não de rotina. Redundância de zona protege dentro da mesma região e não cria endereço secundário. E função de plano de dados não cria endereço que a conta não expõe.",
+      "opcoes": [
+        { "texto": "O secundário do GRS não é legível; é preciso mudar para redundância geográfica com acesso de leitura.", "correta": true },
+        { "texto": "É preciso executar um failover de conta para que o endereço secundário passe a existir.", "correta": false },
+        { "texto": "É preciso mudar a conta para redundância de zona, que expõe endereços de leitura por zona.", "correta": false },
+        { "texto": "Falta à equipe a função Leitor de Dados do Storage Blob no escopo da réplica secundária.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-ciclo-de-vida-avaliacao-07",
+      "topico": "Gerenciamento de ciclo de vida",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma regra de gerenciamento de ciclo de vida foi criada para mover para a camada Cool todo blob de um contêiner que não seja modificado há mais de trinta dias. Logo após salvar a regra, a equipe verifica blobs com noventa dias sem modificação e vê que continuam em Hot. Passadas algumas horas, nada mudou. O que está acontecendo?",
+      "explicacao": "As regras de ciclo de vida são avaliadas pela plataforma em uma execução diária, e não no momento em que a regra é salva; além disso, a primeira execução após criar ou alterar uma regra pode demorar mais de um dia para concluir sobre todo o contêiner. Ou seja, o comportamento é o esperado e a ação correta é aguardar o ciclo — não há como forçar a avaliação imediata. Supor que a regra está errada por usar o critério de modificação é infundado, porque esse critério é justamente o padrão desse tipo de regra. Achar que ela só vale para blobs criados após a regra confunde ciclo de vida com política aplicada na criação: a avaliação alcança os blobs existentes, que é o motivo de existir. E imaginar que é preciso versionamento habilitado inventa um pré-requisito: versionamento amplia o que a regra pode alcançar, mas não é condição para mover blob entre camadas.",
+      "opcoes": [
+        { "texto": "As regras são avaliadas em execução diária da plataforma; a primeira passagem pode levar mais de um dia.", "correta": true },
+        { "texto": "A regra está incorreta: o critério de tempo desde a última modificação não é aceito para mudança de camada.", "correta": false },
+        { "texto": "A regra vale apenas para blobs criados depois de ela ser salva; os antigos precisam ser movidos à mão.", "correta": false },
+        { "texto": "É preciso habilitar o versionamento de blob para que as regras de ciclo de vida sejam avaliadas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-criptografia-infraestrutura-08",
+      "topico": "Criptografia da conta",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma exigência de conformidade determina que os dados da nova conta de armazenamento sejam criptografados em duas camadas independentes, com algoritmos e chaves distintos, de modo que a falha de uma camada não exponha os dados. A equipe já criou a stcontosofin01 na semana passada e agora tenta habilitar essa proteção nas configurações da conta, sem encontrar a opção. O que precisa ser feito?",
+      "explicacao": "A criptografia de infraestrutura, que é o nome dessa segunda camada, só pode ser habilitada no momento da criação da conta — não existe como ativá-la depois, e é por isso que a opção não aparece nas configurações da conta existente. O caminho é criar uma conta nova com a opção marcada e migrar os dados para ela, tipicamente com AzCopy. É uma decisão de criação, e o custo de descobri-la tarde é exatamente esse: recriar e copiar. Desabilitar e reabilitar a criptografia da conta não é possível, porque a criptografia em repouso é sempre ativa e não pode ser desligada. Configurar chave gerenciada pelo cliente é outro eixo — troca quem controla a chave, e não acrescenta uma segunda camada. E a redundância geográfica trata de cópias em outra região, sem relação nenhuma com camadas de criptografia.",
+      "opcoes": [
+        { "texto": "Criar uma conta nova com criptografia de infraestrutura habilitada na criação e migrar os dados.", "correta": true },
+        { "texto": "Desabilitar temporariamente a criptografia da conta e reabilitá-la com a segunda camada marcada.", "correta": false },
+        { "texto": "Configurar uma chave gerenciada pelo cliente no cofre de chaves, o que acrescenta a segunda camada.", "correta": false },
+        { "texto": "Alterar a redundância da conta para geográfica, o que ativa a criptografia dupla entre regiões.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-endpoint-privado-sub-recurso-09",
+      "topico": "Firewall e redes da conta",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A stcontosodocs01 é usada tanto para blobs quanto para um compartilhamento do Azure Files. A equipe criou um endpoint privado para a conta escolhendo o sub-recurso blob, vinculou a zona DNS privada correspondente e desabilitou o acesso público. O acesso aos blobs passou a funcionar pela rede virtual, mas as máquinas não conseguem mais montar o compartilhamento de arquivos. Qual é a causa?",
+      "explicacao": "Cada sub-recurso da conta tem o próprio endpoint privado e a própria zona DNS privada: o endpoint criado para blob resolve apenas o endereço de blob, e o nome usado para montar o compartilhamento continua sem resolução privada. Com o acesso público desabilitado, o resultado é exatamente o descrito — blob funciona, arquivos não. A correção é criar um segundo endpoint privado com o sub-recurso file e vincular a zona privada correspondente. Supor que o endpoint cobre todos os serviços da conta é o engano central aqui e é o que faz a configuração parecer completa. Atribuir o problema à porta do protocolo de arquivos não explica, porque a falha começa na resolução do nome, antes de qualquer conexão. E redundância de zona não tem relação com acesso privado.",
+      "opcoes": [
+        { "texto": "Cada sub-recurso precisa do próprio endpoint privado e da própria zona DNS; falta o de file.", "correta": true },
+        { "texto": "O endpoint privado cobre todos os serviços da conta, e o problema é a porta 445 bloqueada na sub-rede.", "correta": false },
+        { "texto": "O Azure Files não é compatível com endpoint privado e exige endpoint de serviço.", "correta": false },
+        { "texto": "A conta precisa ser convertida para redundância de zona para que o compartilhamento use o endpoint privado.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-penalidade-remocao-antecipada-10",
+      "topico": "Camadas de acesso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para economizar, a equipe moveu para a camada Cool um conjunto de blobs recém-criados. Duas semanas depois, o processo que consome esses arquivos foi reescrito e todos os blobs foram excluídos. Na fatura seguinte, o custo do armazenamento veio maior do que o esperado para o período em que os dados existiram. Qual é a explicação mais provável?",
+      "explicacao": "As camadas frias têm período mínimo de permanência e cobram penalidade de remoção antecipada: excluir ou mover o blob para outra camada antes de completar esse período gera cobrança proporcional aos dias que faltavam, como se ele tivesse permanecido. Com duas semanas de vida em Cool, o blob não cumpriu o mínimo e a diferença apareceu na fatura. É a armadilha clássica de usar camada fria para dado de vida curta: o preço por gigabyte cai, mas o compromisso de permanência sobe, e para dado efêmero a Hot costuma sair mais barata. Supor cobrança em dobro por leitura não corresponde ao sintoma, que é custo de armazenamento e não de operação. Reidratação só se aplica ao Archive, que não é o caso. E a exclusão temporária realmente prolonga a cobrança enquanto os dados retidos existem, mas o enunciado não menciona que ela esteja habilitada, o que faz da penalidade a explicação mais provável.",
+      "opcoes": [
+        { "texto": "A camada Cool tem período mínimo de permanência, e excluir antes dele gera penalidade de remoção antecipada.", "correta": true },
+        { "texto": "Blobs em Cool são cobrados em dobro a cada operação de leitura, e o processo leu muitas vezes.", "correta": false },
+        { "texto": "Mover blobs para Cool dispara uma cobrança de reidratação equivalente à do Archive.", "correta": false },
+        { "texto": "A camada Cool não aceita exclusão antes de trinta dias, e os blobs continuaram sendo cobrados como ativos.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-azcopy-vs-explorer-11",
+      "topico": "Movimentação de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe precisa copiar cerca de quatro milhões de blobs da stcontosolegado01 para a stcontosonovo01, em outra região, dentro de uma janela noturna. A operação precisa rodar sem alguém acompanhando, registrar o que foi transferido e retomar de onde parou caso a conexão caia no meio. Qual ferramenta atende ao requisito?",
+      "explicacao": "O AzCopy é a ferramenta indicada: roda em linha de comando, pode ser agendado, transfere em paralelo com alto desempenho, grava log das transferências e mantém um plano de trabalho que permite retomar um trabalho interrompido de onde parou. É justamente a retomada e a operação desacompanhada que descartam as alternativas. O Storage Explorer é excelente para inspeção visual e ajustes pontuais, mas depende de alguém com a interface aberta e não é feito para volume dessa ordem. Copiar pelo portal tem as mesmas limitações, agravadas por ser dentro do navegador. E a replicação de objeto resolveria a cópia contínua de blobs novos entre contas, mas exige configuração prévia nas duas pontas, replica de forma assíncrona e não é o mecanismo para uma migração pontual com janela definida — além de não cobrir o que já existia sem uma política de captura retroativa.",
+      "opcoes": [
+        { "texto": "AzCopy, que roda em linha de comando, registra log e retoma trabalhos interrompidos.", "correta": true },
+        { "texto": "Storage Explorer, arrastando os contêineres de uma conta para a outra.", "correta": false },
+        { "texto": "O próprio portal do Azure, usando a função de copiar contêiner entre contas.", "correta": false },
+        { "texto": "Replicação de objeto entre as duas contas, que copia todo o conteúdo existente.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-versionamento-sobrescrita-12",
+      "topico": "Proteção de dados de blob",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um processo automatizado sobrescreveu por engano o blob catalogo.json com um conteúdo vazio. O blob não foi excluído: ele existe, com o mesmo nome, e o conteúdo anterior sumiu. A conta tem exclusão temporária de blob habilitada com trinta dias de retenção. A equipe procura o conteúdo antigo na lista de blobs excluídos e não encontra. Qual recurso teria preservado o conteúdo anterior?",
+      "explicacao": "O recurso adequado é o versionamento de blob, que cria automaticamente uma versão a cada escrita: a sobrescrita passa a gerar uma versão nova e mantém a anterior recuperável, que é exatamente o caso aqui. A exclusão temporária protege contra exclusão, e o enunciado deixa claro que o blob não foi excluído — por isso ele não aparece na lista de itens excluídos, e é essa distinção entre sobrescrever e excluir que costuma passar despercebida até acontecer. Aumentar a retenção da exclusão temporária não muda o escopo dela. Exclusão temporária de contêiner protege o contêiner inteiro, outro nível ainda. E a replicação de objeto copiaria a sobrescrita para o destino, propagando o problema em vez de proteger contra ele — vale notar, aliás, que o versionamento é pré-requisito da replicação de objeto, o que reforça que são coisas diferentes.",
+      "opcoes": [
+        { "texto": "Versionamento de blob, que preserva a versão anterior a cada escrita.", "correta": true },
+        { "texto": "Aumentar a retenção da exclusão temporária de blob para além de trinta dias.", "correta": false },
+        { "texto": "Exclusão temporária de contêiner, que também cobre alterações nos blobs contidos.", "correta": false },
+        { "texto": "Replicação de objeto para outra conta, que manteria a cópia íntegra do arquivo.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-files-premium-13",
+      "topico": "Azure Files",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação de processamento de imagens exige de um compartilhamento de arquivos latência baixa e desempenho previsível, com IOPS que não dependam de quanto espaço está ocupado. A equipe criou uma conta de uso geral v2 e um compartilhamento padrão, e o desempenho oscila conforme o volume armazenado. Qual mudança atende ao requisito?",
+      "explicacao": "Compartilhamentos premium exigem uma conta do tipo FileStorage e usam armazenamento em unidade de estado sólido com desempenho provisionado — a capacidade contratada define IOPS e taxa de transferência de forma previsível, independentemente da ocupação. Como o tipo de conta não pode ser convertido, é preciso criar a conta FileStorage e migrar o compartilhamento. Aumentar a cota do compartilhamento padrão altera o limite de espaço, e no modelo padrão o desempenho varia conforme o uso, o que não entrega previsibilidade. Mudar a redundância para zona melhora a tolerância a falha dentro da região e não tem efeito sobre latência. E camadas de acesso como Cool e Archive são conceito de blob, não de compartilhamento de arquivos — aplicá-las aqui não faz sentido e é o distrator de quem mistura os dois serviços da mesma conta.",
+      "opcoes": [
+        { "texto": "Criar uma conta do tipo FileStorage e migrar o compartilhamento para o nível premium.", "correta": true },
+        { "texto": "Aumentar a cota do compartilhamento padrão, o que eleva proporcionalmente os IOPS garantidos.", "correta": false },
+        { "texto": "Alterar a redundância da conta para redundância de zona, reduzindo a latência de escrita.", "correta": false },
+        { "texto": "Mover o compartilhamento para a camada de acesso Cool, otimizada para carga de leitura intensa.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-replicacao-objeto-requisitos-14",
+      "topico": "Replicação de objeto",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso quer que todo blob novo gravado em um contêiner da stcontosoorigem01 seja copiado automaticamente para um contêiner da stcontosodestino01, em outra região, sem escrever nenhuma automação. Ao tentar criar a política de replicação de objeto, o portal recusa a configuração. Quais dois pré-requisitos precisam estar atendidos nas contas? Selecione duas.",
+      "explicacao": "A replicação de objeto exige versionamento de blob habilitado tanto na conta de origem quanto na de destino, e o feed de alterações habilitado na origem. O versionamento é o que dá a cada gravação uma identidade estável para replicar, e o feed de alterações é o registro ordenado de escritas que o serviço consome para saber o que copiar — sem ele não há de onde derivar o trabalho de replicação, e é por isso que a configuração é recusada. Redundância geográfica nas duas contas não é exigida: a replicação de objeto é entre contas e independe do modelo de redundância de cada uma. Contas na mesma região tampouco é requisito, e seria contraditório com o objetivo do recurso, que é justamente aproximar dados de outra região. E chaves compartilhadas entre as contas não existem como conceito nem seriam necessárias, já que a replicação é feita pelo próprio serviço.",
+      "opcoes": [
+        { "texto": "Versionamento de blob habilitado nas contas de origem e de destino.", "correta": true },
+        { "texto": "Feed de alterações habilitado na conta de origem.", "correta": true },
+        { "texto": "Redundância geográfica habilitada nas duas contas.", "correta": false },
+        { "texto": "As duas contas criadas na mesma região.", "correta": false },
+        { "texto": "A mesma chave de acesso configurada nas duas contas.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-acesso-privado-abordagens-15",
+      "topico": "Firewall e redes da conta",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A stcontosodocs01 não pode mais ser acessível pela internet pública, e as máquinas da sub-rede snet-app precisam continuar lendo e gravando blobs. A equipe não vai alterar código de aplicação nem distribuir credencial nova. Quais duas abordagens, cada uma sozinha, atendem ao requisito? Selecione duas.",
+      "explicacao": "A primeira abordagem é o endpoint privado na snet-app com a zona DNS privada vinculada, que dá à conta um endereço privado dentro da rede virtual e permite desabilitar o acesso público por completo. A segunda é o endpoint de serviço na sub-rede combinado com a regra de rede que libera essa sub-rede no firewall da conta: o tráfego passa a sair pelo backbone e a conta reconhece a sub-rede como origem, recusando o restante da internet. As duas resolvem sozinhas e diferem no alcance — só o endpoint privado serve quando há rede local envolvida. Liberar o endereço público de saída da sub-rede no firewall mantém a conta exposta na internet e depende de um endereço que pode mudar. Grupo de segurança de aplicativo é conceito de regra de rede entre recursos, e não é reconhecido pelo firewall da conta. E marcar serviços confiáveis da Microsoft libera serviços do Azure agindo em nome do cliente, não máquinas virtuais de aplicação.",
+      "opcoes": [
+        { "texto": "Criar um endpoint privado na snet-app e vincular a zona DNS privada correspondente.", "correta": true },
+        { "texto": "Habilitar o endpoint de serviço na snet-app e liberar essa sub-rede nas regras de rede da conta.", "correta": true },
+        { "texto": "Liberar no firewall da conta o endereço público de saída usado pela sub-rede.", "correta": false },
+        { "texto": "Associar as interfaces das máquinas a um grupo de segurança de aplicativo permitido na conta.", "correta": false },
+        { "texto": "Marcar a exceção de serviços confiáveis da Microsoft nas configurações de rede da conta.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-files-identidade-16",
+      "topico": "Azure Files",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "A Contoso quer que os usuários do domínio acessem o compartilhamento compartilhamento-rh com as próprias credenciais corporativas, mantendo permissões diferentes por pasta, e sem distribuir a chave da conta de armazenamento a ninguém. Quais dois elementos precisam ser configurados para que isso funcione? Selecione duas.",
+      "explicacao": "São necessárias duas camadas, e é justamente por serem duas que a configuração costuma ficar pela metade. A primeira é a permissão de nível de compartilhamento, concedida por atribuição de função do RBAC — ela decide quem pode montar o compartilhamento e com que tipo de acesso geral. A segunda são as permissões de nível de diretório e arquivo, definidas nas listas de controle de acesso do sistema de arquivos, que é o que permite permissões diferentes por pasta, exatamente o que o enunciado pede. Sem a função, o usuário nem monta; só com a função, todo mundo enxerga tudo dentro do compartilhamento. Distribuir a chave da conta é o que se quer evitar e daria acesso irrestrito. Assinatura de acesso compartilhado por usuário não resolve identidade corporativa e voltaria a depender da chave. E endpoint privado trata de caminho de rede, não de identidade.",
+      "opcoes": [
+        { "texto": "Permissão de nível de compartilhamento, por atribuição de função do RBAC.", "correta": true },
+        { "texto": "Permissões de nível de diretório e arquivo, nas listas de controle de acesso do sistema de arquivos.", "correta": true },
+        { "texto": "Distribuição da chave de acesso da conta aos usuários do departamento.", "correta": false },
+        { "texto": "Uma assinatura de acesso compartilhado emitida individualmente para cada usuário.", "correta": false },
+        { "texto": "Um endpoint privado para o sub-recurso file, sem o qual a identidade não é validada.", "correta": false }
+      ]
+    },
+    {
+      "id": "az104-armaz-criptografia-desabilitar-17",
+      "topico": "Criptografia da conta",
+      "tipo": "SimNao",
+      "enunciado": "Uma auditoria interna pediu à equipe que comprovasse a possibilidade de desligar a criptografia em repouso de uma conta de armazenamento, para medir o ganho de desempenho em um teste comparativo. Avalie a afirmação: é possível desabilitar a criptografia do serviço de armazenamento em uma conta, desde que se aceite formalmente o risco.",
+      "explicacao": "A afirmação é falsa. A criptografia em repouso do serviço de armazenamento é sempre ativa e não pode ser desabilitada em hipótese alguma — não existe opção, nem por portal, nem por linha de comando, nem por solicitação de suporte. O que é configurável é quem controla a chave: por padrão a chave é gerenciada pela Microsoft, e é possível passar para uma chave gerenciada pelo cliente, guardada em cofre de chaves, o que muda a governança sem alterar o fato de que os dados estão criptografados. Também é possível acrescentar uma segunda camada, a criptografia de infraestrutura, que só pode ser habilitada na criação da conta. Sobre o teste pretendido, ele não faria sentido: a criptografia é aplicada de forma transparente pela plataforma e não é o fator que determina o desempenho percebido, que depende de camada de desempenho, redundância e padrão de acesso.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-armaz-soft-delete-conta-18",
+      "topico": "Proteção de dados de blob",
+      "tipo": "SimNao",
+      "enunciado": "A stcontosodocs01 tem exclusão temporária de blob e de contêiner habilitadas, ambas com retenção de trinta dias. Durante uma limpeza, alguém excluiu a conta de armazenamento inteira. Avalie a afirmação: as configurações de exclusão temporária permitem restaurar os dados, porque a retenção de trinta dias ainda está em curso.",
+      "explicacao": "A afirmação é falsa. Exclusão temporária de blob e de contêiner são recursos internos à conta: eles retêm objetos excluídos dentro dela e desaparecem junto com ela. Excluir a conta de armazenamento remove tudo o que ela continha, e a retenção configurada não sobrevive ao próprio contêiner de tudo. A proteção contra esse cenário está em outra camada: bloqueio de recurso do tipo Não Pode Excluir na conta ou no grupo de recursos, que barra a exclusão até para quem é Proprietário, e cópias em outra conta, por replicação de objeto ou por backup. Vale registrar que existe, em condições específicas e por prazo curto, a possibilidade de recuperação de conta excluída, mas depender disso é depender de exceção, não de desenho — o controle previsível é o bloqueio, e é ele que deveria estar aplicado numa conta cujo conteúdo importa.",
+      "opcoes": [
+        { "texto": "Sim", "correta": false },
+        { "texto": "Não", "correta": true }
+      ]
+    },
+    {
+      "id": "az104-armaz-assoc-redundancia-19",
+      "topico": "Redundância",
+      "tipo": "Associacao",
+      "enunciado": "A equipe precisa escolher a opção de redundância adequada para cada requisito abaixo, sempre a mais barata que o atenda. Associe cada requisito à opção de redundância.",
+      "explicacao": "Guardar cópias apenas dentro de um único datacenter, tolerando falha de disco ou de rack ao menor custo, é o armazenamento com redundância local. Sobreviver à perda de um datacenter inteiro sem sair da região é a redundância de zona, que distribui cópias por instalações separadas dentro da mesma região. Manter cópia em outra região para recuperação, sem precisar lê-la em operação normal, é a redundância geográfica — e vale lembrar que ali o secundário não é legível. Poder consultar essa cópia da outra região para relatórios, sem executar failover, é a redundância geográfica com acesso de leitura, que existe justamente por causa dessa necessidade. A redundância geográfica de zona está no painel porque é a resposta certa de uma pergunta vizinha, que combina os dois eixos — zonas na região primária mais réplica em outra região — e por isso é a mais cara: nenhum dos quatro requisitos pede as duas proteções ao mesmo tempo.",
+      "associacoes": [
+        { "alvo": "Menor custo, tolerando falha de disco ou rack dentro de um único datacenter", "item": "Redundância local (LRS)" },
+        { "alvo": "Sobreviver à perda de um datacenter inteiro, sem sair da região", "item": "Redundância de zona (ZRS)" },
+        { "alvo": "Manter cópia em outra região para recuperação, sem precisar lê-la em operação normal", "item": "Redundância geográfica (GRS)" },
+        { "alvo": "Consultar a cópia da outra região para relatórios, sem executar failover", "item": "Redundância geográfica com acesso de leitura (RA-GRS)" }
+      ],
+      "itensExtras": [
+        "Redundância geográfica de zona (GZRS)"
+      ]
+    },
+    {
+      "id": "az104-armaz-assoc-mecanismo-acesso-20",
+      "topico": "SAS e políticas de acesso",
+      "tipo": "Associacao",
+      "enunciado": "Para cada necessidade de acesso abaixo, a equipe precisa escolher o mecanismo de credencial adequado, com o menor privilégio que atenda. Associe cada necessidade ao mecanismo.",
+      "explicacao": "Dar a um parceiro externo acesso temporário a um único blob, com possibilidade de revogar antes do vencimento, é assinatura de acesso compartilhado de serviço vinculada a uma política de acesso armazenada — só o vínculo com a política permite a revogação antecipada. Dar acesso contínuo aos blobs a uma aplicação que roda no Azure é atribuição de função do RBAC à identidade gerenciada dela, sem credencial para guardar nem girar. Gerar uma assinatura assinada com credencial do Microsoft Entra, sem envolver a chave da conta, é a assinatura de delegação de usuário, que reduz o alcance do estrago caso vaze. E uma ferramenta legada que não fala Entra e precisa de acesso administrativo depende da chave de acesso da conta, que é o mecanismo mais poderoso e o último recurso. A política de expiração de chave está no painel porque soa como controle de acesso: ela apenas sinaliza que as chaves passaram do prazo de rotação recomendado, sem conceder nem revogar nada.",
+      "associacoes": [
+        { "alvo": "Acesso temporário de um parceiro a um único blob, revogável antes do vencimento", "item": "SAS de serviço com política de acesso armazenada" },
+        { "alvo": "Acesso contínuo aos blobs para uma aplicação que roda no Azure", "item": "Função do RBAC atribuída à identidade gerenciada" },
+        { "alvo": "Assinatura assinada com credencial do Entra, sem usar a chave da conta", "item": "SAS de delegação de usuário" },
+        { "alvo": "Acesso administrativo total para uma ferramenta legada que não fala Entra", "item": "Chave de acesso da conta" }
+      ],
+      "itensExtras": [
+        "Política de expiração de chave"
+      ]
+    },
+    {
+      "id": "az104-armaz-assoc-protecao-dados-21",
+      "topico": "Proteção de dados de blob",
+      "tipo": "Associacao",
+      "enunciado": "Cada acidente descrito abaixo é evitado por um recurso diferente de proteção de dados. Associe cada acidente ao recurso que permitiria recuperar o conteúdo.",
+      "explicacao": "Recuperar um blob sobrescrito por engano, voltando ao conteúdo anterior, é versionamento de blob: a escrita cria versão nova e preserva a antiga. Recuperar um blob excluído dentro do período de retenção é exclusão temporária de blob, que trata de exclusão e não de sobrescrita. Recuperar um contêiner inteiro excluído por engano é exclusão temporária de contêiner, uma configuração separada — a de blob não cobre esse caso, e descobrir isso no dia do acidente é tarde. Impedir que a conta de armazenamento inteira seja excluída é bloqueio de recurso, a única camada que barra a operação até para quem é Proprietário, porque nenhuma exclusão temporária sobrevive à remoção da conta que a hospeda. O instantâneo manual está no painel porque de fato preserva conteúdo, mas depende de alguém tê-lo criado antes do acidente: é ação deliberada e pontual, não proteção contínua, e por isso não responde a nenhum dos quatro.",
+      "associacoes": [
+        { "alvo": "Um blob foi sobrescrito por engano e o conteúdo anterior sumiu", "item": "Versionamento de blob" },
+        { "alvo": "Um blob foi excluído por engano, dentro do período de retenção", "item": "Exclusão temporária de blob" },
+        { "alvo": "Um contêiner inteiro foi excluído por um script mal parametrizado", "item": "Exclusão temporária de contêiner" },
+        { "alvo": "Alguém tentou excluir a conta de armazenamento inteira", "item": "Bloqueio de recurso" }
+      ],
+      "itensExtras": [
+        "Instantâneo manual do blob"
+      ]
+    },
+    {
+      "id": "az104-armaz-assoc-camadas-acesso-22",
+      "topico": "Camadas de acesso",
+      "tipo": "Associacao",
+      "enunciado": "Para cada padrão de uso de dados abaixo, a equipe precisa escolher a camada de acesso de blob adequada, ao menor custo total. Associe cada padrão à camada.",
+      "explicacao": "Arquivos lidos e gravados muitas vezes ao dia ficam na camada Hot, que tem o maior custo por gigabyte armazenado e o menor por operação — é o equilíbrio certo quando o acesso é frequente. Backups mensais, acessados poucas vezes mas que precisam estar disponíveis na hora, ficam em Cool, que baixa o custo de armazenamento em troca de custo maior por acesso e de um período mínimo de permanência. Registros de auditoria de anos anteriores, que quase nunca são lidos e admitem espera de horas quando forem, ficam em Archive, a mais barata para guardar e a única offline. E dados que só serão lidos numa eventual investigação, precisando de leitura imediata quando isso acontecer, ficam em Cold: online como a Cool, porém mais barata para guardar e com compromisso de permanência maior. O gerenciamento de ciclo de vida está no painel porque é o que costuma vir à cabeça ao falar de camadas: ele é o mecanismo que move blobs entre elas automaticamente conforme a idade, e não uma camada.",
+      "associacoes": [
+        { "alvo": "Arquivos lidos e gravados muitas vezes ao dia pela aplicação", "item": "Hot" },
+        { "alvo": "Backups mensais, acessados poucas vezes, com disponibilidade imediata", "item": "Cool" },
+        { "alvo": "Registros de auditoria de anos anteriores, com espera de horas aceitável", "item": "Archive" },
+        { "alvo": "Dados lidos só em eventual investigação, mas com leitura imediata quando ocorrer", "item": "Cold" }
+      ],
+      "itensExtras": [
+        "Gerenciamento de ciclo de vida"
+      ]
+    }
+  ]
+}
