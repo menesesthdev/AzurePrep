@@ -51,8 +51,7 @@ public static class AzurePrepDbSeeder
 
         // Pesos conferidos no study guide oficial (skills measured de 17/04/2026): os slugs abaixo
         // são os cinco functional groups publicados, com o ponto médio de cada faixa.
-        // ⚠️ Publicado: false — ver DefinicaoDeExame.Publicado. Sai do catálogo e recusa tentativa
-        // até o banco de questões sustentar os 50 itens da prova.
+        // Publicado em 27/08/2026, com os cinco domínios cobertos e pool acima da cota de cada um.
         new DefinicaoDeExame(
             Code: "AZ-104",
             Name: "Microsoft Azure Administrator",
@@ -67,7 +66,7 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("rede-virtual", "Implementar e gerenciar rede virtual", 17.5m),
                 new AreaDeExame("monitoramento", "Monitorar e manter recursos do Azure", 12.5m)
             ],
-            Publicado: false),
+            Publicado: true),
 
         // Pesos conferidos no study guide oficial (skills measured de 17/04/2026). Somam 100 —
         // é o único dos quatro exames cujas faixas fecham exatamente no ponto médio.
@@ -84,7 +83,7 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("continuidade", "Projetar soluções de continuidade de negócios", 17.5m),
                 new AreaDeExame("infraestrutura", "Projetar soluções de infraestrutura", 32.5m)
             ],
-            Publicado: false),
+            Publicado: true),
 
         // Pesos conferidos no study guide oficial (skills measured de 27/07/2026).
         // ⚠️ 'pipelines' vale 50–55% sozinho: metade da prova sai de um domínio só, e é por ele que
@@ -103,7 +102,7 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("seguranca-conformidade", "Desenvolver plano de segurança e conformidade", 12.5m),
                 new AreaDeExame("instrumentacao", "Implementar estratégia de instrumentação", 7.5m)
             ],
-            Publicado: false)
+            Publicado: true)
     ];
 
     /// <summary>
