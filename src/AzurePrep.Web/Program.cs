@@ -3,6 +3,7 @@ using AzurePrep.Infrastructure;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Web.Autenticacao;
 using AzurePrep.Web.Observabilidade;
+using AzurePrep.Web.Rede;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +61,12 @@ using (var scope = app.Services.CreateScope())
 
     await AzurePrepDbSeeder.SemearAsync(db, loggerDoSeed);
 }
+
+// PRIMEIRO middleware do pipeline, e a ordem é o que o faz funcionar: corrige esquema e IP a
+// partir dos cabeçalhos do proxy reverso, antes que HSTS, redirecionamento para HTTPS,
+// autenticação e limitador por IP leiam esses valores. Não faz nada quando não há proxy
+// declarado (ProxyReverso:Habilitado), que é o caso em desenvolvimento.
+app.UseProxyReverso();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
