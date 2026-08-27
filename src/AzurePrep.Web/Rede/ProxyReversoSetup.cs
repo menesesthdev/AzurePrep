@@ -1,6 +1,9 @@
 using System.Net;
 using Microsoft.AspNetCore.HttpOverrides;
 
+// Desambigua o IPNetwork: o tipo do HttpOverrides está obsoleto no .NET 10 em favor deste.
+using IPNetwork = System.Net.IPNetwork;
+
 namespace AzurePrep.Web.Rede;
 
 /// <summary>
@@ -122,7 +125,7 @@ public static class ProxyReversoSetup
         // proxy roda na mesma máquina, e é justamente o que precisa sair quando o proxy é outro
         // container — senão os cabeçalhos vindos dele são descartados sem aviso.
         configuracao.KnownProxies.Clear();
-        configuracao.KnownNetworks.Clear();
+        configuracao.KnownIPNetworks.Clear();
 
         foreach (var texto in opcoes.ProxiesConhecidos)
         {
@@ -150,9 +153,9 @@ public static class ProxyReversoSetup
 
         foreach (var texto in opcoes.RedesConhecidas)
         {
-            if (System.Net.IPNetwork.TryParse(texto, out var rede))
+            if (IPNetwork.TryParse(texto, out var rede))
             {
-                configuracao.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(rede.BaseAddress, rede.PrefixLength));
+                configuracao.KnownIPNetworks.Add(rede);
             }
             else
             {
@@ -173,7 +176,7 @@ public static class ProxyReversoSetup
             return configuracao;
         }
 
-        if (configuracao.KnownProxies.Count == 0 && configuracao.KnownNetworks.Count == 0)
+        if (configuracao.KnownProxies.Count == 0 && configuracao.KnownIPNetworks.Count == 0)
         {
             // Estado mais perigoso da configuração: parece ligado e não faz nada. Sem origem
             // confiável, o middleware descarta todo X-Forwarded-* — e o sintoma é OAuth recusado
@@ -191,7 +194,7 @@ public static class ProxyReversoSetup
         logger?.LogInformation(
             "ProxyReverso ativo: {Proxies} proxy(s) e {Redes} rede(s) confiáveis.",
             configuracao.KnownProxies.Count,
-            configuracao.KnownNetworks.Count);
+            configuracao.KnownIPNetworks.Count);
 
         return configuracao;
     }

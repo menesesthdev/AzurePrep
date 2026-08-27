@@ -57,7 +57,7 @@ public class ProxyReversoTests
             RedesConhecidas = ["172.16.0.0/12"]
         });
 
-        Assert.Single(opcoes.KnownNetworks);
+        Assert.Single(opcoes.KnownIPNetworks);
         Assert.Empty(opcoes.KnownProxies);
         Assert.DoesNotContain(opcoes.KnownProxies, ip => IPAddress.IsLoopback(ip));
     }
@@ -73,7 +73,7 @@ public class ProxyReversoTests
         });
 
         Assert.Contains(opcoes.KnownProxies, ip => ip.Equals(IPAddress.Parse("10.1.2.3")));
-        Assert.Equal(2, opcoes.KnownNetworks.Count);
+        Assert.Equal(2, opcoes.KnownIPNetworks.Count);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public class ProxyReversoTests
         });
 
         Assert.Empty(opcoes.KnownProxies);
-        Assert.Empty(opcoes.KnownNetworks);
+        Assert.Empty(opcoes.KnownIPNetworks);
     }
 
     // ------------------------------------------------------------------------ o modo inseguro
@@ -121,7 +121,7 @@ public class ProxyReversoTests
         });
 
         Assert.Empty(opcoes.KnownProxies);
-        Assert.Empty(opcoes.KnownNetworks);
+        Assert.Empty(opcoes.KnownIPNetworks);
         Assert.Null(opcoes.ForwardLimit);
     }
 
@@ -139,7 +139,7 @@ public class ProxyReversoTests
         var opcoes = ProxyReversoSetup.MontarOpcoes(Habilitado());
 
         Assert.Empty(opcoes.KnownProxies);
-        Assert.Empty(opcoes.KnownNetworks);
+        Assert.Empty(opcoes.KnownIPNetworks);
         Assert.NotNull(opcoes.ForwardLimit);
     }
 }
