@@ -1,4 +1,5 @@
 using AzurePrep.Application.Contracts;
+using AzurePrep.Domain.Enums;
 
 namespace AzurePrep.Web.Models;
 
@@ -12,4 +13,15 @@ namespace AzurePrep.Web.Models;
 /// </remarks>
 public sealed record InicioViewModel(
     IReadOnlyList<ResumoDeExameDto> Exames,
-    IReadOnlyList<ResumoDeTentativaDto> EmAndamento);
+    IReadOnlyList<ResumoDeTentativaDto> EmAndamento)
+{
+    /// <summary>
+    /// Identificador de cada fornecedor no HTML — liga a aba ao bloco de exames que ela mostra.
+    /// </summary>
+    public static string Identificador(FornecedorDoExame fornecedor)
+        => fornecedor == FornecedorDoExame.Aws ? "aws" : "azure";
+
+    /// <summary>Nome exibido de cada fornecedor no catálogo.</summary>
+    public static string NomeExibido(FornecedorDoExame fornecedor)
+        => fornecedor == FornecedorDoExame.Aws ? "AWS" : "Microsoft Azure";
+}

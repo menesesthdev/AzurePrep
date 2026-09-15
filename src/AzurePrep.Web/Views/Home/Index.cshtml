@@ -37,54 +37,88 @@
 }
 
 <section class="exam-list">
-    <h2 class="section-title">Exames disponíveis</h2>
-
     @if (Model.Exames.Count == 0)
     {
+        <h2 class="section-title">Exames disponíveis</h2>
         <p class="empty-state">Nenhum exame cadastrado ainda.</p>
     }
     else
     {
-        <div class="exam-grid">
-            @foreach (var exam in Model.Exames)
+        @*
+            Um bloco por fornecedor, na ordem do enum (Microsoft antes de AWS). A separação não é só
+            visual: as duas provas são entregues em telas diferentes, com escala de nota e formatos
+            próprios, e quem estuda para uma certificação procura só os exames daquele fornecedor.
+            As abas só mostram e escondem os blocos no navegador (catalogo.js): trocar de aba não
+            recarrega a página nem muda a URL. Elas nascem ocultas e o script as revela, então sem
+            JavaScript a tela continua útil, com os dois blocos visíveis e nenhum botão inerte.
+            Fornecedor sem exame publicado não ganha aba nem bloco vazio.
+        *@
+        var grupos = Model.Exames.GroupBy(e => e.Vendor).OrderBy(g => g.Key).ToList();
+
+        <div class="vendor-tabs" role="group" aria-label="Filtrar simulados por fornecedor" data-vendor-tabs hidden>
+            <button type="button" class="vendor-tabs__tab is-active" data-vendor-filter="todos" aria-pressed="true">
+                Todos <span class="vendor-tabs__count">@Model.Exames.Count</span>
+            </button>
+            @foreach (var grupo in grupos)
             {
-                <article class="exam-card">
-                    <header class="exam-card__header">
-                        <span class="exam-card__code">@exam.Code</span>
-                        <span class="exam-card__vendor">@(exam.Vendor == FornecedorDoExame.Aws ? "AWS" : "Microsoft")</span>
-                        <h3 class="exam-card__name">@exam.Name</h3>
-                    </header>
-                    <dl class="exam-card__meta">
-                        <div>
-                            <dt>Questões</dt>
-                            <dd>@exam.TotalQuestions</dd>
-                        </div>
-                        <div>
-                            <dt>Tempo</dt>
-                            <dd>@exam.TimeLimitMinutes min</dd>
-                        </div>
-                        <div>
-                            <dt>Nota de corte</dt>
-                            <dd>700 / 1000</dd>
-                        </div>
-                    </dl>
-                    @if (exam.Vendor == FornecedorDoExame.Aws)
-                    {
-                        @* Na AWS a prova começa pela tela de instruções; o POST que cria a tentativa sai de lá. *@
-                        <div class="exam-card__action">
-                            <a class="btn btn--primary" asp-controller="Exame" asp-action="Instrucoes" asp-route-examId="@exam.Id">Iniciar simulado</a>
-                        </div>
-                    }
-                    else
-                    {
-                        <form asp-controller="Exame" asp-action="Iniciar" method="post" class="exam-card__action">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="examId" value="@exam.Id" />
-                            <button type="submit" class="btn btn--primary">Iniciar simulado</button>
-                        </form>
-                    }
-                </article>
+                <button type="button" class="vendor-tabs__tab" data-vendor-filter="@InicioViewModel.Identificador(grupo.Key)" aria-pressed="false">
+                    @InicioViewModel.NomeExibido(grupo.Key) <span class="vendor-tabs__count">@grupo.Count()</span>
+                </button>
             }
         </div>
+
+        foreach (var grupo in grupos)
+        {
+            <div class="exam-group" data-vendor="@InicioViewModel.Identificador(grupo.Key)">
+                <h2 class="section-title exam-group__title">
+                    @InicioViewModel.NomeExibido(grupo.Key)
+                    <span class="exam-group__count">@grupo.Count() @(grupo.Count() == 1 ? "simulado" : "simulados")</span>
+                </h2>
+                <div class="exam-grid">
+                    @foreach (var exam in grupo)
+                    {
+                        <article class="exam-card">
+                            <header class="exam-card__header">
+                                <span class="exam-card__code">@exam.Code</span>
+                                <h3 class="exam-card__name">@exam.Name</h3>
+                            </header>
+                            <dl class="exam-card__meta">
+                                <div>
+                                    <dt>Questões</dt>
+                                    <dd>@exam.TotalQuestions</dd>
+                                </div>
+                                <div>
+                                    <dt>Tempo</dt>
+                                    <dd>@exam.TimeLimitMinutes min</dd>
+                                </div>
+                                <div>
+                                    <dt>Nota de corte</dt>
+                                    <dd>700 / 1000</dd>
+                                </div>
+                            </dl>
+                            @if (exam.Vendor == FornecedorDoExame.Aws)
+                            {
+                                @* Na AWS a prova começa pela tela de instruções; o POST que cria a tentativa sai de lá. *@
+                                <div class="exam-card__action">
+                                    <a class="btn btn--primary" asp-controller="Exame" asp-action="Instrucoes" asp-route-examId="@exam.Id">Iniciar simulado</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <form asp-controller="Exame" asp-action="Iniciar" method="post" class="exam-card__action">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="examId" value="@exam.Id" />
+                                    <button type="submit" class="btn btn--primary">Iniciar simulado</button>
+                                </form>
+                            }
+                        </article>
+                    }
+                </div>
+            </div>
+        }
     }
 </section>
+
+@section Scripts {
+    <script src="~/js/catalogo.js" asp-append-version="true"></script>
+}

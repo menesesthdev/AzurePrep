@@ -1323,5 +1323,52 @@ html:has(.exam-aws) { background: #fff; }
     .aws-nav__btn { font-size: 1rem; }
 }
 
-/* Selo do fornecedor no card do exame, ao lado do código. */
-.exam-card__vendor { margin-left: 8px; font-size: .75rem; color: var(--c-text-muted); }
+/* Abas de fornecedor do catálogo: botões que mostram e escondem os blocos, sem recarregar.
+   Visual discreto, no mesmo azul do resto do site — é navegação, não chamada para ação. */
+.vendor-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--c-border);
+}
+.vendor-tabs[hidden] { display: none; }
+.vendor-tabs__tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    margin-bottom: -1px;
+    font: inherit;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+}
+.vendor-tabs__tab:focus-visible { outline: 2px solid var(--c-primary); outline-offset: -2px; }
+.vendor-tabs__tab:hover { color: var(--c-primary); background: var(--c-primary-tint); }
+.vendor-tabs__tab.is-active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
+/* No celular as três abas com contagem não cabem numa linha: quebrar em duas separa "AWS" das
+   demais, e rolar na horizontal esconde a última aba de quem não sabe que dá para rolar. Sem a
+   contagem — que o título de cada bloco já repete — as três cabem inteiras. */
+@media (max-width: 480px) {
+    .vendor-tabs { flex-wrap: nowrap; gap: 0; }
+    .vendor-tabs__tab { padding: 10px 12px; white-space: nowrap; }
+    .vendor-tabs__count { display: none; }
+}
+.vendor-tabs__count {
+    font-size: .75rem;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: var(--c-primary-tint);
+    color: var(--c-primary);
+}
+
+/* Um bloco de exames por fornecedor na tela inicial. */
+.exam-group[hidden] { display: none; }
+.exam-group:not([hidden]) ~ .exam-group:not([hidden]) { margin-top: 40px; }
+.exam-group__title { display: flex; align-items: baseline; gap: 10px; }
+.exam-group__count { font-size: .8rem; font-weight: 400; color: var(--c-text-muted); }
