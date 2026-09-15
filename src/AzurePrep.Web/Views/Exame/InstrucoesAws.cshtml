@@ -1,0 +1,53 @@
+@model InstrucoesAwsViewModel
+@using System.Security.Claims
+@{
+    Layout = null;
+    var candidato = User.FindFirst(ClaimTypes.Name)?.Value ?? "Candidato";
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@Model.ExamCode · Instruções</title>
+    <partial name="_Favicon" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="exam-body exam-aws" data-vendor="aws">
+    @*
+        Tela de instruções, antes da primeira questão — mesma moldura do demo oficial: barra sem relógio
+        (a prova ainda não começou), faixa só com o esquema de cores, e rodapé com Encerrar exame à
+        esquerda e Próxima à direita.
+    *@
+    <header class="aws-top">
+        <div class="aws-top__title">@Model.ExamName - @candidato</div>
+    </header>
+
+    <div class="aws-tools">
+        <div class="aws-tools__right">
+            <partial name="_EsquemaDeCoresAws" />
+        </div>
+    </div>
+
+    <main class="aws-stage">
+        <partial name="_InstrucoesAws" model="Model" />
+        <p>Selecione <u>P</u>róxima para iniciar o simulado.</p>
+    </main>
+
+    <footer class="aws-nav">
+        <a class="aws-nav__btn aws-nav__btn--left" asp-controller="Home" asp-action="Index" accesskey="e">
+            <svg class="aws-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h9M7 4.5L10.5 8 7 11.5M11 2h4v12h-4" fill="none" stroke="currentColor" stroke-width="2.2" /></svg>
+            <span><u>E</u>ncerrar exame</span>
+        </a>
+        <form class="aws-nav__right" asp-controller="Exame" asp-action="Iniciar" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="examId" value="@Model.ExamId" />
+            <button type="submit" class="aws-nav__btn" accesskey="p">
+                <span><u>P</u>róxima</span> <svg class="aws-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2l6 6-6 6M13 8H2" fill="none" stroke="currentColor" stroke-width="2.6" /></svg>
+            </button>
+        </form>
+    </footer>
+
+    <script src="~/js/aws-esquema.js" asp-append-version="true"></script>
+</body>
+</html>

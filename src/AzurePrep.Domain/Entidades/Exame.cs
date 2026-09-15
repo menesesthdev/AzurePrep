@@ -23,7 +23,8 @@ public class Exame : Entity
         int passingScorePercent,
         int totalQuestions,
         Guid? id = null,
-        bool isPublished = true)
+        bool isPublished = true,
+        Enums.FornecedorDoExame vendor = Enums.FornecedorDoExame.Microsoft)
         : base(id ?? Guid.NewGuid())
     {
         Code = Guard.NotNullOrWhiteSpace(code, nameof(code));
@@ -32,7 +33,13 @@ public class Exame : Entity
         PassingScorePercent = Guard.InRange(passingScorePercent, 0, 100, nameof(passingScorePercent));
         TotalQuestions = Guard.Positive(totalQuestions, nameof(totalQuestions));
         IsPublished = isPublished;
+        Vendor = vendor;
     }
+
+    /// <summary>
+    /// Quem emite a certificação — decide escala da nota, regras de formato e a tela da prova.
+    /// </summary>
+    public Enums.FornecedorDoExame Vendor { get; private set; } = Enums.FornecedorDoExame.Microsoft;
 
     /// <summary>Código oficial do exame (ex.: "AZ-900").</summary>
     public string Code { get; private set; } = string.Empty;
@@ -85,13 +92,18 @@ public class Exame : Entity
         int timeLimitMinutes,
         int passingScorePercent,
         int totalQuestions,
-        bool isPublished = true)
+        bool isPublished = true,
+        Enums.FornecedorDoExame? vendor = null)
     {
         Name = Guard.NotNullOrWhiteSpace(name, nameof(name));
         TimeLimitMinutes = Guard.Positive(timeLimitMinutes, nameof(timeLimitMinutes));
         PassingScorePercent = Guard.InRange(passingScorePercent, 0, 100, nameof(passingScorePercent));
         TotalQuestions = Guard.Positive(totalQuestions, nameof(totalQuestions));
         IsPublished = isPublished;
+
+        // Nulo preserva o atual: quem só quer republicar (os testes, por exemplo) não precisa
+        // repetir o fornecedor e não corre o risco de transformar um exame AWS em Microsoft.
+        Vendor = vendor ?? Vendor;
     }
 
     public AreaDeHabilidade AdicionarAreaDeHabilidade(string key, string name, decimal weightPercent, Guid? id = null)

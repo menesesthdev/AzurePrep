@@ -1,0 +1,233 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-rag-trechos-pequenos-55",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma base de conhecimento divide manuais de procedimentos em trechos de uma única frase. As respostas do assistente citam a frase certa, mas frequentemente omitem condições e exceções que aparecem nas frases vizinhas do mesmo parágrafo, o que gera orientações incompletas. Qual ajuste é mais adequado?",
+      "explicacao": "Trechos de uma frase separam a regra das condições e exceções que a acompanham, então o modelo recebe a informação sem o contexto necessário. Aumentar o tamanho dos trechos e usar sobreposição entre eles faz cada trecho carregar o parágrafo relevante, sem cortar ideias ao meio. Reduzir ainda mais os trechos agravaria a fragmentação. Aumentar a temperatura só deixaria a resposta mais variada, sem trazer as frases que faltam. E um modelo de embeddings com mais dimensões representa melhor cada trecho, mas não devolve ao modelo o texto vizinho que ficou de fora da divisão.",
+      "opcoes": [
+        { "texto": "Aumentar o tamanho dos trechos e usar sobreposição entre trechos vizinhos.", "correta": true },
+        { "texto": "Reduzir ainda mais o tamanho dos trechos para aumentar a precisão.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo complete as condições.", "correta": false },
+        { "texto": "Trocar por um modelo de embeddings com mais dimensões, mantendo os trechos atuais.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-numero-trechos-56",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente com RAG responde perguntas sobre benefícios de funcionários. Perguntas como quais benefícios um estagiário tem? recebem respostas incompletas, porque as informações estão espalhadas em vários documentos: vale-refeição num, plano de saúde noutro, auxílio-transporte num terceiro. A configuração atual recupera apenas o trecho mais similar a cada pergunta. Qual ajuste resolve o problema?",
+      "explicacao": "Quando a resposta depende de informações espalhadas em vários documentos, recuperar só o trecho mais similar entrega ao modelo apenas uma parte. Aumentar o número de trechos recuperados por pergunta traz os demais documentos relevantes para o contexto, e o modelo consegue compor a resposta completa. Reduzir o limite de tokens de saída encurtaria a resposta, piorando a incompletude. Fazer fine-tuning com os documentos colocaria os benefícios nos pesos do modelo, com custo e desatualização a cada mudança, sem resolver a recuperação. E aumentar a temperatura não traz informação nova, só varia a redação.",
+      "opcoes": [
+        { "texto": "Aumentar o número de trechos recuperados em cada pergunta.", "correta": true },
+        { "texto": "Reduzir o limite de tokens de saída para respostas mais objetivas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com todos os documentos de benefícios.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo considere mais possibilidades.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-filtro-metadados-pais-57",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma multinacional tem uma base de conhecimento com políticas de reembolso do Brasil, do México e da Argentina, com regras diferentes em cada país. O assistente às vezes responde a um cliente brasileiro com a regra mexicana, porque os documentos são muito parecidos. O país do cliente é conhecido pela aplicação no momento da pergunta. Qual solução é mais adequada?",
+      "explicacao": "Adicionar metadados de país aos documentos e filtrar a recuperação pelo país do cliente garante que só as políticas do Brasil cheguem ao modelo quando o cliente é brasileiro — o controle acontece antes da geração, de forma determinística. Pedir no prompt que o modelo ignore políticas de outros países depende de o modelo distinguir documentos quase iguais que já estão no contexto, justamente o que falha hoje. Recuperar mais trechos aumenta a chance de trazer as políticas erradas. E treinar um modelo separado para cada país multiplica custos e manutenção para um problema que a recuperação resolve.",
+      "opcoes": [
+        { "texto": "Adicionar metadados de país aos documentos e filtrar a recuperação pelo país do cliente.", "correta": true },
+        { "texto": "Instruir o modelo, no prompt, a ignorar as políticas de outros países.", "correta": false },
+        { "texto": "Aumentar o número de trechos recuperados em cada pergunta.", "correta": false },
+        { "texto": "Treinar um modelo separado para cada país com as respectivas políticas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-permissoes-documentos-58",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer um único assistente com RAG sobre todos os documentos internos, incluindo planilhas de salários do RH que apenas gestores de RH podem ler. Um estagiário não pode, de nenhuma forma, receber trechos desses documentos nas respostas. Qual abordagem atende a esse requisito?",
+      "explicacao": "A proteção precisa acontecer na recuperação: aplicando controle de acesso — por exemplo, filtrando os documentos recuperados conforme as permissões do usuário que pergunta —, os trechos de salários nunca chegam ao contexto de quem não pode lê-los. Instruir o modelo a não revelar salários deixa os dados no contexto e depende do modelo obedecer, o que injeções de prompt podem contornar. Remover os documentos de RH da base resolve o vazamento, mas quebra o requisito de atender também os gestores de RH. E aumentar a temperatura não tem relação com controle de acesso.",
+      "opcoes": [
+        { "texto": "Filtrar os documentos recuperados conforme as permissões do usuário que faz a pergunta.", "correta": true },
+        { "texto": "Incluir no prompt de sistema a instrução de nunca revelar dados de salários.", "correta": false },
+        { "texto": "Remover da base de conhecimento todos os documentos do RH.", "correta": false },
+        { "texto": "Aumentar a temperatura para dificultar a reprodução literal dos documentos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-dados-estruturados-sql-59",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Gestores de uma varejista querem perguntar em linguagem natural coisas como quanto vendemos na região Sul em março?. Os dados estão em tabelas do Amazon Redshift. Uma primeira versão exportou as tabelas para arquivos de texto indexados numa busca vetorial, e as respostas trazem números errados ou incompletos. Qual abordagem é mais adequada?",
+      "explicacao": "Perguntas que exigem somar, filtrar e agrupar dados tabulares não são bem respondidas por similaridade entre trechos de texto: a busca traz fragmentos, e não o total calculado. Gerar consultas SQL a partir da pergunta e executá-las sobre as tabelas estruturadas produz o número exato — é a recuperação adequada para dados estruturados, oferecida inclusive pelo Amazon Bedrock Knowledge Bases para fontes como o Redshift. Converter as tabelas em PDF mantém o mesmo problema da busca por trechos. Fazer fine-tuning com os dados de vendas não ensina o modelo a calcular totais exatos e fica desatualizado a cada venda. E uma janela de contexto maior permite enviar mais linhas, mas o modelo ainda teria de somar grandes volumes de números sem garantia de exatidão.",
+      "opcoes": [
+        { "texto": "Gerar consultas SQL a partir das perguntas e executá-las nas tabelas estruturadas.", "correta": true },
+        { "texto": "Converter as tabelas em documentos PDF e indexá-los na busca vetorial.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com os dados históricos de vendas.", "correta": false },
+        { "texto": "Usar um modelo com janela de contexto maior e enviar as tabelas inteiras.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-agente-dados-tempo-real-60",
+      "topico": "Agentes de IA e aplicações de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma transportadora responde perguntas sobre políticas de entrega usando uma base de conhecimento sincronizada uma vez por dia. Os clientes também perguntam onde está a minha encomenda agora?, e o status muda a cada poucos minutos no sistema de rastreamento, que tem uma API. Qual abordagem atende a esse novo tipo de pergunta?",
+      "explicacao": "O status da encomenda muda a cada poucos minutos, então a resposta precisa vir do sistema de rastreamento no momento da pergunta. Um agente com uma ferramenta que consulta a API em tempo real resolve isso, enquanto a base de conhecimento continua servindo às políticas, que mudam pouco. Sincronizar a base a cada hora ainda deixaria o status defasado em até uma hora e desperdiçaria processamento. Fazer fine-tuning diário com os status seria caro e ficaria desatualizado minutos depois. E recuperar mais trechos da base não resolve dados que ela simplesmente não tem atualizados.",
+      "opcoes": [
+        { "texto": "Dar ao assistente uma ferramenta que consulta a API de rastreamento em tempo real.", "correta": true },
+        { "texto": "Sincronizar a base de conhecimento com o sistema de rastreamento a cada hora.", "correta": false },
+        { "texto": "Fazer fine-tuning diário do modelo com os status das encomendas.", "correta": false },
+        { "texto": "Aumentar o número de trechos recuperados da base de conhecimento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-agente-confirmacao-humana-61",
+      "topico": "Agentes de IA e aplicações de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma indústria quer um agente de compras que analisa estoques, compara fornecedores e emite pedidos de compra. A diretoria aceita que o agente emita sozinho pedidos pequenos, mas exige que qualquer pedido acima de 50 mil reais seja confirmado por um gestor antes de ser enviado ao fornecedor. Qual desenho atende a esse requisito sem abrir mão da automação?",
+      "explicacao": "O agente pode preparar o pedido e, quando o valor ultrapassar o limite, devolver o controle a um gestor para confirmação antes de executar a ação — um ponto de aprovação humana no fluxo, que mantém a automação dos pedidos pequenos. Confiar apenas numa instrução no prompt para nunca emitir pedidos acima do limite deixa a regra sujeita a erro ou manipulação do modelo, sem uma etapa de aprovação real. Remover a ferramenta de emissão de pedidos elimina a automação que a diretoria aceita. E aumentar a temperatura só deixa as decisões do agente mais variáveis, o oposto do controle pedido.",
+      "opcoes": [
+        { "texto": "Fazer o agente solicitar a confirmação de um gestor antes de emitir pedidos acima do limite.", "correta": true },
+        { "texto": "Instruir o agente, no prompt, a nunca emitir pedidos acima de 50 mil reais.", "correta": false },
+        { "texto": "Remover a ferramenta de emissão de pedidos e deixar o agente apenas recomendar.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o agente seja mais cauteloso nos pedidos grandes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-selecao-suporte-personalizacao-62",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai lançar um assistente usando engenharia de prompt, mas o roadmap já prevê, em seis meses, fazer fine-tuning do modelo com dados próprios no Amazon Bedrock. Dois modelos candidatos têm qualidade e preço parecidos hoje. Qual critério deve desempatar a escolha?",
+      "explicacao": "Se o roadmap prevê fine-tuning no Amazon Bedrock, o modelo escolhido precisa oferecer esse tipo de personalização no serviço; caso contrário, daqui a seis meses a empresa teria de trocar de modelo e refazer testes e integrações. Nem todo modelo disponível oferece todas as formas de personalização, por isso esse é o critério que desempata. A maior janela de contexto é útil em alguns casos, mas não resolve a necessidade planejada. Uma diferença mínima de preço por token pesa menos que o custo de trocar de modelo no meio do projeto. E suporte a imagens não é requisito do assistente descrito.",
+      "opcoes": [
+        { "texto": "Se o modelo oferece fine-tuning no Amazon Bedrock.", "correta": true },
+        { "texto": "Qual modelo tem a maior janela de contexto.", "correta": false },
+        { "texto": "Qual modelo tem o menor preço por token de entrada, mesmo que por pouca diferença.", "correta": false },
+        { "texto": "Se o modelo aceita imagens como entrada.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-selecao-tamanho-saida-63",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma consultoria quer gerar, numa única resposta, relatórios técnicos de cerca de 40 páginas a partir de um roteiro detalhado e de dados já estruturados. Nos testes, alguns modelos param no meio do relatório mesmo com o limite de saída configurado no valor máximo que aceitam. Qual critério de seleção é determinante para esse caso?",
+      "explicacao": "Se o modelo para no meio mesmo com o limite de saída no máximo que ele aceita, o gargalo é a capacidade de saída do próprio modelo. O critério determinante é o número máximo de tokens de saída suportado, que precisa comportar um relatório de 40 páginas numa única resposta. Suporte a imagens como entrada não é necessário, já que o roteiro e os dados são texto. O tamanho do modelo de embeddings diz respeito à busca vetorial, que nem faz parte desse fluxo. E a disponibilidade de Provisioned Throughput garante capacidade de processamento, sem aumentar o tamanho máximo de uma resposta.",
+      "opcoes": [
+        { "texto": "O número máximo de tokens de saída suportado pelo modelo.", "correta": true },
+        { "texto": "O suporte a imagens como entrada.", "correta": false },
+        { "texto": "O número de dimensões do modelo de embeddings associado.", "correta": false },
+        { "texto": "A disponibilidade de Provisioned Throughput para o modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-versus-janela-longa-64",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem um acervo de 5 mil documentos técnicos, que somam dezenas de milhões de tokens, e quer um assistente que responda perguntas sobre esse acervo. Um desenvolvedor sugeriu dispensar RAG e simplesmente usar o modelo com a maior janela de contexto disponível, enviando os documentos junto com cada pergunta. Qual avaliação dessa sugestão está correta?",
+      "explicacao": "Mesmo as maiores janelas de contexto não comportam dezenas de milhões de tokens, e enviar tudo a cada pergunta, mesmo que coubesse, seria caro e lento, porque cada requisição cobraria o acervo inteiro. RAG envia apenas os trechos relevantes para cada pergunta, o que torna a solução viável em custo e latência. Afirmar que janelas grandes não existem é falso: existem, só não nessa escala. A ideia de que modelos de janela grande não aceitam português não tem fundamento. E RAG não é sempre mais caro: ele acrescenta busca e armazenamento vetorial, mas reduz drasticamente os tokens enviados por pergunta.",
+      "opcoes": [
+        { "texto": "O acervo não cabe nem na maior janela, e enviá-lo a cada pergunta seria caro e lento; RAG envia só o relevante.", "correta": true },
+        { "texto": "A sugestão não funciona porque modelos com janelas de contexto grandes não existem.", "correta": false },
+        { "texto": "A sugestão não funciona porque modelos com janela grande não aceitam textos em português.", "correta": false },
+        { "texto": "A sugestão é melhor, porque RAG é sempre mais caro do que enviar os documentos no contexto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-hibrido-fine-tuning-rag-65",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora quer que o assistente escreva no estilo formal e padronizado das cartas da empresa, com uma estrutura que instruções no prompt não conseguiram reproduzir de forma consistente, e que cite as condições atuais das apólices, que mudam toda semana. A empresa tem milhares de cartas aprovadas como exemplo. Qual abordagem atende aos dois requisitos?",
+      "explicacao": "Os dois requisitos têm naturezas diferentes e pedem técnicas diferentes. O estilo e a estrutura das cartas são comportamento estável, que o prompt não reproduziu, e as milhares de cartas aprovadas permitem ensiná-lo com fine-tuning. Já as condições das apólices mudam toda semana e devem vir por RAG, sem retreinar. Fazer apenas fine-tuning semanal resolveria o estilo, mas com custo recorrente e condições defasadas entre um ajuste e outro. Usar apenas RAG com instruções de estilo repete a abordagem que já não produziu o estilo de forma consistente. E o pré-treinamento contínuo adapta o modelo a um domínio com texto sem rótulos, sem ensinar a estrutura das cartas nem manter as condições atualizadas.",
+      "opcoes": [
+        { "texto": "Fine-tuning com as cartas aprovadas para o estilo e RAG para as condições das apólices.", "correta": true },
+        { "texto": "Fine-tuning semanal com as cartas e as condições atualizadas das apólices.", "correta": false },
+        { "texto": "Apenas RAG com as apólices, reforçando no prompt as instruções de estilo.", "correta": false },
+        { "texto": "Pré-treinamento contínuo com as cartas e as apólices da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-embeddings-multilingue-66",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa com operações no Brasil e na Argentina tem documentos em português e em espanhol. Funcionários dos dois países fazem perguntas no próprio idioma e precisam encontrar documentos relevantes nas duas línguas. A arquitetura não deve incluir uma etapa de tradução. Qual escolha é determinante para a busca semântica funcionar?",
+      "explicacao": "Um modelo de embeddings multilíngue representa textos de idiomas diferentes no mesmo espaço vetorial, de modo que uma pergunta em espanhol fica próxima de um documento em português com o mesmo significado — sem etapa de tradução. Traduzir tudo para o inglês antes de gerar os embeddings até funcionaria, mas é exatamente a etapa de tradução que a arquitetura não deve ter. Aumentar as dimensões de um modelo de embeddings treinado só em inglês não o ensina a representar português e espanhol. E a temperatura é um parâmetro de geração de texto, sem efeito sobre a busca vetorial.",
+      "opcoes": [
+        { "texto": "Usar um modelo de embeddings multilíngue para documentos e perguntas.", "correta": true },
+        { "texto": "Traduzir documentos e perguntas para o inglês antes de gerar os embeddings.", "correta": false },
+        { "texto": "Usar um modelo de embeddings treinado em inglês com mais dimensões.", "correta": false },
+        { "texto": "Configurar uma temperatura mais alta no modelo que gera as respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-embeddings-troca-modelo-67",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe trocou o modelo de embeddings de sua busca semântica por um modelo mais novo. A partir desse dia, as perguntas passaram a ser convertidas com o modelo novo, mas os resultados da busca ficaram praticamente aleatórios. Os documentos indexados não foram alterados. O que causou o problema e como corrigi-lo?",
+      "explicacao": "Cada modelo de embeddings cria seu próprio espaço vetorial, e vetores de modelos diferentes não são comparáveis entre si. As perguntas passaram a ser convertidas pelo modelo novo, mas os documentos continuaram com os vetores do modelo antigo, então as distâncias calculadas deixaram de ter significado. A correção é gerar novamente os embeddings de todo o acervo com o modelo novo. Regenerar só os documentos adicionados depois da troca deixaria o restante do acervo incomparável. Ajustar a temperatura não afeta a comparação entre vetores. E recuperar mais trechos só traria mais resultados igualmente sem sentido.",
+      "opcoes": [
+        { "texto": "Vetores de modelos diferentes não são comparáveis; gerar novamente os embeddings de todo o acervo.", "correta": true },
+        { "texto": "Os documentos novos não foram indexados; gerar embeddings apenas para os documentos adicionados.", "correta": false },
+        { "texto": "A temperatura mudou com o novo modelo; reduzi-la até os resultados voltarem ao normal.", "correta": false },
+        { "texto": "O modelo novo exige mais contexto; aumentar o número de trechos recuperados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-agente-descricao-ferramentas-68",
+      "topico": "Agentes de IA e aplicações de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente financeiro tem duas ferramentas: consultar_saldo, descrita como consulta dados da conta, e consultar_extrato, descrita como consulta informações da conta. Com frequência, o agente chama a ferramenta errada. As ferramentas funcionam corretamente quando chamadas. Qual ajuste é mais adequado?",
+      "explicacao": "O modelo escolhe qual ferramenta chamar principalmente pelas descrições, e as duas descrições atuais dizem praticamente a mesma coisa. Escrever descrições claras e distintas — o que cada ferramenta retorna, quando usá-la e quais parâmetros espera — dá ao agente a informação para escolher corretamente. Fazer fine-tuning do modelo é caro para um problema causado por descrições ambíguas. Aumentar a temperatura deixaria a escolha ainda mais aleatória. E remover as descrições tiraria do modelo a principal informação que ele usa para decidir.",
+      "opcoes": [
+        { "texto": "Reescrever as descrições das ferramentas de forma clara e distinta, detalhando retorno e parâmetros.", "correta": true },
+        { "texto": "Fazer fine-tuning do modelo com exemplos de chamadas às duas ferramentas.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o agente explore melhor as ferramentas.", "correta": false },
+        { "texto": "Remover as descrições para que o agente decida apenas pelo nome das ferramentas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-knowledge-base-criacao-ordenacao-69",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma equipe vai criar um assistente com o Amazon Bedrock Knowledge Bases para responder perguntas sobre contratos armazenados como PDFs. Selecione e ordene as etapas para colocar a base de conhecimento em funcionamento.",
+      "explicacao": "Primeiro os contratos são carregados num bucket do Amazon S3, que será a fonte de dados. Depois a base de conhecimento é criada apontando para esse bucket, com a escolha do modelo de embeddings e do banco vetorial. Em seguida a fonte de dados é sincronizada, o que executa a ingestão: divisão em trechos, geração dos embeddings e gravação dos vetores. Só então a aplicação consulta a base para recuperar trechos e gerar respostas. Fazer fine-tuning do modelo antes de criar a base não é necessário: o objetivo do RAG é justamente responder com os documentos sem alterar o modelo. E temperatura não é configuração de modelo de embeddings, que gera vetores de forma determinística e não tem esse parâmetro.",
+      "sequencia": [
+        "Carregar os contratos em PDF num bucket do Amazon S3.",
+        "Criar a base de conhecimento, escolhendo o modelo de embeddings e o banco vetorial.",
+        "Sincronizar a fonte de dados para ingerir os documentos.",
+        "Consultar a base de conhecimento a partir da aplicação."
+      ],
+      "itensExtras": [
+        "Fazer fine-tuning do modelo com os contratos antes de criar a base.",
+        "Definir a temperatura do modelo de embeddings antes da ingestão."
+      ]
+    },
+    {
+      "id": "aifc01-apl-bancos-vetoriais-assoc-70",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "Associacao",
+      "enunciado": "Um arquiteto precisa recomendar onde armazenar embeddings para diferentes projetos da empresa. Associe cada projeto ao serviço mais adequado.",
+      "explicacao": "Um sistema que já opera um cluster Aurora compatível com PostgreSQL e quer vetores junto dos dados relacionais usa o próprio Aurora com pgvector. Um projeto que precisa percorrer relações entre entidades, além da similaridade semântica, pede o Amazon Neptune. Busca híbrida por palavras-chave e por vetores em milhões de documentos é o terreno do Amazon OpenSearch Service. E uma aplicação pequena que já usa o Amazon RDS para PostgreSQL adiciona busca vetorial com a extensão pgvector sem adotar outro serviço. O Amazon DynamoDB está no painel porque é um banco muito usado em aplicações na AWS, mas não oferece busca por similaridade vetorial nativa, então não atende a nenhum dos projetos.",
+      "associacoes": [
+        { "alvo": "Já opera um cluster Aurora compatível com PostgreSQL e quer os vetores junto dos dados relacionais", "item": "Amazon Aurora com pgvector" },
+        { "alvo": "Precisa percorrer relações entre fornecedores, peças e produtos, além da similaridade", "item": "Amazon Neptune" },
+        { "alvo": "Precisa de busca híbrida por palavras-chave e vetores em milhões de documentos", "item": "Amazon OpenSearch Service" },
+        { "alvo": "Aplicação pequena que já usa o Amazon RDS para PostgreSQL", "item": "Amazon RDS para PostgreSQL com pgvector" }
+      ],
+      "itensExtras": ["Amazon DynamoDB"]
+    },
+    {
+      "id": "aifc01-apl-rag-causas-respostas-erradas-71",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um assistente com RAG responde errado a várias perguntas, embora a equipe tenha confirmado que os documentos com as respostas corretas estão na base de conhecimento. Quais causas são prováveis para esse comportamento?",
+      "explicacao": "Se o documento certo está na base e a resposta sai errada, o problema costuma estar entre a base e o modelo. Trechos mal divididos podem separar a informação do contexto que lhe dá sentido, entregando ao modelo um fragmento enganoso. E a recuperação pode trazer poucos trechos ou trechos pouco relevantes, deixando de fora justamente o que responde à pergunta. Temperatura configurada em zero torna as respostas mais estáveis e não faz o modelo ignorar trechos corretos. O uso de HTTPS protege os dados em trânsito, sem afetar o conteúdo recuperado. E criptografar os documentos com o AWS KMS protege os dados em repouso, de forma transparente para o serviço, sem impedir a recuperação.",
+      "opcoes": [
+        { "texto": "Trechos mal divididos, que separam a informação do contexto que lhe dá sentido.", "correta": true },
+        { "texto": "Recuperação que traz poucos trechos ou trechos pouco relevantes para a pergunta.", "correta": true },
+        { "texto": "Temperatura configurada em zero no modelo que gera as respostas.", "correta": false },
+        { "texto": "Uso de HTTPS nas chamadas entre a aplicação e o serviço.", "correta": false },
+        { "texto": "Criptografia dos documentos em repouso com o AWS KMS.", "correta": false }
+      ]
+    }
+  ]
+}

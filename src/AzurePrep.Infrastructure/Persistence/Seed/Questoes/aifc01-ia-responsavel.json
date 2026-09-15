@@ -1,0 +1,234 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "ia-responsavel",
+  "questoes": [
+    {
+      "id": "aifc01-resp-analise-subgrupo-selecao-01",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo que faz a triagem inicial de currículos obteve 88% de acurácia no conjunto de teste e foi aprovado. Meses depois, uma auditoria descobriu que, para candidatas mulheres, a acurácia era de apenas 71%. Qual prática teria revelado esse problema antes do lançamento?",
+      "explicacao": "A acurácia geral é uma média que pode esconder desempenho muito pior para um grupo específico, principalmente quando esse grupo é menor no conjunto de teste. A análise por subgrupo mede o desempenho separadamente para cada grupo demográfico e teria mostrado os 71% antes do lançamento. Um conjunto de teste maior daria uma estimativa mais precisa da mesma média geral, sem separá-la por grupo. Aumentar a temperatura não se aplica a um classificador de currículos nem mede nada. E monitorar a latência avalia o tempo de resposta, sem relação com a qualidade das decisões para cada grupo.",
+      "opcoes": [
+        { "texto": "Analisar o desempenho do modelo separadamente para cada subgrupo demográfico.", "correta": true },
+        { "texto": "Medir a acurácia geral num conjunto de teste maior.", "correta": false },
+        { "texto": "Testar o modelo com diferentes valores de temperatura.", "correta": false },
+        { "texto": "Monitorar a latência das previsões antes do lançamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-clarify-vies-explicabilidade-02",
+      "topico": "Ferramentas de IA responsável da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco vai treinar no Amazon SageMaker AI um modelo de aprovação de crédito. Antes do treinamento, precisa verificar se os dados históricos estão desequilibrados entre faixas etárias e, depois, explicar quanto cada atributo contribuiu para cada decisão do modelo. Qual recurso atende a esses dois requisitos?",
+      "explicacao": "O SageMaker Clarify detecta vieses nos dados antes do treinamento e no modelo treinado, e também gera explicações sobre a contribuição de cada atributo para as previsões — cobre os dois requisitos. O SageMaker Model Cards documenta informações do modelo, como uso pretendido, riscos e resultados de avaliação, mas não executa a análise de viés nem calcula a importância dos atributos. O SageMaker Model Monitor acompanha o modelo em produção e detecta desvios ao longo do tempo, não o desequilíbrio dos dados antes do treinamento. E o Amazon Bedrock Guardrails filtra entradas e saídas de aplicações generativas, sem analisar dados de treinamento nem explicar decisões de um modelo de crédito.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker Clarify", "correta": true },
+        { "texto": "Amazon SageMaker Model Cards", "correta": false },
+        { "texto": "Amazon SageMaker Model Monitor", "correta": false },
+        { "texto": "Amazon Bedrock Guardrails", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-model-cards-documentacao-03",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O regulador exigiu que uma seguradora mantenha, para cada versão de seus modelos, um registro com o uso pretendido, um resumo dos dados de treinamento, os resultados de avaliação e os riscos e limitações conhecidos, num formato padronizado que possa ser apresentado em auditorias. Qual recurso atende a esse requisito?",
+      "explicacao": "O SageMaker Model Cards é o recurso para documentar modelos de forma padronizada: uso pretendido, detalhes de treinamento, resultados de avaliação, riscos e considerações, mantidos por versão e prontos para auditoria. O SageMaker Clarify gera análises de viés e de explicabilidade, cujos resultados podem ser anexados à documentação, mas ele não é o registro documental exigido. O AWS CloudTrail registra chamadas de API na conta — quem fez o quê e quando —, não informações sobre o propósito e as limitações de um modelo. E o SageMaker Model Registry cataloga versões de modelos e seu status de aprovação para implantação, sem cobrir a documentação de riscos e uso pretendido que o regulador pede.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker Model Cards", "correta": true },
+        { "texto": "Amazon SageMaker Clarify", "correta": false },
+        { "texto": "AWS CloudTrail", "correta": false },
+        { "texto": "Amazon SageMaker Model Registry", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-guardrails-assistente-escolar-04",
+      "topico": "Ferramentas de IA responsável da AWS",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma plataforma educacional vai lançar um assistente para alunos do ensino fundamental usando o Amazon Bedrock. O assistente não pode gerar nem aceitar conteúdo sexual ou violento, e as respostas não podem exibir nomes completos, telefones ou endereços de alunos que apareçam nos materiais consultados. Quais recursos do Amazon Bedrock Guardrails atendem a esses requisitos?",
+      "explicacao": "Os filtros de conteúdo do Amazon Bedrock Guardrails bloqueiam categorias como conteúdo sexual e violência, tanto na entrada quanto na saída. Os filtros de informações sensíveis detectam dados pessoais, como nomes, telefones e endereços, e podem bloqueá-los ou mascará-los nas respostas. O Guardrails não retreina o modelo: ele aplica políticas sobre as entradas e saídas, sem alterar os pesos. A detecção de desvio nos dados de entrada ao longo do tempo é função de monitoramento de modelos, como o SageMaker Model Monitor. E gerar a documentação do modelo é papel do SageMaker Model Cards, não de uma política de proteção aplicada em tempo de execução.",
+      "opcoes": [
+        { "texto": "Filtros de conteúdo para bloquear material sexual e violento.", "correta": true },
+        { "texto": "Filtros de informações sensíveis para bloquear ou mascarar dados pessoais.", "correta": true },
+        { "texto": "Retreinamento do modelo para remover conteúdo inadequado dos pesos.", "correta": false },
+        { "texto": "Detecção de desvio na distribuição dos dados de entrada.", "correta": false },
+        { "texto": "Geração automática da documentação de uso pretendido do modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-grounding-check-rag-05",
+      "topico": "Ferramentas de IA responsável da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente com RAG responde perguntas sobre condições de garantia. Na maioria das vezes as respostas seguem os documentos recuperados, mas às vezes o modelo acrescenta prazos que não constam em nenhum documento. A empresa quer verificar automaticamente, antes de exibir cada resposta, se ela está sustentada pelas fontes recuperadas e bloquear as que não estiverem. Qual recurso atende a esse requisito?",
+      "explicacao": "A verificação de fundamentação contextual do Amazon Bedrock Guardrails avalia se a resposta está sustentada pelas fontes fornecidas e relevante para a pergunta, e permite bloquear respostas abaixo do limite configurado — exatamente o controle pedido antes da exibição. Recuperar mais trechos dá ao modelo mais material, mas não verifica se a resposta se limitou a ele, e pode até trazer trechos irrelevantes. O SageMaker Model Cards documenta o modelo, sem avaliar respostas em tempo de execução. E o SageMaker Clarify analisa viés e explicabilidade de modelos de ML, não a fundamentação de respostas geradas a partir de documentos.",
+      "opcoes": [
+        { "texto": "A verificação de fundamentação contextual do Amazon Bedrock Guardrails.", "correta": true },
+        { "texto": "Aumentar o número de trechos recuperados em cada pergunta.", "correta": false },
+        { "texto": "Documentar a limitação no Amazon SageMaker Model Cards.", "correta": false },
+        { "texto": "Executar uma análise do Amazon SageMaker Clarify sobre as respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-risco-propriedade-intelectual-06",
+      "topico": "Riscos legais da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de marketing de uma rede de lojas gerou, com um modelo de imagens, ilustrações para uma campanha nacional. Algumas imagens ficaram muito parecidas com personagens conhecidos de um estúdio de animação. A campanha será veiculada em TV e redes sociais. Qual risco legal é mais relevante e qual medida é adequada?",
+      "explicacao": "Imagens que reproduzem personagens protegidos expõem a empresa a reivindicações de violação de propriedade intelectual, especialmente em uso comercial amplo. A medida adequada é revisar o material antes da veiculação, descartar o que se assemelha a obras protegidas e usar modelos cujos termos de licença permitam o uso comercial pretendido. Alucinação é a geração de informação falsa apresentada como fato, e RAG não se aplica a esse problema de imagens. Desvio de dados é mudança na distribuição dos dados de um modelo em produção, sem relação com o conteúdo das imagens. E subajuste é um modelo simples demais para aprender o padrão; mais dados de treinamento não resolveriam a semelhança com personagens protegidos.",
+      "opcoes": [
+        { "texto": "Violação de propriedade intelectual; revisar as imagens e usar modelos com licença que permita o uso comercial.", "correta": true },
+        { "texto": "Alucinação; usar RAG com o manual da marca antes de gerar as imagens.", "correta": false },
+        { "texto": "Desvio de dados; retreinar o modelo de imagens com as campanhas mais recentes.", "correta": false },
+        { "texto": "Subajuste; ampliar o conjunto de dados usado para treinar o modelo de imagens.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-riscos-legais-assoc-07",
+      "topico": "Riscos legais da IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "O departamento jurídico de uma empresa analisou incidentes envolvendo suas aplicações de IA generativa. Associe cada incidente ao risco que ele representa.",
+      "explicacao": "Oferecer condições piores de crédito a moradores de determinados bairros é um resultado enviesado, que pode configurar discriminação. Um chatbot que inventa uma política de reembolso, cobrada depois pelo cliente na justiça, é alucinação com consequência legal. Material publicitário que reproduz trechos de um livro protegido é violação de propriedade intelectual. E clientes cancelando contas depois de erros públicos do assistente é perda de confiança do cliente, um dano de reputação que também é risco de negócio. O subajuste está no painel porque é um problema real de modelos, mas é técnico — um modelo simples demais para aprender o padrão — e não descreve nenhum dos incidentes.",
+      "associacoes": [
+        { "alvo": "O assistente de crédito ofereceu condições piores a moradores de determinados bairros", "item": "Resultados enviesados" },
+        { "alvo": "O chatbot citou uma política de reembolso inexistente, e o cliente a cobrou na justiça", "item": "Alucinação" },
+        { "alvo": "Um anúncio gerado reproduziu trechos de um livro protegido por direitos autorais", "item": "Violação de propriedade intelectual" },
+        { "alvo": "Depois de erros públicos do assistente, clientes cancelaram contas e criticaram a empresa", "item": "Perda de confiança do cliente" }
+      ],
+      "itensExtras": ["Subajuste"]
+    },
+    {
+      "id": "aifc01-resp-dataset-inclusivo-voz-08",
+      "topico": "Características de conjuntos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de voz de um banco foi treinado principalmente com gravações de homens adultos de uma única região do país. Após o lançamento, a taxa de erro é muito maior para mulheres, idosos e pessoas com sotaques de outras regiões. Qual ação corrige a causa do problema?",
+      "explicacao": "O conjunto de dados não era diverso nem inclusivo: representava bem um único perfil de falante. A correção é coletar dados equilibrados e diversos, com vozes de diferentes gêneros, idades e sotaques, e retreinar o modelo. Treinar por mais épocas com os mesmos dados só reforça o que o modelo já aprendeu sobre o perfil dominante, podendo levar a sobreajuste. Reduzir o tamanho do modelo não acrescenta exemplos dos grupos mal atendidos. E restringir os dados ao grupo com melhor desempenho aprofunda o viés, piorando justamente para quem já é prejudicado.",
+      "opcoes": [
+        { "texto": "Coletar gravações diversas e equilibradas de gênero, idade e sotaque e retreinar o modelo.", "correta": true },
+        { "texto": "Treinar o modelo atual por mais épocas com as mesmas gravações.", "correta": false },
+        { "texto": "Reduzir o tamanho do modelo para diminuir o sobreajuste.", "correta": false },
+        { "texto": "Retreinar apenas com as gravações do grupo que teve melhor desempenho.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-vies-variancia-subajuste-09",
+      "topico": "Efeitos de viés e variância",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo linear simples que prevê a demanda de energia obteve 65% de acurácia nos dados de treinamento e 63% nos dados de teste. A equipe esperava acima de 85% e sabe que o consumo depende de interações entre clima, horário e tipo de dia. Qual diagnóstico e qual ação são adequados?",
+      "explicacao": "Desempenho baixo e parecido no treinamento e no teste indica que o modelo não consegue captar o padrão nem nos dados que viu: é subajuste, associado a viés alto. Um modelo mais expressivo, ou atributos que representem as interações entre clima, horário e tipo de dia, é o caminho para capturar esse padrão. Sobreajuste tem outro sinal — desempenho alto no treinamento e ruim no teste —, e simplificar o modelo pioraria o quadro atual. Desvio de dados é mudança da distribuição em produção ao longo do tempo, e aqui o problema já aparece no treinamento. E vazamento de dados costuma produzir resultados de teste bons demais para ser verdade, o oposto dos 63% observados.",
+      "opcoes": [
+        { "texto": "Subajuste (viés alto); usar um modelo mais expressivo ou atributos que representem as interações.", "correta": true },
+        { "texto": "Sobreajuste (variância alta); simplificar o modelo e aplicar mais regularização.", "correta": false },
+        { "texto": "Desvio de dados; retreinar periodicamente com dados de produção mais recentes.", "correta": false },
+        { "texto": "Vazamento de dados; remover do treinamento os atributos que revelam o resultado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-auditoria-rotulos-dialetos-10",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede social treinou um modelo de moderação com rótulos feitos por uma empresa terceirizada. Usuários de determinadas regiões reclamam que publicações escritas em seu dialeto são removidas como ofensivas, embora não sejam. Qual abordagem investiga e trata a causa do problema?",
+      "explicacao": "A suspeita recai sobre a qualidade dos rótulos: se os anotadores não conheciam o dialeto, marcaram expressões comuns como ofensivas, e o modelo aprendeu esse erro. Auditar os rótulos com revisores que conheçam os dialetos e analisar os erros separadamente por subgrupo confirma a causa e aponta o que corrigir. Aumentar o limiar de bloqueio para todos reduziria as remoções indevidas, mas também deixaria passar conteúdo realmente ofensivo, sem tratar o erro do grupo afetado. Retreinar por mais épocas com os mesmos rótulos reforça o erro aprendido. E ocultar que a moderação é automatizada fere a transparência e não corrige nada.",
+      "opcoes": [
+        { "texto": "Auditar os rótulos com revisores que conheçam os dialetos e analisar os erros por subgrupo.", "correta": true },
+        { "texto": "Aumentar o limiar de bloqueio do modelo para todas as publicações.", "correta": false },
+        { "texto": "Retreinar o modelo por mais épocas com os mesmos rótulos.", "correta": false },
+        { "texto": "Deixar de informar aos usuários que a moderação é automatizada.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-tradeoff-interpretabilidade-11",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um hospital compara dois modelos que estimam o risco de readmissão de pacientes: uma rede neural profunda com 93% de acurácia, cujas previsões não são explicáveis, e um modelo interpretável com 90%, que mostra os fatores de cada previsão. Os médicos só adotarão a ferramenta se entenderem por que um paciente foi classificado como alto risco, e a norma interna exige justificar as decisões clínicas apoiadas pelo modelo. Qual escolha atende a esses requisitos?",
+      "explicacao": "Aqui existe um trade-off real entre desempenho e interpretabilidade, e os requisitos decidem: a adoção pelos médicos e a norma interna dependem de explicar cada previsão. O modelo interpretável atende a isso, com uma pequena perda de acurácia que o hospital aceita em troca da explicação exigida. Escolher a rede profunda porque maior acurácia sempre prevalece ignora que um modelo que ninguém usa, ou que viola a norma, não gera benefício nenhum. Compensar a falta de explicação com mais dados de treinamento pode aumentar a acurácia, mas não torna as previsões explicáveis. E concluir que IA não pode ser usada em saúde descarta uma solução que atende aos requisitos.",
+      "opcoes": [
+        { "texto": "O modelo interpretável, aceitando a pequena perda de acurácia em troca da explicação exigida.", "correta": true },
+        { "texto": "A rede neural profunda, porque a maior acurácia deve sempre prevalecer.", "correta": false },
+        { "texto": "A rede neural profunda treinada com mais dados, para compensar a falta de explicação.", "correta": false },
+        { "texto": "Nenhum dos dois, porque modelos de IA não podem apoiar decisões na área da saúde.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-modelo-aberto-auditoria-12",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa do setor público precisa escolher um modelo de linguagem que possa ser auditado por uma comissão técnica. A comissão exige inspecionar os pesos do modelo, conhecer a documentação dos dados usados no treinamento e confirmar que a licença permite esse tipo de análise e o uso pretendido. Qual opção atende a esses requisitos?",
+      "explicacao": "Um modelo de pesos abertos, com documentação dos dados de treinamento e licença que permita a auditoria e o uso pretendido, dá à comissão acesso direto aos três elementos exigidos — pesos, dados e licença —, o que caracteriza transparência. Um modelo proprietário acessado apenas por API pode ter boa documentação, mas não permite inspecionar os pesos. Escolher o modelo com melhor posição em benchmarks não diz nada sobre a possibilidade de auditá-lo. E um modelo destilado sem documentação dos dados de origem falha justamente no requisito de conhecer como foi treinado.",
+      "opcoes": [
+        { "texto": "Um modelo de pesos abertos, com documentação dos dados de treinamento e licença que permita a auditoria.", "correta": true },
+        { "texto": "Um modelo proprietário acessado por API, sem acesso aos pesos.", "correta": false },
+        { "texto": "O modelo com a melhor posição nos benchmarks públicos de raciocínio.", "correta": false },
+        { "texto": "Um modelo destilado de um modelo maior, sem documentação dos dados de origem.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-design-centrado-humano-13",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um aplicativo de empréstimos informa aos clientes, em poucos segundos, se o pedido foi aprovado por um modelo de ML. A empresa quer aplicar princípios de design centrado no ser humano para IA explicável na tela de resultado. Quais práticas atendem a esses princípios?",
+      "explicacao": "Design centrado no ser humano busca que a pessoa entenda e possa reagir à decisão automatizada. Mostrar, em linguagem simples, os principais fatores que levaram ao resultado dá transparência sobre a decisão. E oferecer um canal para contestar e registrar feedback cria o mecanismo de retorno que permite corrigir erros e melhorar o sistema. Ocultar que a decisão foi automatizada contraria a transparência e a confiança que o design busca. Exibir todos os pesos internos do modelo sobrecarrega o cliente com informação técnica que ele não consegue interpretar — transparência não é despejar dados. E mostrar só o resultado final, sem explicação, é justamente a ausência de explicabilidade que se quer evitar.",
+      "opcoes": [
+        { "texto": "Mostrar ao cliente, em linguagem simples, os principais fatores que levaram à decisão.", "correta": true },
+        { "texto": "Oferecer um canal para contestar a decisão e registrar o feedback do cliente.", "correta": true },
+        { "texto": "Ocultar que a decisão foi automatizada para não gerar desconfiança.", "correta": false },
+        { "texto": "Exibir todos os pesos internos do modelo usados no cálculo.", "correta": false },
+        { "texto": "Mostrar apenas aprovado ou recusado, para simplificar a experiência.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-sustentabilidade-modelo-menor-14",
+      "topico": "Seleção responsável de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa com metas públicas de redução de emissões vai usar um modelo de base para resumir tickets internos de TI. Nos testes, um modelo pequeno e um modelo muito maior atingiram a mesma qualidade exigida. O volume previsto é de centenas de milhares de resumos por mês. Qual escolha é mais adequada do ponto de vista de uma seleção responsável de modelo?",
+      "explicacao": "Quando dois modelos atendem igualmente à qualidade exigida, o menor consome menos computação e energia por requisição — o que, multiplicado por centenas de milhares de resumos, se alinha às metas de sustentabilidade e ainda reduz custo. Escolher o maior para ter margem de qualidade gasta mais energia por uma diferença que os testes não mostraram. Treinar um modelo próprio do zero para controlar o consumo exige muito mais computação no treinamento do que qualquer economia de uso compensaria. E executar os dois modelos em toda requisição para escolher a melhor resposta mais que dobra o consumo, sem ganho de qualidade comprovado.",
+      "opcoes": [
+        { "texto": "O modelo pequeno, que atinge a qualidade exigida com menor consumo de energia.", "correta": true },
+        { "texto": "O modelo maior, para ter margem de qualidade em casos imprevistos.", "correta": false },
+        { "texto": "Um modelo próprio treinado do zero, para controlar o consumo de energia.", "correta": false },
+        { "texto": "Os dois modelos em todas as requisições, escolhendo a melhor resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-robustez-entradas-variadas-15",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um classificador de chamados de suporte funciona bem nos testes, feitos com textos bem escritos. Em produção, erra muito quando os clientes escrevem com erros de digitação, abreviações e gírias. Qual característica de IA responsável está deficiente e qual medida é adequada?",
+      "explicacao": "Robustez é a capacidade de manter o desempenho diante de variações e perturbações nas entradas, como erros de digitação e abreviações. A medida adequada é testar e treinar o modelo com entradas variadas, que representem a forma real como os clientes escrevem. Veracidade diz respeito a gerar informações verdadeiras, e RAG ajuda a fundamentar respostas geradas, não a classificar textos mal escritos. Equidade trata de desempenho justo entre grupos, e o problema descrito afeta qualquer cliente que escreva com erros, não um grupo demográfico. E transparência diz respeito a explicar e documentar o modelo; um model card registraria a limitação, mas não a corrigiria.",
+      "opcoes": [
+        { "texto": "Robustez; testar e treinar o modelo com entradas variadas, incluindo erros de digitação e abreviações.", "correta": true },
+        { "texto": "Veracidade; usar RAG para fundamentar as classificações em documentos.", "correta": false },
+        { "texto": "Equidade; analisar o desempenho separadamente por grupo demográfico.", "correta": false },
+        { "texto": "Transparência; documentar a limitação num model card.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-ciclo-responsavel-ordenacao-16",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma financeira vai desenvolver um novo modelo de concessão de crédito e quer aplicar práticas de IA responsável do início à operação. Selecione e ordene as etapas que a equipe deve seguir.",
+      "explicacao": "O viés pode entrar já pelos dados, então a primeira etapa é analisar os dados de treinamento quanto a desequilíbrios entre grupos. Em seguida o modelo é treinado e avaliado com análise por subgrupo, que revela diferenças de desempenho escondidas na média. Os resultados, o uso pretendido e as limitações são então documentados num model card, e, depois da implantação, vieses e desempenho são monitorados em produção, porque os dados mudam com o tempo. Remover a avaliação por subgrupo para acelerar elimina justamente a etapa que detecta tratamento desigual. E publicar o modelo antes de documentá-lo deixa a operação e as auditorias sem o registro de riscos e limitações.",
+      "sequencia": [
+        "Analisar os dados de treinamento quanto a desequilíbrios entre grupos.",
+        "Treinar o modelo e avaliar seu desempenho por subgrupo.",
+        "Documentar o uso pretendido, as limitações e os resultados num model card.",
+        "Monitorar vieses e desempenho do modelo em produção."
+      ],
+      "itensExtras": [
+        "Dispensar a avaliação por subgrupo para acelerar o lançamento.",
+        "Publicar o modelo antes de documentar suas limitações."
+      ]
+    },
+    {
+      "id": "aifc01-resp-dataset-nao-responsavel-17",
+      "topico": "Características de conjuntos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe está montando o conjunto de dados para treinar um modelo que recomenda tratamentos de fisioterapia. Qual das características a seguir NÃO é adequada a um conjunto de dados responsável?",
+      "explicacao": "A característica inadequada é coletar dados apenas do grupo majoritário de pacientes para maximizar a acurácia geral: a média pode subir, mas o modelo passa a funcionar mal para os grupos que ficaram de fora, o que é viés. As outras três são características de um conjunto responsável. A diversidade garante que idades, condições e perfis diferentes estejam representados. Fontes curadas e com procedência conhecida permitem confiar na qualidade e na legitimidade dos dados. E o equilíbrio entre classes e grupos evita que o modelo favoreça os casos mais frequentes.",
+      "opcoes": [
+        { "texto": "Dados coletados apenas do grupo majoritário de pacientes, para maximizar a acurácia geral.", "correta": true },
+        { "texto": "Diversidade de idades, condições clínicas e perfis de pacientes.", "correta": false },
+        { "texto": "Fontes de dados curadas e com procedência conhecida.", "correta": false },
+        { "texto": "Equilíbrio entre as classes de resultado e entre os grupos de pacientes.", "correta": false }
+      ]
+    }
+  ]
+}

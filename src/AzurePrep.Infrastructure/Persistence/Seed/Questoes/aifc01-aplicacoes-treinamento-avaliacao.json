@@ -1,0 +1,264 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-treino-instruction-tuning-36",
+      "topico": "Treinamento e fine-tuning de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe treinou um modelo de linguagem com grande volume de texto técnico. Quando recebe um comando como liste os riscos deste contrato, o modelo continua o texto como se fosse a próxima parte de um documento, em vez de executar a tarefa pedida. A equipe tem milhares de pares de instrução e resposta revisados. Qual abordagem ensina o modelo a seguir comandos?",
+      "explicacao": "Um modelo treinado só para prever a continuação de textos aprende a completar documentos, não a obedecer comandos. O fine-tuning com instruções (instruction tuning) usa pares de instrução e resposta para ensinar exatamente esse comportamento, e a equipe tem esses pares. Continuar o pré-treinamento com mais texto técnico reforçaria o vocabulário do domínio, mas manteria o comportamento de completar texto. A destilação transfere a capacidade de um modelo para outro menor; se o modelo de origem não segue comandos, o menor também não seguirá. E RAG acrescenta documentos ao contexto, sem mudar a forma como o modelo trata uma instrução.",
+      "opcoes": [
+        { "texto": "Fine-tuning com os pares de instrução e resposta (instruction tuning).", "correta": true },
+        { "texto": "Continuar o pré-treinamento com mais textos técnicos.", "correta": false },
+        { "texto": "Destilar o modelo para uma versão menor.", "correta": false },
+        { "texto": "Adicionar RAG com os contratos da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-transfer-learning-37",
+      "topico": "Treinamento e fine-tuning de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma cooperativa agrícola quer identificar três doenças raras em folhas de café a partir de fotos. Ela conseguiu apenas 2 mil imagens rotuladas, número pequeno para treinar um modelo de visão do zero, e tem orçamento limitado de computação. Qual abordagem é mais adequada?",
+      "explicacao": "A transferência de aprendizado parte de um modelo de visão já pré-treinado com milhões de imagens, que já sabe reconhecer bordas, texturas e formas, e o ajusta com as 2 mil imagens da cooperativa. Assim, poucos dados e pouca computação bastam para a nova tarefa. Treinar do zero exigiria muito mais imagens e computação para aprender o que o modelo pré-treinado já sabe. Agrupar as imagens sem rótulos não usaria os rótulos existentes e não garantiria que os grupos correspondessem às três doenças. E RLHF alinha respostas de modelos a preferências humanas por meio de avaliações comparativas; não é a técnica para ensinar um classificador de imagens.",
+      "opcoes": [
+        { "texto": "Ajustar um modelo de visão pré-treinado com as imagens rotuladas (transferência de aprendizado).", "correta": true },
+        { "texto": "Treinar um modelo de visão do zero apenas com as 2 mil imagens.", "correta": false },
+        { "texto": "Agrupar as imagens sem rótulos e nomear os grupos formados.", "correta": false },
+        { "texto": "Usar aprendizado por reforço com feedback humano (RLHF) sobre as imagens.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-representatividade-38",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa fez fine-tuning de um assistente de suporte usando conversas antigas. Depois do lançamento, o assistente vai bem com clientes do plano premium que escrevem em inglês, mas responde mal a clientes do plano básico que escrevem em português. A equipe descobriu que o conjunto de treinamento tinha apenas conversas do plano premium, em inglês. O que deve ser corrigido?",
+      "explicacao": "O conjunto de treinamento não representava a população que usa o assistente: faltavam clientes do plano básico e conversas em português. A correção é curar um conjunto representativo de todos os segmentos e idiomas atendidos e refazer o ajuste. Treinar por mais épocas com os mesmos dados só reforçaria o viés para o grupo que já estava representado, aumentando o risco de sobreajuste. Um modelo maior não compensa a ausência de exemplos do grupo mal atendido. E aumentar a temperatura varia as respostas, sem ensinar o modelo a lidar com clientes que ele praticamente não viu.",
+      "opcoes": [
+        { "texto": "Curar um conjunto de treinamento representativo de todos os planos e idiomas atendidos.", "correta": true },
+        { "texto": "Treinar por mais épocas com o mesmo conjunto de conversas.", "correta": false },
+        { "texto": "Trocar por um modelo de base maior e repetir o fine-tuning.", "correta": false },
+        { "texto": "Aumentar a temperatura nas respostas para clientes do plano básico.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-rlhf-preferencias-39",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente responde corretamente às dúvidas dos clientes, mas as avaliações mostram que as pessoas preferem respostas mais empáticas e objetivas do que as que ele gera. A empresa organizou especialistas para comparar pares de respostas alternativas à mesma pergunta e indicar qual preferem. Qual técnica usa esse tipo de dado para ajustar o comportamento do modelo?",
+      "explicacao": "Aprendizado por reforço com feedback humano (RLHF) usa justamente comparações humanas entre respostas alternativas para ensinar o modelo a produzir as respostas preferidas, alinhando tom e estilo às expectativas das pessoas. O pré-treinamento contínuo usa grandes volumes de texto sem rótulos para adaptar o modelo a um domínio; não aproveita julgamentos de preferência. RAG fornece documentos no contexto, o que ajuda na correção do conteúdo — que já está boa —, mas não no tom das respostas. E a destilação transfere a capacidade de um modelo maior para um menor, sem incorporar as preferências indicadas pelos especialistas.",
+      "opcoes": [
+        { "texto": "Aprendizado por reforço com feedback humano (RLHF).", "correta": true },
+        { "texto": "Pré-treinamento contínuo com as conversas de suporte.", "correta": false },
+        { "texto": "Geração aumentada por recuperação (RAG).", "correta": false },
+        { "texto": "Destilação de modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-governanca-dados-40",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa quer fazer fine-tuning de um modelo com transcrições de chamadas de atendimento, que incluem nomes, CPFs e endereços de clientes. Quais cuidados de governança de dados devem ser tomados antes do treinamento?",
+      "explicacao": "Os cuidados de governança tratam do que pode ser usado e de como protegê-lo. Remover ou mascarar os dados pessoais evita que o modelo aprenda e reproduza nomes, CPFs e endereços. E confirmar que a empresa tem direito de usar as transcrições para treinar modelos — por consentimento, contrato ou outra base legal — evita um uso não autorizado dos dados. Duplicar conversas para aumentar o volume não acrescenta informação e faz o modelo supervalorizar os casos repetidos. Manter só as chamadas com nota máxima parece curadoria, mas deixa de fora os casos difíceis que o assistente precisará enfrentar, criando um conjunto não representativo. E converter as transcrições em áudio não protege nenhum dado e ainda afasta os dados do formato de texto usado no ajuste.",
+      "opcoes": [
+        { "texto": "Remover ou mascarar os dados pessoais dos clientes nas transcrições.", "correta": true },
+        { "texto": "Confirmar que a empresa tem direito de usar as transcrições para treinar modelos.", "correta": true },
+        { "texto": "Duplicar as conversas disponíveis para aumentar o volume de treinamento.", "correta": false },
+        { "texto": "Manter apenas as chamadas avaliadas com nota máxima pelos clientes.", "correta": false },
+        { "texto": "Converter as transcrições de volta para áudio antes do treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-qualidade-volume-41",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para ajustar um modelo que redige respostas a reclamações formais, uma equipe tem duas opções de dados: 800 exemplos escritos e revisados por especialistas do jurídico, ou 60 mil respostas coletadas automaticamente de fóruns, com erros de conteúdo, tom inadequado e sem revisão. Qual escolha tende a produzir o melhor modelo para essa tarefa?",
+      "explicacao": "Num fine-tuning, o modelo aprende o padrão dos exemplos que recebe, inclusive os erros. Os 800 exemplos revisados por especialistas ensinam exatamente o conteúdo e o tom esperados, e para uma tarefa específica um volume moderado de alta qualidade costuma superar um volume grande e ruidoso. Usar os 60 mil exemplos porque mais dados sempre são melhores ensinaria erros de conteúdo e tom inadequado. Misturar os dois conjuntos sem revisão dilui os exemplos bons no ruído. E pré-treinar um modelo do zero com as respostas dos fóruns combina o custo mais alto do ciclo com os dados de pior qualidade.",
+      "opcoes": [
+        { "texto": "Usar os 800 exemplos revisados pelos especialistas.", "correta": true },
+        { "texto": "Usar as 60 mil respostas dos fóruns, porque mais dados sempre produzem modelos melhores.", "correta": false },
+        { "texto": "Misturar os dois conjuntos sem revisão para ganhar volume e qualidade.", "correta": false },
+        { "texto": "Pré-treinar um modelo do zero com as respostas coletadas dos fóruns.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-rotulagem-divergente-42",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cinco analistas rotularam 10 mil documentos em categorias para ajustar um modelo de classificação. Numa amostra rotulada por mais de um analista, os rótulos divergiram em cerca de 30% dos casos. Qual ação a equipe deve tomar antes de usar os dados?",
+      "explicacao": "Divergência alta entre analistas indica que as categorias estão sendo interpretadas de formas diferentes, e o modelo aprenderia essa inconsistência. A ação correta é criar diretrizes de rotulagem claras, medir a concordância entre os analistas e revisar os rótulos divergentes, para que o conjunto represente uma única interpretação. Aceitar o primeiro rótulo registrado mantém a inconsistência, apenas escolhida ao acaso. Descartar os dados e pré-treinar um modelo resolve outro problema, a um custo muito maior, e não cria rótulos confiáveis. E treinar por mais épocas faz o modelo decorar melhor os rótulos contraditórios, sem torná-los corretos.",
+      "opcoes": [
+        { "texto": "Definir diretrizes de rotulagem, medir a concordância e revisar os rótulos divergentes.", "correta": true },
+        { "texto": "Manter, em cada documento, o primeiro rótulo registrado.", "correta": false },
+        { "texto": "Descartar os rótulos e pré-treinar um modelo com os documentos.", "correta": false },
+        { "texto": "Treinar por mais épocas para compensar os rótulos divergentes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-treino-preparacao-ordenacao-43",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma seguradora vai fazer fine-tuning de um modelo para redigir respostas a pedidos de reembolso, a partir de pedidos históricos que contêm dados pessoais. Selecione e ordene as etapas de preparação dos dados antes do treinamento.",
+      "explicacao": "Primeiro são coletados os pedidos históricos e as respostas dadas, que formam a matéria-prima. Antes de qualquer pessoa manipulá-los para rotulagem, os dados pessoais e o conteúdo sem autorização de uso são removidos ou mascarados. Em seguida os pares de pedido e resposta são revisados conforme as diretrizes, garantindo qualidade. Por fim, separa-se um conjunto de avaliação que não participará do treinamento, para medir o modelo de forma honesta. Duplicar exemplos para aumentar o volume não acrescenta informação e distorce o peso dos casos repetidos. E avaliar com os mesmos exemplos do treinamento mede memorização, não a capacidade de lidar com pedidos novos.",
+      "sequencia": [
+        "Coletar os pedidos históricos e as respostas dadas.",
+        "Remover ou mascarar dados pessoais e conteúdo sem autorização de uso.",
+        "Revisar os pares de pedido e resposta conforme as diretrizes de qualidade.",
+        "Separar um conjunto de avaliação que não será usado no treinamento."
+      ],
+      "itensExtras": [
+        "Duplicar os exemplos disponíveis para aumentar o volume de treinamento.",
+        "Reservar os mesmos exemplos do treinamento para avaliar o modelo."
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-rouge-resumos-44",
+      "topico": "Métricas de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe tem mil relatórios, cada um com um resumo de referência escrito por especialistas, e quer uma métrica automática tradicional que meça quanto das palavras e sequências de palavras dos resumos de referência aparecem nos resumos gerados pelo modelo. Qual métrica atende a esse requisito?",
+      "explicacao": "ROUGE (Recall-Oriented Understudy for Gisting Evaluation) mede a sobreposição de palavras e sequências de palavras entre o texto gerado e o de referência, com ênfase em quanto da referência foi coberto — a métrica tradicional para avaliar resumos. BLEU também mede sobreposição de sequências de palavras, mas é orientado à precisão e historicamente usado em tradução automática. BERTScore compara o significado dos textos por meio de embeddings, e não a sobreposição literal de palavras que o enunciado pede. E o F1 score de classificação mede acertos em categorias, sem se aplicar à comparação entre textos livres.",
+      "opcoes": [
+        { "texto": "ROUGE", "correta": true },
+        { "texto": "BLEU", "correta": false },
+        { "texto": "BERTScore", "correta": false },
+        { "texto": "F1 score de classificação", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-bertscore-parafrases-45",
+      "topico": "Métricas de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo traduz manuais técnicos, e revisores humanos consideram a maioria das traduções corretas. Mesmo assim, a pontuação BLEU é baixa, porque o modelo usa sinônimos e construções diferentes das traduções de referência. A equipe quer uma métrica automática que valorize traduções com o mesmo significado, mesmo com palavras diferentes. Qual métrica atende a esse requisito?",
+      "explicacao": "O BERTScore compara textos por meio de embeddings contextuais, então reconhece como semelhantes frases com o mesmo significado escritas com palavras diferentes — exatamente o que falta ao BLEU neste caso. O ROUGE também se baseia em sobreposição de palavras e sequências, e penalizaria os sinônimos da mesma forma. Acrescentar traduções de referência ao BLEU ajuda a cobrir mais variações, mas continua dependendo de coincidência literal de palavras. E a acurácia de classificação não se aplica à comparação de textos livres.",
+      "opcoes": [
+        { "texto": "BERTScore", "correta": true },
+        { "texto": "ROUGE", "correta": false },
+        { "texto": "BLEU com mais traduções de referência", "correta": false },
+        { "texto": "Acurácia de classificação", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-llm-juiz-46",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa precisa avaliar 20 mil respostas de um assistente quanto à utilidade, à correção e ao cumprimento das políticas internas, e repetir essa avaliação a cada nova versão do prompt. Não existem respostas de referência, e a revisão humana de todas as respostas levaria semanas. Qual abordagem atende a esses requisitos?",
+      "explicacao": "Usar um modelo como avaliador (LLM como juiz), com critérios definidos numa rubrica, permite julgar utilidade, correção e aderência a políticas em grande volume, sem respostas de referência e de forma repetível a cada versão — e uma amostra revisada por humanos serve para calibrar o avaliador. O BLEU exige textos de referência, que não existem, e mede sobreposição de palavras, não utilidade nem cumprimento de políticas. A revisão humana de todas as respostas é justamente o que o enunciado descarta pelo prazo. E a acurácia exige um rótulo correto por item e mede acerto de categoria, o que não captura qualidade de respostas abertas.",
+      "opcoes": [
+        { "texto": "Usar um modelo como avaliador (LLM como juiz) com uma rubrica dos critérios.", "correta": true },
+        { "texto": "Calcular a pontuação BLEU de cada resposta.", "correta": false },
+        { "texto": "Submeter todas as 20 mil respostas à revisão humana.", "correta": false },
+        { "texto": "Medir a acurácia de cada resposta do assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-humana-marca-47",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma marca de cosméticos vai escolher entre dois modelos para criar legendas de campanhas em diferentes países. Os critérios são adequação ao tom da marca e sensibilidade cultural em cada mercado, e a política da empresa determina que a decisão final seja tomada pelos especialistas regionais de marketing. Qual abordagem de avaliação é mais adequada?",
+      "explicacao": "Tom de marca e sensibilidade cultural são critérios subjetivos que dependem do conhecimento de quem conhece cada mercado, e a política exige a decisão desses especialistas. Uma avaliação humana (human-in-the-loop), em que os especialistas regionais comparam as legendas dos dois modelos, atende aos dois pontos — e pode ser organizada com os trabalhos de avaliação humana do Amazon Bedrock Model Evaluation. O ROUGE mede sobreposição com textos de referência, que não capturam tom nem adequação cultural. Um benchmark público de raciocínio mede capacidade geral, sem relação com a voz da marca em cada país. E usar apenas um modelo como avaliador pode ajudar a triar, mas contraria a política que exige a decisão dos especialistas.",
+      "opcoes": [
+        { "texto": "Avaliação humana, com os especialistas regionais comparando as legendas dos dois modelos.", "correta": true },
+        { "texto": "Cálculo do ROUGE das legendas em relação a campanhas anteriores.", "correta": false },
+        { "texto": "Comparação dos modelos num benchmark público de raciocínio.", "correta": false },
+        { "texto": "Avaliação feita somente por um modelo como juiz, sem participação humana.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-limite-benchmark-48",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco quer escolher um modelo de base para responder dúvidas de clientes sobre seus produtos. Um analista propôs escolher o modelo com a melhor posição em um benchmark público conhecido e encerrar a avaliação. Qual é a principal limitação dessa proposta?",
+      "explicacao": "Benchmarks públicos são úteis para uma triagem inicial, porque comparam modelos em tarefas padronizadas. Mas eles não representam as perguntas, os produtos e as regras do banco, então o melhor modelo no benchmark não é necessariamente o melhor para esse caso — é preciso avaliar também com um conjunto de dados próprio. Afirmar que benchmarks medem só latência é falso: a maioria mede qualidade em tarefas como raciocínio e compreensão. Eles não são exclusivos de modelos de código aberto; modelos proprietários também são avaliados neles. E não exigem fine-tuning prévio: medem justamente os modelos como são disponibilizados.",
+      "opcoes": [
+        { "texto": "O benchmark não representa as perguntas e os produtos do banco, que precisam de avaliação com dados próprios.", "correta": true },
+        { "texto": "Benchmarks públicos medem apenas a latência dos modelos, não a qualidade das respostas.", "correta": false },
+        { "texto": "Benchmarks públicos só podem ser aplicados a modelos de código aberto.", "correta": false },
+        { "texto": "Benchmarks públicos exigem que os modelos passem por fine-tuning antes da avaliação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-bedrock-model-evaluation-49",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer comparar três modelos de base do Amazon Bedrock usando um conjunto de perguntas próprio. Ela precisa de avaliações automáticas com métricas prontas e também de trabalhos em que revisores humanos atribuam notas às respostas, tudo num recurso gerenciado. Qual recurso atende a esses requisitos?",
+      "explicacao": "O Amazon Bedrock Model Evaluation executa avaliações de modelos com conjuntos de dados prontos ou próprios, oferece métricas automáticas, avaliação com modelo como juiz e trabalhos de avaliação humana — exatamente a combinação pedida. O SageMaker Model Monitor acompanha modelos em produção, detectando desvios de dados e de qualidade ao longo do tempo; não compara modelos candidatos antes da escolha. O Amazon CloudWatch coleta métricas operacionais e logs, como latência e erros, sem avaliar a qualidade das respostas. E o Amazon Bedrock Guardrails aplica filtros de segurança a entradas e saídas, sem gerar comparações entre modelos.",
+      "opcoes": [
+        { "texto": "Amazon Bedrock Model Evaluation", "correta": true },
+        { "texto": "Amazon SageMaker Model Monitor", "correta": false },
+        { "texto": "Amazon CloudWatch", "correta": false },
+        { "texto": "Amazon Bedrock Guardrails", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-aplicacao-rag-50",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa lançou um assistente com RAG sobre sua documentação interna e quer avaliar a aplicação como um todo, e não só o modelo gerador. Quais aspectos são específicos da avaliação de uma aplicação com RAG?",
+      "explicacao": "Numa aplicação com RAG, a resposta depende de duas etapas, e as duas precisam ser avaliadas. A primeira é a recuperação: se os trechos recuperados são relevantes para a pergunta — se não forem, o melhor modelo responde mal. A segunda é a fidelidade: se a resposta se apoia nos trechos recuperados, sem acrescentar informação que eles não sustentam. O número de parâmetros descreve o modelo, não a qualidade da aplicação. A pontuação BLEU contra traduções de referência é métrica de tradução e não se aplica a um assistente de documentação. E o tempo de treinamento do modelo de embeddings é custo de construção, sem relação com a qualidade das respostas entregues.",
+      "opcoes": [
+        { "texto": "Se os trechos recuperados são relevantes para a pergunta feita.", "correta": true },
+        { "texto": "Se a resposta é fiel aos trechos recuperados, sem acrescentar informação não sustentada.", "correta": true },
+        { "texto": "Quantos parâmetros tem o modelo que gera as respostas.", "correta": false },
+        { "texto": "Qual é a pontuação BLEU das respostas contra traduções de referência.", "correta": false },
+        { "texto": "Quanto tempo levou o treinamento do modelo de embeddings.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-agente-conclusao-51",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente agenda reuniões consultando calendários e enviando convites. Nas avaliações, as mensagens do agente são bem escritas e recebem boas notas de qualidade de texto, mas usuários relatam reuniões marcadas no horário errado ou sem convite enviado. Qual métrica a equipe deve priorizar para avaliar o agente?",
+      "explicacao": "O valor de um agente está em concluir a tarefa, não em escrever bem. A taxa de conclusão da tarefa, verificando se a reunião foi agendada no horário certo, com as ferramentas certas e com o convite enviado, mede exatamente as falhas que os usuários relatam e que a nota de texto não enxerga. O ROUGE compara as mensagens com textos de referência, medindo semelhança de redação, que já está boa. O número de tokens por conversa é métrica de custo, sem relação com o agendamento correto. E o BERTScore mede semelhança de significado entre textos, continuando a avaliar a mensagem e não a ação executada.",
+      "opcoes": [
+        { "texto": "A taxa de conclusão da tarefa, conferindo se cada reunião foi agendada e o convite enviado corretamente.", "correta": true },
+        { "texto": "A pontuação ROUGE das mensagens do agente em relação a mensagens de referência.", "correta": false },
+        { "texto": "O número médio de tokens usados em cada conversa com o agente.", "correta": false },
+        { "texto": "O BERTScore das mensagens do agente em relação a mensagens de referência.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-metricas-negocio-assoc-52",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "Associacao",
+      "enunciado": "Uma empresa definiu perguntas para verificar se seu assistente de IA atende aos objetivos de negócio. Associe cada pergunta à métrica que a responde.",
+      "explicacao": "Saber se o assistente resolve o pedido sem transferir para um atendente humano é medir a taxa de conclusão de tarefas. Saber se os clientes ficaram satisfeitos é a satisfação do usuário, colhida em pesquisas após o atendimento. O custo médio de cada atendimento feito pelo assistente é o custo por interação. E saber se os analistas produzem mais relatórios por semana com a ferramenta é produtividade. A pontuação BLEU está no painel por ser uma métrica conhecida de avaliação de texto, mas mede a sobreposição com traduções de referência — é qualidade de texto, e não responde a nenhuma das perguntas de negócio.",
+      "associacoes": [
+        { "alvo": "O assistente resolve o pedido do cliente sem transferir para um atendente humano?", "item": "Taxa de conclusão de tarefas" },
+        { "alvo": "Os clientes ficaram satisfeitos com o atendimento recebido?", "item": "Satisfação do usuário" },
+        { "alvo": "Quanto custa, em média, cada atendimento feito pelo assistente?", "item": "Custo por interação" },
+        { "alvo": "Os analistas passaram a produzir mais relatórios por semana com a ferramenta?", "item": "Produtividade" }
+      ],
+      "itensExtras": ["Pontuação BLEU"]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-objetivo-negocio-53",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa avaliou seu gerador de resumos de reuniões apenas com ROUGE, e a pontuação é alta. Mesmo assim, poucos funcionários usam a ferramenta, e muitos a abandonam depois da primeira semana. A diretoria quer saber se o projeto está cumprindo seu objetivo de economizar tempo das equipes. O que a equipe deve fazer?",
+      "explicacao": "O ROUGE mede semelhança com resumos de referência, e não se o resumo economiza tempo de quem o usa — daí a contradição entre pontuação alta e abandono. A equipe deve definir métricas ligadas ao objetivo de negócio, como tempo economizado, adoção e engajamento dos usuários, e avaliar a ferramenta por elas. Otimizar o modelo para subir ainda mais o ROUGE aprofunda a métrica que já não explica o problema. Trocar o ROUGE pelo BLEU substitui uma métrica de sobreposição de texto por outra do mesmo tipo. E trocar por um modelo maior pressupõe que a qualidade técnica é o problema, sem nenhuma evidência de que seja isso que afasta os usuários.",
+      "opcoes": [
+        { "texto": "Definir métricas ligadas ao objetivo, como tempo economizado e engajamento, e avaliar a ferramenta por elas.", "correta": true },
+        { "texto": "Otimizar o modelo para aumentar ainda mais a pontuação ROUGE dos resumos.", "correta": false },
+        { "texto": "Substituir o ROUGE pelo BLEU como métrica principal de avaliação.", "correta": false },
+        { "texto": "Trocar o modelo por um maior, com melhor desempenho em benchmarks.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-plano-ordenacao-54",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa vai decidir qual de três modelos candidatos usará num assistente de atendimento. Selecione e ordene as etapas de um plano de avaliação bem conduzido.",
+      "explicacao": "O plano começa definindo o objetivo de negócio e as métricas, porque são eles que dizem o que significa um modelo melhor. Depois é montado um conjunto de avaliação representativo das perguntas reais dos clientes. Com isso, os candidatos passam por avaliação automática e humana, e os resultados são comparados com os critérios definidos antes, para então decidir. Usar os dados de treinamento como conjunto de avaliação mede memorização e superestima a qualidade dos modelos. E escolher a métrica depois de ver os resultados permite eleger a métrica que favorece o modelo preferido, tirando a validade da comparação.",
+      "sequencia": [
+        "Definir o objetivo de negócio e as métricas de avaliação.",
+        "Montar um conjunto de avaliação representativo das perguntas reais.",
+        "Executar avaliações automáticas e humanas com os três candidatos.",
+        "Comparar os resultados com os critérios definidos e decidir."
+      ],
+      "itensExtras": [
+        "Usar os dados de treinamento dos modelos como conjunto de avaliação.",
+        "Escolher a métrica principal depois de ver os resultados dos candidatos."
+      ]
+    }
+  ]
+}

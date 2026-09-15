@@ -1,0 +1,239 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-tokens-custo-documento-01",
+      "topico": "Tokens e preço por token",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente interno responde perguntas sobre a política de benefícios da empresa usando um modelo de base sob demanda no Amazon Bedrock. A cada pergunta, a aplicação envia no prompt o documento inteiro da política, com 40 páginas, e as respostas costumam ter um parágrafo. A fatura mensal cresceu com o número de usuários. Qual mudança reduz mais o custo sem deixar as respostas sem fundamento no documento?",
+      "explicacao": "No modo sob demanda, o custo acompanha os tokens de entrada e de saída. Aqui a entrada domina — 40 páginas por pergunta contra um parágrafo de resposta —, então recuperar só os trechos relevantes da política a cada pergunta, com RAG, corta a maior parte dos tokens enviados e mantém a resposta fundamentada no documento. Reduzir o limite de tokens de saída mexe na parte pequena da conta e ainda pode cortar respostas no meio. A temperatura controla a aleatoriedade da geração e não altera o número de tokens cobrados. O Provisioned Throughput troca a cobrança por token por capacidade reservada com compromisso de tempo; faz sentido para volume alto e constante, mas não reduz a quantidade de texto que cada requisição processa.",
+      "opcoes": [
+        { "texto": "Recuperar e enviar apenas os trechos da política relevantes para cada pergunta.", "correta": true },
+        { "texto": "Reduzir o número máximo de tokens de saída configurado na requisição.", "correta": false },
+        { "texto": "Diminuir a temperatura para que o modelo gere respostas mais objetivas.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput para o modelo usado pelo assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-embeddings-busca-semantica-02",
+      "topico": "Embeddings e vetores",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O portal de ajuda de um banco usa busca por palavras-chave. Clientes que digitam como pedir meu dinheiro de volta não encontram o artigo intitulado Solicitação de reembolso, porque os termos não coincidem. O banco quer que a busca encontre artigos com o mesmo significado da pergunta, mesmo quando as palavras são diferentes, e novos artigos são publicados toda semana. Qual abordagem atende a esses requisitos?",
+      "explicacao": "Embeddings representam textos como vetores em que significados parecidos ficam próximos. Gerando o embedding de cada artigo e o da pergunta, a busca por similaridade vetorial encontra o artigo de reembolso a partir de dinheiro de volta, e artigos novos entram só com a geração do seu embedding. Um dicionário de sinônimos mantido à mão resolve os casos que alguém lembrou de cadastrar, e falha no próximo jeito de perguntar. Enviar todos os artigos no contexto do modelo a cada busca é caro, esbarra no limite da janela de contexto e piora conforme o portal cresce. Fazer fine-tuning com os artigos coloca o conteúdo nos pesos do modelo, que ficariam desatualizados a cada artigo publicado, e não produz uma busca que devolve o artigo em si.",
+      "opcoes": [
+        { "texto": "Gerar embeddings dos artigos e da pergunta e buscar por similaridade vetorial.", "correta": true },
+        { "texto": "Manter um dicionário de sinônimos cadastrado manualmente na busca por palavras-chave.", "correta": false },
+        { "texto": "Enviar todos os artigos no contexto de um modelo de base a cada busca.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo de base com o conteúdo de todos os artigos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-chunking-manuais-03",
+      "topico": "Chunking",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fabricante indexou seus manuais técnicos para uma busca semântica gerando um único embedding para cada manual, que tem cerca de 300 páginas. Quando um técnico pergunta como trocar o filtro de um modelo específico, a busca devolve manuais inteiros e pouco relacionados, e o trecho sobre o filtro fica diluído. O que a equipe deve mudar?",
+      "explicacao": "Um embedding de 300 páginas mistura todos os assuntos do manual num único vetor, e o trecho sobre o filtro perde peso nessa média. Dividir o manual em trechos menores (chunking), com alguma sobreposição para não cortar ideias ao meio, e gerar um embedding por trecho permite que a busca encontre exatamente a passagem sobre a troca do filtro. Um modelo de embeddings com mais dimensões representa melhor cada texto, mas continua comprimindo o manual inteiro num vetor só, e o problema é a granularidade, não a precisão do vetor. A temperatura é um parâmetro de geração do modelo e não interfere na busca vetorial. Converter os manuais em imagens para um modelo multimodal troca o formato da entrada sem resolver a diluição: o documento continua indexado como uma unidade só.",
+      "opcoes": [
+        { "texto": "Dividir cada manual em trechos menores, com sobreposição, e gerar um embedding por trecho.", "correta": true },
+        { "texto": "Usar um modelo de embeddings com mais dimensões, mantendo um embedding por manual.", "correta": false },
+        { "texto": "Aumentar a temperatura do modelo que gera as respostas a partir dos manuais.", "correta": false },
+        { "texto": "Converter as páginas dos manuais em imagens e indexá-las com um modelo multimodal.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-difusao-imagens-produto-04",
+      "topico": "Tipos de modelos generativos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja de móveis quer gerar imagens realistas de sofás em diferentes ambientes a partir de descrições em texto escritas pela equipe de marketing, como sofá de linho cinza em sala com piso de madeira. As imagens não existem previamente. Qual tipo de modelo é adequado para essa tarefa?",
+      "explicacao": "Modelos de difusão geram imagens a partir de ruído, guiados por uma descrição em texto, e são a família usada para criar imagens novas a partir de prompts — exatamente o caso de imagens que ainda não existem. Um modelo de linguagem baseado em transformer, somente de texto, gera texto; poderia melhorar a descrição, mas não produz a imagem. Um modelo de embeddings multimodal representa textos e imagens no mesmo espaço vetorial e serve para buscar imagens parecidas com uma descrição, não para criá-las. E um serviço de análise de imagens, como o Amazon Rekognition, reconhece objetos em imagens que já existem, que é a direção oposta à pedida.",
+      "opcoes": [
+        { "texto": "Um modelo de difusão para geração de imagens a partir de texto.", "correta": true },
+        { "texto": "Um modelo de linguagem somente de texto, baseado em transformer.", "correta": false },
+        { "texto": "Um modelo de embeddings multimodal que representa textos e imagens.", "correta": false },
+        { "texto": "Um serviço de análise de imagens, como o Amazon Rekognition.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-multimodal-sinistro-05",
+      "topico": "Tipos de modelos generativos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora quer que o cliente envie, num único pedido, fotos do veículo avariado e um relato em texto do acidente. A partir disso, um único modelo deve analisar as fotos em conjunto com o relato, apontar inconsistências entre o que foi descrito e o dano visível e redigir um parecer preliminar. Qual tipo de modelo atende a esse requisito?",
+      "explicacao": "Um modelo de base multimodal aceita imagem e texto na mesma entrada e raciocina sobre os dois ao mesmo tempo, o que é necessário para comparar o relato com o dano visível e redigir o parecer num único passo. Um modelo somente de texto que recebe o resultado do Amazon Textract falha logo na entrada: o Textract extrai texto de documentos, e fotos de uma lataria amassada não têm texto a extrair. Gerar rótulos com o Amazon Rekognition e enviá-los a um modelo de texto cria um fluxo de dois serviços que perde os detalhes visuais — rótulos como carro ou para-choque não permitem avaliar se o dano combina com o relato — e contraria o requisito de um único modelo. Um modelo de difusão gera imagens a partir de texto, que é a direção oposta à análise pedida.",
+      "opcoes": [
+        { "texto": "Um modelo de base multimodal que aceita imagens e texto na mesma entrada.", "correta": true },
+        { "texto": "Um modelo somente de texto que recebe o conteúdo das fotos extraído pelo Amazon Textract.", "correta": false },
+        { "texto": "Um modelo somente de texto que recebe rótulos das fotos gerados pelo Amazon Rekognition.", "correta": false },
+        { "texto": "Um modelo de difusão treinado com fotos de veículos avariados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ciclo-vida-fm-ordenacao-06",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Um escritório de advocacia decidiu adaptar um modelo de base existente para redigir minutas no estilo e na terminologia da casa, usando um conjunto já curado de minutas aprovadas. O escritório não pretende construir um modelo do zero. Selecione e ordene as etapas do ciclo de vida que o escritório deve seguir.",
+      "explicacao": "A primeira decisão é qual modelo de base pré-treinado adaptar, considerando capacidade, idioma e custo. Com o modelo escolhido, o fine-tuning com as minutas curadas ensina o estilo e a terminologia da casa. O modelo ajustado precisa ser avaliado antes de chegar aos advogados, e só então é implantado, com coleta de feedback dos usuários para orientar os próximos ciclos. Pré-treinar um modelo do zero com textos jurídicos públicos é a etapa que o próprio enunciado descarta — é a mais cara do ciclo e desnecessária quando se parte de um modelo existente. Reduzir a temperatura é um ajuste de inferência, feito ao usar o modelo; não é etapa de preparação do fine-tuning.",
+      "sequencia": [
+        "Selecionar o modelo de base pré-treinado a ser adaptado.",
+        "Fazer fine-tuning do modelo com as minutas aprovadas.",
+        "Avaliar o modelo ajustado antes de liberá-lo aos advogados.",
+        "Implantar o modelo e coletar o feedback dos usuários."
+      ],
+      "itensExtras": [
+        "Pré-treinar um modelo do zero com textos jurídicos públicos.",
+        "Reduzir a temperatura do modelo antes de iniciar o fine-tuning."
+      ]
+    },
+    {
+      "id": "aifc01-gen-tokens-fatores-custo-07",
+      "topico": "Tokens e preço por token",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um chatbot usa um modelo de texto sob demanda no Amazon Bedrock, e a cada turno a aplicação reenvia ao modelo todo o histórico da conversa. A equipe quer entender o que faz o custo de cada requisição aumentar. Quais fatores aumentam diretamente o custo de uma requisição?",
+      "explicacao": "No modo sob demanda, cada requisição é cobrada pelos tokens processados. Os tokens de entrada incluem tudo o que vai no prompt — e, como o histórico é reenviado a cada turno, conversas longas encarecem cada nova mensagem. Os tokens gerados na resposta são cobrados como saída. A temperatura muda a aleatoriedade da escolha dos próximos tokens, não a quantidade deles. O número de usuários cadastrados aumenta a fatura total pelo volume de requisições, mas não o custo de uma requisição individual. E o número de instâncias não se aplica ao consumo sob demanda: não há instância a dimensionar, e esse é justamente um dos atrativos desse modo.",
+      "opcoes": [
+        { "texto": "A quantidade de tokens de entrada, incluindo o histórico reenviado a cada turno.", "correta": true },
+        { "texto": "A quantidade de tokens gerados na resposta do modelo.", "correta": true },
+        { "texto": "O valor configurado para a temperatura do modelo.", "correta": false },
+        { "texto": "O número de usuários cadastrados na aplicação.", "correta": false },
+        { "texto": "O número de instâncias alocadas para o modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-contexto-historico-longo-08",
+      "topico": "Engenharia de contexto",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de suporte atende conversas longas. Depois de algumas dezenas de turnos, ele passa a ignorar informações que o cliente deu no começo, como o número do pedido, e o custo de cada resposta cresce porque todo o histórico é reenviado. Qual prática de engenharia de contexto resolve os dois problemas?",
+      "explicacao": "Engenharia de contexto é decidir o que entra na janela de contexto a cada chamada. Resumir periodicamente o histórico e manter os fatos importantes, como o número do pedido, numa memória estruturada que é incluída em toda chamada reduz os tokens reenviados e garante que o dado crucial não se perca no meio de uma conversa longa. Aumentar o limite de tokens de saída permite respostas maiores, sem mudar o que o modelo recebe nem o custo da entrada. Fazer fine-tuning com conversas antigas pode melhorar o tom e o conhecimento geral, mas o modelo não teria como saber o número do pedido deste cliente nesta conversa. E aumentar a temperatura deixa as respostas mais variadas, o que tende a piorar a consistência, não a lembrança.",
+      "opcoes": [
+        { "texto": "Resumir o histórico periodicamente e incluir os fatos-chave numa memória estruturada em cada chamada.", "correta": true },
+        { "texto": "Aumentar o limite de tokens de saída para que o modelo desenvolva respostas mais completas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com conversas de suporte anteriores.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo explore mais o histórico da conversa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-mcp-integracao-unica-09",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem três agentes de IA, construídos com frameworks diferentes, e todos precisam consultar e abrir chamados no mesmo sistema interno de tickets. Hoje cada equipe mantém uma integração própria, e toda mudança na API do sistema quebra os três agentes. A empresa quer expor as operações do sistema uma única vez, de forma padronizada, para que qualquer agente descubra e chame essas operações. Qual abordagem atende a esse requisito?",
+      "explicacao": "O Model Context Protocol (MCP) padroniza como aplicações de IA descobrem e chamam ferramentas e fontes de dados externas: um servidor MCP expõe as operações do sistema de tickets uma vez, e qualquer agente que fale o protocolo as utiliza, independentemente do framework. Uma mudança na API passa a ser absorvida num único lugar. Fazer fine-tuning de cada agente com a documentação da API mantém três integrações e ainda coloca o contrato da API nos pesos do modelo, que ficam desatualizados na próxima mudança. Colocar a documentação no prompt de sistema e deixar o modelo montar as chamadas HTTP é frágil e continua repetido em cada agente. E uma base de conhecimento com dados exportados permite consultar informações, mas não abre chamados e fica defasada em relação ao sistema.",
+      "opcoes": [
+        { "texto": "Expor as operações do sistema de tickets por meio de um servidor MCP.", "correta": true },
+        { "texto": "Fazer fine-tuning de cada agente com a documentação da API do sistema de tickets.", "correta": false },
+        { "texto": "Incluir a documentação da API no prompt de sistema de cada agente para que o modelo monte as chamadas.", "correta": false },
+        { "texto": "Criar uma base de conhecimento com os dados exportados do sistema de tickets.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-multiagente-supervisor-10",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma consultoria quer um sistema que responda a pedidos de proposta. Dependendo do pedido, pode ser preciso pesquisar o histórico do cliente, calcular preços, verificar restrições contratuais ou todas essas coisas. Já existem agentes especializados para cada tarefa. A empresa quer que o sistema decida, a cada pedido, quais especialistas acionar e consolide os resultados numa resposta única. Qual padrão de sistema multiagente atende a esse requisito?",
+      "explicacao": "No padrão supervisor, um agente orquestrador interpreta o pedido, decide quais especialistas acionar e em que ordem, e consolida os resultados — exatamente a decisão dinâmica que o enunciado exige. Um pipeline sequencial fixo aciona sempre todos os agentes na mesma ordem, o que serve para processos estáveis, mas desperdiça trabalho e não se adapta a pedidos que só precisam de uma das tarefas. Um único agente com todas as ferramentas e instruções dos especialistas volta ao problema que a especialização resolve: contexto sobrecarregado e instruções competindo entre si. E agentes independentes respondendo em paralelo, sem comunicação, deixam para o usuário a consolidação que o sistema deveria fazer.",
+      "opcoes": [
+        { "texto": "Um agente supervisor que delega aos especialistas necessários e consolida as respostas.", "correta": true },
+        { "texto": "Um pipeline sequencial fixo que aciona todos os especialistas na mesma ordem.", "correta": false },
+        { "texto": "Um único agente que concentra as ferramentas e instruções de todos os especialistas.", "correta": false },
+        { "texto": "Agentes independentes que respondem em paralelo para o usuário escolher a melhor resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agente-memoria-longo-prazo-11",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de viagens corporativas conversa com os funcionários pelo chat da empresa. Os usuários reclamam que, a cada nova viagem, semanas depois, precisam repetir preferências já informadas, como assento na janela e refeição vegetariana. Dentro de uma mesma conversa, o agente se lembra de tudo corretamente. O que falta ao agente?",
+      "explicacao": "O agente já tem memória de curto prazo — o histórico da sessão atual —, e por isso lembra de tudo dentro da conversa. O que falta é memória de longo prazo: preferências extraídas das conversas e persistidas por usuário, recuperadas quando ele volta semanas depois. Aumentar o histórico mantido na sessão melhora conversas longas, mas o histórico some quando a sessão termina, que é justamente o problema. Uma janela de contexto maior amplia o que cabe numa chamada, sem guardar nada entre sessões. E fazer fine-tuning por usuário para gravar preferências nos pesos do modelo é caro, lento para refletir mudanças e inviável com milhares de funcionários.",
+      "opcoes": [
+        { "texto": "Memória de longo prazo que persiste as preferências de cada usuário entre sessões.", "correta": true },
+        { "texto": "Um histórico de sessão maior, mantendo mais turnos da conversa atual.", "correta": false },
+        { "texto": "Um modelo com janela de contexto maior para cada chamada.", "correta": false },
+        { "texto": "Fine-tuning do modelo com as preferências de cada funcionário.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-casos-uso-adequados-12",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma distribuidora avalia onde aplicar IA generativa. Quais iniciativas são casos de uso adequados para IA generativa?",
+      "explicacao": "IA generativa é adequada onde o resultado é conteúdo novo em linguagem natural. Redigir rascunhos de resposta personalizados a e-mails de clientes gera texto adaptado a cada mensagem, e resumir transcrições longas de reuniões condensa linguagem natural em conteúdo novo — os dois são casos típicos. Prever a quantidade de cada produto a ser vendida amanhã a partir do histórico é previsão numérica, que modelos de ML tradicional para séries temporais resolvem com mais precisão, menor custo e resultado determinístico. Validar o dígito verificador de um CNPJ é uma regra matemática fixa, em que um modelo generativo só acrescentaria custo e risco de erro. E calcular o frete pela tabela das transportadoras também é regra determinística: a resposta tem de ser exata, não gerada.",
+      "opcoes": [
+        { "texto": "Redigir rascunhos de respostas personalizadas para e-mails de clientes.", "correta": true },
+        { "texto": "Resumir as transcrições das reuniões semanais com fornecedores.", "correta": true },
+        { "texto": "Prever a quantidade de cada produto que será vendida amanhã a partir do histórico.", "correta": false },
+        { "texto": "Validar o dígito verificador do CNPJ informado no cadastro de clientes.", "correta": false },
+        { "texto": "Calcular o valor do frete de cada pedido com base na tabela das transportadoras.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-tokens-janela-contexto-13",
+      "topico": "Tokens e preço por token",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe escolheu um modelo com janela de contexto de 200 mil tokens para analisar contratos. Para verificar se os documentos cabem, contou as palavras: o maior contrato tem 170 mil palavras em português. Mesmo assim, as requisições com esse contrato falham por excederem o limite. O que explica a falha?",
+      "explicacao": "A janela de contexto é medida em tokens, e tokens não são palavras: o texto é dividido em unidades menores, e uma palavra pode virar vários tokens — o que é comum em português, com acentos e flexões. Por isso 170 mil palavras podem ultrapassar 200 mil tokens, e contar palavras subestima o tamanho real. Dizer que o limite vale só para a resposta inverte a regra: a janela cobre a entrada e a saída juntas. O limite não é medido em caracteres, e a explicação de que acentos contam em dobro inventa uma regra que não existe. E o número de dimensões de embeddings é outra coisa: descreve o tamanho dos vetores usados em busca semântica, não quanto texto o modelo gerador aceita.",
+      "opcoes": [
+        { "texto": "O limite é medido em tokens, e um texto costuma gerar mais tokens do que palavras.", "correta": true },
+        { "texto": "A janela de contexto se aplica apenas à resposta gerada, não ao texto enviado.", "correta": false },
+        { "texto": "O limite é medido em caracteres, e cada letra acentuada conta como dois caracteres.", "correta": false },
+        { "texto": "O limite corresponde ao número de dimensões dos embeddings gerados para o contrato.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-conceitos-assoc-14",
+      "topico": "Conceitos de IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe está planejando um portal de atendimento com IA generativa e listou as necessidades abaixo. Associe cada necessidade ao conceito que a resolve.",
+      "explicacao": "Quebrar um manual extenso em trechos antes de indexar é chunking, que evita que um único vetor dilua todos os assuntos do documento. Encontrar documentos pelo significado, e não pelas palavras, é busca por similaridade entre embeddings. Estimar quanto texto cabe numa chamada e quanto ela custa depende de contar tokens, a unidade da janela de contexto e da cobrança. Criar uma imagem nova a partir de uma descrição é tarefa de um modelo de difusão. Responder perguntas sobre uma foto enviada junto com a pergunta exige um modelo multimodal, que aceita imagem e texto na mesma entrada. A temperatura está no painel porque aparece em qualquer projeto de IA generativa, mas só controla a aleatoriedade da resposta gerada — não resolve nenhuma das necessidades listadas.",
+      "associacoes": [
+        { "alvo": "Dividir um manual de 300 páginas em partes menores antes de indexá-lo", "item": "Chunking" },
+        { "alvo": "Encontrar artigos com o mesmo significado da pergunta, mesmo com outras palavras", "item": "Embeddings" },
+        { "alvo": "Estimar quanto texto cabe numa chamada e quanto ela vai custar", "item": "Tokens" },
+        { "alvo": "Criar a imagem de um produto a partir de uma descrição em texto", "item": "Modelo de difusão" },
+        { "alvo": "Responder perguntas sobre a foto de um produto enviada pelo cliente", "item": "Modelo multimodal" }
+      ],
+      "itensExtras": ["Temperatura"]
+    },
+    {
+      "id": "aifc01-gen-modelo-base-varias-tarefas-15",
+      "topico": "Modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma editora quer, a partir das avaliações que leitores publicam em seu site, resumir cada avaliação, identificar o sentimento e redigir uma sugestão de resposta ao leitor. A equipe tem pouca experiência em ML, não tem dados rotulados e quer evitar construir e manter uma solução separada para cada tarefa. Qual abordagem atende melhor?",
+      "explicacao": "Um modelo de base é pré-treinado com grande volume de dados variados e pode ser direcionado por prompts para tarefas diferentes — resumir, identificar sentimento e redigir texto — sem treinamento específico e sem dados rotulados. É exatamente o que evita manter uma solução por tarefa. Treinar três modelos de ML especializados exigiria dados rotulados para cada tarefa, que a editora não tem, e três soluções para manter. O Amazon Comprehend identifica sentimento sem treinamento, mas não resume avaliações nem redige respostas, então a editora continuaria precisando de outras soluções. E aprendizado por reforço treina um agente por tentativa e recompensa, o que não se aplica a transformar textos de avaliações.",
+      "opcoes": [
+        { "texto": "Usar um modelo de base direcionado por prompts para as três tarefas.", "correta": true },
+        { "texto": "Treinar três modelos de ML especializados, um para cada tarefa.", "correta": false },
+        { "texto": "Usar o Amazon Comprehend para as três tarefas.", "correta": false },
+        { "texto": "Treinar um modelo com aprendizado por reforço usando as avaliações publicadas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ciclo-agente-ordenacao-16",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "Ordenacao",
+      "enunciado": "Um agente de TI recebe o pedido meu notebook não conecta à VPN e tem acesso a ferramentas que consultam o inventário, verificam o status da conta e redefinem certificados. Selecione e ordene as etapas do ciclo de execução que o agente percorre para atender o pedido.",
+      "explicacao": "Um agente começa interpretando o objetivo e planejando os passos necessários — aqui, descobrir por que a VPN falha. Em seguida chama a ferramenta que o plano indica, avalia o resultado dessa chamada e, com base nele, decide se responde ao usuário ou segue para o próximo passo, como redefinir o certificado. Esse ciclo de planejar, agir e observar é o que diferencia um agente de uma resposta única. Retreinar o modelo a cada ferramenta chamada não faz parte da execução: o modelo usa as ferramentas sem mudar seus pesos, e retreinar a cada passo seria inviável. Gerar embeddings de todas as ferramentas antes de cada resposta também não é etapa do ciclo; no máximo seria uma técnica pontual para escolher ferramentas num catálogo muito grande, não um passo obrigatório.",
+      "sequencia": [
+        "Interpretar o objetivo do usuário e planejar os passos.",
+        "Chamar a ferramenta indicada pelo plano.",
+        "Avaliar o resultado retornado pela ferramenta.",
+        "Responder ao usuário ou seguir para o próximo passo."
+      ],
+      "itensExtras": [
+        "Retreinar o modelo com o resultado de cada ferramenta chamada.",
+        "Gerar embeddings de todas as ferramentas antes de cada resposta."
+      ]
+    },
+    {
+      "id": "aifc01-gen-mcp-afirmacao-incorreta-17",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um arquiteto está preparando uma apresentação sobre o Model Context Protocol (MCP) para as equipes que constroem agentes na empresa. Qual das afirmações a seguir sobre o MCP NÃO está correta?",
+      "explicacao": "A afirmação incorreta é a de que o MCP treina o modelo com os dados dos sistemas conectados. O MCP é um protocolo de integração: ele define como uma aplicação de IA descobre e chama ferramentas e fontes de dados externas em tempo de execução, e não altera os pesos do modelo. As outras três afirmações estão corretas. O protocolo padroniza a descoberta e a chamada de ferramentas externas; por ser um padrão, a mesma integração pode ser reutilizada por agentes diferentes; e ele separa quem expõe as ferramentas (o servidor MCP) de quem as consome (o cliente, dentro da aplicação de IA).",
+      "opcoes": [
+        { "texto": "O MCP treina o modelo com os dados dos sistemas conectados, para que ele os conheça.", "correta": true },
+        { "texto": "O MCP padroniza como agentes descobrem e chamam ferramentas e fontes de dados externas.", "correta": false },
+        { "texto": "Com o MCP, uma mesma integração pode ser reutilizada por agentes diferentes.", "correta": false },
+        { "texto": "O MCP separa o servidor que expõe as ferramentas do cliente que as consome.", "correta": false }
+      ]
+    }
+  ]
+}

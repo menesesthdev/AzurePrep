@@ -1,0 +1,221 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-transformer-atencao-36",
+      "topico": "Modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um analista testou um modelo de linguagem com a frase: o banco recusou o empréstimo porque ele estava sem garantia. O modelo entendeu que ele se refere ao empréstimo, e não ao banco, e que banco é uma instituição financeira, não um assento. Qual característica dos modelos baseados em transformer explica esse resultado?",
+      "explicacao": "O mecanismo de atenção dos transformers relaciona cada token com os demais tokens do contexto, ponderando quais são relevantes para interpretar cada um — é o que permite resolver a que ele se refere e qual sentido de banco se aplica. Um dicionário fixo com um significado por palavra não resolveria ambiguidades que dependem da frase. Processar uma palavra por vez, sem considerar as anteriores, impediria justamente a interpretação pelo contexto. E regras gramaticais programadas manualmente descrevem sistemas antigos de processamento de linguagem, não o funcionamento de um modelo de base, que aprende esses padrões a partir dos dados.",
+      "opcoes": [
+        { "texto": "O mecanismo de atenção, que relaciona cada token aos demais tokens do contexto.", "correta": true },
+        { "texto": "Um dicionário interno fixo, com um único significado por palavra.", "correta": false },
+        { "texto": "O processamento de uma palavra por vez, sem considerar as anteriores.", "correta": false },
+        { "texto": "Regras gramaticais programadas manualmente pelos desenvolvedores do modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-caso-uso-codigo-revisao-37",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento adotou um assistente de IA que gera funções completas a partir de descrições. A produtividade aumentou, mas o time de segurança está preocupado com o uso desse código em produção. Qual prática permite aproveitar o caso de uso de geração de código de forma segura?",
+      "explicacao": "Código gerado por IA pode conter vulnerabilidades, bugs sutis ou trechos com problemas de licença, e deve seguir o mesmo caminho de qualquer contribuição: revisão humana, testes e varredura de segurança antes de ir para produção. Publicar direto porque o assistente é treinado com bom código ignora que o modelo pode reproduzir padrões inseguros e errar com confiança. Dispensar os testes automatizados para não atrasar remove a proteção justamente onde a origem do código pede mais cuidado. E aumentar a temperatura deixa as sugestões mais variadas, sem nenhum efeito sobre a segurança do código.",
+      "opcoes": [
+        { "texto": "Tratar o código gerado como qualquer contribuição, com revisão humana, testes e varredura de segurança.", "correta": true },
+        { "texto": "Publicar o código gerado diretamente, porque o assistente foi treinado com código de qualidade.", "correta": false },
+        { "texto": "Dispensar os testes automatizados do código gerado para não perder o ganho de produtividade.", "correta": false },
+        { "texto": "Aumentar a temperatura do assistente para gerar código mais seguro.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-caso-uso-adaptacao-cultural-38",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma marca de bebidas quer levar para o México e a Espanha campanhas criadas no Brasil, cheias de trocadilhos e referências culturais brasileiras. Uma tradução literal perderia o sentido; a equipe quer versões que recriem o humor com referências locais de cada país, mantendo o tom da marca, para revisão final dos redatores. Qual abordagem é mais adequada?",
+      "explicacao": "Recriar trocadilhos e referências culturais é adaptar conteúdo, não traduzir palavra por palavra — tarefa em que um modelo de base, orientado por um prompt com o tom da marca e o público de cada país, gera versões criativas para os redatores revisarem. O Amazon Translate com terminologia personalizada garante consistência de termos numa tradução, mas continua traduzindo o sentido literal, e os trocadilhos se perderiam. O Amazon Comprehend identifica entidades e sentimento, sem gerar texto novo. E o Amazon Polly converte texto em fala, sem adaptar o conteúdo.",
+      "opcoes": [
+        { "texto": "Usar um modelo de base com um prompt que descreva o tom da marca e o público de cada país.", "correta": true },
+        { "texto": "Usar o Amazon Translate com uma terminologia personalizada da marca.", "correta": false },
+        { "texto": "Usar o Amazon Comprehend para identificar os trocadilhos das campanhas.", "correta": false },
+        { "texto": "Usar o Amazon Polly para gerar versões em áudio das campanhas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacao-interpretabilidade-39",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco usa um modelo de base para indicar quais reclamações de clientes podem envolver fraude, e as reclamações sinalizadas levam ao bloqueio preventivo da conta. O regulador pediu que o banco explique por que determinada reclamação foi sinalizada. A equipe não consegue apontar o que, dentro do modelo, levou à decisão. Qual limitação se manifestou e qual medida é adequada?",
+      "explicacao": "Não conseguir explicar como o modelo chegou a uma decisão é a limitação de interpretabilidade dos modelos de base. Para decisões com impacto sobre o cliente, uma medida adequada é exigir que a sinalização venha acompanhada de justificativa com trechos da reclamação citados como evidência, e que um analista revise antes do bloqueio — ou avaliar se um modelo mais interpretável atende melhor. Não determinismo trata de respostas diferentes para a mesma entrada; temperatura zero tornaria a resposta mais estável, mas não explicável. A janela de contexto limita quanto texto o modelo recebe, sem relação com a explicação da decisão. E afirmar que prompts bem escritos eliminam alucinações é falso, além de não responder ao pedido do regulador.",
+      "opcoes": [
+        { "texto": "Baixa interpretabilidade; exigir justificativa com evidências citadas e revisão humana antes do bloqueio.", "correta": true },
+        { "texto": "Não determinismo; configurar temperatura zero para que a decisão fique explicável.", "correta": false },
+        { "texto": "Limite da janela de contexto; enviar o histórico completo do cliente ao modelo.", "correta": false },
+        { "texto": "Alucinação; reescrever o prompt, já que prompts bem escritos eliminam o problema.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacao-calculo-ferramenta-40",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de compras soma os itens de pedidos com dezenas de linhas e aplica descontos por faixa de valor. Em alguns pedidos longos, o total apresentado está errado, embora o texto da resposta seja convincente. A empresa precisa que o valor esteja sempre correto. Qual abordagem resolve o problema de forma mais confiável?",
+      "explicacao": "Modelos de linguagem geram texto token a token e podem errar cálculos longos, apresentando o resultado com confiança — é imprecisão, não falta de instrução. Deixar o cálculo para uma ferramenta determinística, como uma função que soma e aplica os descontos, chamada pelo modelo, garante o valor correto e mantém a conversa em linguagem natural. Aumentar a temperatura aumenta a variação e tende a piorar a exatidão. Fazer fine-tuning com exemplos de somas pode reduzir os erros, mas não garante exatidão em todos os pedidos, que é o requisito. E pedir ao modelo que confira a própria conta usa o mesmo mecanismo que errou, sem garantia nenhuma.",
+      "opcoes": [
+        { "texto": "Fazer o modelo chamar uma ferramenta determinística que calcula o total e os descontos.", "correta": true },
+        { "texto": "Aumentar a temperatura para que o modelo explore outros caminhos de cálculo.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com milhares de exemplos de somas de pedidos.", "correta": false },
+        { "texto": "Pedir no prompt que o modelo confira o total antes de responder.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-desempenho-entre-dominios-41",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai substituir três assistentes especializados — jurídico, recursos humanos e TI — por um único assistente baseado num modelo de base. O modelo candidato teve ótimo resultado nos testes com perguntas jurídicas. Antes de aprovar a troca, qual avaliação a empresa deve fazer?",
+      "explicacao": "Um único assistente para três áreas precisa funcionar bem em todas, e um bom resultado em uma delas não garante as demais. Avaliar o desempenho com conjuntos de perguntas representativos de cada domínio — jurídico, RH e TI — mede o desempenho entre domínios, que é o valor que a troca promete. Repetir os testes apenas com perguntas jurídicas mede de novo o que já se sabe. Escolher pelo número de parâmetros supõe que um modelo maior funciona bem em tudo, sem evidência. E um benchmark público de matemática mede uma capacidade que não corresponde às perguntas das três áreas.",
+      "opcoes": [
+        { "texto": "Avaliar o modelo com conjuntos de perguntas representativos de cada um dos três domínios.", "correta": true },
+        { "texto": "Ampliar os testes com mais perguntas jurídicas para confirmar o resultado.", "correta": false },
+        { "texto": "Aprovar o modelo com o maior número de parâmetros entre os candidatos.", "correta": false },
+        { "texto": "Comparar os modelos candidatos num benchmark público de matemática.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-metrica-acuracia-extracao-42",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa usa um modelo de base para extrair CNPJ, valor e data de vencimento de boletos recebidos por e-mail e lançar as contas a pagar automaticamente. A diretoria financeira quer uma métrica que mostre se a solução é confiável o suficiente para reduzir a conferência manual. Qual métrica atende a esse objetivo?",
+      "explicacao": "A decisão de reduzir a conferência manual depende de quantos lançamentos saem corretos. A acurácia dos campos extraídos, conferida por amostragem contra os boletos originais, mede exatamente isso, campo a campo. A pontuação BLEU compara textos gerados com textos de referência, típica de tradução, e não verifica se um CNPJ ou um valor está certo. O número de tokens por boleto mostra custo de processamento, não confiabilidade. E a latência média indica rapidez, e um lançamento rápido e errado é justamente o que a diretoria quer evitar.",
+      "opcoes": [
+        { "texto": "A acurácia dos campos extraídos, conferida por amostragem contra os boletos originais.", "correta": true },
+        { "texto": "A pontuação BLEU do texto extraído de cada boleto.", "correta": false },
+        { "texto": "O número médio de tokens processados por boleto.", "correta": false },
+        { "texto": "A latência média de processamento de cada boleto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servico-jumpstart-catalogo-43",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de ciência de dados quer explorar um catálogo de modelos pré-treinados de código aberto, implantá-los em poucos cliques em endpoints na própria conta e, para alguns, fazer fine-tuning com dados próprios, tudo dentro do ambiente do Amazon SageMaker AI. Qual recurso atende a esses requisitos?",
+      "explicacao": "O Amazon SageMaker JumpStart oferece um catálogo de modelos pré-treinados, incluindo modelos de código aberto, que podem ser implantados em endpoints na conta do cliente e ajustados com dados próprios dentro do SageMaker AI. O Amazon Quick é um espaço de trabalho com agentes para usuários de negócio, sem catálogo de modelos para implantar. O Kiro é um ambiente de desenvolvimento com agentes para escrever software, e não implanta modelos. E o Amazon Bedrock Guardrails aplica políticas de segurança a entradas e saídas, sem relação com a escolha e a implantação de modelos.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker JumpStart", "correta": true },
+        { "texto": "Amazon Quick", "correta": false },
+        { "texto": "Kiro", "correta": false },
+        { "texto": "Amazon Bedrock Guardrails", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-modelo-personalizado-44",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um diretor financeiro compara duas propostas: usar um modelo de base com engenharia de prompt, ou fazer fine-tuning desse modelo com dados da empresa no Amazon Bedrock. Ele pergunta quais custos a segunda proposta acrescenta em relação à primeira. Qual resposta está correta?",
+      "explicacao": "A proposta de fine-tuning acrescenta o custo do treinamento do ajuste e, em geral, custos para armazenar e usar o modelo personalizado, que podem ser diferentes do uso sob demanda do modelo de base — além do trabalho de preparar os dados. Afirmar que não há custo adicional ignora o treinamento e o uso do modelo personalizado. O custo não se limita ao armazenamento dos prompts, que nem é o que muda entre as propostas. E o pré-treinamento do modelo de base já foi feito pelo provedor; quem faz fine-tuning parte de um modelo pronto e não paga por essa etapa.",
+      "opcoes": [
+        { "texto": "O custo de treinamento do ajuste e os custos de armazenar e usar o modelo personalizado.", "correta": true },
+        { "texto": "Nenhum custo adicional, porque o modelo de base continua sendo o mesmo.", "correta": false },
+        { "texto": "Apenas o custo de armazenamento dos prompts usados no ajuste.", "correta": false },
+        { "texto": "O custo de pré-treinamento do modelo de base a partir do zero.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-disponibilidade-redundancia-45",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem duas aplicações de IA generativa: um assistente de atendimento aos clientes, cuja indisponibilidade gera perda de vendas, e uma ferramenta interna que resume atas de reunião, usada algumas vezes por semana. O arquiteto propôs a mesma arquitetura para as duas, com implantação em várias Regiões e capacidade reservada em todas. Qual ajuste equilibra melhor custo e disponibilidade?",
+      "explicacao": "Redundância e capacidade reservada custam caro e só se justificam onde a indisponibilidade custa mais que elas. O assistente de clientes, que gera perda de vendas quando cai, justifica o investimento; a ferramenta de atas, usada algumas vezes por semana, pode rodar numa única Região e sob demanda, aceitando uma indisponibilidade ocasional. Aplicar redundância e capacidade reservada às duas paga por uma disponibilidade que a ferramenta interna não precisa. Inverter a prioridade protege a aplicação menos crítica e expõe a que gera receita. E eliminar a redundância das duas economiza justamente onde a indisponibilidade custa vendas.",
+      "opcoes": [
+        { "texto": "Manter a redundância no assistente de clientes e usar uma única Região, sob demanda, na ferramenta interna.", "correta": true },
+        { "texto": "Manter várias Regiões e capacidade reservada nas duas aplicações.", "correta": false },
+        { "texto": "Usar várias Regiões na ferramenta interna e uma única Região no assistente de clientes.", "correta": false },
+        { "texto": "Usar uma única Região, sob demanda, nas duas aplicações.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-responsividade-streaming-46",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os usuários de um assistente reclamam que ficam olhando para a tela em branco por vários segundos até que a resposta completa apareça. As respostas têm a qualidade esperada e a empresa não quer aumentar o custo. Qual mudança melhora a experiência de resposta?",
+      "explicacao": "Com a resposta em streaming, os tokens são exibidos à medida que o modelo os gera, e o usuário começa a ler em poucos instantes em vez de esperar o texto completo — a percepção de responsividade melhora sem mudar o modelo nem a quantidade de tokens. Trocar por um modelo maior tende a aumentar a latência e o custo. Aumentar o limite de tokens de saída permite respostas mais longas, o que pode até alongar a espera. E a inferência em lote é assíncrona, adequada a processamento em massa, e deixaria o usuário sem resposta interativa.",
+      "opcoes": [
+        { "texto": "Exibir a resposta em streaming, à medida que os tokens são gerados.", "correta": true },
+        { "texto": "Trocar por um modelo maior, com respostas de melhor qualidade.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída das respostas.", "correta": false },
+        { "texto": "Processar as perguntas por meio da inferência em lote.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentes-conceitos-assoc-47",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe está desenhando um agente de vendas e listou comportamentos esperados. Associe cada comportamento ao conceito de IA agêntica correspondente.",
+      "explicacao": "Lembrar o que o cliente disse três mensagens antes, na mesma conversa, é memória de curto prazo. Lembrar, numa sessão nova semanas depois, que o cliente prefere entrega aos sábados é memória de longo prazo. Consultar a API de estoque é uso de ferramenta. Decidir a sequência de verificar estoque, reservar o produto e enviar a confirmação é planejamento e orquestração do fluxo. E padronizar como a API de estoque é exposta para qualquer agente é o papel do Model Context Protocol (MCP). O fine-tuning está no painel porque também muda o comportamento de um modelo, mas ajusta seus pesos com exemplos — não é o mecanismo de nenhum dos comportamentos listados.",
+      "associacoes": [
+        { "alvo": "Lembrar o que o cliente disse três mensagens antes, na mesma conversa", "item": "Memória de curto prazo" },
+        { "alvo": "Lembrar, numa nova sessão semanas depois, que o cliente prefere entregas aos sábados", "item": "Memória de longo prazo" },
+        { "alvo": "Consultar a API de estoque para saber se o produto está disponível", "item": "Uso de ferramenta" },
+        { "alvo": "Decidir a sequência: verificar estoque, reservar o produto e enviar a confirmação", "item": "Planejamento e orquestração" },
+        { "alvo": "Padronizar como a API de estoque é exposta para qualquer agente", "item": "Model Context Protocol (MCP)" }
+      ],
+      "itensExtras": ["Fine-tuning"]
+    },
+    {
+      "id": "aifc01-gen-ciclo-vida-feedback-48",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa implantou há três meses um modelo de base ajustado para responder dúvidas técnicas. Os usuários marcam respostas como úteis ou não úteis, e a equipe acumula exemplos de perguntas que o modelo errou. Qual uso dessas informações corresponde à etapa de feedback do ciclo de vida de modelos de base?",
+      "explicacao": "A etapa de feedback fecha o ciclo: as avaliações dos usuários e os casos de falha coletados em produção orientam a próxima avaliação, a curadoria de dados e um eventual novo ajuste, e o modelo melhora a cada volta. Encerrar o ciclo na implantação desperdiça justamente essa informação. Pré-treinar o modelo do zero toda semana é a etapa mais cara do ciclo e não corresponde a incorporar feedback. E descartar as avaliações negativas elimina os sinais mais valiosos, porque mostram onde o modelo precisa melhorar.",
+      "opcoes": [
+        { "texto": "Usar as avaliações e os casos de falha para orientar a próxima avaliação e o próximo ajuste do modelo.", "correta": true },
+        { "texto": "Arquivar as avaliações, já que o ciclo de vida termina na implantação.", "correta": false },
+        { "texto": "Pré-treinar o modelo do zero toda semana com as perguntas dos usuários.", "correta": false },
+        { "texto": "Descartar as avaliações negativas para manter apenas os exemplos de sucesso.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacoes-dosagem-49",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um hospital avalia usar um modelo de base para sugerir doses de medicamentos a partir do prontuário, sem revisão do farmacêutico. O comitê clínico pediu que a equipe liste as limitações da IA generativa que tornam esse uso arriscado. Quais limitações se aplicam?",
+      "explicacao": "Duas limitações tornam o uso sem revisão arriscado. O modelo pode gerar valores incorretos com aparência confiável — alucinação e imprecisão —, o que numa dose de medicamento pode causar dano grave. E pode produzir respostas diferentes para a mesma entrada, por não determinismo, o que impede confiar que uma dose validada uma vez será repetida. Afirmar que modelos de base não entendem linguagem natural é falso: é justamente sua capacidade central. Eles também geram texto em português, e isso não é limitação para o caso. E não exigem dados rotulados para cada nova pergunta; funcionam por prompts, sem treinamento específico.",
+      "opcoes": [
+        { "texto": "Pode gerar valores incorretos com aparência confiável.", "correta": true },
+        { "texto": "Pode produzir respostas diferentes para a mesma entrada.", "correta": true },
+        { "texto": "Não consegue interpretar textos escritos em linguagem natural.", "correta": false },
+        { "texto": "Não é capaz de gerar respostas em português.", "correta": false },
+        { "texto": "Exige dados rotulados para cada nova pergunta recebida.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-embeddings-proximidade-50",
+      "topico": "Embeddings e vetores",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa busca semântica, a pergunta como encerro meu plano? encontrou o artigo Cancelamento de assinatura, embora as duas frases não tenham nenhuma palavra em comum. Um gestor pergunta por que isso aconteceu. Qual explicação está correta?",
+      "explicacao": "Os embeddings representam textos como vetores posicionados de modo que significados parecidos fiquem próximos no espaço vetorial. A busca calcula a proximidade entre o vetor da pergunta e os vetores dos artigos, e por isso encontra o artigo de cancelamento mesmo sem palavras em comum. O número de tokens de cada frase não determina a semelhança de significado. O banco vetorial não ordena os resultados alfabeticamente, e sim pela proximidade entre vetores. E a temperatura é um parâmetro de geração de texto, que não participa da comparação entre embeddings.",
+      "opcoes": [
+        { "texto": "Os embeddings posicionam textos de significado parecido em pontos próximos do espaço vetorial.", "correta": true },
+        { "texto": "As duas frases têm o mesmo número de tokens, o que as torna equivalentes.", "correta": false },
+        { "texto": "O banco vetorial ordena os artigos alfabeticamente a partir da pergunta.", "correta": false },
+        { "texto": "A temperatura da busca aproximou o significado das duas frases.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-engenharia-contexto-ordenacao-51",
+      "topico": "Engenharia de contexto",
+      "tipo": "Ordenacao",
+      "enunciado": "Um agente de suporte atende conversas longas, consulta uma base de documentos e tem um orçamento máximo de tokens por chamada ao modelo. Selecione e ordene as etapas de engenharia de contexto que o agente deve executar antes de cada chamada.",
+      "explicacao": "A montagem do contexto começa pelas instruções de sistema relevantes para a tarefa atual, que definem o papel e as regras do agente. Em seguida são recuperados os documentos e as memórias pertinentes ao pedido, e não tudo o que existe. Depois o histórico da conversa é resumido ou truncado para que o conjunto caiba no orçamento de tokens, preservando os fatos importantes. Só então o contexto final é montado e o modelo é chamado. Incluir sempre todo o histórico e todos os documentos estoura o orçamento, aumenta o custo e dilui a informação relevante. E aumentar a temperatura não é etapa de montagem de contexto: é um parâmetro de geração, que só deixaria a resposta mais variada.",
+      "sequencia": [
+        "Selecionar as instruções de sistema relevantes para a tarefa atual.",
+        "Recuperar os documentos e as memórias pertinentes ao pedido.",
+        "Resumir ou truncar o histórico para caber no orçamento de tokens.",
+        "Montar o contexto final e chamar o modelo."
+      ],
+      "itensExtras": [
+        "Incluir sempre todo o histórico e todos os documentos disponíveis.",
+        "Aumentar a temperatura antes de montar o contexto."
+      ]
+    }
+  ]
+}

@@ -1,10 +1,12 @@
-# AzurePrep — Contexto do Projeto
+# PrepHub (repositório AzurePrep) — Contexto do Projeto
 
 ## O que é
 
+> **Marca: PrepHub** (desde 15/09/2026, com a entrada da AWS). Mudou só o nome **exibido** — telas, e-mails, recebedor do Pix. Solução, namespaces, métricas `azureprep_*`, volume `azureprep_dados` e nomes de cookie continuam `AzurePrep`: trocá-los derrubaria sessões, dashboards e o volume de dados sem ganho para quem usa.
+
 Simulado do exame **AZ-900 (Microsoft Azure Fundamentals)** que replica fielmente a experiência real da prova: interface, timer, navegação entre questões, marcação para revisão. O diferencial não é ter "mais um banco de questões" — é a fidelidade à experiência real de prova (estilo Pearson VUE), algo que o simulado oficial da Microsoft não oferece.
 
-Roadmap futuro: expandir para outras certificações Microsoft (AZ-104, AI-900, etc.). O modelo de dados deve ser desenhado pensando nisso desde já — nada de hardcoded só pro AZ-900.
+Roadmap: outras certificações Microsoft (AZ-104, AZ-305, AZ-400 já publicados) e **AWS**, começando pelo **AIF-C01 (AWS Certified AI Practitioner)**, publicado em 15/09/2026. O modelo de dados deve ser desenhado pensando nisso desde já — nada de hardcoded só pro AZ-900.
 
 ## ⚠️ Regra crítica de conteúdo (não negociável)
 
@@ -41,9 +43,9 @@ Dependências: `Web` → `Application` + `Infrastructure`; `Infrastructure` → 
 
 ## Modelo de domínio (nomes de tipo em português; propriedades em inglês = colunas do banco)
 
-- **Exame** (`Exam`) — Id, Code (ex: "AZ-900"), Name, TimeLimitMinutes, PassingScorePercent, TotalQuestions
+- **Exame** (`Exam`) — Id, Code (ex: "AZ-900"), Name, TimeLimitMinutes, PassingScorePercent, TotalQuestions, Vendor (`FornecedorDoExame`: Microsoft, Aws — decide escala da nota, regras de formato e a tela da prova)
 - **AreaDeHabilidade** (`SkillArea`) — Id, ExamId, Name, WeightPercent (ex: "Descrever conceitos de nuvem — 25-30%")
-- **Questao** (`Question`) — Id, ExamId, SkillAreaId, Text, Type (`TipoDeQuestao`: EscolhaUnica, EscolhaMultipla, SimNao, Associacao), Explanation
+- **Questao** (`Question`) — Id, ExamId, SkillAreaId, Text, Type (`TipoDeQuestao`: EscolhaUnica, EscolhaMultipla, SimNao, Associacao, Ordenacao), Explanation
 - **OpcaoDeResposta** (`AnswerOption`) — Id, QuestionId, Text, IsCorrect, OrderIndex, TargetText (nulo fora de `Associacao`)
 
 > **`Associacao` (arrastar e soltar) não trouxe formato de resposta novo — de propósito.** Cada alternativa é um **par candidato** (alvo × item): `TargetText` é o alvo da coluna da direita, `Text` é o item arrastável, e existe uma linha para cada combinação possível. Responder é selecionar um par por alvo, então continua sendo um conjunto de Ids de alternativa: `CorretorDeProva`, `OrdemDasOpcoes`, a gravação da resposta e o histórico seguem sem saber que o tipo existe. A alternativa seria uma tabela de pares com resposta própria, e aí todo caminho do sistema teria de aprender um segundo jeito de estar certo. O custo dessa escolha é o número de linhas (4 alvos × 5 itens = 20 alternativas para uma questão) — irrelevante no volume deste banco. ⚠️ **Sem crédito parcial**: errar um alvo perde a questão inteira, como já vale para múltipla escolha. A prova real dá crédito parcial nos dois formatos; dar em um só é que seria inconsistente.
@@ -95,11 +97,25 @@ Isso não é "nice to have", é o diferencial do AzurePrep. A referência de cal
 - **Barra de ações fixa no rodapé**: à esquerda "Marcar para revisão" e "Comentários"; à direita "Tela de revisão", "Anterior", "Próxima". No último item, "Próxima" dá lugar a "Encerrar prova"
 - ⚠️ **Sem painel de navegação lateral.** A prova real não tem grid de questões — a navegação é linear e o único jeito de saltar entre itens é pela tela de revisão. Não reintroduzir
 - **Tela de revisão**: substitui a área da questão (não é modal). Tabela Item / Status / Marcado, com status **Completo, Incompleto, Não visto** — múltipla resposta parcialmente marcada é Incompleto. Filtros "Revisar todos / incompletos / marcados". Clique na linha volta ao item. Modal de confirmação em "Encerrar prova", com aviso de que não dá pra voltar
-- **Score report**: nota na **escala 1–1000, corte em 700** (nunca percentual), veredito aprovado/reprovado, régua da escala e barras por domínio **sem números** — igual ao relatório real, que não revela contagem de acertos nem quais itens foram errados
+- **Score report**: nota na **escala 1–1000 (Microsoft) ou 100–1000 (AWS), corte em 700** (nunca percentual), veredito aprovado/reprovado, régua da escala e barras por domínio **sem números** — igual ao relatório real, que não revela contagem de acertos nem quais itens foram errados
 - **Revisão de estudo**: tela à parte (`exam/{id}/review`), com gabarito, explicação por distrator e números por domínio. Deve deixar explícito que não existe na prova real
 - **Estilo visual**: neutro e sério — tons de azul/cinza/branco, nada de gamificação, emoji ou cor vibrante. Tem que parecer ambiente de prova, não app de quiz
 - **Timer zerado = submissão automática**, sem exceção
 - Fluxo deve se comportar como SPA (AJAX/partial views no MVC) — sem recarregar a página inteira a cada navegação de questão, pra não quebrar a imersão
+
+### Tela da AWS (`RealizarAws.cshtml`, `_QuestaoAws.cshtml`)
+
+Não é tema da tela Microsoft: é outra disposição e outro fluxo, e o controller escolhe a view pelo `Vendor` do exame. Calibrada pelo **AWS Exam Demo** público da Pearson VUE (`pearsonvue.com/us/en/redirects/aws/demo-test-enu.html`) — referência de interface, nunca de conteúdo: a questão de exemplo do demo não entra no banco, nem adaptada.
+
+- **Tela de instruções antes da primeira questão** (`InstrucoesAws.cshtml`, rota `exam/start/{examId}`): barra **sem relógio**, faixa só com o esquema de cores, rodapé com "Encerrar exame" à esquerda e "Próxima" à direita. É GET e não cria nada — a tentativa, e com ela o tempo, só começa no POST de "Próxima". O texto das instruções é **nosso** (`_InstrucoesAws.cshtml`); do demo vem só a posição.
+- **Barra azul `#006caa`**: nome do exame e do candidato à esquerda; "Tempo restante" (MM:SS, H:MM:SS acima de uma hora) e "Questão N de M" à direita. **Faixa `#4678bd`** logo abaixo: Comentário à esquerda; Marcar para revisão (bandeira) e **Esquema de cores** à direita. Fundo branco, **fonte serifada genérica** (`serif`), como o demo.
+- **Esquema de cores**: as nove combinações do demo (preto sobre amarelo-claro, branco sobre preto...), em `_EsquemaDeCoresAws.cshtml` + `aws-esquema.js`. Muda só a área de conteúdo, via `[data-scheme]` e variáveis CSS; a escolha fica no `localStorage` do navegador (conveniência de quem vê, não dado da prova).
+- **Rodapé só com Anterior/Próxima**, e "Anterior" **some** (não desabilita) na primeira questão. Não existe "Tela de revisão" até o candidato passar pelo último item: "Próxima" no último item abre a revisão. A partir daí o botão aparece.
+- **Revisão** (conferida contra o demo): troca a moldura — faixa com "Instruções" no lugar de Comentário/Marcar, contador de questão oculto, **fundo cinza `#f2f3f5`**. Título "Revisão" e botão "Revisar todas" (teal `#007394`) no alto; abas "Todas (n)" / "Incompletas (n)" com ícone de informação / "Marcadas (n)" (só aparece se houver marcada), que **filtram a tabela**; cartão branco com Questão / Título / Status (selo vermelho "Incompleta") / Marcada (Sim/Não) / link "Revisar". "Revisar todas" **percorre as questões em sequência** (Próxima vai à seguinte e, no fim, volta à revisão). "Encerrar revisão" no canto inferior esquerdo, com modal de confirmação.
+- **Instrução no fim do enunciado**, gerada pela tela: "(Selecione DUAS.)", "(Selecione e ordene TRÊS.)". Alternativas com letra (A., B., C., D.).
+- **Ordenação e associação por lista suspensa** ("Etapa 1: [Selecione...]"), com os passos listados em marcadores acima. Mesmos checkboxes ocultos da tela Microsoft: a lista suspensa só marca o par.
+- **Score report**: escala 100–1000 e **tabela de classificação por seção** ("Atende às competências" / "Precisa melhorar"), no lugar das barras.
+- ⚠️ **Inferido, sem print do demo:** a disposição da questão de associação (hoje igual à de ordenação, com lista suspensa por enunciado), o selo "Completa" na revisão (o demo só mostrou questões incompletas), o significado da coluna que o demo chama de "Testing" (tratada como "Marcada"), os rótulos em pt-BR da prova traduzida e o layout do score report.
 
 ## Convenções de código
 
@@ -361,12 +377,13 @@ Callback a cadastrar em cada provedor (ajuste host/porta): `/signin-google`, `/s
 | AZ-104 | 5 | 50 em 100 min | 17/04/2026 | 108 (5/5 domínios) |
 | AZ-305 | 4 | 50 em 120 min | 17/04/2026 | 88 (4/4 domínios) |
 | AZ-400 | 5 | 50 em 120 min | 27/07/2026 | 120 (5/5 domínios) |
+| **AIF-C01** (AWS) | 5 | 65 em 90 min | v1.1, 30/04/2026 | 450 — 90/108/126/63/63 (publicado 15/09/2026) |
 
 ⚠️ No AZ-400, o domínio `pipelines` vale **50–55% sozinho** — um banco equilibrado entre os cinco daria prova enviesada, e por isso ele tem 32 questões contra 22 dos demais.
 
 ⚠️ **Profundidade é a dívida que sobra.** O AZ-900 tem 7,1× o tamanho da prova (285 para 40); os três novos ficam entre 1,8× e 2,4×. A partir da terceira tentativa do mesmo usuário o sorteio estoura o teto de 15% de repetidas — ele prefere repetir a entregar prova curta. Publicados assim por decisão consciente; crescer os bancos é o próximo passo de conteúdo, não um defeito de código.
 
-⚠️ **As questões dos três exames novos não passaram por revisão técnica humana.** O validador garante forma (contagem de alternativas, gabarito presente, explicação por distrator, distrator obrigatório no arrastar), não veracidade — gabarito errado passa em todos os testes.
+⚠️ **As questões dos exames novos — inclusive as 450 do AIF-C01, geradas com assistência — não passaram por revisão técnica humana.** No AIF-C01 o risco maior está nos serviços recentes da v1.1 (Bedrock AgentCore, Strands Agents, Kiro, Amazon Quick, AWS Transform): o exame foi publicado a pedido do usuário antes dessa conferência, que continua pendente. O validador garante forma (contagem de alternativas, gabarito presente, explicação por distrator, distrator obrigatório no arrastar), não veracidade — gabarito errado passa em todos os testes.
   - **`Exame.IsPublished` ("em construção") continua valendo para o próximo exame.** O exame é semeado e recebe questões desde a primeira — os arquivos de seed exigem um `exameCode` declarado, então sem esse estado intermediário o exame só poderia entrar já pronto, e as centenas de questões seriam escritas sem nunca passar pelo seed nem pelos testes. Enquanto está em construção ele **some do catálogo e recusa tentativa**, e a recusa é na Application (`SessaoDeProvaService`), não só na tela: o id do exame trafega no formulário de "Iniciar simulado", então esconder o botão não impede quem já o tem. Publicar antes da hora **não quebra nada** — e é esse o problema: o sorteio faz `Math.Min(total, pool)` e entrega uma prova curta e sempre parecida, com cara de prova normal. Dois testes guardam o par, e o seed registra o progresso no log a cada startup. ⚠️ **Estudos de caso: risco reconhecido, NÃO confirmado.** Se AZ-305/AZ-400 tiverem case study (cenário longo compartilhado por várias questões), isso não cabe no modelo atual — `Questao` é unidade independente, e o formato exigiria entidade nova + migration, mudança no sorteio (o bloco é atômico e pode atravessar domínios, quebrando a repartição por cota) e uma UI de abas que colide com a navegação linear. **Mas os study guides oficiais dos dois exames não mencionam case studies**, e a afirmação anterior de que os têm era conhecimento não verificado apresentado como fato. Antes de tratar isso como épico, confirmar na página de detalhes do exame ou no `aka.ms/examdemo`. De todo modo não bloqueia escrever as questões independentes, que são a maior parte de qualquer um dos dois.
 - **Alertas** (`alerting_rules` no Prometheus, Alertmanager, notificação do Grafana). A infraestrutura já suporta — `azureprep_coleta_idade_seconds` e a taxa de 5xx são os dois candidatos naturais —, mas alerta sem destino combinado e sem alguém de plantão é só mais um painel vermelho que ninguém vê.
 - **Logs e traces centralizados** (Loki, Tempo, OTLP). O `AddOpenTelemetry` já está montado e trocar o exportador é mudança de uma linha, mas isso dobraria a stack do compose para responder perguntas que hoje `docker compose logs` responde.

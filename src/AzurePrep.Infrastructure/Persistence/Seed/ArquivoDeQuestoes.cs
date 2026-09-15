@@ -24,7 +24,7 @@ public sealed record QuestaoDeSeed
 
     public string? Topico { get; init; }
 
-    /// <summary>"EscolhaUnica", "EscolhaMultipla", "SimNao" ou "Associacao".</summary>
+    /// <summary>"EscolhaUnica", "EscolhaMultipla", "SimNao", "Associacao" ou "Ordenacao".</summary>
     public string Tipo { get; init; } = string.Empty;
 
     public string Enunciado { get; init; } = string.Empty;
@@ -59,6 +59,18 @@ public sealed record QuestaoDeSeed
     /// banco, aplicado ao painel de itens.
     /// </remarks>
     public IReadOnlyList<string> ItensExtras { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// Gabarito de uma questão <c>Ordenacao</c>: os passos certos, na ordem certa. Os passos que não
+    /// entram em etapa nenhuma vão em <see cref="ItensExtras"/>.
+    /// </summary>
+    /// <remarks>
+    /// O carregador transforma cada posição numa etapa ("Etapa 1", "Etapa 2"...) e expande em pares
+    /// etapa × passo, exatamente como faz com <see cref="Associacoes"/>. ⚠️ Mesma regra de Id: a
+    /// ordem da lista e dos extras é parte da chave das alternativas — nunca reordenar numa questão
+    /// já publicada (corrigir a sequência de uma questão publicada é aposentá-la e escrever outra).
+    /// </remarks>
+    public IReadOnlyList<string> Sequencia { get; init; } = Array.Empty<string>();
 }
 
 /// <summary>Um alvo e o item que lhe corresponde, numa questão de arrastar e soltar.</summary>

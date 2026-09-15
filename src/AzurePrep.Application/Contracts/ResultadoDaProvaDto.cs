@@ -33,7 +33,7 @@ public sealed record RevisaoDeQuestaoDto(
 /// e a revisão questão a questão.
 /// </summary>
 /// <remarks>
-/// O score report fiel exibe apenas <see cref="ScaledScore"/> (escala 1–1000, corte em
+/// O score report fiel exibe apenas <see cref="ScaledScore"/> (escala <see cref="ScaledMinimumScore"/>–1000, corte em
 /// <see cref="ScaledPassingScore"/>) — o percentual e a revisão questão a questão existem só
 /// para o modo de estudo, que na prova real não é oferecido.
 /// </remarks>
@@ -51,4 +51,6 @@ public sealed record ResultadoDaProvaDto(
     IReadOnlyList<ResultadoPorAreaDto> SkillAreas,
     IReadOnlyList<RevisaoDeQuestaoDto> Questions,
     int ScaledScore,
-    int ScaledPassingScore);
+    int ScaledPassingScore,
+    int ScaledMinimumScore = 1,
+    FornecedorDoExame Vendor = FornecedorDoExame.Microsoft);

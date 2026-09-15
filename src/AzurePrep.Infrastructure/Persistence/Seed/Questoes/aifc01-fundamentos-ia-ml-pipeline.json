@@ -1,0 +1,195 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-inferencia-multimodelo-lojas-63",
+      "topico": "Tipos de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede de varejo treinou um modelo de previsão de demanda separado para cada uma de suas 500 lojas. Os modelos são pequenos, e cada um recebe poucas requisições por dia, em horários imprevisíveis, com resposta esperada em poucos segundos. Manter um endpoint dedicado para cada loja ficou caro demais. Qual abordagem do Amazon SageMaker AI atende melhor a esse cenário?",
+      "explicacao": "Um endpoint multimodelo hospeda muitos modelos num mesmo endpoint, compartilhando a infraestrutura e carregando cada modelo sob demanda — solução pensada para grandes quantidades de modelos pequenos e pouco acessados, com custo muito menor que um endpoint por modelo. Manter 500 endpoints em tempo real separados é justamente o custo que se quer eliminar. Substituir tudo por um único modelo global muda a solução de negócio e pode piorar a previsão de cada loja, sem que isso tenha sido pedido. E um batch transform diário não atende a requisições que chegam em horários imprevisíveis e esperam resposta em segundos.",
+      "opcoes": [
+        { "texto": "Hospedar os modelos num endpoint multimodelo compartilhado.", "correta": true },
+        { "texto": "Manter um endpoint em tempo real dedicado para cada loja.", "correta": false },
+        { "texto": "Substituir os 500 modelos por um único modelo global sem distinção de loja.", "correta": false },
+        { "texto": "Executar um batch transform diário com todos os modelos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aprendizado-autossupervisionado-64",
+      "topico": "Tipos de aprendizado",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um estagiário leu que modelos de linguagem são pré-treinados com trilhões de palavras e perguntou como seria possível alguém rotular manualmente todo esse texto. Qual explicação sobre o tipo de aprendizado usado no pré-treinamento está correta?",
+      "explicacao": "O pré-treinamento de modelos de linguagem usa aprendizado autossupervisionado: o próprio texto fornece o alvo, porque o modelo aprende a prever o próximo token a partir dos anteriores. Não há rotulagem manual, e é por isso que trilhões de palavras podem ser usadas. Não existe um rótulo humano para cada frase — isso seria inviável nessa escala. O aprendizado por reforço pode ser usado depois, por exemplo com feedback humano, mas não é a base do pré-treinamento. E agrupamento é uma técnica não supervisionada para descobrir grupos, não para aprender a gerar texto.",
+      "opcoes": [
+        { "texto": "É autossupervisionado: o próprio texto fornece o alvo, que é prever o próximo token.", "correta": true },
+        { "texto": "É supervisionado, com um rótulo escrito por pessoas para cada frase do texto.", "correta": false },
+        { "texto": "É aprendizado por reforço desde o início, com recompensas para cada palavra correta.", "correta": false },
+        { "texto": "É agrupamento, que organiza as palavras em grupos de significado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-conceitos-algoritmo-modelo-65",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa reunião, um gerente disse: o time vai colocar o algoritmo de árvores de decisão em produção na semana que vem, e ele vai prever quais clientes vão cancelar. Uma cientista de dados pediu para corrigir a frase. Qual é a distinção correta entre algoritmo e modelo nesse contexto?",
+      "explicacao": "O algoritmo é o procedimento de aprendizado — por exemplo, o método de construir árvores de decisão. O modelo é o resultado de aplicar esse algoritmo aos dados de treinamento: é ele que carrega os padrões aprendidos e faz as previsões na inferência. Por isso o que vai para produção é o modelo treinado. Um algoritmo sem treinamento não sabe nada sobre os clientes da empresa e não prevê nada. Dizer que modelo e algoritmo são a mesma coisa apaga justamente a etapa de treinamento. E o conjunto de dados é a matéria-prima do treinamento, não o algoritmo.",
+      "opcoes": [
+        { "texto": "O algoritmo é o procedimento de aprendizado; o que vai para produção é o modelo treinado a partir dos dados.", "correta": true },
+        { "texto": "O algoritmo vai para produção sem treinamento e aprende enquanto faz as previsões.", "correta": false },
+        { "texto": "Modelo e algoritmo são a mesma coisa, então a frase do gerente está correta.", "correta": false },
+        { "texto": "O algoritmo é o conjunto de dados, e o modelo é o código que o lê.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-transcribe-legendas-66",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma plataforma de eventos on-line quer exibir legendas em português para os participantes durante as palestras transmitidas ao vivo, à medida que o palestrante fala. A equipe quer um serviço gerenciado, sem treinar modelos. Qual solução atende a esse requisito?",
+      "explicacao": "A transcrição em streaming do Amazon Transcribe converte o áudio em texto à medida que ele chega, o que permite exibir as legendas durante a palestra. Um trabalho de transcrição em lote do Amazon Transcribe processa arquivos de áudio já gravados e só entregaria o texto depois do evento. O Amazon Polly faz o caminho inverso, gerando fala a partir de texto. E o Amazon Translate traduz textos entre idiomas, mas precisa receber o texto já transcrito — sozinho, não converte a fala em legenda.",
+      "opcoes": [
+        { "texto": "Transcrição em streaming do Amazon Transcribe.", "correta": true },
+        { "texto": "Trabalhos de transcrição em lote do Amazon Transcribe.", "correta": false },
+        { "texto": "Amazon Polly.", "correta": false },
+        { "texto": "Amazon Translate.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-translate-chat-67",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa brasileira começou a atender clientes do México e da Argentina pelo chat, mas seus atendentes só escrevem em português. A empresa quer que as mensagens dos clientes cheguem traduzidas ao atendente e que as respostas cheguem traduzidas ao cliente em tempo real, identificando automaticamente o idioma de origem. Qual serviço atende a esse requisito?",
+      "explicacao": "O Amazon Translate traduz textos em tempo real entre idiomas e pode detectar automaticamente o idioma de origem, atendendo aos dois sentidos da conversa no chat. O Amazon Transcribe converte áudio em texto, e aqui a conversa já é escrita. O Amazon Polly gera fala a partir de texto, sem traduzir. E o Amazon Comprehend consegue identificar o idioma de um texto, mas não traduz as mensagens — resolveria só uma parte do problema.",
+      "opcoes": [
+        { "texto": "Amazon Translate", "correta": true },
+        { "texto": "Amazon Transcribe", "correta": false },
+        { "texto": "Amazon Polly", "correta": false },
+        { "texto": "Amazon Comprehend", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-comprehend-entidades-custom-68",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma distribuidora recebe milhares de e-mails de clientes e quer extrair automaticamente os códigos internos dos seus produtos, como DST-88213, e os números de contrato, que seguem formatos próprios da empresa. A detecção de entidades padrão identificou pessoas, datas e organizações, mas não esses códigos. A empresa tem exemplos anotados e não quer construir modelos do zero. Qual solução atende a esse requisito?",
+      "explicacao": "O reconhecimento de entidades personalizado do Amazon Comprehend treina, a partir de exemplos anotados, a identificação de tipos de entidade próprios do negócio, como códigos de produto e números de contrato, sem construir um modelo do zero. A detecção de entidades padrão do Comprehend reconhece categorias genéricas, e o enunciado já mostrou que ela não identifica os códigos internos. O Amazon Textract extrai texto de documentos digitalizados, mas os e-mails já são texto e o problema é reconhecer as entidades. E o Amazon Rekognition analisa imagens, sem relação com o conteúdo textual dos e-mails.",
+      "opcoes": [
+        { "texto": "Reconhecimento de entidades personalizado do Amazon Comprehend, treinado com os exemplos anotados.", "correta": true },
+        { "texto": "Detecção de entidades padrão do Amazon Comprehend.", "correta": false },
+        { "texto": "Amazon Textract aplicado ao corpo dos e-mails.", "correta": false },
+        { "texto": "Amazon Rekognition aplicado ao texto dos e-mails.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-rekognition-epi-69",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma construtora quer verificar, a partir de imagens das câmeras dos canteiros de obra, se os trabalhadores estão usando capacete e outros equipamentos de proteção individual, e gerar alertas quando não estiverem. A empresa não tem equipe de ML e quer um recurso pronto. Qual solução atende a esse requisito?",
+      "explicacao": "O Amazon Rekognition oferece detecção de equipamentos de proteção individual pronta, identificando pessoas e se usam itens como capacete, máscara e luvas em imagens, sem treinamento. O Amazon Textract extrai texto de documentos, sem analisar pessoas em imagens de câmeras. O Amazon Comprehend processa textos. E treinar um modelo de visão do zero no SageMaker AI resolveria tecnicamente, mas exige exatamente a equipe de ML e o esforço que a empresa quer evitar.",
+      "opcoes": [
+        { "texto": "Detecção de equipamentos de proteção individual do Amazon Rekognition.", "correta": true },
+        { "texto": "Amazon Textract aplicado às imagens das câmeras.", "correta": false },
+        { "texto": "Amazon Comprehend aplicado às imagens das câmeras.", "correta": false },
+        { "texto": "Um modelo de visão treinado do zero no Amazon SageMaker AI.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-engenharia-atributos-70",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Num projeto de previsão de movimento em restaurantes, os dados brutos trazem apenas a data e a hora de cada pedido. A equipe criou, a partir delas, as colunas dia da semana, é feriado e faixa de horário, e o modelo melhorou bastante. Qual componente do pipeline de ML corresponde a esse trabalho?",
+      "explicacao": "Criar colunas novas e mais informativas a partir dos dados brutos — transformar data e hora em dia da semana, feriado e faixa de horário — é engenharia de atributos, que ajuda o modelo a enxergar padrões presentes nos dados. O ajuste de hiperparâmetros testa configurações do treinamento, como profundidade de árvores, sem criar colunas. O monitoramento acompanha o modelo em produção. E a implantação disponibiliza o modelo para uso, uma etapa posterior.",
+      "opcoes": [
+        { "texto": "Engenharia de atributos", "correta": true },
+        { "texto": "Ajuste de hiperparâmetros", "correta": false },
+        { "texto": "Monitoramento do modelo", "correta": false },
+        { "texto": "Implantação do modelo", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-hiperparametros-71",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Com os dados já preparados, uma equipe treina várias versões do mesmo modelo de árvores de decisão, variando a profundidade máxima das árvores, a taxa de aprendizado e o número de árvores, e escolhe a combinação com melhor resultado no conjunto de validação. Qual componente do pipeline de ML corresponde a esse trabalho?",
+      "explicacao": "Variar configurações definidas antes do treinamento — profundidade das árvores, taxa de aprendizado, número de árvores — e escolher a combinação com melhor resultado na validação é o ajuste de hiperparâmetros, que o SageMaker AI pode automatizar. A engenharia de atributos cria ou transforma colunas dos dados, e os dados já estavam preparados. A rotulagem de dados atribui a resposta correta aos exemplos, antes do treinamento. E o monitoramento de desvio acompanha o modelo em produção.",
+      "opcoes": [
+        { "texto": "Ajuste de hiperparâmetros", "correta": true },
+        { "texto": "Engenharia de atributos", "correta": false },
+        { "texto": "Rotulagem de dados", "correta": false },
+        { "texto": "Monitoramento de desvio", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-validacao-teste-72",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante semanas, uma equipe ajustou o modelo testando cada mudança no conjunto de teste e mantendo as que melhoravam o resultado. O modelo final tinha 94% no teste, mas em produção ficou em 85%. Qual prática teria evitado essa estimativa otimista?",
+      "explicacao": "Ao usar o conjunto de teste repetidamente para decidir ajustes, a equipe acabou adaptando o modelo a esse conjunto, e os 94% deixaram de representar dados novos. A prática correta é usar um conjunto de validação separado para comparar e ajustar versões e reservar o conjunto de teste para uma única avaliação final. Continuar usando o teste para tudo repete o problema. Dispensar o conjunto de teste elimina a estimativa independente do desempenho. E treinar incluindo os dados de teste impede qualquer avaliação honesta.",
+      "opcoes": [
+        { "texto": "Usar um conjunto de validação para os ajustes e reservar o de teste para a avaliação final.", "correta": true },
+        { "texto": "Continuar usando o conjunto de teste para todos os ajustes, com mais rigor.", "correta": false },
+        { "texto": "Dispensar o conjunto de teste e avaliar o modelo diretamente em produção.", "correta": false },
+        { "texto": "Incluir os dados de teste no treinamento para aumentar o volume.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-rastreamento-experimentos-73",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de ciência de dados executa centenas de treinamentos por mês e registra os parâmetros e as métricas de cada execução em planilhas, que ficam desatualizadas e dificultam comparar resultados. A equipe quer registrar e comparar automaticamente parâmetros, métricas e artefatos de cada execução usando um recurso gerenciado. Qual solução atende a esse requisito?",
+      "explicacao": "O rastreamento de experimentos, como o MLflow gerenciado no Amazon SageMaker AI, registra automaticamente parâmetros, métricas e artefatos de cada execução e permite comparar execuções — exatamente o que as planilhas não conseguem fazer. O SageMaker Model Monitor acompanha modelos em produção, sem registrar as execuções de treinamento. O SageMaker Ground Truth organiza a rotulagem de dados. E o SageMaker Feature Store armazena atributos para treinamento e inferência, sem comparar execuções.",
+      "opcoes": [
+        { "texto": "Rastreamento de experimentos, como o MLflow gerenciado no Amazon SageMaker AI.", "correta": true },
+        { "texto": "Amazon SageMaker Model Monitor.", "correta": false },
+        { "texto": "Amazon SageMaker Ground Truth.", "correta": false },
+        { "texto": "Amazon SageMaker Feature Store.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-recursos-sagemaker-assoc-74",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe está mapeando os recursos do Amazon SageMaker AI para cada etapa do seu pipeline de ML. Associe cada necessidade ao recurso adequado.",
+      "explicacao": "Rotular imagens com anotadores humanos é o SageMaker Ground Truth. Armazenar atributos para usá-los igualmente no treinamento e na inferência é o SageMaker Feature Store. Buscar automaticamente a melhor combinação de hiperparâmetros é o ajuste automático de modelos do SageMaker AI. Versionar e aprovar modelos para produção é o SageMaker Model Registry. E detectar desvios de dados e de qualidade em produção é o SageMaker Model Monitor. O Amazon Polly está no painel porque é um serviço de IA da AWS, mas converte texto em fala e não corresponde a nenhuma etapa do pipeline descrito.",
+      "associacoes": [
+        { "alvo": "Rotular imagens com anotadores humanos", "item": "Amazon SageMaker Ground Truth" },
+        { "alvo": "Armazenar atributos para usá-los no treinamento e na inferência", "item": "Amazon SageMaker Feature Store" },
+        { "alvo": "Buscar automaticamente a melhor combinação de hiperparâmetros", "item": "Ajuste automático de modelos do SageMaker AI" },
+        { "alvo": "Versionar e aprovar modelos para produção", "item": "Amazon SageMaker Model Registry" },
+        { "alvo": "Detectar desvios de dados e de qualidade em produção", "item": "Amazon SageMaker Model Monitor" }
+      ],
+      "itensExtras": ["Amazon Polly"]
+    },
+    {
+      "id": "aifc01-fund-pipeline-completo-ordenacao-75",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma equipe vai construir um modelo de previsão de vendas a partir de dados brutos do sistema de caixa. Selecione e ordene as etapas centrais do pipeline, da coleta até a avaliação final.",
+      "explicacao": "Os dados brutos são coletados primeiro. Em seguida vem a engenharia de atributos, que transforma esses dados em colunas informativas para o modelo. Depois o modelo é treinado com ajuste de hiperparâmetros, comparando versões no conjunto de validação. Por fim, faz-se a avaliação final no conjunto de teste, que não participou dos ajustes. Implantar o modelo antes da avaliação final coloca em produção algo de qualidade desconhecida. E ajustar os hiperparâmetros com o conjunto de teste contamina a avaliação final, produzindo uma estimativa otimista.",
+      "sequencia": [
+        "Coletar os dados brutos do sistema de caixa.",
+        "Fazer a engenharia de atributos a partir dos dados brutos.",
+        "Treinar o modelo ajustando os hiperparâmetros com o conjunto de validação.",
+        "Avaliar o modelo final no conjunto de teste."
+      ],
+      "itensExtras": [
+        "Implantar o modelo antes da avaliação final.",
+        "Ajustar os hiperparâmetros usando o conjunto de teste."
+      ]
+    },
+    {
+      "id": "aifc01-fund-quando-modelo-base-multipla-76",
+      "topico": "ML tradicional versus modelos de base",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um grupo empresarial está decidindo, para cada projeto, se usa um modelo de ML tradicional ou um modelo de base. Em quais projetos um modelo de base é a escolha mais adequada?",
+      "explicacao": "Modelos de base se destacam em tarefas de linguagem variadas e sem dados rotulados. Resumir e responder e-mails com assuntos muito diversos, sem exemplos rotulados, aproveita a capacidade de generalização desses modelos. E atender várias tarefas de linguagem — resumo, classificação e redação — com um único modelo evita construir e manter uma solução por tarefa. Já a classificação de dados tabulares em alto volume, com milhões de rótulos e latência de milissegundos, favorece um modelo tradicional, mais rápido e barato. Um cálculo baseado em regra fixa não precisa de ML. E um dispositivo sem conexão e com pouca memória não comporta um modelo de base.",
+      "opcoes": [
+        { "texto": "Resumir e responder e-mails de assuntos muito variados, sem exemplos rotulados.", "correta": true },
+        { "texto": "Atender resumo, classificação e redação de textos com um único modelo.", "correta": true },
+        { "texto": "Classificar milhões de registros tabulares por dia, com rótulos disponíveis e latência de milissegundos.", "correta": false },
+        { "texto": "Calcular multas por atraso segundo uma regra contratual fixa.", "correta": false },
+        { "texto": "Classificar leituras de um sensor sem conexão com a internet e com pouca memória.", "correta": false }
+      ]
+    }
+  ]
+}

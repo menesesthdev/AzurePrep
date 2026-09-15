@@ -22,6 +22,10 @@ public sealed class ExameConfiguration : IEntityTypeConfiguration<Exame>
         // valor padrão bloqueia acesso é uma indisponibilidade silenciosa em produção.
         builder.Property(e => e.IsPublished).IsRequired().HasDefaultValue(true);
 
+        // Sem HasDefaultValue: Microsoft é o zero do enum, e a migration já cria a coluna com 0 —
+        // os quatro exames Azure que existiam antes dela continuam sendo Microsoft sem backfill.
+        builder.Property(e => e.Vendor).IsRequired();
+
         builder.HasIndex(e => e.Code).IsUnique();
 
         builder.HasMany(e => e.SkillAreas)

@@ -1,0 +1,168 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-documento-maior-janela-103",
+      "topico": "Parâmetros de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma editora quer gerar um resumo de cada livro técnico do catálogo. Alguns livros têm 900 páginas e ultrapassam em muito a janela de contexto do modelo escolhido, e as requisições falham. O resumo precisa cobrir o livro inteiro. Qual abordagem resolve o problema?",
+      "explicacao": "Quando o documento não cabe na janela de contexto, a abordagem é dividi-lo em partes que caibam, resumir cada parte e depois combinar os resumos parciais num resumo final — assim o livro inteiro é coberto. Aumentar o limite de tokens de saída não resolve, porque o que excede o limite é a entrada. Aumentar a temperatura não altera a quantidade de texto que o modelo aceita. E enviar apenas as primeiras páginas faz a requisição funcionar, mas descumpre o requisito de cobrir o livro inteiro.",
+      "opcoes": [
+        { "texto": "Dividir o livro em partes, resumir cada uma e combinar os resumos parciais num resumo final.", "correta": true },
+        { "texto": "Aumentar o limite de tokens de saída da requisição.", "correta": false },
+        { "texto": "Aumentar a temperatura para o modelo processar mais texto.", "correta": false },
+        { "texto": "Enviar apenas as páginas que cabem na janela de contexto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-analise-tabelas-figuras-104",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fabricante indexou manuais técnicos em PDF numa base de conhecimento. Boa parte das especificações está em tabelas e em diagramas com legendas. As perguntas sobre valores dessas tabelas recebem respostas erradas, porque, na ingestão, o texto das tabelas sai embaralhado e as figuras são ignoradas. Qual ajuste é mais adequado?",
+      "explicacao": "O problema acontece antes da recuperação: a extração de texto simples desmonta tabelas e ignora figuras. Usar na ingestão um analisador de documentos capaz de interpretar tabelas e figuras — por exemplo, o processamento com modelo de base oferecido pelo Amazon Bedrock Knowledge Bases — preserva a estrutura das especificações antes da divisão em trechos. Aumentar o tamanho dos trechos não reorganiza um texto que já foi extraído embaralhado. Aumentar a temperatura não recupera informação perdida na ingestão. E fazer fine-tuning com os manuais não resolve a extração e ainda colocaria as especificações nos pesos do modelo, sem citação das fontes.",
+      "opcoes": [
+        { "texto": "Usar na ingestão um analisador de documentos capaz de interpretar tabelas e figuras.", "correta": true },
+        { "texto": "Aumentar o tamanho dos trechos indexados.", "correta": false },
+        { "texto": "Aumentar a temperatura do modelo que gera as respostas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com os manuais técnicos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-prompt-delimitar-conteudo-105",
+      "topico": "Boas práticas de engenharia de prompt",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo resume avaliações de clientes inserindo o texto de cada avaliação logo após a instrução, no mesmo parágrafo. Algumas avaliações contêm frases como resuma em inglês ou ignore as regras, e o modelo passou a segui-las como se fossem parte da instrução. Qual boa prática de prompt reduz esse problema?",
+      "explicacao": "Quando o conteúdo do usuário se mistura à instrução, o modelo não distingue o que é ordem e o que é dado. Delimitar claramente o texto da avaliação — por exemplo, entre marcações — e indicar na instrução que esse conteúdo deve ser tratado apenas como dado a resumir reduz a chance de o modelo seguir frases escritas pelos clientes. Juntar tudo num parágrafo só é exatamente o que causa a confusão. Aumentar a temperatura deixa as respostas mais imprevisíveis. E aumentar o limite de tokens de saída não altera a forma como o modelo interpreta a instrução. Para ataques deliberados, a delimitação deve ser combinada com filtros aplicados fora do modelo.",
+      "opcoes": [
+        { "texto": "Delimitar o texto da avaliação com marcações e indicar que ele deve ser tratado apenas como dado.", "correta": true },
+        { "texto": "Manter a instrução e a avaliação no mesmo parágrafo, sem separação.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo ignore frases inesperadas.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída dos resumos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-humana-concordancia-106",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cinco especialistas avaliaram com notas de 1 a 5 as respostas de um assistente jurídico. Para a mesma resposta, as notas variaram com frequência entre 2 e 5, e a equipe não consegue tirar conclusões. Qual medida torna a avaliação humana mais confiável?",
+      "explicacao": "Notas tão diferentes indicam que cada especialista usa um critério próprio. Definir uma rubrica com critérios claros e exemplos de respostas para cada nota, calibrar os avaliadores numa amostra comum e medir a concordância entre eles torna as notas comparáveis e a avaliação confiável. Tirar a média das notas sem rubrica esconde a divergência, sem resolvê-la. Deixar a avaliação com um único especialista elimina a divergência visível, mas não garante um critério consistente. E substituir os especialistas por um modelo juiz sem nenhuma calibração apenas troca um critério incerto por outro.",
+      "opcoes": [
+        { "texto": "Definir rubrica com exemplos, calibrar os avaliadores e medir a concordância entre eles.", "correta": true },
+        { "texto": "Calcular a média das notas dos cinco especialistas, sem mudar o processo.", "correta": false },
+        { "texto": "Manter apenas um especialista responsável por todas as avaliações.", "correta": false },
+        { "texto": "Substituir os especialistas por um modelo juiz, sem calibração.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-metricas-rag-assoc-107",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe definiu perguntas para avaliar a qualidade do seu assistente com RAG. Associe cada pergunta ao aspecto de avaliação que ela mede.",
+      "explicacao": "Verificar se a resposta contém apenas informações sustentadas pelos trechos recuperados mede a fidelidade da resposta às fontes. Verificar se os trechos recuperados têm relação com a pergunta mede a relevância do contexto. Verificar se a resposta de fato atende ao que foi perguntado mede a relevância da resposta. E verificar se todos os trechos necessários foram recuperados mede a cobertura do contexto. O BLEU está no painel porque é uma métrica automática conhecida, mas compara o texto gerado com traduções de referência e não mede nenhum desses aspectos de uma aplicação com RAG.",
+      "associacoes": [
+        { "alvo": "A resposta contém apenas informações sustentadas pelos trechos recuperados?", "item": "Fidelidade às fontes" },
+        { "alvo": "Os trechos recuperados têm relação com a pergunta feita?", "item": "Relevância do contexto" },
+        { "alvo": "A resposta atende de fato ao que foi perguntado?", "item": "Relevância da resposta" },
+        { "alvo": "Todos os trechos necessários para responder foram recuperados?", "item": "Cobertura do contexto" }
+      ],
+      "itensExtras": ["BLEU"]
+    },
+    {
+      "id": "aifc01-apl-rag-sincronizacao-atualizacao-108",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os documentos de preços de uma distribuidora são atualizados no bucket do Amazon S3 várias vezes por dia, mas o assistente com RAG continua citando preços de dias atrás. A equipe confirmou que os arquivos no bucket estão corretos e que a base de conhecimento foi criada apontando para ele. Qual é a causa mais provável e a correção adequada?",
+      "explicacao": "A base de conhecimento só incorpora mudanças quando a fonte de dados é sincronizada; atualizar os arquivos no S3 não reindexa nada sozinho. Se a sincronização não acompanha a frequência de atualização dos documentos, os trechos e vetores continuam refletindo versões antigas. A correção é sincronizar a fonte de dados com a frequência necessária. Fazer fine-tuning com os preços atuais seria caro e ficaria desatualizado a cada mudança. Aumentar a temperatura não traz os preços novos. E recuperar mais trechos só traria mais conteúdo desatualizado.",
+      "opcoes": [
+        { "texto": "A fonte de dados não está sendo sincronizada; sincronizá-la com a frequência de atualização dos documentos.", "correta": true },
+        { "texto": "O modelo não conhece os preços; fazer fine-tuning com os preços atualizados.", "correta": false },
+        { "texto": "A temperatura está baixa; aumentá-la para o modelo considerar os preços novos.", "correta": false },
+        { "texto": "Poucos trechos são recuperados; aumentar o número de trechos por pergunta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-custo-sincronizacao-incremental-109",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem uma base de conhecimento com 2 milhões de documentos, dos quais cerca de 1% muda por dia. O diretor financeiro teme que cada sincronização diária regenere os embeddings de todo o acervo, multiplicando o custo. Qual avaliação está correta?",
+      "explicacao": "A sincronização de uma base de conhecimento do Amazon Bedrock é incremental: processa apenas os documentos novos, alterados ou excluídos desde a última sincronização. Com cerca de 1% do acervo mudando por dia, o custo recorrente de geração de embeddings acompanha o volume que muda, e não os 2 milhões de documentos. O temor de regenerar todo o acervo a cada sincronização não procede. Afirmar que RAG não tem custo de ingestão também é errado: gerar embeddings e armazenar vetores custa. E fazer fine-tuning diário seria muito mais caro e não substituiria a atualização da base.",
+      "opcoes": [
+        { "texto": "A sincronização é incremental; o custo recorrente acompanha os documentos que mudam, não o acervo inteiro.", "correta": true },
+        { "texto": "Cada sincronização regenera os embeddings de todos os 2 milhões de documentos.", "correta": false },
+        { "texto": "Não há custo de ingestão, porque gerar embeddings é gratuito numa base de conhecimento.", "correta": false },
+        { "texto": "Para evitar o custo, é preciso substituir a sincronização por um fine-tuning diário.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-dataset-proprio-110",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora montou 500 perguntas reais de corretores, cada uma com uma resposta de referência revisada pelo jurídico, e quer comparar dois modelos de base com métricas automáticas usando exatamente esse material, num recurso gerenciado. Qual abordagem atende a esse requisito?",
+      "explicacao": "O Amazon Bedrock Model Evaluation permite criar trabalhos de avaliação automática usando um conjunto de dados próprio, com prompts e respostas de referência, e comparar modelos com métricas prontas — exatamente o que a seguradora quer. Usar apenas os conjuntos de dados prontos do serviço mediria os modelos em perguntas genéricas, e não nas perguntas dos corretores. O Amazon CloudWatch acompanha métricas operacionais, sem comparar a qualidade das respostas com as referências. E o AWS Artifact fornece relatórios de conformidade, sem relação com avaliação de modelos.",
+      "opcoes": [
+        { "texto": "Criar um trabalho de avaliação automática no Amazon Bedrock com o conjunto próprio de perguntas e referências.", "correta": true },
+        { "texto": "Avaliar os modelos apenas com os conjuntos de dados prontos oferecidos pelo serviço.", "correta": false },
+        { "texto": "Comparar os modelos pelas métricas de invocação no Amazon CloudWatch.", "correta": false },
+        { "texto": "Consultar os relatórios de avaliação disponíveis no AWS Artifact.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-in-context-learning-afirmacoes-111",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um comitê está comparando a aprendizagem em contexto — incluir instruções e exemplos no prompt — com outras formas de personalização. Quais afirmações sobre a aprendizagem em contexto estão corretas?",
+      "explicacao": "Duas afirmações estão corretas. A aprendizagem em contexto não altera os pesos do modelo: o comportamento muda apenas pelo que é enviado no prompt. E, por isso mesmo, os exemplos e as instruções contam como tokens de entrada em cada requisição, o que pesa no custo em volume alto. Ela não exige milhares de exemplos rotulados — funciona com poucos exemplos, ou nenhum. Não gera um novo modelo personalizado para hospedar, o que é característica do fine-tuning. E não é mais cara que o pré-treinamento, que é de longe a abordagem mais custosa.",
+      "opcoes": [
+        { "texto": "Não altera os pesos do modelo.", "correta": true },
+        { "texto": "Os exemplos incluídos contam como tokens de entrada em cada requisição.", "correta": true },
+        { "texto": "Exige um conjunto com milhares de exemplos rotulados.", "correta": false },
+        { "texto": "Gera um novo modelo personalizado que precisa ser hospedado.", "correta": false },
+        { "texto": "É mais cara que o pré-treinamento de um modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-fine-tuning-bedrock-ordenacao-112",
+      "topico": "Treinamento e fine-tuning de modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa vai fazer fine-tuning de um modelo de base no Amazon Bedrock com exemplos de respostas do seu suporte técnico, já revisados. Selecione e ordene as etapas do processo.",
+      "explicacao": "Primeiro o conjunto de dados é preparado no formato exigido, com pares de prompt e resposta, e armazenado no Amazon S3. Em seguida cria-se o trabalho de personalização, escolhendo o modelo de base e os hiperparâmetros. Com o modelo ajustado, avalia-se o desempenho com dados de validação que não participaram do treinamento. Por fim, configura-se a forma de uso do modelo personalizado para inferência. Pré-treinar o modelo de base antes do ajuste é desnecessário: o fine-tuning parte de um modelo já pré-treinado. E implantar o modelo antes de avaliá-lo coloca em uso algo de qualidade desconhecida.",
+      "sequencia": [
+        "Preparar os pares de prompt e resposta no formato exigido e armazená-los no Amazon S3.",
+        "Criar o trabalho de personalização, escolhendo o modelo de base e os hiperparâmetros.",
+        "Avaliar o modelo ajustado com dados de validação.",
+        "Configurar a forma de uso do modelo personalizado para inferência."
+      ],
+      "itensExtras": [
+        "Pré-treinar o modelo de base antes de iniciar o fine-tuning.",
+        "Colocar o modelo ajustado em uso antes de avaliá-lo."
+      ]
+    },
+    {
+      "id": "aifc01-apl-nao-e-tecnica-prompt-113",
+      "topico": "Técnicas de engenharia de prompt",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um material de treinamento interno lista técnicas que podem ser aplicadas apenas mudando o prompt enviado ao modelo, sem alterar o modelo. Qual das opções a seguir NÃO pertence a essa lista?",
+      "explicacao": "O pré-treinamento contínuo não é técnica de engenharia de prompt: ele prossegue o treinamento do modelo com grandes volumes de texto e altera seus pesos. As outras três são técnicas de prompt. No zero-shot, o modelo recebe apenas a instrução, sem exemplos. No few-shot, alguns exemplos são incluídos no prompt. E no chain-of-thought o prompt pede que o modelo desenvolva o raciocínio passo a passo antes da resposta.",
+      "opcoes": [
+        { "texto": "Pré-treinamento contínuo", "correta": true },
+        { "texto": "Zero-shot", "correta": false },
+        { "texto": "Few-shot", "correta": false },
+        { "texto": "Chain-of-thought", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-parametros-um-por-vez-114",
+      "topico": "Parâmetros de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para melhorar um gerador de descrições de produtos, um desenvolvedor mudou ao mesmo tempo a temperatura, o top-p, o limite de tokens de saída e o texto do prompt. Os resultados mudaram, mas ninguém sabe qual alteração causou a melhora nem qual causou os novos problemas. Qual prática evita essa situação?",
+      "explicacao": "Mudando vários parâmetros e o prompt ao mesmo tempo, os efeitos se misturam e não há como atribuir a melhora ou o problema a uma causa. A prática adequada é variar um parâmetro de cada vez e medir o efeito com o mesmo conjunto de testes, o que torna cada ajuste interpretável. Mudar tudo de uma vez é exatamente o que gerou a confusão. Deixar de testar e confiar na impressão inicial impede saber se houve melhora. E usar sempre os valores máximos de cada parâmetro não é critério de qualidade: temperatura máxima, por exemplo, aumenta a aleatoriedade das descrições.",
+      "opcoes": [
+        { "texto": "Variar um parâmetro de cada vez e medir o efeito com o mesmo conjunto de testes.", "correta": true },
+        { "texto": "Continuar mudando todos os parâmetros juntos até o resultado ficar bom.", "correta": false },
+        { "texto": "Dispensar os testes e manter a configuração que pareceu melhor.", "correta": false },
+        { "texto": "Usar sempre os valores máximos permitidos para cada parâmetro.", "correta": false }
+      ]
+    }
+  ]
+}

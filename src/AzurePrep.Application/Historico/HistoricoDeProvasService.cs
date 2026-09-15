@@ -64,7 +64,7 @@ public sealed class HistoricoDeProvasService : IHistoricoDeProvasService
         // Nota escalada só existe para tentativa concluída: sem correção não há percentual, e
         // converter um placar parcial daria uma nota que não significa nada.
         int? nota = tentativa is { IsFinished: true, ScorePercent: { } percent }
-            ? EscalaDeNota.Converter(percent, exame.PassingScorePercent)
+            ? EscalaDeNota.Converter(percent, exame.PassingScorePercent, EscalaDeNota.NotaMinimaPara(exame.Vendor))
             : null;
 
         return new ResumoDeTentativaDto(

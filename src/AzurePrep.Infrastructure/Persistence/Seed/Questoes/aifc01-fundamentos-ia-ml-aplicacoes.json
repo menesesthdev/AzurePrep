@@ -1,0 +1,239 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-tecnica-regressao-combustivel-13",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma companhia aérea quer estimar, antes de cada voo, quantos litros de combustível serão consumidos, usando histórico de rota, peso de decolagem, previsão de vento e modelo da aeronave. O planejamento financeiro usa o valor estimado em litros para calcular o custo de cada voo e comparar com o consumo real. Qual técnica de ML é adequada?",
+      "explicacao": "O resultado esperado é um número contínuo, em litros, que entra num cálculo de custo: isso é regressão. Classificação binária responderia sim ou não (por exemplo, se o voo vai consumir acima da média) e jogaria fora justamente o valor que o planejamento precisa multiplicar pelo preço do combustível. Agrupamento descobre grupos de voos parecidos sem uma resposta-alvo; poderia revelar perfis de rota, mas não produz a estimativa por voo. Detecção de anomalias aponta voos com consumo fora do padrão depois que o consumo acontece, o que responde a outra pergunta — auditoria, não previsão antes do voo.",
+      "opcoes": [
+        { "texto": "Regressão", "correta": true },
+        { "texto": "Classificação binária", "correta": false },
+        { "texto": "Agrupamento", "correta": false },
+        { "texto": "Detecção de anomalias", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-ate-decisao-ordenacao-14",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma equipe recebeu três anos de dados brutos de manutenção de equipamentos, com colunas vazias e valores inconsistentes, e precisa chegar a um modelo de previsão de falhas pronto para a decisão de implantar ou não. Selecione e ordene as etapas do pipeline que a equipe deve executar até essa decisão.",
+      "explicacao": "A análise exploratória vem primeiro porque é ela que revela as colunas vazias, os valores inconsistentes e a distribuição dos dados — sem ela, não se sabe o que o pré-processamento precisa corrigir. O pré-processamento trata ausências e inconsistências e prepara os atributos. Só então o modelo é treinado, e a avaliação com dados separados do treinamento fornece a evidência para a decisão de implantar. A implantação em um endpoint é a etapa seguinte à decisão, não uma etapa até ela. O monitoramento de desvio em produção só existe depois que o modelo está servindo previsões reais, então também fica fora da sequência pedida.",
+      "sequencia": [
+        "Realizar a análise exploratória dos dados.",
+        "Pré-processar os dados, tratando valores ausentes e inconsistentes.",
+        "Treinar o modelo com os dados preparados.",
+        "Avaliar o modelo com dados que não foram usados no treinamento."
+      ],
+      "itensExtras": [
+        "Implantar o modelo em um endpoint de inferência.",
+        "Monitorar o desvio dos dados em produção."
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-moderacao-imagens-15",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo de classificados permite que usuários publiquem fotos dos produtos anunciados. A empresa precisa bloquear automaticamente imagens com conteúdo explícito ou violento antes da publicação. A equipe não tem cientistas de dados e não quer coletar nem rotular imagens para treinar um modelo. Qual serviço atende a esse requisito?",
+      "explicacao": "O Amazon Rekognition oferece moderação de conteúdo pronta para imagens e vídeos, identificando categorias como conteúdo explícito e violência sem que o cliente treine nada — atende à restrição de não rotular dados. O Amazon Comprehend também detecta conteúdo tóxico, mas em texto; ele não analisa pixels de uma foto. O Amazon Textract extrai texto, formulários e tabelas de documentos digitalizados, e não classifica o conteúdo visual de uma imagem. Treinar um classificador de imagens no Amazon SageMaker AI resolveria tecnicamente, mas exige exatamente a coleta, a rotulagem e a especialização que a empresa declarou não ter.",
+      "opcoes": [
+        { "texto": "Amazon Rekognition", "correta": true },
+        { "texto": "Amazon Comprehend", "correta": false },
+        { "texto": "Amazon Textract", "correta": false },
+        { "texto": "Um classificador de imagens treinado no Amazon SageMaker AI", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-recomendacao-personalize-16",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja on-line quer exibir recomendações de produtos personalizadas para cada visitante, com base no histórico de navegação e de compras, e quer que as recomendações reflitam os cliques da sessão atual. A equipe não tem experiência em ML e procura um serviço gerenciado criado para esse caso de uso. Qual solução atende melhor?",
+      "explicacao": "O Amazon Personalize é o serviço gerenciado criado para recomendações: treina modelos a partir das interações de usuários e itens e incorpora eventos em tempo real, como os cliques da sessão atual, sem exigir experiência em ML. Enviar o histórico de cada visitante num prompt a um modelo de base no Amazon Bedrock pode produzir sugestões, mas a solução não é feita para esse caso de uso: o custo cresce com os tokens de cada página exibida, e ninguém aprende com o comportamento agregado de todos os clientes. O Amazon Comprehend analisa texto — poderia extrair temas de avaliações, não recomendar produtos a partir de interações. O Amazon Q Business é um assistente que responde perguntas de funcionários com os dados da empresa, não um mecanismo de recomendação para clientes da loja.",
+      "opcoes": [
+        { "texto": "Amazon Personalize", "correta": true },
+        { "texto": "Um modelo de base no Amazon Bedrock que recebe o histórico do visitante no prompt", "correta": false },
+        { "texto": "Amazon Comprehend", "correta": false },
+        { "texto": "Amazon Q Business", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servicos-central-atendimento-17",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma central de atendimento no Brasil grava as ligações dos clientes em português. A matriz, nos Estados Unidos, quer receber relatórios em inglês que indiquem o sentimento de cada ligação. A empresa quer montar o fluxo apenas com serviços gerenciados de IA da AWS, sem treinar modelos. Quais serviços compõem a solução?",
+      "explicacao": "O fluxo tem três transformações, e cada serviço correto cuida de uma. O Amazon Transcribe converte o áudio das ligações em texto. O Amazon Comprehend analisa esse texto e identifica o sentimento. O Amazon Translate leva o conteúdo do português para o inglês exigido pela matriz. O Amazon Polly faz o caminho inverso do Transcribe — gera fala a partir de texto — e não há áudio a produzir aqui. O Amazon Lex constrói bots conversacionais que interagem com o cliente; ele não processa gravações já existentes. O Amazon Textract extrai texto de documentos digitalizados, e a entrada deste fluxo é áudio, não documento.",
+      "opcoes": [
+        { "texto": "Amazon Transcribe", "correta": true },
+        { "texto": "Amazon Comprehend", "correta": true },
+        { "texto": "Amazon Translate", "correta": true },
+        { "texto": "Amazon Polly", "correta": false },
+        { "texto": "Amazon Lex", "correta": false },
+        { "texto": "Amazon Textract", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-bloqueio-precisao-18",
+      "topico": "Métricas de avaliação de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco vai usar um modelo que bloqueia automaticamente, sem revisão humana, contas suspeitas de lavagem de dinheiro. Cada bloqueio indevido de um cliente legítimo gera cancelamento de conta e risco de processo judicial. Casos não detectados pelo modelo continuam sendo investigados pela equipe de compliance, como já acontece hoje. Qual dos modelos avaliados a equipe deve escolher?",
+      "explicacao": "O erro caro aqui é o falso positivo — bloquear um cliente legítimo sem revisão —, e a métrica que o penaliza é a precisão: entre as contas que o modelo bloqueia, quantas eram de fato suspeitas. O modelo com precisão 0,97 bloqueia pouquíssimos inocentes, e o recall menor é aceitável porque os casos que ele deixa passar continuam indo para o processo atual de compliance. O modelo com recall 0,95 pega mais casos, mas com precisão 0,78 cerca de um em cada cinco bloqueios atingiria um cliente legítimo — exatamente o dano descrito. A maior acurácia não diz nada útil quando quase todas as contas são legítimas: um modelo que nunca bloqueia teria acurácia altíssima. E o maior F1 score equilibra os dois erros como se custassem o mesmo, o que o enunciado deixa claro que não é verdade.",
+      "opcoes": [
+        { "texto": "O modelo com precisão de 0,97 e recall de 0,71.", "correta": true },
+        { "texto": "O modelo com precisão de 0,78 e recall de 0,95.", "correta": false },
+        { "texto": "O modelo com a maior acurácia, de 99,2%.", "correta": false },
+        { "texto": "O modelo com o maior F1 score, com precisão de 0,83 e recall de 0,87.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-negocio-roi-19",
+      "topico": "Métricas de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Seis meses depois de colocar em produção um modelo de recomendação, a diretoria pergunta se o investimento valeu a pena. O projeto teve custo de desenvolvimento e tem custo mensal de hospedagem do modelo. Qual métrica responde diretamente a essa pergunta?",
+      "explicacao": "A pergunta é de negócio — o investimento valeu a pena —, e quem responde é o retorno sobre o investimento: a receita adicional atribuída às recomendações comparada com o custo de desenvolvimento e de operação. O F1 score mede a qualidade do modelo num conjunto de teste; um modelo tecnicamente excelente pode não gerar receita nenhuma, e a métrica não enxerga custo. A latência média do endpoint é métrica operacional: importa para a experiência do usuário, mas não diz se o projeto se pagou. A perda do treinamento indica como o modelo convergiu durante o ajuste, informação útil para a equipe técnica e sem relação com o resultado financeiro.",
+      "opcoes": [
+        { "texto": "Receita adicional atribuída às recomendações comparada com os custos do projeto (ROI).", "correta": true },
+        { "texto": "F1 score do modelo medido no conjunto de teste.", "correta": false },
+        { "texto": "Latência média das respostas do endpoint de inferência.", "correta": false },
+        { "texto": "Valor da função de perda ao final do treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-conceitos-deep-learning-generativa-20",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um hospital desenvolveu uma rede neural profunda que recebe radiografias de tórax e as classifica como normais ou com suspeita de pneumonia. Na apresentação do projeto, a equipe o descreveu como uma solução de IA generativa, porque usa deep learning e foi treinada com um grande volume de imagens. Qual avaliação dessa descrição está correta?",
+      "explicacao": "O sistema é deep learning, que é um subconjunto de machine learning, que por sua vez é um subconjunto de IA. Mas ele classifica uma entrada em categorias existentes; IA generativa é a que produz conteúdo novo, como texto, imagem ou áudio. Usar rede neural profunda não torna um modelo generativo — a maior parte dos modelos de deep learning em produção é discriminativa, como este. Afirmar que não é machine learning por usar redes neurais inverte a hierarquia: redes neurais são uma das técnicas de ML. E o volume de dados de treinamento não define a categoria do modelo; um classificador treinado com milhões de imagens continua sendo um classificador.",
+      "opcoes": [
+        { "texto": "É deep learning, mas não é IA generativa, porque classifica imagens em vez de gerar conteúdo novo.", "correta": true },
+        { "texto": "É IA generativa, porque todo modelo de deep learning é generativo por natureza.", "correta": false },
+        { "texto": "Não é machine learning, porque redes neurais formam uma área separada do ML.", "correta": false },
+        { "texto": "É IA generativa, porque foi treinada com um grande volume de dados não estruturados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aprendizado-reforco-robo-21",
+      "topico": "Tipos de aprendizado",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma operadora logística quer que robôs de armazém aprendam a escolher trajetos entre as prateleiras. Não existe um registro de qual seria o melhor trajeto para cada situação. A equipe consegue simular o armazém, dando pontos quando o robô entrega mais rápido e retirando pontos a cada colisão, e quer que o comportamento melhore com as tentativas. Qual tipo de aprendizado se aplica?",
+      "explicacao": "Um agente que age num ambiente, recebe recompensa ou penalidade pelas consequências e melhora com as tentativas é a definição de aprendizado por reforço — e o simulador com pontuação é exatamente o ambiente de que ele precisa. O aprendizado supervisionado exigiria exemplos rotulados com o trajeto correto para cada situação, e o enunciado afirma que esse registro não existe. O agrupamento, não supervisionado, encontraria trajetos parecidos entre si, mas não aprende qual é melhor, porque não há objetivo a otimizar. A transferência de aprendizado reaproveita um modelo pré-treinado numa tarefa próxima; ajudaria a reconhecer objetos pela câmera, mas não ensina a política de decisão de trajeto.",
+      "opcoes": [
+        { "texto": "Aprendizado por reforço", "correta": true },
+        { "texto": "Aprendizado supervisionado", "correta": false },
+        { "texto": "Aprendizado não supervisionado com agrupamento", "correta": false },
+        { "texto": "Transferência de aprendizado a partir de um modelo de visão", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-tipos-dados-assoc-22",
+      "topico": "Tipos de dados",
+      "tipo": "Associacao",
+      "enunciado": "Uma fabricante de turbinas eólicas reuniu as fontes de dados abaixo para projetos de ML. Associe cada fonte ao tipo de dado que ela representa.",
+      "explicacao": "Leituras de temperatura registradas a cada minuto têm ordem cronológica que importa para a previsão: são série temporal. Fotos de rachaduras nas pás são dados de imagem, não estruturados. A planilha com potência nominal, idade e local de cada turbina é tabular, com linhas e colunas definidas. As transcrições dos relatórios de técnicos são texto não estruturado. O item dados de áudio é a armadilha: os relatórios começaram como gravações, mas o que está disponível são as transcrições, que já foram convertidas em texto — o tipo de dado é o que o modelo recebe, não a origem dele.",
+      "associacoes": [
+        { "alvo": "Temperatura do rolamento registrada a cada minuto", "item": "Série temporal" },
+        { "alvo": "Fotos de rachaduras nas pás tiradas por drones", "item": "Imagem" },
+        { "alvo": "Planilha com potência nominal, idade e local de cada turbina", "item": "Tabular" },
+        { "alvo": "Transcrições dos relatórios gravados pelos técnicos", "item": "Texto" }
+      ],
+      "itensExtras": ["Áudio"]
+    },
+    {
+      "id": "aifc01-fund-agentica-fluxo-deterministico-23",
+      "topico": "IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa processa notas fiscais recebidas por e-mail sempre nas mesmas quatro etapas e na mesma ordem: extrair os campos do documento, validar o CNPJ no cadastro interno, lançar a despesa no sistema financeiro e arquivar o PDF. Só a extração exige interpretar o conteúdo; as outras etapas seguem regras fixas. A empresa precisa de um processo previsível e auditável. Qual abordagem é mais adequada?",
+      "explicacao": "Quando as etapas e a ordem são sempre as mesmas, não há decisão a delegar: um fluxo de trabalho determinístico executa a sequência fixa e usa IA só onde há interpretação, na extração. É o que dá previsibilidade e trilha auditável. Um agente autônomo decidindo a ordem das etapas a cada documento acrescenta não determinismo e custo justamente onde as regras são fixas — a autonomia agêntica compensa quando o caminho varia com a situação. Um sistema multiagente com um agente por etapa multiplica esse problema e a complexidade de orquestração, para um processo que é linear. E fine-tuning ajusta o comportamento do modelo; não o torna capaz de chamar o cadastro, o sistema financeiro ou o arquivamento.",
+      "opcoes": [
+        { "texto": "Um fluxo de trabalho determinístico que usa um modelo de IA apenas na etapa de extração.", "correta": true },
+        { "texto": "Um agente autônomo que decide, para cada nota, a ordem em que executa as etapas.", "correta": false },
+        { "texto": "Um sistema multiagente com um agente independente responsável por cada etapa.", "correta": false },
+        { "texto": "Um modelo de base ajustado por fine-tuning para executar as quatro etapas sozinho.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-ajuste-sobreajuste-24",
+      "topico": "Viés, variância e ajuste do modelo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo que classifica defeitos em peças obteve 99% de acurácia nos dados de treinamento e 72% nos dados de validação, que vêm da mesma linha de produção e do mesmo período. O modelo ainda não foi implantado. Qual é o diagnóstico e a ação adequada?",
+      "explicacao": "Desempenho quase perfeito no treinamento e muito pior em dados novos do mesmo tipo é o sinal clássico de sobreajuste (overfitting): o modelo decorou particularidades dos exemplos em vez de aprender o padrão. Aumentar e diversificar os dados de treinamento é uma das formas de fazê-lo generalizar. Subajuste é o caso oposto — desempenho ruim já no treinamento —, e treinar mais ou aumentar a complexidade pioraria o sobreajuste. Remover o conjunto de validação só esconderia o problema, que continuaria aparecendo em produção. E desvio de dados é uma mudança na distribuição dos dados em produção ao longo do tempo; aqui o modelo nem foi implantado e a validação vem do mesmo período.",
+      "opcoes": [
+        { "texto": "Sobreajuste; aumentar e diversificar os dados de treinamento.", "correta": true },
+        { "texto": "Subajuste; treinar por mais tempo e aumentar a complexidade do modelo.", "correta": false },
+        { "texto": "Viés nos dados de validação; remover o conjunto de validação da avaliação.", "correta": false },
+        { "texto": "Desvio de dados; retreinar o modelo com dados mais recentes de produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-feature-store-25",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe calcula atributos como média de gastos dos últimos 30 dias para treinar um modelo de crédito. Em produção, outra equipe recalculou esses atributos com código próprio para a inferência em tempo real, e as previsões ficaram piores que na avaliação, porque os valores divergem. A empresa quer que treinamento e inferência usem os mesmos atributos, definidos uma única vez. Qual recurso do Amazon SageMaker AI atende a esse requisito?",
+      "explicacao": "O SageMaker Feature Store armazena os atributos definidos uma única vez e os serve para o treinamento (armazenamento offline) e para a inferência em tempo real (armazenamento online), eliminando a divergência entre os dois cálculos, que é a causa do problema. O SageMaker Model Registry versiona e aprova modelos; ele controla qual modelo vai para produção, não como os atributos são calculados. O SageMaker Model Monitor detectaria que os dados de produção divergem dos de treinamento, mas só depois do dano — ele aponta o problema, não impede que ele exista. O SageMaker Data Wrangler prepara e explora dados visualmente; ajuda a construir as transformações, mas não é o repositório compartilhado que serve os mesmos valores nas duas pontas.",
+      "opcoes": [
+        { "texto": "SageMaker Feature Store", "correta": true },
+        { "texto": "SageMaker Model Registry", "correta": false },
+        { "texto": "SageMaker Model Monitor", "correta": false },
+        { "texto": "SageMaker Data Wrangler", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-nova-versao-ordenacao-26",
+      "topico": "MLOps",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma equipe acabou de treinar uma nova versão de um modelo de previsão de demanda que já está em produção. A empresa exige rastreabilidade de qual versão atendeu cada período e quer detectar rapidamente se a nova versão se comportar mal com dados reais. Selecione e ordene os passos para levar a nova versão à produção.",
+      "explicacao": "Primeiro a nova versão é avaliada contra o modelo atual, porque só faz sentido registrar e implantar o que se provou melhor. A versão aprovada é então registrada no registro de modelos, o que cria a rastreabilidade exigida entre versão, artefatos e data. Em seguida ela é implantada no endpoint e, por fim, monitorada com dados reais, que é onde um mau comportamento aparece. Implantar diretamente o artefato do último treinamento pula a avaliação e o registro, quebrando as duas exigências. E excluir os dados de treinamento para economizar armazenamento destrói a capacidade de reproduzir e auditar a versão — o oposto de rastreabilidade.",
+      "sequencia": [
+        "Avaliar a nova versão e comparar o desempenho com o modelo em produção.",
+        "Registrar a versão aprovada no registro de modelos.",
+        "Implantar a versão aprovada no endpoint de inferência.",
+        "Monitorar a qualidade das previsões com dados reais."
+      ],
+      "itensExtras": [
+        "Implantar diretamente o artefato gerado pelo último treinamento.",
+        "Excluir os dados de treinamento para reduzir o custo de armazenamento."
+      ]
+    },
+    {
+      "id": "aifc01-fund-producao-api-gerenciada-27",
+      "topico": "Formas de usar um modelo em produção",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de médio porte quer adicionar geração de resumos de contratos ao seu sistema interno. O uso é imprevisível: alguns dias têm centenas de pedidos, outros nenhum. A equipe não tem ninguém para operar infraestrutura de ML e quer pagar apenas pelo que usar. Qual abordagem atende a esses requisitos?",
+      "explicacao": "Um modelo de base consumido sob demanda no Amazon Bedrock é uma API gerenciada: não há instância para operar e a cobrança acompanha o uso, em tokens, o que se ajusta a dias sem nenhum pedido. Hospedar um modelo do SageMaker JumpStart num endpoint em tempo real dá mais controle, mas a equipe passa a dimensionar e manter instâncias, que custam mesmo nos dias sem pedido. Um servidor de inferência de código aberto em instâncias Amazon EC2 é o extremo do autogerenciamento, exatamente o que a equipe não pode operar. E o Provisioned Throughput do Bedrock reserva capacidade com compromisso de tempo — faz sentido para volume alto e previsível, não para uso que oscila entre centenas de pedidos e nenhum.",
+      "opcoes": [
+        { "texto": "Consumir um modelo de base sob demanda pela API do Amazon Bedrock.", "correta": true },
+        { "texto": "Implantar um modelo do SageMaker JumpStart em um endpoint de inferência em tempo real.", "correta": false },
+        { "texto": "Executar um servidor de inferência de código aberto em instâncias Amazon EC2.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput no Amazon Bedrock para o modelo escolhido.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-ml-tradicional-tickets-28",
+      "topico": "ML tradicional versus modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma operadora de telefonia recebe cerca de três milhões de chamados de suporte por dia e precisa encaminhar cada um para uma de 12 filas fixas em poucos milissegundos. Ela tem 400 mil chamados históricos já rotulados com a fila correta, e o custo por chamado precisa ser o menor possível. Qual abordagem é mais adequada?",
+      "explicacao": "Com categorias fixas, centenas de milhares de exemplos rotulados, volume de milhões por dia e latência de milissegundos, um classificador tradicional treinado nos chamados rotulados é a escolha: é rápido, barato por previsão e aproveita os rótulos que já existem. Um modelo de base com prompt zero-shot provavelmente classificaria bem, mas pagaria tokens de entrada e saída em três milhões de chamadas diárias e teria latência maior que a exigida, sem usar os rótulos disponíveis. Fazer fine-tuning de um modelo de base grande aproveitaria os rótulos, mas mantém o custo e a latência de um modelo grande para uma tarefa que um modelo pequeno resolve. E agrupamento não supervisionado descobriria grupos novos, quando as 12 filas já estão definidas e os rótulos já existem.",
+      "opcoes": [
+        { "texto": "Treinar um classificador tradicional com os chamados históricos rotulados.", "correta": true },
+        { "texto": "Enviar cada chamado a um modelo de base com um prompt zero-shot listando as 12 filas.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo de base grande com os chamados rotulados.", "correta": false },
+        { "texto": "Aplicar agrupamento não supervisionado para descobrir as filas automaticamente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-sinais-retreinamento-29",
+      "topico": "MLOps",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um modelo de previsão de inadimplência está em produção há três meses. A empresa quer ser alertada automaticamente quando o modelo precisar ser retreinado, em vez de retreinar num calendário fixo. Quais sinais indicam essa necessidade?",
+      "explicacao": "O modelo precisa de retreinamento quando deixa de representar a realidade, e os dois sinais corretos medem exatamente isso. A distribuição dos dados de entrada se afastando da distribuição usada no treinamento indica que o modelo passou a ver clientes diferentes dos que aprendeu. E a queda de precisão medida quando os resultados reais chegam — quem de fato ficou inadimplente — mostra diretamente que as previsões pioraram. A utilização de CPU do endpoint e o número de requisições por minuto são métricas operacionais: indicam necessidade de escalar a infraestrutura, e um modelo pode estar errando muito com CPU baixa e tráfego estável. O tempo da última execução de treinamento descreve o custo do treino, sem nenhuma relação com a qualidade das previsões atuais.",
+      "opcoes": [
+        { "texto": "A distribuição dos dados de entrada se afasta da distribuição dos dados de treinamento.", "correta": true },
+        { "texto": "A precisão cai quando comparada aos resultados reais de inadimplência, conforme eles chegam.", "correta": true },
+        { "texto": "A utilização de CPU das instâncias do endpoint aumenta.", "correta": false },
+        { "texto": "O número de requisições por minuto ao endpoint cresce.", "correta": false },
+        { "texto": "A última execução de treinamento levou mais tempo que a anterior.", "correta": false }
+      ]
+    }
+  ]
+}

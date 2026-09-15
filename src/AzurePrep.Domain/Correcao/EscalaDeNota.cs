@@ -1,34 +1,48 @@
+using AzurePrep.Domain.Enums;
+
 namespace AzurePrep.Domain.Correcao;
 
 /// <summary>
-/// Converte o percentual de acertos na nota em escala 1–1000 usada pelos exames Microsoft,
-/// onde a aprovação é sempre 700 — independentemente de quantos acertos isso representa.
+/// Converte o percentual de acertos na nota escalada exibida no score report, onde a aprovação é
+/// sempre 700 — independentemente de quantos acertos isso representa.
 /// </summary>
 /// <remarks>
-/// A escala real da Microsoft é derivada de Teoria de Resposta ao Item: cada questão tem peso
+/// A escala real (Microsoft e AWS) é derivada de modelos psicométricos: cada questão tem peso
 /// próprio, calibrado estatisticamente, e o mapeamento nunca é divulgado. Aqui usamos uma
 /// aproximação linear por partes, ancorada no ponto que importa: o percentual de corte do exame
 /// vira exatamente 700. Assim a nota exibida e o veredito aprovado/reprovado nunca se contradizem.
+///
+/// Os dois fornecedores cortam em 700 e terminam em 1000; o que muda é o piso — a Microsoft
+/// publica a escala como 1–1000, a AWS como 100–1000. Ver <see cref="NotaMinimaPara"/>.
 /// </remarks>
 public static class EscalaDeNota
 {
-    /// <summary>Nota mínima de aprovação na escala Microsoft.</summary>
+    /// <summary>Nota mínima de aprovação (igual nos dois fornecedores).</summary>
     public const int NotaDeCorte = 700;
 
-    /// <summary>Menor nota possível na escala (a escala não começa em zero).</summary>
+    /// <summary>Menor nota possível na escala Microsoft (a escala não começa em zero).</summary>
     public const int NotaMinima = 1;
+
+    /// <summary>Menor nota possível na escala AWS ("scaled score of 100–1,000").</summary>
+    public const int NotaMinimaAws = 100;
 
     /// <summary>Maior nota possível na escala.</summary>
     public const int NotaMaxima = 1000;
 
+    /// <summary>O piso da escala publicada pelo fornecedor do exame.</summary>
+    public static int NotaMinimaPara(FornecedorDoExame fornecedor)
+        => fornecedor == FornecedorDoExame.Aws ? NotaMinimaAws : NotaMinima;
+
     /// <summary>
-    /// Converte <paramref name="scorePercent"/> (0–100) para a escala 1–1000, ancorando
-    /// <paramref name="passingScorePercent"/> em <see cref="NotaDeCorte"/>.
+    /// Converte <paramref name="scorePercent"/> (0–100) para a escala
+    /// <paramref name="notaMinima"/>–1000, ancorando <paramref name="passingScorePercent"/> em
+    /// <see cref="NotaDeCorte"/>.
     /// </summary>
-    public static int Converter(decimal scorePercent, int passingScorePercent)
+    public static int Converter(decimal scorePercent, int passingScorePercent, int notaMinima = NotaMinima)
     {
         var percent = Math.Clamp(scorePercent, 0m, 100m);
         var passing = Math.Clamp(passingScorePercent, 0, 100);
+        var piso = Math.Clamp(notaMinima, 0, NotaDeCorte - 1);
 
         decimal scaled;
 
@@ -42,7 +56,7 @@ public static class EscalaDeNota
             // Corte em 100%: só a prova perfeita atinge 700; o resto é reprovado.
             scaled = percent >= 100m
                 ? NotaMaxima
-                : NotaMinima + (percent / 100m * (NotaDeCorte - 1 - NotaMinima));
+                : piso + (percent / 100m * (NotaDeCorte - 1 - piso));
         }
         else if (percent >= passing)
         {
@@ -52,11 +66,11 @@ public static class EscalaDeNota
         }
         else
         {
-            // Faixa reprovada: 1 com zero acertos, 699 imediatamente abaixo do corte.
+            // Faixa reprovada: o piso com zero acertos, 699 imediatamente abaixo do corte.
             var below = percent / passing;
-            scaled = NotaMinima + (below * (NotaDeCorte - 1 - NotaMinima));
+            scaled = piso + (below * (NotaDeCorte - 1 - piso));
         }
 
-        return Math.Clamp((int)Math.Round(scaled, MidpointRounding.AwayFromZero), NotaMinima, NotaMaxima);
+        return Math.Clamp((int)Math.Round(scaled, MidpointRounding.AwayFromZero), piso, NotaMaxima);
     }
 }

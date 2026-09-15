@@ -1,0 +1,169 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-destilacao-ordenacao-115",
+      "topico": "Treinamento e fine-tuning de modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa quer reduzir o custo de um assistente de triagem de chamados, hoje atendido por um modelo grande, destilando essa capacidade num modelo menor. Selecione e ordene as etapas do processo.",
+      "explicacao": "A destilação começa escolhendo o modelo professor, que já entrega a qualidade desejada na tarefa. Em seguida o professor gera respostas para prompts representativos dos chamados reais. Essas respostas são usadas para treinar o modelo aluno, menor. Por fim, o aluno é avaliado contra o professor na mesma tarefa, para confirmar que a qualidade se manteve. Pré-treinar o modelo professor do zero é desnecessário: a destilação parte de um modelo que já funciona. E colocar o aluno em produção sem avaliá-lo arrisca trocar custo por qualidade sem saber.",
+      "sequencia": [
+        "Selecionar o modelo professor que já entrega a qualidade desejada.",
+        "Gerar as respostas do professor para prompts representativos dos chamados.",
+        "Treinar o modelo aluno com as respostas geradas pelo professor.",
+        "Avaliar o modelo aluno contra o professor na mesma tarefa."
+      ],
+      "itensExtras": [
+        "Pré-treinar o modelo professor do zero antes da destilação.",
+        "Colocar o modelo aluno em produção antes de avaliá-lo."
+      ]
+    },
+    {
+      "id": "aifc01-apl-temperatura-zero-reproducao-116",
+      "topico": "Parâmetros de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa gera laudos preliminares com um modelo de base e precisa conseguir apresentar a um auditor, meses depois, exatamente o texto entregue ao cliente. Um desenvolvedor propõe não guardar os laudos, já que, com temperatura zero, bastaria enviar o mesmo prompt de novo para obter o mesmo texto. Qual avaliação está correta?",
+      "explicacao": "A temperatura zero reduz bastante a variação entre respostas, mas não garante textos idênticos em todas as execuções, e o modelo ou sua versão pode mudar ao longo de meses. Quando é preciso apresentar exatamente o que foi entregue, as respostas geradas devem ser armazenadas. Afirmar que a temperatura zero garante sempre o mesmo texto ignora essas fontes de variação. Aumentar a temperatura só aumentaria a diferença entre execuções. E o limite de tokens de saída controla o tamanho da resposta, sem garantir que ela se repita.",
+      "opcoes": [
+        { "texto": "A temperatura zero reduz, mas não garante, respostas idênticas; os laudos entregues devem ser armazenados.", "correta": true },
+        { "texto": "A temperatura zero garante sempre o mesmo texto, então não é preciso guardar os laudos.", "correta": false },
+        { "texto": "Basta aumentar a temperatura para que o texto possa ser reproduzido depois.", "correta": false },
+        { "texto": "Basta fixar o limite de tokens de saída para reproduzir exatamente o mesmo laudo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-prompt-papel-publico-117",
+      "topico": "Elementos de um prompt",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um escritório de contabilidade usa o mesmo modelo para responder dúvidas de clientes leigos e para apoiar seus contadores. As respostas saem sempre no mesmo nível: técnicas demais para os clientes e superficiais demais para os contadores. Qual ajuste de prompt é mais adequado?",
+      "explicacao": "Definir no prompt o papel que o modelo deve assumir e o público a quem responde — por exemplo, um contador explicando a um cliente leigo, ou um especialista apoiando outro contador — orienta a perspectiva, o vocabulário e a profundidade de cada resposta. Aumentar a temperatura só varia a redação, sem ajustar o nível técnico ao público. Fazer fine-tuning para cada público é caro para um problema que o contexto do prompt resolve. E uma instrução negativa genérica, como não seja técnico, pioraria as respostas para os contadores, que precisam de profundidade.",
+      "opcoes": [
+        { "texto": "Definir no prompt o papel do modelo e o público de cada resposta.", "correta": true },
+        { "texto": "Aumentar a temperatura para variar o nível técnico das respostas.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo separado para cada público.", "correta": false },
+        { "texto": "Adicionar a todas as respostas a instrução negativa não seja técnico.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-fine-tuning-esquecimento-118",
+      "topico": "Treinamento e fine-tuning de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um escritório fez fine-tuning de um modelo de base apenas com exemplos de redação de petições. O modelo ficou ótimo em petições, mas passou a ter desempenho bem pior em tarefas gerais que fazia bem antes, como resumir e-mails e responder perguntas simples, que também são usadas no escritório. Qual explicação e qual medida são adequadas?",
+      "explicacao": "Um ajuste muito concentrado numa única tarefa pode degradar capacidades gerais que o modelo tinha antes — um efeito conhecido como esquecimento. Para mitigar, inclui-se no conjunto de ajuste exemplos variados que preservem essas capacidades, ou mantém-se o modelo de base original para as tarefas gerais e usa-se o ajustado só para petições. Atribuir o problema à temperatura não explica a perda de uma capacidade específica. Adicionar RAG com e-mails não recupera a habilidade de resumir que o ajuste degradou. E treinar por mais épocas só com petições tende a agravar o esquecimento.",
+      "opcoes": [
+        { "texto": "O ajuste estreito degradou capacidades gerais; incluir exemplos variados ou usar o modelo base para tarefas gerais.", "correta": true },
+        { "texto": "A temperatura aumentou com o ajuste; reduzi-la recupera as tarefas gerais.", "correta": false },
+        { "texto": "Faltam dados de contexto; adicionar RAG com os e-mails do escritório.", "correta": false },
+        { "texto": "O ajuste foi curto; treinar por mais épocas apenas com petições.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-latencia-percentil-119",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de atendimento tem latência média de 1,2 segundo, dentro da meta de 2 segundos. Mesmo assim, muitos clientes reclamam de respostas que demoram muito. A análise mostrou que cerca de 5% das respostas levam mais de 9 segundos. Qual prática de avaliação reflete melhor a experiência dos usuários?",
+      "explicacao": "A média esconde a cauda: com 5% das respostas acima de 9 segundos, muitos clientes têm uma experiência ruim, mesmo com a média boa. Acompanhar percentis altos de latência, como o p95 ou o p99, junto com a média, mostra quantos usuários enfrentam esperas longas e permite definir metas que refletem a experiência real. Continuar olhando só a média mantém o problema invisível. A menor latência observada diz apenas o melhor caso. E o número de tokens gerados ajuda a entender uma parte da causa, mas não mede diretamente o tempo percebido pelos usuários.",
+      "opcoes": [
+        { "texto": "Acompanhar percentis altos de latência, como o p95, além da média.", "correta": true },
+        { "texto": "Continuar acompanhando apenas a latência média, que está dentro da meta.", "correta": false },
+        { "texto": "Acompanhar a menor latência observada em cada dia.", "correta": false },
+        { "texto": "Acompanhar apenas o número de tokens gerados por resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-citacao-pagina-120",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os auditores internos usam um assistente com RAG sobre normas de centenas de páginas. Eles só aceitam uma resposta se conseguirem abrir o documento de origem e ir direto ao trecho usado. Hoje o assistente responde corretamente, mas sem indicar de onde veio a informação. Qual ajuste é mais adequado?",
+      "explicacao": "Associar aos trechos indexados os metadados de origem — título do documento, seção e página — e exibir essas citações junto de cada resposta permite ao auditor ir direto ao trecho usado e conferir a informação. Omitir as fontes para simplificar a resposta mantém exatamente o problema. Aumentar a temperatura não acrescenta citações. E fazer fine-tuning com as normas coloca o conteúdo nos pesos do modelo, o que dificulta, em vez de facilitar, apontar a origem de cada afirmação.",
+      "opcoes": [
+        { "texto": "Guardar título, seção e página nos metadados dos trechos e exibir as citações em cada resposta.", "correta": true },
+        { "texto": "Omitir as fontes para manter as respostas mais curtas e objetivas.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo mencione os documentos.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com o conteúdo das normas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-agente-base-conhecimento-acoes-121",
+      "topico": "Agentes de IA e aplicações de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja quer um único assistente que responda perguntas sobre sua política de trocas, com base no documento oficial, e que também abra a solicitação de troca e gere a etiqueta de devolução quando o cliente pedir. Qual arquitetura atende aos dois requisitos?",
+      "explicacao": "Os dois requisitos pedem capacidades diferentes num mesmo assistente: responder com base num documento pede uma base de conhecimento, e abrir a solicitação e gerar a etiqueta pede ferramentas que executam ações. Um agente que combina a base de conhecimento com essas ferramentas atende aos dois. Usar apenas a base de conhecimento responde sobre a política, mas não executa a troca. Fazer fine-tuning com a política coloca o conteúdo nos pesos, sem citação e sem capacidade de agir. E configurar apenas guardrails aplica filtros de segurança, sem responder nem executar nada.",
+      "opcoes": [
+        { "texto": "Um agente que combina uma base de conhecimento sobre a política e ferramentas para abrir a troca e gerar a etiqueta.", "correta": true },
+        { "texto": "Apenas uma base de conhecimento com o documento da política de trocas.", "correta": false },
+        { "texto": "Apenas fine-tuning do modelo com a política de trocas.", "correta": false },
+        { "texto": "Apenas guardrails configurados sobre as conversas de troca.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-latencia-tradeoff-122",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de voz com RAG precisa começar a responder em até um segundo. As medições mostram que a busca recupera 30 trechos por pergunta e que parte do atraso vem de enviar todos eles ao modelo. Cerca de 40% das perguntas se repetem com frequência, como qual é o prazo de entrega?. Qual abordagem equilibra latência e qualidade?",
+      "explicacao": "RAG acrescenta latência e tokens a cada pergunta, e há duas alavancas aqui. Reduzir o número de trechos enviados ao modelo diminui o contexto processado, e usar cache de respostas para as perguntas frequentes elimina boa parte das chamadas repetidas — medindo sempre o impacto na qualidade das respostas. Remover a recuperação e deixar o modelo responder sozinho reduz a latência à custa de respostas sem fundamento. Aumentar a temperatura não acelera nada. E trocar por um modelo maior tende a aumentar a latência.",
+      "opcoes": [
+        { "texto": "Reduzir os trechos enviados e usar cache para as perguntas frequentes, medindo o impacto na qualidade.", "correta": true },
+        { "texto": "Remover a recuperação e deixar o modelo responder apenas com o próprio conhecimento.", "correta": false },
+        { "texto": "Aumentar a temperatura para acelerar a geração das respostas.", "correta": false },
+        { "texto": "Trocar por um modelo maior, capaz de processar os 30 trechos com mais qualidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-prompt-beneficios-123",
+      "topico": "Boas práticas de engenharia de prompt",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um gerente de produto está preparando uma apresentação sobre o que a engenharia de prompt pode e o que não pode oferecer. Quais afirmações sobre os benefícios da engenharia de prompt estão corretas?",
+      "explicacao": "A engenharia de prompt melhora a qualidade das respostas sem retreinar o modelo, apenas ajustando instruções, contexto e exemplos. E, como mudar um prompt é rápido e barato, ela permite experimentar muitas variações e medir resultados com baixo custo. Ela não garante a eliminação total de alucinações; pode reduzi-las, mas não as elimina. Não substitui controles de segurança aplicados fora do modelo, como filtros de conteúdo, porque instruções podem ser contornadas. E não atualiza o conhecimento do modelo de forma permanente: o que vai no prompt vale só para aquela requisição.",
+      "opcoes": [
+        { "texto": "Melhora a qualidade das respostas sem retreinar o modelo.", "correta": true },
+        { "texto": "Permite experimentar variações rapidamente e com baixo custo.", "correta": true },
+        { "texto": "Garante a eliminação total das alucinações.", "correta": false },
+        { "texto": "Substitui controles de segurança aplicados fora do modelo, como filtros.", "correta": false },
+        { "texto": "Atualiza permanentemente o conhecimento do modelo com dados novos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-tecnicas-prompt-assoc-124",
+      "topico": "Técnicas de engenharia de prompt",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe está escolhendo a técnica de prompt adequada para cada tarefa de um projeto. Associe cada situação à técnica mais indicada.",
+      "explicacao": "Uma tarefa simples e comum, que o modelo resolve só com a instrução, pede zero-shot. Quando um único exemplo já mostra o formato esperado, basta one-shot. Para ensinar ao modelo como aplicar categorias internas pouco intuitivas, vários exemplos — few-shot — são mais adequados. Um problema com várias regras aplicadas em sequência se beneficia de chain-of-thought. E uma estrutura fixa reutilizada por várias aplicações, com dados que mudam a cada requisição, é um template de prompt. O pré-treinamento contínuo está no painel porque também muda o comportamento do modelo, mas altera seus pesos com grandes volumes de texto — não é uma técnica de prompt e não atende a nenhuma das situações.",
+      "associacoes": [
+        { "alvo": "Tarefa simples e comum que o modelo resolve apenas com a instrução", "item": "Zero-shot" },
+        { "alvo": "Um único exemplo já basta para mostrar o formato esperado", "item": "One-shot" },
+        { "alvo": "Vários exemplos são necessários para ensinar categorias internas pouco intuitivas", "item": "Few-shot" },
+        { "alvo": "Um problema com várias regras que precisam ser aplicadas em sequência", "item": "Chain-of-thought" },
+        { "alvo": "Uma estrutura fixa reutilizada por várias aplicações, com dados diferentes a cada requisição", "item": "Template de prompt" }
+      ],
+      "itensExtras": ["Pré-treinamento contínuo"]
+    },
+    {
+      "id": "aifc01-apl-rag-sobreposicao-excessiva-125",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma base de conhecimento foi configurada com sobreposição de 60% entre trechos vizinhos. Com isso, os trechos recuperados para uma pergunta costumam repetir quase o mesmo texto várias vezes, o contexto enviado ao modelo ficou grande e caro, e informações de outras partes do documento deixam de caber. Qual ajuste é mais adequado?",
+      "explicacao": "Alguma sobreposição entre trechos evita cortar ideias ao meio, mas 60% faz trechos vizinhos serem quase iguais, e os resultados recuperados passam a repetir conteúdo, ocupando o espaço de outras informações relevantes e aumentando o custo. Reduzir a sobreposição para um valor que preserve o contexto sem tanta duplicação resolve o problema. Aumentar a sobreposição para 90% agravaria a repetição. Aumentar a temperatura não altera os trechos recuperados. E fazer fine-tuning com os documentos não corrige a configuração de divisão da base.",
+      "opcoes": [
+        { "texto": "Reduzir a sobreposição para um valor que preserve o contexto sem duplicar tanto conteúdo.", "correta": true },
+        { "texto": "Aumentar a sobreposição para 90% para garantir que nada seja cortado.", "correta": false },
+        { "texto": "Aumentar a temperatura para o modelo ignorar os trechos repetidos.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com os documentos da base.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-sem-contexto-recusa-126",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Quando um cliente pergunta sobre um assunto que não existe na documentação da empresa, o assistente com RAG não encontra trechos relevantes, mas mesmo assim inventa uma resposta com tom confiante. A empresa prefere que o assistente admita que não tem a informação. Qual abordagem é mais adequada?",
+      "explicacao": "O assistente precisa lidar com a ausência de contexto de forma explícita. Instruir o modelo a informar que não encontrou a informação quando os trechos recuperados não a contêm, e aplicar uma verificação de fundamentação que bloqueie respostas não sustentadas pelas fontes, reduz as invenções e dá ao cliente uma resposta honesta. Aumentar a temperatura tende a aumentar as invenções. Obrigar o assistente a sempre dar uma resposta completa agrava exatamente o problema. E treinar o modelo por mais épocas não resolve a falta de informação na documentação.",
+      "opcoes": [
+        { "texto": "Instruir o modelo a dizer que não encontrou a informação e aplicar verificação de fundamentação.", "correta": true },
+        { "texto": "Aumentar a temperatura para gerar respostas mais completas.", "correta": false },
+        { "texto": "Exigir no prompt que o assistente sempre dê uma resposta completa.", "correta": false },
+        { "texto": "Treinar o modelo por mais épocas com a documentação existente.", "correta": false }
+      ]
+    }
+  ]
+}

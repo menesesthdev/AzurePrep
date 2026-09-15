@@ -215,8 +215,19 @@ public sealed class ProvaCompletaTests : IDisposable
 
         Assert.Contains(TipoDeQuestao.EscolhaUnica, tipos);
         Assert.Contains(TipoDeQuestao.EscolhaMultipla, tipos);
-        Assert.Contains(TipoDeQuestao.SimNao, tipos);
         Assert.Contains(TipoDeQuestao.Associacao, tipos);
+
+        // Os quatro formatos são outros na AWS: não existe Sim/Não, existe ordenação.
+        var fornecedor = AzurePrepDbSeeder.FornecedorPorExame[codigo];
+        if (fornecedor == FornecedorDoExame.Aws)
+        {
+            Assert.Contains(TipoDeQuestao.Ordenacao, tipos);
+            Assert.DoesNotContain(TipoDeQuestao.SimNao, tipos);
+        }
+        else
+        {
+            Assert.Contains(TipoDeQuestao.SimNao, tipos);
+        }
     }
 
     // ------------------------------------------------------------------------- fluxo completo

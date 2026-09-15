@@ -1,5 +1,7 @@
 using AzurePrep.Application.Contracts;
+using AzurePrep.Application.Exames;
 using AzurePrep.Application.Sessoes;
+using AzurePrep.Domain.Enums;
 using AzurePrep.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +11,34 @@ namespace AzurePrep.Web.Controllers;
 public class ExameController : Controller
 {
     private readonly ISessaoDeProvaService _session;
+    private readonly ICatalogoDeExamesService _catalogo;
 
-    public ExameController(ISessaoDeProvaService session)
+    public ExameController(ISessaoDeProvaService session, ICatalogoDeExamesService catalogo)
     {
         _session = session;
+        _catalogo = catalogo;
+    }
+
+    // Tela de instruções da AWS, antes da primeira questão e sem relógio — como no demo oficial.
+    // É GET e não cria nada: a tentativa (e o tempo) só começa no POST de "Próxima", que é o mesmo
+    // Iniciar de sempre. Assim ler as instruções não consome tempo de prova.
+    [HttpGet("start/{examId:guid}")]
+    public async Task<IActionResult> Instrucoes(Guid examId, CancellationToken cancellationToken)
+    {
+        var exame = await _catalogo.ObterExameDisponivelAsync(examId, cancellationToken);
+        if (exame is null)
+        {
+            return NotFound();
+        }
+
+        // A entrega da Microsoft não tem esta etapa: quem chega aqui por URL segue para o catálogo.
+        if (exame.Vendor != FornecedorDoExame.Aws)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View("InstrucoesAws", new InstrucoesAwsViewModel(
+            exame.Id, exame.Code, exame.Name, exame.TotalQuestions, exame.TimeLimitMinutes));
     }
 
     // Inicia uma nova tentativa e leva para a tela de prova.
@@ -45,7 +71,11 @@ public class ExameController : Controller
             return NotFound();
         }
 
-        return View(new RealizarProvaViewModel(state, firstQuestion));
+        // Cada fornecedor entrega a prova numa tela diferente, e fidelidade à tela real é o produto:
+        // a da AWS não é um tema da da Microsoft, é outra disposição, outro fluxo de revisão e outro
+        // formato de resposta (lista suspensa em vez de arrastar).
+        var view = state.Vendor == FornecedorDoExame.Aws ? "RealizarAws" : "Realizar";
+        return View(view, new RealizarProvaViewModel(state, firstQuestion));
     }
 
     // Partial de uma questão (navegação sem recarregar a página — fidelidade estilo SPA).
@@ -58,7 +88,7 @@ public class ExameController : Controller
             return NotFound();
         }
 
-        return PartialView("_Questao", question);
+        return PartialView(question.Vendor == FornecedorDoExame.Aws ? "_QuestaoAws" : "_Questao", question);
     }
 
     // Estado atual (painel lateral + tempo restante) em JSON para o front-end sincronizar.

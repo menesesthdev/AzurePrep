@@ -1,0 +1,181 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-embeddings-dimensao-custo-82",
+      "topico": "Embeddings e vetores",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai indexar 200 milhões de trechos de documentos para busca semântica. O modelo de embeddings escolhido permite gerar vetores de 256, 512 ou 1.024 dimensões. Nos testes com perguntas reais, as três opções tiveram qualidade de recuperação praticamente igual. Qual escolha é mais adequada?",
+      "explicacao": "Vetores com mais dimensões ocupam mais armazenamento e tornam a busca mais pesada, o que em 200 milhões de trechos se traduz em custo e latência significativos. Como a qualidade de recuperação foi praticamente igual, a escolha adequada é a menor dimensão que mantém a qualidade medida, 256. Escolher sempre a maior dimensão paga por uma qualidade que os testes não mostraram. Afirmar que a dimensão não afeta custo ignora o armazenamento e o processamento dos vetores. E trocar por um modelo de geração de texto não faz sentido: ele não produz os vetores de que a busca precisa.",
+      "opcoes": [
+        { "texto": "Usar vetores de 256 dimensões, a menor opção que mantém a qualidade medida.", "correta": true },
+        { "texto": "Usar vetores de 1.024 dimensões, porque mais dimensões são sempre melhores.", "correta": false },
+        { "texto": "Escolher qualquer opção, porque a dimensão dos vetores não afeta o custo.", "correta": false },
+        { "texto": "Trocar o modelo de embeddings por um modelo de geração de texto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-banco-vetorial-proposito-83",
+      "topico": "Embeddings e vetores",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um desenvolvedor sugeriu guardar os embeddings de 50 milhões de trechos numa tabela comum e, a cada pergunta, calcular a similaridade da pergunta com todos os trechos, um por um, para economizar com um banco de dados vetorial. Qual é o principal problema dessa abordagem?",
+      "explicacao": "Comparar a pergunta com 50 milhões de vetores, um por um, a cada consulta seria lento demais para uma aplicação interativa. Bancos de dados vetoriais criam índices específicos que encontram rapidamente os vetores mais próximos, mesmo em grande escala, geralmente por busca aproximada de vizinhos mais próximos. Tabelas comuns armazenam números sem problema; o limite é o desempenho da busca. Vetores não precisam de GPU para ser armazenados nem comparados. E o banco vetorial não gera respostas: ele recupera os trechos, e quem gera a resposta é o modelo.",
+      "opcoes": [
+        { "texto": "A busca seria lenta demais; bancos vetoriais indexam os vetores para encontrar os mais próximos rapidamente.", "correta": true },
+        { "texto": "Tabelas comuns não conseguem armazenar números com casas decimais.", "correta": false },
+        { "texto": "Vetores só podem ser armazenados e comparados em memória de GPU.", "correta": false },
+        { "texto": "Sem banco vetorial, o modelo não consegue gerar a resposta final.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ciclo-vida-implantacao-84",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa concluiu a avaliação de um modelo de base ajustado e aprovou seu uso num assistente para clientes. A próxima etapa do ciclo de vida é a implantação. Quais atividades pertencem a essa etapa?",
+      "explicacao": "Na implantação, o modelo aprovado passa a atender usuários, e duas atividades são centrais: escolher a forma de inferência — sob demanda ou com capacidade reservada, conforme volume e custo — e configurar o monitoramento e as proteções da aplicação em produção, como guardrails e alertas. Selecionar o corpus de pré-treinamento pertence às primeiras etapas do ciclo, de seleção de dados e pré-treinamento. Rotular dados para o fine-tuning é preparação do ajuste, que já foi concluído. E coletar o feedback dos usuários em produção é a etapa seguinte, de feedback, que alimenta os próximos ciclos.",
+      "opcoes": [
+        { "texto": "Escolher a forma de inferência, como sob demanda ou capacidade reservada.", "correta": true },
+        { "texto": "Configurar o monitoramento e as proteções da aplicação em produção.", "correta": true },
+        { "texto": "Selecionar o corpus de pré-treinamento do modelo.", "correta": false },
+        { "texto": "Rotular os dados que serão usados no fine-tuning.", "correta": false },
+        { "texto": "Coletar o feedback dos usuários sobre as respostas em produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-bedrock-playground-85",
+      "topico": "Vantagens dos serviços de IA generativa da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma analista de negócios, sem conhecimento de programação, quer testar como diferentes modelos de base respondem a prompts sobre análise de contratos, comparando respostas e ajustando parâmetros como a temperatura, antes de pedir recursos para um projeto. Qual recurso da AWS atende a esse requisito com a menor barreira de entrada?",
+      "explicacao": "Os playgrounds do console do Amazon Bedrock permitem escolher modelos, escrever prompts, ajustar parâmetros e comparar respostas diretamente no navegador, sem escrever código — a barreira de entrada mais baixa para experimentar. Um trabalho de treinamento no SageMaker AI serve para treinar modelos, exige preparação técnica e não é uma forma de testar prompts. Uma instância Amazon EC2 com um modelo instalado exigiria configurar e operar infraestrutura. E o AWS Glue prepara e integra dados, sem relação com testar modelos de base.",
+      "opcoes": [
+        { "texto": "Os playgrounds do console do Amazon Bedrock.", "correta": true },
+        { "texto": "Um trabalho de treinamento no Amazon SageMaker AI.", "correta": false },
+        { "texto": "Uma instância Amazon EC2 com um modelo instalado pela analista.", "correta": false },
+        { "texto": "Um trabalho do AWS Glue.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-velocidade-geracao-86",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai lançar um assistente de programação que gera blocos longos de código enquanto o desenvolvedor espera, exibindo o texto em streaming. Nos testes, dois modelos tiveram qualidade parecida, mas os desenvolvedores reclamaram que num deles o código aparece muito devagar na tela. Qual critério de desempenho deve decidir a escolha?",
+      "explicacao": "Com respostas longas exibidas em streaming, o que o desenvolvedor sente é quanto tempo leva para o texto começar a aparecer e com que rapidez ele continua sendo gerado. Por isso os critérios decisivos são a latência até o primeiro token e a velocidade de geração, em tokens por segundo. O número de idiomas suportados não afeta a rapidez com que o código aparece. Suporte a imagens como entrada não participa da tarefa. E o tamanho do modelo de embeddings diz respeito à busca semântica, não à geração de código.",
+      "opcoes": [
+        { "texto": "A latência até o primeiro token e a velocidade de geração em tokens por segundo.", "correta": true },
+        { "texto": "O número de idiomas suportados pelo modelo.", "correta": false },
+        { "texto": "O suporte a imagens como entrada.", "correta": false },
+        { "texto": "O tamanho do modelo de embeddings associado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-bedrock-importacao-modelo-87",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa fez fine-tuning de um modelo de pesos abertos fora da AWS e obteve bons resultados. Agora quer usar esse modelo personalizado pela mesma API gerenciada e sem servidor que já usa para outros modelos de base, sem provisionar nem operar endpoints. Qual recurso atende a esse requisito?",
+      "explicacao": "A importação de modelos personalizados do Amazon Bedrock (Custom Model Import) permite trazer pesos de modelos ajustados fora da AWS, de arquiteturas suportadas, e usá-los pela API gerenciada do Bedrock, sem operar infraestrutura. O SageMaker JumpStart facilita implantar modelos, mas em endpoints que a empresa precisaria provisionar e manter, justamente o que quer evitar. O Amazon Quick é uma aplicação para usuários de negócio, sem hospedar modelos personalizados. E o Kiro é um ambiente de desenvolvimento com agentes, que não executa modelos para aplicações.",
+      "opcoes": [
+        { "texto": "Importação de modelos personalizados do Amazon Bedrock.", "correta": true },
+        { "texto": "Implantação do modelo num endpoint pelo SageMaker JumpStart.", "correta": false },
+        { "texto": "Amazon Quick.", "correta": false },
+        { "texto": "Kiro.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-code-interpreter-88",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de análise financeira precisa, a pedido do usuário, escrever e executar código Python sobre planilhas enviadas, para calcular indicadores e gerar gráficos. A equipe de segurança exige que esse código rode num ambiente isolado, separado dos sistemas da empresa. Qual componente do Amazon Bedrock AgentCore atende a esse requisito?",
+      "explicacao": "O AgentCore Code Interpreter oferece um ambiente isolado em que o agente executa código, como Python, para cálculos e análises, sem acesso direto aos sistemas da empresa — exatamente o que a equipe de segurança exige. O AgentCore Memory armazena memórias de curto e longo prazo, sem executar código. O AgentCore Gateway transforma APIs e funções existentes em ferramentas para agentes, sem oferecer um ambiente para rodar código arbitrário. E o AgentCore Identity gerencia a identidade e o acesso do agente a outros serviços.",
+      "opcoes": [
+        { "texto": "AgentCore Code Interpreter", "correta": true },
+        { "texto": "AgentCore Memory", "correta": false },
+        { "texto": "AgentCore Gateway", "correta": false },
+        { "texto": "AgentCore Identity", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-browser-portal-89",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de compras precisa consultar o status de pedidos no portal web de um fornecedor antigo, que não oferece API: é preciso fazer login, navegar por menus e ler informações das páginas. A empresa quer um ambiente gerenciado para o agente interagir com esse site. Qual componente do Amazon Bedrock AgentCore atende a esse requisito?",
+      "explicacao": "O AgentCore Browser oferece um ambiente de navegador gerenciado na nuvem para que agentes interajam com aplicações web — navegando, preenchendo formulários e extraindo informações —, adequado a um portal sem API. O AgentCore Gateway transforma APIs e serviços existentes em ferramentas, e o portal justamente não tem API. O AgentCore Memory guarda o contexto e as preferências do agente, sem interagir com sites. E o AgentCore Observability rastreia a execução do agente, sem executar a navegação.",
+      "opcoes": [
+        { "texto": "AgentCore Browser", "correta": true },
+        { "texto": "AgentCore Gateway", "correta": false },
+        { "texto": "AgentCore Memory", "correta": false },
+        { "texto": "AgentCore Observability", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-evaluations-90",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem um agente de atendimento em produção e quer medir de forma automatizada e contínua a qualidade das sessões — se o agente concluiu as tarefas, usou as ferramentas corretamente e se comportou bem em casos difíceis —, com resultados integrados ao monitoramento do agente. Qual componente do Amazon Bedrock AgentCore atende a esse requisito?",
+      "explicacao": "O AgentCore Evaluations avalia de forma automatizada a qualidade de agentes e ferramentas — conclusão de tarefas, uso de ferramentas, comportamento em casos difíceis —, antes e depois da implantação, com resultados integrados à observabilidade. O AgentCore Observability fornece rastros e visualizações da execução, que ajudam a depurar, mas não atribui por si notas de qualidade às sessões. O Amazon Bedrock Guardrails aplica filtros de segurança a entradas e saídas, sem medir se as tarefas foram concluídas. E o AgentCore Runtime executa e escala o agente, sem avaliar sua qualidade.",
+      "opcoes": [
+        { "texto": "AgentCore Evaluations", "correta": true },
+        { "texto": "AgentCore Observability", "correta": false },
+        { "texto": "Amazon Bedrock Guardrails", "correta": false },
+        { "texto": "AgentCore Runtime", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-contexto-selecao-ferramentas-91",
+      "topico": "Engenharia de contexto",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente corporativo tem acesso a mais de cem ferramentas, e as definições de todas elas são enviadas no contexto de cada chamada. As chamadas ficaram caras, e o agente passou a escolher ferramentas erradas com mais frequência. A maioria dos pedidos usa apenas duas ou três ferramentas. Qual prática de engenharia de contexto é mais adequada?",
+      "explicacao": "Definições de ferramentas ocupam tokens e competem pela atenção do modelo. Selecionar dinamicamente apenas as ferramentas relevantes para cada pedido — por exemplo, por busca semântica sobre as descrições — antes de montar o contexto reduz o custo e deixa a escolha mais precisa. Continuar enviando as cem definições mantém exatamente os dois problemas. Aumentar a temperatura deixaria a escolha de ferramentas mais aleatória. E fazer fine-tuning para memorizar as cem ferramentas é caro, desatualiza a cada ferramenta nova e não reduz o contexto enviado.",
+      "opcoes": [
+        { "texto": "Selecionar dinamicamente só as ferramentas relevantes para cada pedido antes de montar o contexto.", "correta": true },
+        { "texto": "Continuar enviando as definições de todas as ferramentas em todas as chamadas.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o agente explore mais ferramentas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo para memorizar todas as ferramentas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-memoria-isolamento-usuarios-92",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de atendimento de um banco usa memória de longo prazo. Num teste, um cliente recebeu uma resposta que mencionava a preferência de outro cliente, porque as memórias de todos estão num único espaço compartilhado. Qual correção é mais adequada?",
+      "explicacao": "Memória de agente pode conter dados pessoais e precisa ser isolada. Separar a memória por usuário e por sessão, e recuperar apenas a do usuário autenticado, impede que informações de um cliente apareçam para outro. Manter uma memória global compartilhada é exatamente a causa do vazamento. Desativar toda a memória elimina a personalização que motivou o recurso. E uma janela de contexto maior só permitiria enviar mais memórias, inclusive de outros clientes.",
+      "opcoes": [
+        { "texto": "Separar a memória por usuário e sessão e recuperar apenas a do usuário autenticado.", "correta": true },
+        { "texto": "Manter a memória compartilhada e instruir o modelo a não citar outros clientes.", "correta": false },
+        { "texto": "Desativar a memória de longo prazo para todos os clientes.", "correta": false },
+        { "texto": "Usar um modelo com janela de contexto maior para diferenciar os clientes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-padroes-multiagente-assoc-93",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "Associacao",
+      "enunciado": "Um arquiteto está documentando os sistemas multiagente da empresa. Associe cada descrição ao padrão correspondente.",
+      "explicacao": "Um agente orquestrador que interpreta o pedido, distribui partes para especialistas e consolida as respostas é o padrão supervisor. Etapas fixas em que a saída de um agente alimenta o próximo formam um pipeline sequencial. Consultas independentes executadas ao mesmo tempo e depois consolidadas são execução em paralelo. E agentes de organizações diferentes trocando tarefas por um protocolo comum é comunicação entre agentes, como o Agent2Agent (A2A). O fine-tuning conjunto está no painel porque também envolve vários modelos, mas é uma forma de ajustar pesos, e não um padrão de colaboração entre agentes.",
+      "associacoes": [
+        { "alvo": "Um agente orquestrador divide o pedido, distribui para especialistas e consolida as respostas", "item": "Padrão supervisor" },
+        { "alvo": "Etapas fixas em que a saída de um agente alimenta o agente seguinte", "item": "Pipeline sequencial" },
+        { "alvo": "Consultas independentes executadas ao mesmo tempo e depois consolidadas", "item": "Execução em paralelo" },
+        { "alvo": "Agentes de organizações diferentes trocam tarefas por um protocolo comum", "item": "Comunicação entre agentes (A2A)" }
+      ],
+      "itensExtras": ["Fine-tuning conjunto"]
+    },
+    {
+      "id": "aifc01-gen-caso-negocio-piloto-ordenacao-94",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa de contabilidade quer comprovar o valor de negócio de um assistente de IA generativa que redige respostas a dúvidas fiscais dos clientes, antes de levá-lo a todas as equipes. Selecione e ordene as etapas.",
+      "explicacao": "Primeiro define-se a métrica de negócio que vai comprovar o valor, como o tempo economizado por resposta. Depois mede-se a linha de base atual, sem o assistente, para ter com o que comparar. Em seguida roda-se um piloto com um grupo de usuários e, por fim, comparam-se os resultados com a linha de base para decidir sobre a expansão. Expandir para todas as equipes antes do piloto assume o valor que se queria comprovar. E definir a métrica depois de ver os resultados permite escolher a que favorece a decisão já tomada, tirando a validade da análise.",
+      "sequencia": [
+        "Definir a métrica de negócio, como o tempo economizado por resposta.",
+        "Medir a linha de base atual, sem o assistente.",
+        "Executar um piloto com um grupo de usuários.",
+        "Comparar os resultados com a linha de base e decidir sobre a expansão."
+      ],
+      "itensExtras": [
+        "Expandir o assistente para todas as equipes antes do piloto.",
+        "Definir a métrica de negócio depois de ver os resultados do piloto."
+      ]
+    }
+  ]
+}

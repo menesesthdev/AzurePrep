@@ -1,0 +1,253 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-inferencia-serverless-rh-30",
+      "topico": "Tipos de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O RH de uma empresa usa um modelo hospedado no Amazon SageMaker AI para classificar perguntas de funcionários. As requisições são pequenas e esporádicas: algumas por hora durante o expediente e nenhuma à noite ou nos fins de semana. O chat precisa responder em poucos segundos, e um atraso ocasional na primeira requisição depois de um período sem uso é aceitável. A empresa não quer gerenciar instâncias nem pagar por capacidade ociosa. Qual opção de inferência atende a esses requisitos?",
+      "explicacao": "A inferência serverless provisiona capacidade automaticamente conforme as requisições chegam e cobra pelo processamento usado, sem instâncias para gerenciar e sem custo nos períodos ociosos; o atraso ocasional após inatividade é a partida a frio, que o enunciado aceita. Um endpoint em tempo real mantém instâncias ativas o tempo todo, pagando pelas noites e fins de semana sem uso. A inferência assíncrona coloca as requisições numa fila e entrega o resultado depois, o que não serve a um chat que precisa responder em poucos segundos. E o batch transform processa um conjunto de dados acumulado de uma vez, sem atender perguntas individuais no momento em que chegam.",
+      "opcoes": [
+        { "texto": "Inferência serverless", "correta": true },
+        { "texto": "Endpoint de inferência em tempo real", "correta": false },
+        { "texto": "Inferência assíncrona", "correta": false },
+        { "texto": "Batch transform", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-inferencia-tempo-real-pagamento-31",
+      "topico": "Tipos de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma processadora de pagamentos precisa pontuar o risco de fraude de cada transação durante a autorização, com resposta consistente em menos de 100 milissegundos. O tráfego é alto e constante durante todo o dia, e uma resposta lenta faz a transação ser recusada. Qual opção de inferência do Amazon SageMaker AI atende a esses requisitos?",
+      "explicacao": "Um endpoint de inferência em tempo real mantém instâncias sempre prontas e responde de forma síncrona com latência baixa e consistente, o que é necessário numa autorização de pagamento com tráfego alto e constante — cenário em que capacidade ativa o tempo todo não é desperdício. A inferência serverless é atraente por dispensar instâncias, mas as partidas a frio tornam a latência imprevisível, e uma resposta lenta recusaria a transação. A inferência assíncrona enfileira as requisições e entrega o resultado depois, incompatível com uma decisão durante a autorização. E o batch transform pontua conjuntos de dados acumulados, o que só identificaria a fraude depois de a transação ter sido aprovada.",
+      "opcoes": [
+        { "texto": "Endpoint de inferência em tempo real", "correta": true },
+        { "texto": "Inferência serverless", "correta": false },
+        { "texto": "Inferência assíncrona", "correta": false },
+        { "texto": "Batch transform", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aprendizado-anomalias-sensores-32",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fábrica coleta leituras de vibração e temperatura de centenas de máquinas. Falhas são raríssimas: em cinco anos de histórico, só três foram registradas com precisão. A equipe quer sinalizar automaticamente máquinas com comportamento fora do padrão habitual, para inspecioná-las antes que falhem. Qual abordagem é mais adequada?",
+      "explicacao": "Com apenas três falhas rotuladas, não há exemplos suficientes da classe que se quer prever. A detecção de anomalias não supervisionada aprende como é o funcionamento normal a partir do grande volume de leituras sem rótulo e sinaliza o que se afasta desse padrão, sem depender de exemplos de falha. A classificação supervisionada binária precisaria de muitos exemplos das duas classes; com três falhas, o modelo aprenderia a dizer que tudo está normal. A regressão prevê um valor numérico contínuo, e o objetivo é sinalizar comportamento incomum, não estimar um número. E o aprendizado por reforço treina um agente que toma ações e recebe recompensas, o que não se aplica a monitorar leituras de sensores.",
+      "opcoes": [
+        { "texto": "Detecção de anomalias não supervisionada", "correta": true },
+        { "texto": "Classificação supervisionada binária entre falha e normal", "correta": false },
+        { "texto": "Regressão da temperatura esperada de cada máquina", "correta": false },
+        { "texto": "Aprendizado por reforço com recompensa por falha evitada", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-f1-documentos-33",
+      "topico": "Métricas de avaliação de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um escritório usa um modelo para identificar contratos que contêm cláusulas de exclusividade, presentes em cerca de 8% dos documentos. Um contrato com a cláusula que não é identificado gera risco jurídico, e um contrato sinalizado por engano gera horas de revisão cara por advogados — a direção considera os dois erros igualmente graves. Qual métrica deve ser usada para comparar os modelos?",
+      "explicacao": "Quando falsos positivos e falsos negativos têm peso parecido e as classes são desbalanceadas, o F1 score é a métrica indicada: é a média harmônica de precisão e recall e só fica alto quando os dois estão bons. A acurácia engana com 8% de contratos positivos, porque um modelo que nunca sinaliza nada acerta 92% das vezes. A precisão sozinha penaliza só os contratos sinalizados por engano e deixaria passar cláusulas não identificadas. E o recall sozinho penaliza só as cláusulas perdidas, podendo aprovar um modelo que sinaliza quase tudo e gera horas de revisão desnecessária.",
+      "opcoes": [
+        { "texto": "F1 score", "correta": true },
+        { "texto": "Acurácia", "correta": false },
+        { "texto": "Precisão", "correta": false },
+        { "texto": "Recall", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-custo-por-usuario-34",
+      "topico": "Métricas de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup lançou um recurso de recomendações baseado em ML para 20 mil usuários ativos e planeja chegar a 500 mil no próximo ano. O conselho quer saber se o recurso continuará financeiramente sustentável conforme a base crescer. Qual métrica responde melhor a essa pergunta?",
+      "explicacao": "O custo por usuário, que divide os custos recorrentes de infraestrutura e de inferência pelos usuários ativos, mostra quanto cada usuário custa para ser atendido e permite projetar o que acontece com 500 mil usuários — a pergunta do conselho. O recall do modelo mede a qualidade das recomendações, sem relação com a sustentabilidade financeira. O custo total de desenvolvimento já realizado é um gasto passado e único, que não cresce com a base e não diz se a operação se sustenta. E o número de parâmetros do modelo é uma característica técnica que, sozinha, não traduz custo por usuário.",
+      "opcoes": [
+        { "texto": "O custo por usuário, considerando os custos recorrentes de infraestrutura e inferência.", "correta": true },
+        { "texto": "O recall do modelo de recomendação no conjunto de teste.", "correta": false },
+        { "texto": "O custo total de desenvolvimento já investido no recurso.", "correta": false },
+        { "texto": "O número de parâmetros do modelo de recomendação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-modelo-negocio-assoc-35",
+      "topico": "Métricas de negócio",
+      "tipo": "Associacao",
+      "enunciado": "Um banco quer acompanhar um modelo de detecção de fraudes em cartões tanto do ponto de vista técnico quanto do de negócio. Associe cada pergunta à métrica que a responde.",
+      "explicacao": "Saber se o modelo deixa passar fraudes reais é medir o recall: das fraudes que aconteceram, quantas foram detectadas. Saber quantas das transações bloqueadas eram de fato fraude é a precisão. Saber se a solução se paga diante do investimento é o ROI. O custo de operar o modelo para cada cliente ativo é o custo por usuário. E saber se os clientes estão incomodados com bloqueios é o feedback dos clientes, colhido em pesquisas e reclamações. A acurácia está no painel porque parece responder à qualidade do modelo, mas com fraudes raras ela fica alta até num modelo que não detecta nada — e não responde a nenhuma das perguntas de forma útil.",
+      "associacoes": [
+        { "alvo": "O modelo está deixando passar muitas fraudes reais?", "item": "Recall" },
+        { "alvo": "Das transações bloqueadas, quantas eram de fato fraude?", "item": "Precisão" },
+        { "alvo": "A solução se paga diante do investimento realizado?", "item": "ROI" },
+        { "alvo": "Quanto custa operar o modelo para cada cliente ativo?", "item": "Custo por usuário" },
+        { "alvo": "Os clientes estão incomodados com bloqueios de cartão?", "item": "Feedback dos clientes" }
+      ],
+      "itensExtras": ["Acurácia"]
+    },
+    {
+      "id": "aifc01-fund-servico-transcribe-vocabulario-36",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede de clínicas usa o Amazon Transcribe para converter em texto os ditados dos médicos. O texto sai bom, mas nomes de medicamentos e termos técnicos pouco comuns são transcritos incorretamente com frequência. Qual solução resolve o problema com o menor esforço?",
+      "explicacao": "O vocabulário personalizado do Amazon Transcribe permite informar ao serviço termos específicos, como nomes de medicamentos, melhorando o reconhecimento dessas palavras sem treinar modelo algum. O léxico personalizado do Amazon Polly é uma armadilha: ele ajusta a pronúncia na síntese de fala, o caminho inverso, e não influencia a transcrição. A terminologia personalizada do Amazon Translate garante a tradução consistente de termos entre idiomas, mas o problema acontece antes, no reconhecimento do áudio. E corrigir o texto depois com o Amazon Comprehend não funciona, porque o Comprehend analisa entidades e sentimento, sem saber qual medicamento foi realmente ditado.",
+      "opcoes": [
+        { "texto": "Criar um vocabulário personalizado no Amazon Transcribe com os termos médicos.", "correta": true },
+        { "texto": "Criar um léxico personalizado no Amazon Polly com os nomes dos medicamentos.", "correta": false },
+        { "texto": "Configurar uma terminologia personalizada no Amazon Translate.", "correta": false },
+        { "texto": "Corrigir as transcrições com o Amazon Comprehend após a conversão.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-lex-reservas-37",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede de hotéis quer um assistente no site e no telefone que entenda pedidos como quero um quarto duplo de sexta a domingo, identifique a intenção de fazer uma reserva, pergunte o que faltar — como o número de hóspedes — e só então conclua a reserva. A equipe quer usar um serviço gerenciado construído para esse tipo de interação. Qual serviço atende a esse requisito?",
+      "explicacao": "O Amazon Lex é o serviço para criar interfaces conversacionais por voz e texto: reconhece a intenção do usuário, extrai os valores necessários (datas, tipo de quarto) e conduz o diálogo pedindo o que falta antes de executar a ação. O Amazon Comprehend extrai entidades e sentimento de textos, mas não gerencia um diálogo nem pergunta o que está faltando. O Amazon Polly converte texto em fala e poderia dar voz às respostas, mas não entende o pedido. E o Amazon Transcribe converte fala em texto, também sem interpretar intenções nem conduzir a conversa.",
+      "opcoes": [
+        { "texto": "Amazon Lex", "correta": true },
+        { "texto": "Amazon Comprehend", "correta": false },
+        { "texto": "Amazon Polly", "correta": false },
+        { "texto": "Amazon Transcribe", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servicos-notas-despesas-38",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa recebe notas fiscais digitalizadas de fornecedores. Ela quer extrair automaticamente o valor total, a data e a tabela de itens de cada nota e, em seguida, classificar a descrição de cada item numa das 15 categorias de despesa internas, usando um conjunto de descrições já categorizadas. Quais serviços compõem a solução?",
+      "explicacao": "O Amazon Textract extrai texto, pares chave-valor e tabelas de documentos digitalizados, cobrindo o valor total, a data e a tabela de itens. A classificação personalizada do Amazon Comprehend treina, a partir das descrições já categorizadas, um classificador para as 15 categorias internas — sem exigir experiência em ML. O Amazon Rekognition identifica objetos e texto solto em imagens, mas não interpreta a estrutura de uma nota fiscal com tabelas e campos. O Amazon Polly gera fala a partir de texto, sem relação com a tarefa. E o Amazon Translate traduz entre idiomas, e nada no fluxo exige tradução.",
+      "opcoes": [
+        { "texto": "Amazon Textract", "correta": true },
+        { "texto": "Classificação personalizada do Amazon Comprehend", "correta": true },
+        { "texto": "Amazon Rekognition", "correta": false },
+        { "texto": "Amazon Polly", "correta": false },
+        { "texto": "Amazon Translate", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-rekognition-custom-labels-39",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fabricante de azulejos quer detectar em fotos da linha de produção quatro tipos de defeito específicos do seu produto, como trinca capilar e bolha de esmalte. Ela tem algumas centenas de fotos rotuladas por tipo de defeito e não tem cientistas de dados. Qual solução atende a esses requisitos com o menor esforço?",
+      "explicacao": "O Amazon Rekognition Custom Labels permite treinar um modelo para identificar objetos e condições específicos do negócio a partir de um conjunto relativamente pequeno de imagens rotuladas, sem experiência em ML — adequado a defeitos próprios do produto. Os rótulos padrão do Amazon Rekognition reconhecem objetos e cenas genéricos, como azulejo ou parede, mas não conhecem trincas capilares ou bolhas de esmalte. Treinar do zero uma rede neural convolucional no SageMaker AI exigiria mais dados e justamente a especialização que a empresa não tem. E o Amazon Textract extrai texto e tabelas de documentos, sem detectar defeitos visuais.",
+      "opcoes": [
+        { "texto": "Treinar um modelo com o Amazon Rekognition Custom Labels usando as fotos rotuladas.", "correta": true },
+        { "texto": "Usar os rótulos padrão do Amazon Rekognition, sem treinamento.", "correta": false },
+        { "texto": "Treinar do zero uma rede neural convolucional no Amazon SageMaker AI.", "correta": false },
+        { "texto": "Processar as fotos com o Amazon Textract.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-translate-terminologia-40",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fabricante traduz seus manuais do português para o espanhol e o inglês com o Amazon Translate. Os nomes dos produtos e alguns termos da marca estão sendo traduzidos, e cada manual acaba usando uma tradução diferente para o mesmo termo. A empresa quer que esses termos sejam mantidos ou traduzidos sempre da mesma forma. Qual solução atende a esse requisito?",
+      "explicacao": "A terminologia personalizada do Amazon Translate define como termos específicos devem ser tratados na tradução, garantindo que nomes de produtos e termos da marca saiam sempre iguais em todos os manuais. O léxico personalizado do Amazon Polly ajusta a pronúncia de palavras na síntese de fala, sem efeito sobre a tradução de textos. Fazer fine-tuning de um modelo de base para tradução é possível, mas custa muito mais esforço para resolver algo que um recurso nativo resolve com uma lista de termos. E o Amazon Comprehend identifica entidades nos textos, sem controlar como elas são traduzidas.",
+      "opcoes": [
+        { "texto": "Configurar uma terminologia personalizada no Amazon Translate.", "correta": true },
+        { "texto": "Criar um léxico personalizado no Amazon Polly com os nomes dos produtos.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo de base para traduzir os manuais.", "correta": false },
+        { "texto": "Detectar os nomes dos produtos com o Amazon Comprehend antes da tradução.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-comprehend-pii-41",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma operadora de telefonia quer analisar o texto de milhões de chamados de suporte para identificar os problemas mais frequentes. Antes de gravar os textos no ambiente de análise, precisa detectar e mascarar dados pessoais que os clientes escreveram, como CPF, e-mail e endereço, durante o próprio fluxo de processamento. Qual serviço atende a esse requisito?",
+      "explicacao": "O Amazon Comprehend detecta e oculta informações pessoais em textos, e pode ser chamado no fluxo de processamento para mascarar CPF, e-mail e endereço antes de os dados chegarem ao ambiente de análise. O Amazon Macie descobre dados sensíveis em objetos que já estão armazenados no Amazon S3; é útil para auditar buckets, mas não mascara o texto durante o processamento. O Amazon Textract extrai texto de documentos digitalizados, e aqui o texto já existe. E o Amazon Rekognition analisa imagens e vídeos, sem relação com textos de chamados.",
+      "opcoes": [
+        { "texto": "Amazon Comprehend", "correta": true },
+        { "texto": "Amazon Macie", "correta": false },
+        { "texto": "Amazon Textract", "correta": false },
+        { "texto": "Amazon Rekognition", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-ground-truth-rotulagem-42",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de logística precisa rotular 50 mil imagens de pacotes, indicando a posição de etiquetas danificadas, para treinar um modelo de visão. Ela quer distribuir o trabalho entre anotadores humanos, próprios ou contratados, com fluxos de rotulagem gerenciados. Qual recurso atende a esse requisito?",
+      "explicacao": "O Amazon SageMaker Ground Truth é o recurso de rotulagem de dados: oferece fluxos de trabalho para anotadores humanos, que podem ser a própria equipe ou uma força de trabalho contratada, e produz o conjunto rotulado para o treinamento. O Amazon Rekognition analisa imagens com modelos prontos, mas não organiza a rotulagem humana de um conjunto de dados. O SageMaker Clarify analisa viés e explicabilidade de dados e modelos, sem criar rótulos. E o SageMaker Model Monitor acompanha modelos em produção, uma etapa muito posterior à rotulagem.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker Ground Truth", "correta": true },
+        { "texto": "Amazon Rekognition", "correta": false },
+        { "texto": "Amazon SageMaker Clarify", "correta": false },
+        { "texto": "Amazon SageMaker Model Monitor", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-pipeline-vazamento-atributo-43",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Na análise exploratória de dados para um modelo que prevê cancelamento de assinaturas, a equipe percebe que o atributo data_do_ultimo_estorno está preenchido praticamente só para clientes que cancelaram, porque o estorno é feito no próprio processo de cancelamento. Um modelo de teste com esse atributo atingiu 99% de acurácia. O que a equipe deve fazer?",
+      "explicacao": "O atributo só existe porque o cancelamento já aconteceu: é vazamento de dados, porque entrega ao modelo a resposta que ele deveria prever. No momento real da previsão, antes do cancelamento, essa informação não está disponível, e o modelo desabaria em produção — os 99% são o sintoma, não uma conquista. Por isso o atributo deve ser removido. Mantê-lo por ser o mais preditivo é exatamente cair na armadilha. Normalizá-lo muda a escala dos valores, mas continua entregando a resposta. E aumentar o conjunto de teste mediria com mais precisão um resultado que já é inválido.",
+      "opcoes": [
+        { "texto": "Remover o atributo, porque ele só existe depois do cancelamento e vaza a resposta.", "correta": true },
+        { "texto": "Manter o atributo, porque ele é o mais preditivo do conjunto de dados.", "correta": false },
+        { "texto": "Normalizar os valores do atributo antes de treinar o modelo.", "correta": false },
+        { "texto": "Aumentar o conjunto de teste para confirmar os 99% de acurácia.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-ml-tradicional-dispositivo-offline-44",
+      "topico": "ML tradicional versus modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa agrícola quer que um sensor instalado em colheitadeiras classifique, em tempo real, o nível de umidade dos grãos a partir de leituras numéricas. As máquinas operam em áreas sem conexão com a internet, e o sensor tem pouca memória e processamento. Qual abordagem é mais adequada?",
+      "explicacao": "As restrições operacionais decidem: sem conexão e com pouco processamento, o modelo precisa rodar no próprio dispositivo e ser leve. Um modelo de ML tradicional compacto, treinado com as leituras numéricas, atende bem a uma classificação sobre dados estruturados e cabe no sensor. Chamar um modelo de base no Amazon Bedrock exige conexão com a internet, que as máquinas não têm. Embarcar um modelo de base grande ajustado por fine-tuning esbarra na memória e no processamento do sensor. E RAG depende de recuperar documentos e chamar um modelo gerador, o que não se aplica a classificar leituras numéricas e também exigiria conectividade.",
+      "opcoes": [
+        { "texto": "Um modelo de ML tradicional compacto, executado no próprio sensor.", "correta": true },
+        { "texto": "Um modelo de base no Amazon Bedrock chamado pela API a cada leitura.", "correta": false },
+        { "texto": "Um modelo de base grande ajustado por fine-tuning e embarcado no sensor.", "correta": false },
+        { "texto": "Uma solução de RAG com os manuais técnicos dos grãos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aplicacoes-ia-assoc-45",
+      "topico": "Aplicações práticas de IA",
+      "tipo": "Associacao",
+      "enunciado": "Um shopping levantou ideias de uso de IA com os lojistas. Associe cada ideia à área de aplicação de IA correspondente.",
+      "explicacao": "Ler as placas dos veículos nas câmeras do estacionamento é visão computacional, que extrai informação de imagens. Identificar a intenção em mensagens de clientes é processamento de linguagem natural. Converter as chamadas da central em texto é reconhecimento de fala. Sugerir lojas e promoções com base no histórico de visitas é um sistema de recomendação. E estimar o fluxo de visitantes do próximo trimestre é previsão (forecasting), a partir de dados históricos. O aprendizado por reforço está no painel porque é uma técnica real de ML, mas treina agentes que agem e recebem recompensas — nenhuma das ideias descreve esse tipo de problema.",
+      "associacoes": [
+        { "alvo": "Ler as placas dos veículos nas câmeras do estacionamento", "item": "Visão computacional" },
+        { "alvo": "Identificar a intenção das mensagens enviadas pelos clientes", "item": "Processamento de linguagem natural" },
+        { "alvo": "Converter as chamadas da central de atendimento em texto", "item": "Reconhecimento de fala" },
+        { "alvo": "Sugerir lojas e promoções com base no histórico de visitas", "item": "Sistema de recomendação" },
+        { "alvo": "Estimar o fluxo de visitantes do próximo trimestre", "item": "Previsão (forecasting)" }
+      ],
+      "itensExtras": ["Aprendizado por reforço"]
+    },
+    {
+      "id": "aifc01-fund-ciclo-projeto-ordenacao-46",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma distribuidora quer usar ML supervisionado para prever quais clientes vão atrasar pagamentos. Ainda não há dados organizados nem modelo. Selecione e ordene as etapas do projeto, do início até o modelo em operação.",
+      "explicacao": "O projeto começa pelo problema de negócio e pela métrica de sucesso, porque são eles que definem que dados coletar e como avaliar o modelo. Em seguida os dados históricos são coletados e rotulados com o resultado conhecido — pagou em dia ou atrasou —, o que o aprendizado supervisionado exige. Depois o modelo é treinado e avaliado contra a métrica definida e, só então, implantado e monitorado em produção. Escolher o algoritmo antes de definir o problema inverte a lógica: a técnica depende do problema e dos dados. E implantar sem avaliação para coletar rótulos em produção coloca decisões reais nas mãos de um modelo de qualidade desconhecida.",
+      "sequencia": [
+        "Definir o problema de negócio e a métrica de sucesso.",
+        "Coletar os dados históricos e rotulá-los com o resultado conhecido.",
+        "Treinar o modelo e avaliá-lo com a métrica definida.",
+        "Implantar o modelo e monitorá-lo em produção."
+      ],
+      "itensExtras": [
+        "Escolher o algoritmo de ML antes de definir o problema de negócio.",
+        "Implantar o modelo sem avaliação para coletar os rótulos em produção."
+      ]
+    },
+    {
+      "id": "aifc01-fund-servicos-fluxo-documentos-ordenacao-47",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma seguradora recebe formulários de sinistro digitalizados e quer, sem treinar modelos próprios, extrair os campos preenchidos, mascarar os dados pessoais do segurado e gravar o resultado num banco de dados de análise. Os formulários chegam num bucket do Amazon S3. Selecione e ordene as etapas do fluxo.",
+      "explicacao": "O fluxo parte do formulário armazenado no S3. O Amazon Textract extrai os campos preenchidos e as tabelas do documento digitalizado, produzindo texto estruturado. Esse texto passa pelo Amazon Comprehend para detectar e mascarar os dados pessoais antes de qualquer gravação, e só então o resultado é carregado no banco de análise. O Amazon Rekognition identifica objetos e texto solto em imagens, mas não interpreta a estrutura de campos de um formulário, e por isso não serve para a extração. E o Amazon Translate traduz textos entre idiomas; nem extrai tabelas nem faz parte de um fluxo em que nada precisa ser traduzido.",
+      "sequencia": [
+        "Receber o formulário digitalizado no bucket do Amazon S3.",
+        "Extrair os campos preenchidos com o Amazon Textract.",
+        "Detectar e mascarar os dados pessoais com o Amazon Comprehend.",
+        "Gravar o resultado mascarado no banco de dados de análise."
+      ],
+      "itensExtras": [
+        "Ler os campos do formulário com os rótulos do Amazon Rekognition.",
+        "Extrair as tabelas do formulário com o Amazon Translate."
+      ]
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 using AzurePrep.Domain.Correcao;
+using AzurePrep.Domain.Enums;
 
 namespace AzurePrep.Domain.Tests;
 
@@ -75,5 +76,35 @@ public class EscalaDeNotaTests
     {
         Assert.Equal(EscalaDeNota.NotaMaxima, EscalaDeNota.Converter(100m, 100));
         Assert.True(EscalaDeNota.Converter(99m, 100) < EscalaDeNota.NotaDeCorte);
+    }
+
+    // AWS publica a escala como 100–1000: o piso muda, o corte e o teto não. Uma prova zerada que
+    // mostrasse 1 contradiria o relatório real, e a régua do score report ficaria desalinhada.
+    [Fact]
+    public void Converter_EscalaAws_ZeroAcertosRetorna100()
+    {
+        Assert.Equal(100, EscalaDeNota.Converter(0m, 70, EscalaDeNota.NotaMinimaPara(FornecedorDoExame.Aws)));
+    }
+
+    [Theory]
+    [InlineData(70, 700)]
+    [InlineData(100, 1000)]
+    public void Converter_EscalaAws_MantemCorteETeto(int percent, int esperado)
+    {
+        Assert.Equal(esperado, EscalaDeNota.Converter(percent, 70, EscalaDeNota.NotaMinimaAws));
+    }
+
+    [Fact]
+    public void Converter_EscalaAws_AbaixoDoCorteFicaEntre100E699()
+    {
+        var nota = EscalaDeNota.Converter(35m, 70, EscalaDeNota.NotaMinimaAws);
+
+        Assert.InRange(nota, EscalaDeNota.NotaMinimaAws + 1, EscalaDeNota.NotaDeCorte - 1);
+    }
+
+    [Fact]
+    public void NotaMinimaPara_MicrosoftContinuaEm1()
+    {
+        Assert.Equal(1, EscalaDeNota.NotaMinimaPara(FornecedorDoExame.Microsoft));
     }
 }

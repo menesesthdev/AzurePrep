@@ -6,7 +6,8 @@
     {
         TipoDeQuestao.EscolhaMultipla => "Múltipla escolha",
         TipoDeQuestao.SimNao => "Sim/Não",
-        TipoDeQuestao.Associacao => "Arrastar e soltar",
+        TipoDeQuestao.Associacao => Model.Vendor == FornecedorDoExame.Aws ? "Associação" : "Arrastar e soltar",
+        TipoDeQuestao.Ordenacao => "Ordenação",
         _ => "Escolha única"
     };
 }
@@ -19,7 +20,7 @@
     <h1 class="hero__title">Revisão da tentativa</h1>
     <p class="hero__lead">
         @Model.ExamCode · @Model.CorrectAnswers de @Model.TotalQuestions itens corretos
-        (@Model.ScorePercent.ToString("0.#")%). Nota: @Model.ScaledScore de 1000.
+        (@Model.ScorePercent.ToString("0.#")%). Nota: @Model.ScaledScore (escala @Model.ScaledMinimumScore–1000).
     </p>
     <p class="result__note">
         Esta tela não existe na prova real — lá o candidato recebe apenas a nota e o desempenho

@@ -78,6 +78,9 @@ namespace AzurePrep.Infrastructure.Migrations
                     b.Property<int>("TotalQuestions")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("Vendor")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Code")

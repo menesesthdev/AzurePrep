@@ -1,0 +1,196 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-tipos-inferencia-assoc-77",
+      "topico": "Tipos de inferência",
+      "tipo": "Associacao",
+      "enunciado": "Um banco tem vários modelos hospedados no Amazon SageMaker AI, cada um com uma necessidade diferente de uso. Associe cada cenário à opção de inferência mais adequada.",
+      "explicacao": "Pontuar 30 milhões de clientes toda noite para uma campanha do dia seguinte é processamento de um conjunto de dados inteiro, sem ninguém esperando: batch transform. Aprovar pagamentos em até 100 milissegundos com tráfego alto e constante exige inferência em tempo real. Analisar vídeos de 500 MB que chegam a qualquer hora, com notificação quando o resultado fica pronto, é o caso da inferência assíncrona. E um classificador interno com poucas requisições por hora, que tolera partida a frio e não quer capacidade ociosa, se encaixa na inferência serverless. O endpoint multimodelo está no painel porque também reduz custo, mas é indicado para hospedar muitos modelos pequenos num mesmo endpoint, e nenhum dos cenários descreve essa necessidade.",
+      "associacoes": [
+        { "alvo": "Pontuar 30 milhões de clientes toda noite para a campanha do dia seguinte", "item": "Batch transform" },
+        { "alvo": "Aprovar pagamentos em até 100 milissegundos, com tráfego alto e constante", "item": "Inferência em tempo real" },
+        { "alvo": "Analisar vídeos de 500 MB que chegam a qualquer hora, com notificação ao concluir", "item": "Inferência assíncrona" },
+        { "alvo": "Classificador interno com poucas requisições por hora, que tolera partida a frio", "item": "Inferência serverless" }
+      ],
+      "itensExtras": ["Endpoint multimodelo"]
+    },
+    {
+      "id": "aifc01-fund-mlops-mudanca-conceito-78",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de detecção de fraude em cartões perdeu desempenho nos últimos meses. O monitoramento mostra que a distribuição dos dados de entrada — valores, horários, tipos de estabelecimento — praticamente não mudou. A investigação revelou que os fraudadores passaram a usar padrões de compra que antes eram típicos de clientes legítimos. Como esse fenômeno é caracterizado e como tratá-lo?",
+      "explicacao": "Quando os dados de entrada continuam parecidos, mas a relação entre eles e o resultado muda — compras com o mesmo perfil deixaram de significar cliente legítimo —, trata-se de mudança de conceito (concept drift). Ela não aparece no monitoramento da distribuição das entradas, e por isso é preciso monitorar a qualidade das previsões contra os resultados reais e retreinar com dados recentes rotulados. Desvio de dados de entrada é justamente o que o monitoramento mostrou não estar acontecendo. Sobreajuste é um modelo que decorou o treinamento, com sinais desde a validação, não uma queda gradual em produção. E vazamento de dados produz resultados de avaliação bons demais, não uma piora ao longo do tempo.",
+      "opcoes": [
+        { "texto": "Mudança de conceito; monitorar a qualidade contra os resultados reais e retreinar com dados recentes.", "correta": true },
+        { "texto": "Desvio dos dados de entrada; ajustar o monitoramento da distribuição das entradas.", "correta": false },
+        { "texto": "Sobreajuste; simplificar o modelo e aplicar regularização.", "correta": false },
+        { "texto": "Vazamento de dados; remover atributos que revelam o resultado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-implantacao-sombra-79",
+      "topico": "Formas de usar um modelo em produção",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora treinou uma nova versão do modelo de precificação e quer verificar como ela se comporta com as requisições reais de produção — latência, erros e diferença em relação às previsões atuais — sem que nenhum cliente receba preços calculados pela nova versão durante o teste. Qual abordagem atende a esse requisito?",
+      "explicacao": "Numa implantação em sombra, a nova versão recebe uma cópia das requisições reais e suas previsões são registradas para comparação, mas as respostas enviadas aos clientes continuam vindo da versão atual. Assim se avalia o comportamento com tráfego real sem impacto nos clientes, o que o SageMaker AI suporta com testes de sombra. Substituir a versão atual diretamente expõe todos os clientes à nova versão. Uma implantação gradual reduz o risco, mas uma parte dos clientes receberia preços da nova versão, o que o requisito proíbe. E testar só com os dados de treinamento não mostra o comportamento com as requisições reais de produção.",
+      "opcoes": [
+        { "texto": "Implantação em sombra, com a nova versão recebendo uma cópia do tráfego sem responder aos clientes.", "correta": true },
+        { "texto": "Substituição direta da versão atual pela nova versão.", "correta": false },
+        { "texto": "Implantação gradual, enviando 10% dos clientes para a nova versão.", "correta": false },
+        { "texto": "Avaliação da nova versão apenas com os dados usados no treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-limiar-precisao-recall-80",
+      "topico": "Métricas de avaliação de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo atribui a cada transação uma probabilidade de fraude, e a transação é bloqueada quando essa probabilidade ultrapassa um limiar. A equipe está pensando em aumentar o limiar de 0,5 para 0,8, para bloquear só os casos em que o modelo tem mais certeza. Qual efeito essa mudança tende a produzir?",
+      "explicacao": "Com um limiar mais alto, o modelo só bloqueia as transações com probabilidade de fraude muito elevada. Os bloqueios que restam tendem a estar mais certos, então a precisão aumenta; mas fraudes com probabilidade entre 0,5 e 0,8 deixam de ser bloqueadas, e o recall diminui. É o trade-off entre as duas métricas, decidido pelo custo de cada erro. Precisão e recall não aumentam juntos só por mudar o limiar. O efeito oposto — recall maior e precisão menor — é o que acontece ao reduzir o limiar. E a mudança do limiar altera, sim, quais transações são bloqueadas.",
+      "opcoes": [
+        { "texto": "A precisão tende a aumentar e o recall tende a diminuir.", "correta": true },
+        { "texto": "A precisão e o recall tendem a aumentar juntos.", "correta": false },
+        { "texto": "O recall tende a aumentar e a precisão tende a diminuir.", "correta": false },
+        { "texto": "Nada muda, porque o modelo continua o mesmo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-deep-learning-representacoes-81",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Em projetos antigos de visão computacional, especialistas passavam meses definindo manualmente atributos como bordas, cantos e texturas antes de treinar um classificador. Com deep learning, a equipe passou a fornecer as imagens diretamente. O que explica essa diferença?",
+      "explicacao": "Redes neurais profundas têm várias camadas que aprendem representações a partir dos dados: as primeiras camadas captam padrões simples, como bordas, e as seguintes combinam esses padrões em formas e objetos. Por isso a definição manual de atributos deixa de ser necessária. Deep learning não usa regras escritas por especialistas; aprende com exemplos. Ele não dispensa dados — ao contrário, costuma exigir grandes volumes. E não é, por natureza, mais explicável: suas representações internas são justamente difíceis de interpretar.",
+      "opcoes": [
+        { "texto": "As camadas da rede aprendem sozinhas as representações relevantes a partir das imagens.", "correta": true },
+        { "texto": "O deep learning aplica regras visuais escritas previamente por especialistas.", "correta": false },
+        { "texto": "O deep learning funciona sem precisar de dados de treinamento.", "correta": false },
+        { "texto": "O deep learning é sempre explicável, por isso dispensa atributos manuais.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-categorias-ia-assoc-82",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "Associacao",
+      "enunciado": "Um consultor está explicando a uma diretoria as diferenças entre as categorias de sistemas de IA. Associe cada sistema à categoria que melhor o descreve.",
+      "explicacao": "Um filtro de spam que aprende com e-mails marcados pelos usuários é machine learning: aprende padrões a partir de dados rotulados. Uma rede neural com muitas camadas que reconhece rostos em fotos é deep learning, um subconjunto do ML. Um sistema que escreve rascunhos de e-mails a partir de tópicos é IA generativa, porque produz conteúdo novo. Um sistema que planeja e executa sozinho a reserva de viagens usando APIs é IA agêntica. E um sistema de regras se-então escrito por especialistas é IA baseada em regras, que não aprende com dados. O processamento em lote está no painel porque aparece em projetos de dados, mas é uma forma de executar cargas de trabalho, e não uma categoria de sistema de IA.",
+      "associacoes": [
+        { "alvo": "Filtro de spam que aprende com os e-mails marcados pelos usuários", "item": "Machine learning" },
+        { "alvo": "Rede neural com muitas camadas que reconhece rostos em fotos", "item": "Deep learning" },
+        { "alvo": "Sistema que escreve rascunhos de e-mails a partir de tópicos informados", "item": "IA generativa" },
+        { "alvo": "Sistema que planeja e executa sozinho a reserva de viagens usando APIs", "item": "IA agêntica" },
+        { "alvo": "Sistema de regras se-então escritas por especialistas", "item": "IA baseada em regras" }
+      ],
+      "itensExtras": ["Processamento em lote"]
+    },
+    {
+      "id": "aifc01-fund-producao-api-eks-83",
+      "topico": "Formas de usar um modelo em produção",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa padronizou todas as suas aplicações em clusters Kubernetes, com as mesmas ferramentas de implantação, observabilidade e segurança. Ela vai colocar em produção um modelo de pesos abertos que exige um código de inferência personalizado, e quer que ele siga exatamente esse padrão de operação. Qual abordagem atende a esse requisito?",
+      "explicacao": "Hospedar o modelo como uma API própria no Amazon EKS, o serviço gerenciado de Kubernetes da AWS, permite usar o código de inferência personalizado e seguir o mesmo padrão de implantação, observabilidade e segurança das demais aplicações da empresa — é a forma de uso autogerenciada. Consumir um modelo sob demanda no Amazon Bedrock é uma API gerenciada, sem código de inferência próprio nem operação no padrão Kubernetes da empresa. O Amazon Quick é uma aplicação para usuários de negócio, sem hospedar modelos. E o batch transform processa conjuntos de dados em lote, sem expor uma API que siga o padrão de operação descrito.",
+      "opcoes": [
+        { "texto": "Hospedar o modelo como uma API própria no Amazon EKS.", "correta": true },
+        { "texto": "Consumir um modelo sob demanda pela API do Amazon Bedrock.", "correta": false },
+        { "texto": "Disponibilizar o modelo por meio do Amazon Quick.", "correta": false },
+        { "texto": "Executar o modelo por meio de batch transform do SageMaker AI.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servico-quick-resultados-84",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de previsão de churn grava diariamente as probabilidades de cancelamento de cada cliente numa tabela do Amazon Redshift. Os gerentes comerciais, que não programam, querem painéis com esses resultados e poder fazer perguntas em linguagem natural, como quais clientes da região Sul têm maior risco este mês?. Qual serviço atende a esse requisito?",
+      "explicacao": "O Amazon Quick é o espaço de trabalho com IA para usuários de negócio: cria painéis sobre dados de fontes como o Amazon Redshift e responde perguntas em linguagem natural, sem programação — adequado para consumir os resultados do modelo. O SageMaker Model Monitor acompanha a qualidade do modelo em produção, para a equipe técnica, sem painéis de negócio. O Amazon Bedrock AgentCore é uma plataforma para desenvolvedores implantarem agentes. E o Kiro é um ambiente de desenvolvimento com agentes, voltado a quem escreve software.",
+      "opcoes": [
+        { "texto": "Amazon Quick", "correta": true },
+        { "texto": "Amazon SageMaker Model Monitor", "correta": false },
+        { "texto": "Amazon Bedrock AgentCore", "correta": false },
+        { "texto": "Kiro", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-escalonamento-endpoint-85",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O modelo de recomendação de uma loja on-line fica num endpoint em tempo real do Amazon SageMaker AI. Em datas promocionais, o tráfego multiplica em poucos minutos, as respostas ficam lentas e parte das requisições falha; no resto do ano, a capacidade atual sobra. Qual prática atende a esse cenário de forma escalável?",
+      "explicacao": "O escalonamento automático do endpoint ajusta o número de instâncias conforme métricas de carga, como requisições por instância, adicionando capacidade nos picos e reduzindo-a quando o tráfego volta ao normal — um sistema escalável sem pagar pela capacidade de pico o ano todo. Adicionar instâncias manualmente quando alguém percebe a lentidão chega tarde, porque os picos acontecem em minutos. Trocar por batch transform tiraria a resposta em tempo real de que a loja precisa. E usar um modelo menor e pior pode reduzir a carga, mas sacrifica a qualidade das recomendações sem resolver a variação de tráfego.",
+      "opcoes": [
+        { "texto": "Configurar o escalonamento automático do endpoint com base em métricas de carga.", "correta": true },
+        { "texto": "Adicionar instâncias manualmente quando a equipe perceber lentidão.", "correta": false },
+        { "texto": "Trocar o endpoint em tempo real por batch transform nas datas promocionais.", "correta": false },
+        { "texto": "Substituir o modelo por uma versão menor e menos precisa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-dados-nao-estruturados-seguradora-86",
+      "topico": "Tipos de dados",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma seguradora quer usar ML sobre várias fontes de dados. Quais das fontes a seguir são dados não estruturados?",
+      "explicacao": "Dados não estruturados não seguem um formato de linhas e colunas predefinido. As fotos de sinistros enviadas pelo aplicativo são imagens, e as gravações das chamadas de atendimento são áudio — ambos exigem técnicas específicas, como visão computacional e reconhecimento de fala, para extrair informação. A tabela de apólices, com colunas definidas, é estruturada. As leituras de telemetria dos veículos a cada minuto são uma série temporal numérica, também estruturada. E a planilha de pagamentos organizada em linhas e colunas é outro exemplo de dado estruturado.",
+      "opcoes": [
+        { "texto": "Fotos dos sinistros enviadas pelo aplicativo.", "correta": true },
+        { "texto": "Gravações das chamadas de atendimento.", "correta": true },
+        { "texto": "Tabela de apólices com colunas definidas.", "correta": false },
+        { "texto": "Leituras numéricas de telemetria dos veículos a cada minuto.", "correta": false },
+        { "texto": "Planilha de pagamentos organizada em linhas e colunas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-rotulagem-projeto-ordenacao-87",
+      "topico": "Componentes do pipeline de ML",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa vai rotular 100 mil imagens de produtos com anotadores humanos para treinar um classificador e quer rótulos consistentes. Selecione e ordene as etapas do projeto de rotulagem.",
+      "explicacao": "O projeto começa com instruções de rotulagem claras, com exemplos de cada categoria, porque são elas que fazem anotadores diferentes aplicarem o mesmo critério. Em seguida uma amostra piloto é rotulada e a concordância entre os anotadores é medida. Com base nas divergências encontradas, as instruções são ajustadas, e só então o conjunto completo é rotulado. Treinar o modelo antes de rotular as imagens é impossível num aprendizado supervisionado. E dispensar as instruções para acelerar o trabalho produz exatamente os rótulos inconsistentes que se quer evitar.",
+      "sequencia": [
+        "Definir instruções de rotulagem com exemplos de cada categoria.",
+        "Rotular uma amostra piloto e medir a concordância entre os anotadores.",
+        "Ajustar as instruções com base nas divergências encontradas.",
+        "Rotular o conjunto completo de imagens."
+      ],
+      "itensExtras": [
+        "Treinar o classificador antes de rotular as imagens.",
+        "Dispensar as instruções para acelerar a rotulagem."
+      ]
+    },
+    {
+      "id": "aifc01-fund-custo-desenvolvimento-manutencao-88",
+      "topico": "Métricas de negócio",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa aprovou um projeto de ML com base numa estimativa que considerava a coleta de dados, a rotulagem e o treinamento inicial do modelo. Um ano depois, o custo real foi bem maior que o previsto, embora essas etapas tenham custado o esperado. Qual componente de custo provavelmente ficou de fora da estimativa?",
+      "explicacao": "Um modelo em produção gera custos contínuos: monitoramento, retreinamento periódico com dados novos, infraestrutura de inferência e manutenção do pipeline. Estimativas que consideram só a construção inicial costumam subestimar o custo total — por isso as métricas de custo de desenvolvimento precisam incluir a operação ao longo do tempo. O custo de licenciar o algoritmo raramente é significativo, já que a maioria dos algoritmos é de uso livre. Afirmar que não há custo depois do lançamento é justamente o erro da estimativa. E temperatura não é um item de custo; é um parâmetro de modelos generativos.",
+      "opcoes": [
+        { "texto": "Os custos contínuos de monitoramento, retreinamento, inferência e manutenção após o lançamento.", "correta": true },
+        { "texto": "O custo de licença do algoritmo usado no treinamento.", "correta": false },
+        { "texto": "Nenhum, porque modelos de ML não geram custos depois do lançamento.", "correta": false },
+        { "texto": "O custo de configurar a temperatura do modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-visao-deteccao-objetos-89",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma rede de supermercados quer analisar fotos das gôndolas para contar quantas unidades de cada produto estão expostas e indicar onde estão os espaços vazios. Qual tipo de tarefa de visão computacional atende a esse requisito?",
+      "explicacao": "Contar unidades e indicar onde estão os espaços vazios exige localizar cada item dentro da imagem, o que é detecção de objetos: o modelo identifica os objetos e a posição de cada um. A classificação de imagem atribui um rótulo à imagem inteira, como gôndola cheia ou vazia, sem contar nem localizar produtos. Regressão sobre a imagem inteira poderia estimar um número total, mas não diria onde estão os produtos e os vazios. E o reconhecimento óptico de caracteres extrai texto, como preços nas etiquetas, sem contar unidades de produto.",
+      "opcoes": [
+        { "texto": "Detecção de objetos, que identifica e localiza cada item na imagem.", "correta": true },
+        { "texto": "Classificação da imagem inteira da gôndola.", "correta": false },
+        { "texto": "Regressão de um único valor para a imagem inteira.", "correta": false },
+        { "texto": "Reconhecimento óptico de caracteres das etiquetas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-nlp-modelagem-topicos-90",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa recebeu 100 mil respostas abertas numa pesquisa com clientes e quer descobrir quais são os principais temas mencionados. Não existem categorias definidas previamente, nem respostas rotuladas. Qual técnica atende a esse objetivo?",
+      "explicacao": "Descobrir os temas presentes num grande conjunto de textos, sem categorias prévias nem rótulos, é modelagem de tópicos, uma técnica não supervisionada que o Amazon Comprehend oferece. A análise de sentimento indica se cada resposta é positiva, negativa ou neutra, mas não revela sobre quais temas os clientes falam. A classificação personalizada exigiria categorias definidas e exemplos rotulados, que não existem. E a tradução muda o idioma das respostas, sem identificar temas.",
+      "opcoes": [
+        { "texto": "Modelagem de tópicos", "correta": true },
+        { "texto": "Análise de sentimento", "correta": false },
+        { "texto": "Classificação personalizada", "correta": false },
+        { "texto": "Tradução automática", "correta": false }
+      ]
+    }
+  ]
+}

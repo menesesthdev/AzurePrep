@@ -51,6 +51,7 @@
                 <article class="exam-card">
                     <header class="exam-card__header">
                         <span class="exam-card__code">@exam.Code</span>
+                        <span class="exam-card__vendor">@(exam.Vendor == FornecedorDoExame.Aws ? "AWS" : "Microsoft")</span>
                         <h3 class="exam-card__name">@exam.Name</h3>
                     </header>
                     <dl class="exam-card__meta">
@@ -67,11 +68,21 @@
                             <dd>700 / 1000</dd>
                         </div>
                     </dl>
-                    <form asp-controller="Exame" asp-action="Iniciar" method="post" class="exam-card__action">
-                        @Html.AntiForgeryToken()
-                        <input type="hidden" name="examId" value="@exam.Id" />
-                        <button type="submit" class="btn btn--primary">Iniciar simulado</button>
-                    </form>
+                    @if (exam.Vendor == FornecedorDoExame.Aws)
+                    {
+                        @* Na AWS a prova começa pela tela de instruções; o POST que cria a tentativa sai de lá. *@
+                        <div class="exam-card__action">
+                            <a class="btn btn--primary" asp-controller="Exame" asp-action="Instrucoes" asp-route-examId="@exam.Id">Iniciar simulado</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-controller="Exame" asp-action="Iniciar" method="post" class="exam-card__action">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="examId" value="@exam.Id" />
+                            <button type="submit" class="btn btn--primary">Iniciar simulado</button>
+                        </form>
+                    }
                 </article>
             }
         </div>

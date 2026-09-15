@@ -1,3 +1,5 @@
+using AzurePrep.Domain.Enums;
+
 namespace AzurePrep.Application.Contracts;
 
 /// <summary>
@@ -25,4 +27,5 @@ public sealed record EstadoDaTentativaDto(
     DateTime StartedAt,
     int RemainingSeconds,
     bool IsFinished,
-    IReadOnlyList<StatusDaQuestaoDto> Questions);
+    IReadOnlyList<StatusDaQuestaoDto> Questions,
+    FornecedorDoExame Vendor = FornecedorDoExame.Microsoft);

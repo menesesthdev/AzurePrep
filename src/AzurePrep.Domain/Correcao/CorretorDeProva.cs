@@ -67,6 +67,6 @@ public static class CorretorDeProva
             scorePercent,
             passed,
             skillAreaScores,
-            EscalaDeNota.Converter(scorePercent, exam.PassingScorePercent));
+            EscalaDeNota.Converter(scorePercent, exam.PassingScorePercent, EscalaDeNota.NotaMinimaPara(exam.Vendor)));
     }
 }

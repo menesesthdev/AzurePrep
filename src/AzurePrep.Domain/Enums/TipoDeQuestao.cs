@@ -26,5 +26,17 @@ public enum TipoDeQuestao
     /// conjuntos de Ids de alternativa —, em vez de exigir uma segunda forma de resposta que todo
     /// caminho do sistema teria de aprender a tratar.
     /// </remarks>
-    Associacao = 3
+    Associacao = 3,
+
+    /// <summary>
+    /// Ordenação: escolher, entre os passos listados, os que resolvem a tarefa e colocá-los na
+    /// sequência certa ("Etapa 1", "Etapa 2"...). Formato documentado da AWS; sobram passos que
+    /// não entram em etapa nenhuma.
+    /// </summary>
+    /// <remarks>
+    /// Mesmo modelo de <see cref="Associacao"/>, sem nada novo no banco: cada etapa é um alvo, cada
+    /// passo é um item, e existe um par candidato por combinação. A diferença é só de apresentação
+    /// — os alvos têm ordem natural e a tela não pode embaralhá-los.
+    /// </remarks>
+    Ordenacao = 4
 }

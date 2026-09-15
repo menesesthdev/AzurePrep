@@ -1,3 +1,5 @@
+using AzurePrep.Domain.Enums;
+
 namespace AzurePrep.Application.Contracts;
 
 /// <summary>Resumo de um exame disponível para a tela inicial.</summary>
@@ -7,4 +9,5 @@ public sealed record ResumoDeExameDto(
     string Name,
     int TimeLimitMinutes,
     int TotalQuestions,
-    int PassingScorePercent);
+    int PassingScorePercent,
+    FornecedorDoExame Vendor = FornecedorDoExame.Microsoft);

@@ -1,0 +1,195 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-contexto-informacao-no-meio-95",
+      "topico": "Engenharia de contexto",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente monta prompts muito longos: começa com regras gerais, depois inclui dezenas de páginas de documentos e, no meio desse material, a regra crítica nunca informar valores de indenização antes da análise do perito. Com frequência, o modelo ignora justamente essa regra. Qual ajuste de engenharia de contexto é mais adequado?",
+      "explicacao": "Em contextos muito longos, instruções importantes posicionadas no meio de grandes volumes de texto tendem a receber menos atenção do modelo. Colocar a regra crítica em posição de destaque, no início ou no fim do prompt, e reduzir o conteúdo irrelevante enviado aumenta a chance de ela ser seguida. Acrescentar ainda mais documentos agrava o problema, diluindo a regra. Aumentar a temperatura deixa as respostas mais variadas, sem dar mais peso à instrução. E aumentar o limite de tokens de saída só permite respostas maiores. Para uma regra que não pode falhar, vale ainda combinar o ajuste com um controle aplicado fora do modelo.",
+      "opcoes": [
+        { "texto": "Colocar a regra crítica no início ou no fim do prompt e reduzir o conteúdo irrelevante enviado.", "correta": true },
+        { "texto": "Incluir ainda mais documentos para dar mais contexto ao modelo.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo considere todas as partes do prompt.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída das respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-caso-uso-dados-sinteticos-96",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de testes de um banco precisa de milhares de registros de clientes realistas — nomes, endereços, históricos de transações — para testar um novo sistema, mas a política proíbe usar dados reais de clientes fora da produção. Qual abordagem aproveita a IA generativa para esse caso?",
+      "explicacao": "Gerar dados sintéticos, fictícios mas realistas, com um modelo de base atende à necessidade de volume e variedade sem usar dados de clientes. É importante verificar que os registros gerados não reproduzem dados reais, por exemplo quando o modelo recebe amostras como referência. Copiar a base de produção para o ambiente de testes viola a política. O Amazon Comprehend analisa textos, sem gerar registros de clientes. E o Amazon Translate traduz textos, o que não cria dados de teste.",
+      "opcoes": [
+        { "texto": "Gerar dados sintéticos fictícios com um modelo de base, verificando que não reproduzem dados reais.", "correta": true },
+        { "texto": "Copiar a base de produção para o ambiente de testes com acesso restrito.", "correta": false },
+        { "texto": "Usar o Amazon Comprehend para criar os registros de clientes.", "correta": false },
+        { "texto": "Usar o Amazon Translate para transformar dados reais em dados de teste.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ciclo-vida-pre-treinamento-custo-97",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um executivo quer entender por que tão poucas empresas constroem seus próprios modelos de base, enquanto muitas adaptam modelos existentes. Considerando as etapas do ciclo de vida de um modelo de base, qual etapa costuma exigir o maior volume de dados e de computação?",
+      "explicacao": "O pré-treinamento é a etapa em que o modelo aprende padrões gerais a partir de volumes enormes de dados, e exige muita computação e tempo — por isso poucas organizações o fazem, e a maioria parte de modelos já pré-treinados. O fine-tuning usa volumes muito menores de dados específicos, a partir de um modelo pronto. A avaliação mede o desempenho com conjuntos de teste, com custo bem menor. E a implantação coloca o modelo em uso; tem custo de operação, mas não o volume de dados e computação do pré-treinamento.",
+      "opcoes": [
+        { "texto": "Pré-treinamento", "correta": true },
+        { "texto": "Fine-tuning", "correta": false },
+        { "texto": "Avaliação", "correta": false },
+        { "texto": "Implantação", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-runtime-longa-duracao-98",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma consultoria desenvolveu um agente de pesquisa que pode levar horas para concluir um relatório, consultando dezenas de fontes. Cada cliente precisa de uma sessão isolada, e a empresa não quer gerenciar servidores. A primeira tentativa, em funções do AWS Lambda, falhou porque as execuções eram interrompidas antes do fim. Qual solução é mais adequada?",
+      "explicacao": "O Amazon Bedrock AgentCore Runtime é um ambiente sem servidor feito para executar agentes, com suporte a execuções longas e assíncronas e isolamento de sessão — atende às tarefas de horas e à separação entre clientes sem gerenciar servidores. Funções do AWS Lambda têm limite máximo de duração por execução, o que explica as interrupções. Chamar diretamente a API de inferência do Amazon Bedrock fornece o modelo, mas não um ambiente para hospedar e executar o laço do agente por horas. E o Amazon Quick é uma aplicação para usuários de negócio, sem hospedar agentes desenvolvidos pela empresa.",
+      "opcoes": [
+        { "texto": "Executar o agente no Amazon Bedrock AgentCore Runtime.", "correta": true },
+        { "texto": "Continuar no AWS Lambda, aumentando a memória das funções.", "correta": false },
+        { "texto": "Chamar diretamente a API de inferência do Amazon Bedrock a partir do navegador do cliente.", "correta": false },
+        { "texto": "Publicar o agente como um aplicativo do Amazon Quick.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-registry-99",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa grande empresa, dezenas de equipes criaram agentes e servidores MCP, e ninguém sabe quais já existem, quais foram aprovados pela segurança nem como encontrá-los. A empresa quer um catálogo central, com fluxo de publicação e aprovação e busca para desenvolvedores e agentes descobrirem os recursos disponíveis. Qual componente do Amazon Bedrock AgentCore atende a esse requisito?",
+      "explicacao": "O AgentCore Registry é um catálogo centralizado para descobrir e gerenciar agentes, servidores MCP e ferramentas, com fluxo de publicação, revisão e aprovação e busca semântica e por palavras-chave. O AgentCore Gateway transforma APIs em ferramentas e conecta servidores MCP, mas não é o catálogo governado de todos os recursos da organização. O AWS Glue Data Catalog cataloga metadados de conjuntos de dados, não agentes nem ferramentas. E o SageMaker Model Registry versiona modelos de ML treinados, sem cobrir agentes e servidores MCP.",
+      "opcoes": [
+        { "texto": "AgentCore Registry", "correta": true },
+        { "texto": "AgentCore Gateway", "correta": false },
+        { "texto": "AWS Glue Data Catalog", "correta": false },
+        { "texto": "Amazon SageMaker Model Registry", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-roteamento-prompts-100",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente usa um modelo grande e caro para todas as perguntas. A análise mostrou que 80% das perguntas são simples, como horário de funcionamento ou segunda via de boleto, e são respondidas corretamente por um modelo muito menor; só 20% exigem o modelo grande. A empresa quer reduzir custos sem piorar as respostas complexas. Qual abordagem é mais adequada?",
+      "explicacao": "Encaminhar cada pergunta ao modelo adequado — as simples a um modelo menor e mais barato, as complexas ao modelo grande —, como faz o roteamento de prompts do Amazon Bedrock, reduz o custo da maior parte do volume sem sacrificar a qualidade onde ela importa. Manter tudo no modelo grande paga caro por 80% de perguntas que não precisam dele. Usar só o modelo menor pioraria as 20% complexas. E contratar Provisioned Throughput para o modelo grande garante capacidade, mas não reduz o custo de usar um modelo caro em perguntas simples.",
+      "opcoes": [
+        { "texto": "Encaminhar as perguntas simples a um modelo menor e as complexas ao modelo grande.", "correta": true },
+        { "texto": "Manter todas as perguntas no modelo grande para garantir a qualidade.", "correta": false },
+        { "texto": "Usar apenas o modelo menor para todas as perguntas.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput para o modelo grande.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacao-idiomas-baixo-recurso-101",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um órgão público vai oferecer um assistente em português, espanhol e guarani. Nos testes em português, as respostas foram excelentes. A equipe planeja lançar nos três idiomas assumindo desempenho equivalente. Qual avaliação é mais adequada?",
+      "explicacao": "Modelos de base costumam ter desempenho pior em idiomas com pouca presença nos dados de treinamento, como o guarani, então resultados excelentes em português não se estendem automaticamente a eles. É preciso avaliar separadamente cada idioma, com perguntas reais, e prever revisão humana ou limitações onde o desempenho não for suficiente. Assumir desempenho igual nos três idiomas é justamente o risco. Aumentar a temperatura não melhora a qualidade num idioma pouco conhecido pelo modelo. E aumentar o limite de tokens de saída só permite respostas maiores.",
+      "opcoes": [
+        { "texto": "Avaliar cada idioma separadamente, porque o desempenho costuma cair em idiomas com poucos dados de treinamento.", "correta": true },
+        { "texto": "Lançar nos três idiomas, porque o bom resultado em português se repete nos demais.", "correta": false },
+        { "texto": "Aumentar a temperatura para melhorar as respostas em guarani.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída para compensar a diferença entre idiomas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-integracao-mcp-ordenacao-102",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa quer permitir que seus agentes consultem e atualizem pedidos no sistema de gestão por meio do Model Context Protocol. Selecione e ordene as etapas da integração.",
+      "explicacao": "Primeiro identificam-se as operações do sistema que os agentes realmente precisam, como consultar e atualizar pedidos, para expor apenas o necessário. Depois implementa-se o servidor MCP com essas operações, exigindo autenticação e autorização. Em seguida o servidor é conectado aos agentes que vão usá-lo e, por fim, as chamadas são testadas e o uso passa a ser monitorado. Expor todas as operações do sistema sem autenticação amplia a superfície de ataque sem necessidade. E colocar credenciais do sistema no prompt dos agentes expõe segredos que podem acabar numa resposta.",
+      "sequencia": [
+        "Identificar as operações do sistema de que os agentes precisam.",
+        "Implementar o servidor MCP com essas operações, exigindo autenticação.",
+        "Conectar o servidor MCP aos agentes que vão usá-lo.",
+        "Testar as chamadas e monitorar o uso das operações."
+      ],
+      "itensExtras": [
+        "Expor todas as operações do sistema sem autenticação.",
+        "Incluir as credenciais do sistema de gestão no prompt dos agentes."
+      ]
+    },
+    {
+      "id": "aifc01-gen-riscos-ia-agentica-103",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa está avaliando substituir assistentes que só respondem perguntas por agentes que executam ações em sistemas corporativos. O comitê de riscos pediu uma lista dos riscos que passam a ser mais relevantes com agentes. Quais riscos devem constar?",
+      "explicacao": "Dois riscos crescem quando o sistema passa a agir. Um agente manipulado por conteúdo malicioso — uma injeção de prompt vinda de um documento ou página — pode executar ações indevidas em sistemas reais, e não apenas escrever uma resposta errada. E ciclos longos de planejamento e chamadas de ferramentas podem gerar custos imprevisíveis, principalmente quando uma ferramenta falha repetidamente. Agentes continuam capazes de gerar texto, então isso não é um risco novo. Usar ferramentas é justamente a capacidade central de um agente. E adotar agentes não exige pré-treinar um modelo próprio.",
+      "opcoes": [
+        { "texto": "Executar ações indevidas em sistemas reais quando manipulado por conteúdo malicioso.", "correta": true },
+        { "texto": "Gerar custos imprevisíveis por ciclos longos de chamadas ao modelo e às ferramentas.", "correta": true },
+        { "texto": "Perder a capacidade de gerar respostas em linguagem natural.", "correta": false },
+        { "texto": "Não conseguir chamar ferramentas externas.", "correta": false },
+        { "texto": "Exigir que a empresa pré-treine um modelo de base próprio.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-alavancas-custo-assoc-104",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe de FinOps levantou situações de custo e desempenho nas aplicações de IA generativa da empresa. Associe cada situação ao recurso mais adequado.",
+      "explicacao": "Um prefixo longo e idêntico reenviado em toda requisição é o caso do cache de prompt. Grandes volumes processados sem urgência, com preço menor, pedem a inferência em lote. Um volume alto e constante que precisa de vazão garantida justifica o Provisioned Throughput. Encaminhar pedidos simples a um modelo menor e os complexos a um maior é roteamento de prompts. E absorver picos ocasionais distribuindo as requisições entre Regiões da mesma área geográfica é a inferência entre Regiões. Aumentar a temperatura está no painel porque é um ajuste comum, mas muda a aleatoriedade das respostas, sem efeito sobre custo ou vazão.",
+      "associacoes": [
+        { "alvo": "Um prefixo longo e idêntico é reenviado em todas as requisições", "item": "Cache de prompt" },
+        { "alvo": "Milhões de textos precisam ser processados sem urgência, com o menor preço", "item": "Inferência em lote" },
+        { "alvo": "O volume é alto e constante, e a vazão precisa ser garantida", "item": "Provisioned Throughput" },
+        { "alvo": "Pedidos simples podem ir para um modelo menor, e os complexos para um maior", "item": "Roteamento de prompts" },
+        { "alvo": "Picos ocasionais precisam ser absorvidos entre Regiões da mesma área geográfica", "item": "Inferência entre Regiões" }
+      ],
+      "itensExtras": ["Aumentar a temperatura"]
+    },
+    {
+      "id": "aifc01-gen-contexto-exemplos-dinamicos-105",
+      "topico": "Engenharia de contexto",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um classificador de chamados usa um prompt com 50 exemplos fixos, cobrindo todos os tipos de chamado. O custo por requisição é alto e, mesmo assim, o modelo erra em tipos de chamado que têm poucos exemplos no prompt. A equipe tem uma biblioteca com milhares de exemplos já classificados. Qual prática de engenharia de contexto é mais adequada?",
+      "explicacao": "Em vez de enviar sempre os mesmos 50 exemplos, recuperar dinamicamente da biblioteca os poucos exemplos mais parecidos com o chamado atual — por exemplo, por busca semântica — coloca no contexto justamente os casos mais úteis para aquela classificação, com menos tokens. Continuar com os 50 exemplos fixos mantém o custo e a cobertura fraca de alguns tipos. Remover todos os exemplos tende a piorar a classificação de categorias específicas. E aumentar a temperatura deixa as classificações mais aleatórias.",
+      "opcoes": [
+        { "texto": "Recuperar dinamicamente da biblioteca os exemplos mais parecidos com cada chamado.", "correta": true },
+        { "texto": "Manter os 50 exemplos fixos em todas as requisições.", "correta": false },
+        { "texto": "Remover todos os exemplos e usar apenas a instrução.", "correta": false },
+        { "texto": "Aumentar a temperatura para o modelo generalizar melhor.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-modelos-base-nome-106",
+      "topico": "Modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa apresentação para a diretoria, perguntaram por que os grandes modelos de linguagem e de imagem são chamados de modelos de base. Qual explicação está correta?",
+      "explicacao": "Modelos de base são pré-treinados com grandes volumes de dados amplos e diversos e, por isso, servem de base para muitas tarefas diferentes, que podem ser atendidas por prompts ou adaptadas com técnicas como RAG e fine-tuning. Eles não se limitam a tarefas básicas; ao contrário, executam tarefas complexas. O nome não tem relação com camadas de banco de dados. E eles podem, sim, ser personalizados — a adaptação a tarefas específicas é justamente o que o nome sugere.",
+      "opcoes": [
+        { "texto": "Porque são pré-treinados com dados amplos e servem de base para adaptar a muitas tarefas.", "correta": true },
+        { "texto": "Porque só conseguem executar tarefas simples e básicas.", "correta": false },
+        { "texto": "Porque são executados na camada de banco de dados das aplicações.", "correta": false },
+        { "texto": "Porque não podem ser personalizados depois de treinados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-caso-uso-edicao-imagem-107",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um e-commerce tem milhares de fotos de produtos tiradas em fundos diferentes e quer padronizá-las, substituindo o fundo por ambientes decorados, mantendo o produto exatamente como está na foto original. Qual tipo de solução atende a esse caso de uso?",
+      "explicacao": "Substituir o fundo mantendo o produto intacto é edição de imagem com um modelo generativo, que gera novas áreas da imagem a partir de uma descrição preservando a região indicada. O Amazon Rekognition identifica objetos e cenas, mas não cria novos fundos. O Amazon Textract extrai texto de documentos, sem editar imagens. E o Amazon Polly gera fala a partir de texto, sem relação com imagens.",
+      "opcoes": [
+        { "texto": "Edição de imagem com um modelo generativo, substituindo o fundo e preservando o produto.", "correta": true },
+        { "texto": "Amazon Rekognition", "correta": false },
+        { "texto": "Amazon Textract", "correta": false },
+        { "texto": "Amazon Polly", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-vantagem-adaptabilidade-108",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja usa um assistente baseado em modelo de base para responder dúvidas sobre produtos. Ela vai lançar uma linha nova de eletrodomésticos na semana que vem, com manuais e políticas de garantia próprias. Qual caminho aproveita melhor a adaptabilidade da IA generativa para o assistente atender a linha nova a tempo?",
+      "explicacao": "A adaptabilidade dos modelos de base permite atender a uma linha nova apenas atualizando o que o modelo recebe: incluir os manuais e as políticas de garantia na base consultada e ajustar as instruções do prompt, sem retreinar nada. Treinar um novo classificador exigiria dados rotulados e tempo que não existem. Pré-treinar um modelo novo com os manuais seria a opção mais cara e demorada de todas. E rotular milhares de perguntas antes do lançamento repete a lógica de modelos tradicionais, que é justamente o que a IA generativa permite evitar.",
+      "opcoes": [
+        { "texto": "Adicionar os manuais e as políticas à base consultada e ajustar as instruções do prompt, sem retreinar.", "correta": true },
+        { "texto": "Treinar um novo classificador de perguntas para a linha nova.", "correta": false },
+        { "texto": "Pré-treinar um modelo novo com os manuais da linha nova.", "correta": false },
+        { "texto": "Rotular milhares de perguntas sobre a linha nova antes do lançamento.", "correta": false }
+      ]
+    }
+  ]
+}

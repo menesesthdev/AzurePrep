@@ -1,0 +1,208 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-tecnica-multiclasse-departamentos-48",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa recebe milhares de e-mails por dia num endereço de contato único e quer encaminhar cada um automaticamente para um de cinco departamentos: financeiro, jurídico, TI, RH ou compras. Ela tem um histórico de 80 mil e-mails já encaminhados manualmente para o departamento correto. Qual técnica de ML é adequada?",
+      "explicacao": "Atribuir cada e-mail a uma de cinco categorias conhecidas, com um histórico rotulado, é classificação multiclasse, uma técnica supervisionada. Classificação binária decide entre apenas duas classes; seria preciso montar vários classificadores e ainda assim a formulação natural do problema se perde. Regressão prevê um valor numérico contínuo, e departamentos não são números com ordem ou distância entre si. E agrupamento descobre grupos sem rótulos, mas aqui as categorias já estão definidas e o histórico já está rotulado.",
+      "opcoes": [
+        { "texto": "Classificação multiclasse", "correta": true },
+        { "texto": "Classificação binária", "correta": false },
+        { "texto": "Regressão", "correta": false },
+        { "texto": "Agrupamento", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-tecnica-atraso-voo-binaria-49",
+      "topico": "Técnicas de ML por caso de uso",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma companhia aérea quer avisar os passageiros, com antecedência, quando um voo tem grande chance de atrasar. A regra de negócio é simples: o aviso só é enviado se a previsão for de atraso superior a 15 minutos, e a companhia não precisa saber quantos minutos. Ela tem o histórico de voos com a informação de se atrasaram mais de 15 minutos ou não. Qual técnica de ML é adequada?",
+      "explicacao": "O resultado que interessa é sim ou não — atraso acima de 15 minutos ou não —, e o histórico já está rotulado assim: é classificação binária. Regressão estimaria os minutos de atraso, informação que a companhia declarou não precisar e que exigiria o valor exato no histórico. Agrupamento encontraria voos parecidos entre si, sem produzir a decisão de avisar. E aprendizado por reforço treina um agente que age e recebe recompensas, o que não se aplica a prever um evento a partir de dados históricos.",
+      "opcoes": [
+        { "texto": "Classificação binária", "correta": true },
+        { "texto": "Regressão", "correta": false },
+        { "texto": "Agrupamento", "correta": false },
+        { "texto": "Aprendizado por reforço", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-conceitos-sistema-especialista-50",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora usa há anos um sistema que aprova ou recusa sinistros simples aplicando centenas de regras do tipo se-então escritas por especialistas. O sistema não aprende com novos casos: quando uma regra muda, alguém a reescreve. Um consultor pergunta se isso é inteligência artificial e se é machine learning. Qual resposta está correta?",
+      "explicacao": "Sistemas especialistas baseados em regras escritas por pessoas são uma forma clássica de inteligência artificial, porque automatizam decisões que exigiriam julgamento humano. Mas não são machine learning, que é justamente o subconjunto da IA em que o sistema aprende padrões a partir de dados — e este sistema só muda quando alguém reescreve uma regra. Dizer que é ML porque toma decisões confunde automação de decisões com aprendizado. Dizer que não é IA ignora que sistemas baseados em regras fazem parte da história e do escopo da IA. E deep learning é um subconjunto do ML baseado em redes neurais, o que o sistema não usa.",
+      "opcoes": [
+        { "texto": "É inteligência artificial, mas não é machine learning, porque não aprende a partir de dados.", "correta": true },
+        { "texto": "É machine learning, porque toma decisões automaticamente sobre os sinistros.", "correta": false },
+        { "texto": "Não é inteligência artificial, porque as regras foram escritas por pessoas.", "correta": false },
+        { "texto": "É deep learning, porque usa centenas de regras encadeadas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-deep-learning-quando-usar-51",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa está decidindo em quais projetos investir em modelos de deep learning, que exigem mais dados e computação que os modelos tradicionais. Em qual dos projetos a seguir o deep learning traz mais vantagem?",
+      "explicacao": "Deep learning se destaca com grandes volumes de dados não estruturados, como imagens, em que as redes neurais aprendem sozinhas as características relevantes — reconhecer defeitos em milhões de imagens de alta resolução é o caso típico. Prever vendas com uma planilha de 20 colunas e 500 linhas é um problema tabular pequeno, em que modelos tradicionais costumam ser tão bons quanto, mais baratos e mais fáceis de explicar. Calcular o frete pela tabela das transportadoras é uma regra determinística, que não precisa de ML algum. E ordenar uma lista em ordem alfabética é uma operação trivial de programação.",
+      "opcoes": [
+        { "texto": "Reconhecer defeitos em milhões de imagens de alta resolução de peças.", "correta": true },
+        { "texto": "Prever vendas mensais a partir de uma planilha com 20 colunas e 500 linhas.", "correta": false },
+        { "texto": "Calcular o frete de cada pedido com base na tabela das transportadoras.", "correta": false },
+        { "texto": "Ordenar alfabeticamente a lista de clientes cadastrados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-ajuste-adequado-52",
+      "topico": "Viés, variância e ajuste do modelo",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de previsão de inadimplência obteve 91% de acurácia nos dados de treinamento e 90% nos dados de validação, que não foram usados no treinamento e vêm do mesmo período. A meta de negócio era 88%. Um analista sugere aumentar a complexidade do modelo por precaução. Qual avaliação está correta?",
+      "explicacao": "Desempenho alto e muito próximo entre treinamento e validação, acima da meta, indica um ajuste adequado: o modelo aprendeu o padrão e generaliza bem para dados que não viu. Aumentar a complexidade sem necessidade traria o risco de sobreajuste. Sobreajuste teria outro sinal, com desempenho bem maior no treinamento que na validação. Subajuste apareceria como desempenho baixo nos dois conjuntos, e o modelo está acima da meta. E vazamento de dados costuma produzir resultados bons demais para ser verdade em relação à dificuldade do problema, sem nenhum indício disso no enunciado.",
+      "opcoes": [
+        { "texto": "O ajuste é adequado; o modelo generaliza bem e não precisa de mais complexidade.", "correta": true },
+        { "texto": "Há sobreajuste; é preciso simplificar o modelo e aplicar regularização.", "correta": false },
+        { "texto": "Há subajuste; é preciso aumentar a complexidade, como sugere o analista.", "correta": false },
+        { "texto": "Há vazamento de dados; é preciso descartar o resultado e refazer a validação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-treinamento-inferencia-custo-53",
+      "topico": "Conceitos básicos de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup treinou uma única vez um modelo que detecta produtos em fotos enviadas pelos usuários. Depois do lançamento, o número de fotos analisadas por dia cresceu dez vezes, e o custo mensal do modelo cresceu na mesma proporção. Nenhum retreinamento foi feito nesse período. Qual etapa explica o crescimento do custo?",
+      "explicacao": "O modelo foi treinado uma única vez e não houve retreinamento, então o custo que cresce com o uso vem da inferência: cada foto enviada é uma previsão processada. É a inferência que acompanha o volume de requisições. O treinamento é um custo pontual, que só volta a ocorrer se o modelo for retreinado. A rotulagem de dados acontece na preparação do treinamento, não a cada foto analisada. E a análise exploratória dos dados é uma etapa inicial do projeto, sem relação com o volume de uso em produção.",
+      "opcoes": [
+        { "texto": "A inferência, que é executada a cada foto analisada.", "correta": true },
+        { "texto": "O treinamento, que foi executado uma única vez.", "correta": false },
+        { "texto": "A rotulagem dos dados usados para treinar o modelo.", "correta": false },
+        { "texto": "A análise exploratória dos dados de treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-model-monitor-54",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de precificação de seguros está implantado num endpoint do Amazon SageMaker AI. A empresa quer acompanhar continuamente se os dados recebidos em produção continuam parecidos com os de treinamento e se a qualidade das previsões se mantém, recebendo alertas quando houver desvios. Qual recurso atende a esse requisito?",
+      "explicacao": "O SageMaker Model Monitor monitora modelos em produção, comparando os dados recebidos com uma linha de base do treinamento e acompanhando a qualidade das previsões, com alertas quando há desvio. O SageMaker Feature Store armazena e serve atributos para treinamento e inferência, sem monitorar desvios. O SageMaker Model Registry versiona e aprova modelos antes da implantação, sem acompanhar o comportamento em produção. E o SageMaker Ground Truth organiza a rotulagem de dados, uma etapa anterior ao treinamento.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker Model Monitor", "correta": true },
+        { "texto": "Amazon SageMaker Feature Store", "correta": false },
+        { "texto": "Amazon SageMaker Model Registry", "correta": false },
+        { "texto": "Amazon SageMaker Ground Truth", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-valor-escala-triagem-55",
+      "topico": "Aplicações práticas de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora recebe 20 mil pedidos de sinistro por dia, e sua equipe de peritos consegue analisar com cuidado cerca de 2 mil. Hoje os pedidos são analisados por ordem de chegada, e fraudes grandes às vezes só são vistas semanas depois. A empresa pensa em usar um modelo de ML para pontuar o risco de cada pedido. Qual é o principal valor que o ML pode trazer nesse cenário?",
+      "explicacao": "O modelo consegue pontuar todos os 20 mil pedidos por dia, algo que a equipe não consegue, e colocar os de maior risco na frente da fila dos peritos. É o valor de escala somado ao apoio à decisão humana: os especialistas continuam decidindo, mas passam a gastar seu tempo nos casos que mais importam. Eliminar os peritos de todos os casos ignora que o modelo erra e que sinistros envolvem decisões com impacto. Nenhum modelo garante acerto de 100%. E ML não reduz a necessidade de dados; ao contrário, depende de dados históricos para aprender.",
+      "opcoes": [
+        { "texto": "Pontuar todo o volume diário e direcionar os peritos para os pedidos de maior risco.", "correta": true },
+        { "texto": "Eliminar a necessidade de peritos na análise de todos os pedidos.", "correta": false },
+        { "texto": "Garantir que nenhum pedido fraudulento seja aprovado.", "correta": false },
+        { "texto": "Reduzir a quantidade de dados históricos necessária para analisar os pedidos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-poucos-dados-inadequado-56",
+      "topico": "Quando não usar ML",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma pequena empresa de eventos quer um modelo de ML que preveja quantas pessoas vão comparecer a cada evento. Ela realizou apenas 50 eventos até hoje, com formatos muito diferentes entre si, e os organizadores já estimam o público com boa precisão usando algumas regras simples. Qual recomendação é mais adequada?",
+      "explicacao": "Com apenas 50 eventos muito diferentes entre si, não há dados suficientes para um modelo aprender padrões confiáveis, e as regras atuais já funcionam bem. A recomendação adequada é manter as regras simples e acumular dados de forma organizada, reavaliando o uso de ML quando houver volume que o justifique — é uma avaliação de custo-benefício. Treinar uma rede neural profunda com 50 exemplos levaria a sobreajuste. Treinar por muitas épocas faria o modelo decorar os poucos exemplos. E duplicar os eventos para aumentar o volume não acrescenta informação nova, só reforça os mesmos casos.",
+      "opcoes": [
+        { "texto": "Manter as regras atuais e organizar a coleta de dados antes de considerar um modelo de ML.", "correta": true },
+        { "texto": "Treinar uma rede neural profunda com os 50 eventos disponíveis.", "correta": false },
+        { "texto": "Treinar um modelo por muitas épocas para compensar a pouca quantidade de dados.", "correta": false },
+        { "texto": "Duplicar os registros dos eventos para aumentar o conjunto de treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-dados-nao-rotulados-imagens-57",
+      "topico": "Tipos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um marketplace tem 200 mil fotos de produtos enviadas por vendedores, e nenhuma delas indica a categoria do produto. A empresa quer um classificador que atribua cada nova foto a uma de dez categorias do catálogo. Qual é o passo necessário antes de treinar esse classificador supervisionado?",
+      "explicacao": "Um classificador supervisionado aprende a partir de exemplos rotulados com a resposta correta. Como nenhuma foto indica a categoria, é preciso rotular uma parte das imagens com as dez categorias — por exemplo, com um fluxo de rotulagem humana — antes de treinar. Treinar diretamente com as fotos sem rótulo é impossível num aprendizado supervisionado, porque não há resposta com que comparar as previsões. Aprendizado por reforço exigiria um ambiente de recompensas, que não se aplica a classificar fotos. E regressão prevê valores numéricos contínuos, não categorias.",
+      "opcoes": [
+        { "texto": "Rotular uma parte das fotos com as categorias corretas.", "correta": true },
+        { "texto": "Treinar o classificador diretamente com as fotos, mesmo sem rótulos.", "correta": false },
+        { "texto": "Configurar um ambiente de aprendizado por reforço com as fotos.", "correta": false },
+        { "texto": "Converter as categorias em valores numéricos e aplicar regressão.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-pipelines-repetiveis-58",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa empresa, o retreinamento mensal de um modelo é feito por um cientista de dados que executa manualmente células de vários notebooks. Cada mês o processo sai um pouco diferente, às vezes uma etapa é esquecida, e quando esse profissional tira férias o modelo não é atualizado. Qual prática de MLOps resolve o problema?",
+      "explicacao": "Transformar as etapas — preparação de dados, treinamento, avaliação e registro — num pipeline de ML automatizado e versionado, como os do SageMaker Pipelines, torna o processo repetível: executa sempre as mesmas etapas, na mesma ordem, sem depender de uma pessoa. Documentar os passos manuais numa wiki ajuda, mas continua dependendo de alguém executá-los corretamente. Instâncias de treinamento maiores deixam cada execução mais rápida, sem torná-la consistente. E retreinar com menos frequência só adia o problema e deixa o modelo desatualizado por mais tempo.",
+      "opcoes": [
+        { "texto": "Automatizar as etapas num pipeline de ML versionado e repetível.", "correta": true },
+        { "texto": "Documentar numa wiki cada passo executado manualmente nos notebooks.", "correta": false },
+        { "texto": "Usar instâncias de treinamento maiores para acelerar os notebooks.", "correta": false },
+        { "texto": "Reduzir a frequência de retreinamento para trimestral.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-divida-tecnica-59",
+      "topico": "MLOps",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Em dois anos, a equipe de ML de uma empresa criou dezenas de scripts parecidos para calcular os mesmos atributos, cada um com pequenas diferenças, sem testes automatizados e sem saber quais ainda são usados. Qualquer mudança nos dados de origem quebra modelos de forma imprevisível. Como esse problema é caracterizado em MLOps e qual prática ajuda a tratá-lo?",
+      "explicacao": "Código duplicado, sem testes e sem clareza sobre o que está em uso é dívida técnica, que em sistemas de ML se acumula rapidamente e torna cada mudança arriscada. Tratá-la envolve consolidar o cálculo dos atributos num único ponto reutilizável — por exemplo, um repositório de atributos —, adicionar testes automatizados e remover o que não é mais usado. Chamar isso de desvio de dados confunde o problema: desvio é mudança na distribuição dos dados em produção, e retreinar não resolve scripts duplicados. Sobreajuste é um modelo que decorou os dados de treinamento. E alucinação é uma limitação de modelos generativos, sem relação com scripts de atributos.",
+      "opcoes": [
+        { "texto": "Dívida técnica; consolidar os atributos num ponto reutilizável, com testes, e remover o que não é usado.", "correta": true },
+        { "texto": "Desvio de dados; retreinar todos os modelos com dados mais recentes.", "correta": false },
+        { "texto": "Sobreajuste; simplificar os modelos que usam esses atributos.", "correta": false },
+        { "texto": "Alucinação; usar RAG para validar os atributos calculados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-prontidao-producao-60",
+      "topico": "MLOps",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe está prestes a colocar em produção um modelo que definirá limites de crédito de clientes. O comitê de arquitetura está verificando se o modelo está pronto para produção. Quais itens são critérios de prontidão para produção?",
+      "explicacao": "Prontidão para produção é mais que um bom resultado no teste. Ter monitoramento e alertas de qualidade configurados garante que degradações em produção sejam percebidas. E ter um plano testado de reversão para a versão anterior permite recuar rapidamente se algo der errado. Buscar a maior acurácia possível sem testes de carga ignora se o modelo aguenta o volume real. Usar o notebook exploratório do cientista como código de produção traz código não testado e difícil de manter. E avaliar com os mesmos dados usados no treinamento superestima o desempenho e não prova nada sobre dados novos.",
+      "opcoes": [
+        { "texto": "Monitoramento e alertas de qualidade do modelo configurados.", "correta": true },
+        { "texto": "Plano testado para reverter à versão anterior do modelo.", "correta": true },
+        { "texto": "A maior acurácia possível, mesmo sem testes de carga.", "correta": false },
+        { "texto": "O notebook exploratório do cientista de dados como código de produção.", "correta": false },
+        { "texto": "Avaliação feita com os mesmos dados usados no treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aplicacoes-reais-assoc-61",
+      "topico": "Aplicações práticas de IA",
+      "tipo": "Associacao",
+      "enunciado": "Um grupo empresarial reuniu projetos de IA de suas empresas. Associe cada projeto ao tipo de aplicação de IA que ele representa.",
+      "explicacao": "Funcionários fazendo perguntas sobre políticas internas e recebendo respostas com a fonte é uma base de conhecimento com IA. Um sistema que remarca voos cancelados sozinho, consultando disponibilidade e emitindo bilhetes, é IA agêntica. Uma loja que sugere produtos a partir do histórico de cada cliente usa um sistema de recomendação. Um banco que sinaliza transações suspeitas no momento da compra faz detecção de fraude. E uma distribuidora que estima a demanda do próximo mês faz previsão. A visão computacional está no painel porque é uma área real de aplicação de IA, mas nenhum dos projetos extrai informação de imagens ou vídeos.",
+      "associacoes": [
+        { "alvo": "Funcionários perguntam sobre políticas internas e recebem respostas com a fonte citada", "item": "Base de conhecimento com IA" },
+        { "alvo": "Um sistema remarca sozinho voos cancelados, consultando disponibilidade e emitindo bilhetes", "item": "IA agêntica" },
+        { "alvo": "Uma loja sugere produtos com base no histórico de compras de cada cliente", "item": "Sistema de recomendação" },
+        { "alvo": "Um banco sinaliza transações suspeitas no momento da compra", "item": "Detecção de fraude" },
+        { "alvo": "Uma distribuidora estima a demanda de cada produto no próximo mês", "item": "Previsão" }
+      ],
+      "itensExtras": ["Visão computacional"]
+    },
+    {
+      "id": "aifc01-fund-implantacao-gradual-ordenacao-62",
+      "topico": "Formas de usar um modelo em produção",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma plataforma de streaming vai substituir o modelo de recomendação em produção por uma nova versão, e quer limitar o impacto caso a nova versão se comporte mal com usuários reais. Selecione e ordene as etapas de uma implantação gradual.",
+      "explicacao": "A nova versão começa atendendo uma pequena parte do tráfego, o que limita o impacto de um eventual problema. Em seguida suas métricas são comparadas com as da versão atual, com usuários reais. Se os resultados forem bons, o tráfego é ampliado aos poucos, e a troca é concluída mantendo a possibilidade de voltar à versão anterior. Substituir todo o tráfego de uma vez expõe todos os usuários a um possível problema, que é justamente o que a implantação gradual evita. E desligar o monitoramento durante a troca elimina a informação necessária para decidir se avança ou volta atrás.",
+      "sequencia": [
+        "Direcionar uma pequena parte do tráfego para a nova versão.",
+        "Comparar as métricas da nova versão com as da versão atual.",
+        "Ampliar gradualmente o tráfego da nova versão.",
+        "Concluir a troca mantendo a possibilidade de reverter."
+      ],
+      "itensExtras": [
+        "Substituir de uma vez todo o tráfego pela nova versão.",
+        "Desligar o monitoramento durante a troca para evitar alertas falsos."
+      ]
+    }
+  ]
+}

@@ -212,6 +212,28 @@ public sealed class AzurePrepDbSeederTests : IDisposable
     // ------------------------------------------------------------------- exame em construção
 
     /// <summary>
+    /// O fornecedor declarado chega ao banco — é ele que escolhe a tela da prova e a escala da nota.
+    /// </summary>
+    /// <remarks>
+    /// Falha calada se regredisse: um exame AWS gravado como Microsoft abriria na tela da
+    /// Microsoft, com nota de 1 a 1000 e itens de ordenação caindo no arrastar — tudo funcionando.
+    /// </remarks>
+    [Fact]
+    public async Task Semear_GravaOFornecedorDeCadaExame()
+    {
+        await using (var ctx = CreateContext())
+        {
+            await AzurePrepDbSeeder.SemearAsync(ctx);
+        }
+
+        await using var leitura = CreateContext();
+        var porCodigo = await leitura.Exams.ToDictionaryAsync(e => e.Code, e => e.Vendor);
+
+        Assert.All(AzurePrepDbSeeder.Exames, d => Assert.Equal(d.Fornecedor, porCodigo[d.Code]));
+        Assert.Equal(Domain.Enums.FornecedorDoExame.Aws, porCodigo["AIF-C01"]);
+    }
+
+    /// <summary>
     /// O flag de publicação da definição chega ao banco como está declarado.
     /// </summary>
     [Fact]

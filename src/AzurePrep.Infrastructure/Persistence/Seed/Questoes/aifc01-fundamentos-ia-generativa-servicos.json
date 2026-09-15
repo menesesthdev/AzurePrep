@@ -1,0 +1,220 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-servico-aws-transform-52",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa tem dezenas de aplicações legadas em .NET Framework, que só rodam em Windows, e quer modernizá-las para .NET multiplataforma. Ela procura um serviço da AWS que use agentes de IA especializados em migração e modernização para analisar o código, planejar e executar a transformação em escala. Qual serviço atende a esse requisito?",
+      "explicacao": "O AWS Transform usa agentes de IA especializados em migração e modernização — por exemplo, de aplicações .NET Framework para .NET multiplataforma — para analisar o código, planejar e executar a transformação em escala. O Kiro é um ambiente de desenvolvimento com agentes que ajuda a escrever software a partir de especificações; poderia apoiar desenvolvedores, mas não é o serviço especializado em modernizar portfólios de aplicações legadas. O Amazon Quick atende usuários de negócio com análise de dados, pesquisa e automação, sem modernizar código. E o SageMaker JumpStart oferece modelos para implantar, sem um fluxo de modernização de aplicações.",
+      "opcoes": [
+        { "texto": "AWS Transform", "correta": true },
+        { "texto": "Kiro", "correta": false },
+        { "texto": "Amazon Quick", "correta": false },
+        { "texto": "Amazon SageMaker JumpStart", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servico-amazon-nova-53",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer avaliar modelos de base desenvolvidos pela própria Amazon, disponíveis no Amazon Bedrock, com opções para compreender texto, imagens e vídeos e para gerar conteúdo, e com versões de diferentes tamanhos para equilibrar custo e desempenho. Qual família de modelos atende a essa descrição?",
+      "explicacao": "O Amazon Nova é a família de modelos de base desenvolvida pela Amazon e disponível no Amazon Bedrock, com modelos de diferentes tamanhos para compreensão de texto, imagens e vídeos e modelos para geração de conteúdo. O Amazon Comprehend é um serviço de processamento de linguagem natural que extrai entidades e sentimento, não uma família de modelos de base generativos. O Amazon Rekognition analisa imagens e vídeos com modelos prontos, sem gerar conteúdo nem responder a prompts gerais. E o Amazon Lex é um serviço para construir bots conversacionais, e não uma família de modelos de base.",
+      "opcoes": [
+        { "texto": "Amazon Nova", "correta": true },
+        { "texto": "Amazon Comprehend", "correta": false },
+        { "texto": "Amazon Rekognition", "correta": false },
+        { "texto": "Amazon Lex", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-bedrock-api-unificada-54",
+      "topico": "Vantagens dos serviços de IA generativa da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa ainda não sabe qual provedor de modelos de base terá o melhor custo-benefício daqui a um ano e quer poder trocar de modelo, entre provedores diferentes, sem reescrever a integração da aplicação nem operar infraestrutura. Qual abordagem atende melhor a esse requisito?",
+      "explicacao": "O Amazon Bedrock oferece modelos de vários provedores por meio de uma API unificada e totalmente gerenciada, então trocar de modelo exige principalmente mudar o identificador do modelo, sem nova integração nem infraestrutura para operar. Hospedar cada modelo candidato em instâncias Amazon EC2 obrigaria a empresa a operar servidores de inferência e integrar cada modelo separadamente. Implantar cada modelo num endpoint próprio do SageMaker AI é possível para modelos disponíveis ali, mas mantém a gestão de endpoints e não cobre da mesma forma os modelos de todos os provedores. E o Amazon Polly converte texto em fala, sem relação com a escolha de modelos de base.",
+      "opcoes": [
+        { "texto": "Usar o Amazon Bedrock, que oferece modelos de vários provedores por uma API unificada.", "correta": true },
+        { "texto": "Hospedar cada modelo candidato em instâncias Amazon EC2 próprias.", "correta": false },
+        { "texto": "Implantar cada modelo candidato num endpoint próprio do SageMaker AI.", "correta": false },
+        { "texto": "Usar o Amazon Polly como camada de abstração entre os modelos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-multiagente-paralelo-55",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um sistema de due diligence precisa, para cada empresa analisada, consultar cinco fontes independentes — processos judiciais, notícias, dados financeiros, cadastro de sócios e sanções internacionais — e depois produzir um relatório único. Nenhuma consulta depende do resultado das outras, e o tempo total de resposta é importante. Qual padrão de sistema multiagente é mais adequado?",
+      "explicacao": "Como as cinco consultas são independentes, agentes especializados podem executá-las em paralelo, e um passo final consolida os resultados no relatório — o tempo total passa a ser o da consulta mais lenta, não a soma de todas. Um pipeline sequencial executaria uma consulta após a outra, somando os tempos sem nenhum benefício, já que não há dependência entre elas. Um único agente fazendo as consultas uma a uma tem o mesmo problema de tempo e concentra contexto demais. E agentes competindo para dar a melhor resposta à mesma pergunta serve para comparar alternativas, não para cobrir fontes diferentes.",
+      "opcoes": [
+        { "texto": "Agentes especializados executando as consultas em paralelo, com consolidação dos resultados.", "correta": true },
+        { "texto": "Um pipeline sequencial em que cada agente consulta uma fonte após o anterior terminar.", "correta": false },
+        { "texto": "Um único agente que consulta as cinco fontes, uma de cada vez.", "correta": false },
+        { "texto": "Vários agentes respondendo à mesma consulta para escolher a melhor resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-multiagente-sequencial-56",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma editora processa manuscritos sempre na mesma ordem: um agente extrai e estrutura o texto, outro revisa a gramática do texto estruturado, um terceiro traduz o texto revisado e o último formata a versão traduzida para publicação. Cada etapa depende da saída da etapa anterior, e a sequência nunca muda. Qual padrão de sistema multiagente é mais adequado?",
+      "explicacao": "Quando cada etapa depende da saída da anterior e a ordem nunca muda, o padrão adequado é o pipeline sequencial, em que a saída de um agente vira a entrada do seguinte — simples de entender, testar e auditar. Executar os agentes em paralelo não funciona, porque a revisão precisa do texto estruturado e a tradução, do texto revisado. Um supervisor decidindo dinamicamente a ordem acrescenta custo e imprevisibilidade a um fluxo que é sempre o mesmo. E um único agente com todas as tarefas perde a separação de responsabilidades que facilita avaliar e corrigir cada etapa.",
+      "opcoes": [
+        { "texto": "Um pipeline sequencial, em que a saída de cada agente é a entrada do seguinte.", "correta": true },
+        { "texto": "Os quatro agentes executando em paralelo sobre o manuscrito original.", "correta": false },
+        { "texto": "Um agente supervisor que decide, a cada manuscrito, a ordem das etapas.", "correta": false },
+        { "texto": "Um único agente que executa as quatro tarefas numa só chamada.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agente-gestao-memoria-57",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de atendimento guarda na memória de longo prazo a transcrição completa de todas as conversas de cada cliente. Depois de alguns meses, a recuperação de memórias ficou lenta, traz trechos irrelevantes e às vezes usa preferências antigas que o cliente já mudou. Qual prática de gestão de memória resolve o problema?",
+      "explicacao": "Guardar transcrições inteiras enche a memória de ruído. A prática adequada é extrair e armazenar apenas os fatos relevantes — como preferências e decisões —, consolidar informações repetidas, atualizar o que mudou e expirar o que ficou obsoleto. Assim a recuperação fica rápida, relevante e atual. Continuar guardando tudo para sempre agrava exatamente o problema observado. Uma janela de contexto maior permite enviar mais memórias, mas não resolve a irrelevância nem as preferências desatualizadas. E desativar a memória de longo prazo elimina o benefício de lembrar do cliente entre sessões.",
+      "opcoes": [
+        { "texto": "Extrair e armazenar só os fatos relevantes, consolidando, atualizando e expirando memórias antigas.", "correta": true },
+        { "texto": "Continuar guardando as transcrições completas e aumentar a capacidade de armazenamento.", "correta": false },
+        { "texto": "Usar um modelo com janela de contexto maior para receber mais memórias.", "correta": false },
+        { "texto": "Desativar a memória de longo prazo e usar apenas o histórico da sessão.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ciclo-vida-selecao-dados-58",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai pré-treinar um modelo de linguagem especializado no setor jurídico. A equipe coletou automaticamente milhões de páginas da internet, incluindo livros e artigos protegidos por direitos autorais, sem verificar licenças, e com muitas páginas duplicadas ou de baixa qualidade. Em que etapa do ciclo de vida esse problema deve ser tratado e como?",
+      "explicacao": "Esse problema pertence à etapa de seleção de dados, que vem antes do pré-treinamento: é ali que se verificam licenças e direitos de uso, se remove conteúdo duplicado ou de baixa qualidade e se garante a diversidade do corpus. Deixar para o fine-tuning não resolve, porque o que foi aprendido no pré-treinamento, inclusive o conteúdo sem direito de uso, permanece no modelo. Ajustar a temperatura na implantação não muda nada do que o modelo aprendeu. E presumir que tudo o que é público na internet pode ser usado livremente ignora direitos autorais e expõe a empresa a reivindicações de propriedade intelectual.",
+      "opcoes": [
+        { "texto": "Na seleção de dados, verificando licenças, removendo duplicatas e baixa qualidade antes do pré-treinamento.", "correta": true },
+        { "texto": "No fine-tuning, depois do pré-treinamento, removendo o conteúdo protegido do modelo.", "correta": false },
+        { "texto": "Na implantação, ajustando a temperatura para reduzir a reprodução de textos protegidos.", "correta": false },
+        { "texto": "Em nenhuma etapa, porque conteúdo público na internet pode ser usado livremente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-tokens-saida-59",
+      "topico": "Tokens e preço por token",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação envia prompts curtos a um modelo sob demanda no Amazon Bedrock e recebe respostas muito longas, com introduções, repetições e resumos finais que os usuários não leem. A tabela de preços do modelo cobra os tokens de saída mais caro que os de entrada. Qual mudança reduz mais o custo?",
+      "explicacao": "Com prompts curtos e respostas longas, a maior parte da conta está nos tokens de saída, que ainda custam mais por token. Pedir no prompt um formato conciso e limitar o tamanho máximo das respostas corta justamente esses tokens, sem prejuízo para o usuário, que não lê as partes extras. Enviar prompts mais longos com mais contexto aumentaria os tokens de entrada sem reduzir a saída. Aumentar a temperatura não muda a quantidade de tokens gerados de forma controlada. E a inferência em lote reduz preço para cargas assíncronas, mas a aplicação é interativa e precisa das respostas na hora.",
+      "opcoes": [
+        { "texto": "Pedir respostas concisas no prompt e limitar o número máximo de tokens de saída.", "correta": true },
+        { "texto": "Enviar prompts mais longos, com mais contexto, para evitar repetições.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo gere respostas mais variadas.", "correta": false },
+        { "texto": "Enviar as requisições interativas para a inferência em lote.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-conformidade-regulada-60",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma operadora de saúde nos Estados Unidos precisa usar um modelo de base para processar informações protegidas de pacientes, e a área de conformidade exige que o serviço usado esteja coberto pelos programas de conformidade aplicáveis ao setor. A equipe técnica já tem dois modelos candidatos com qualidade parecida. Qual verificação deve ser feita antes da escolha?",
+      "explicacao": "Num setor regulado, a conformidade é critério eliminatório: é preciso confirmar que o serviço está coberto pelos programas de conformidade exigidos e que o uso pretendido do modelo é permitido, consultando a documentação e os relatórios de conformidade da AWS, como os disponíveis no AWS Artifact, e os termos de uso do modelo. Escolher pela maior pontuação em benchmarks compara qualidade, que já é parecida, e não diz nada sobre conformidade. Escolher o menor preço ignora o requisito eliminatório. E presumir que qualquer modelo atende a qualquer regulação é justamente o risco que a área de conformidade quer evitar.",
+      "opcoes": [
+        { "texto": "Confirmar que o serviço e o uso do modelo atendem aos programas de conformidade exigidos.", "correta": true },
+        { "texto": "Escolher o modelo com a maior pontuação em benchmarks públicos.", "correta": false },
+        { "texto": "Escolher o modelo com o menor preço por token.", "correta": false },
+        { "texto": "Nenhuma, porque todo modelo de base disponível atende a qualquer regulação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-uso-ferramentas-61",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe vai construir um agente que precisa decidir, a cada passo, se chama uma API de estoque, uma de preços ou uma de pedidos, informando os parâmetros corretos. Na lista de modelos candidatos há diferenças de preço, de janela de contexto e de capacidades. Qual capacidade do modelo é indispensável para esse caso?",
+      "explicacao": "Um agente que escolhe e chama APIs com os parâmetros corretos depende de o modelo suportar uso de ferramentas (chamadas de função): é essa capacidade que permite ao modelo indicar qual ferramenta chamar e com quais argumentos. Geração de imagens não participa desse fluxo. Uma temperatura máxima mais alta só aumenta a variação das respostas, o que nem é desejável ao escolher ferramentas. E gerar embeddings é função de modelos de representação usados em busca semântica, não do modelo que decide e chama as APIs.",
+      "opcoes": [
+        { "texto": "Suporte a uso de ferramentas (chamadas de função).", "correta": true },
+        { "texto": "Capacidade de gerar imagens a partir de texto.", "correta": false },
+        { "texto": "Temperatura máxima configurável mais alta.", "correta": false },
+        { "texto": "Capacidade de gerar embeddings.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-caso-uso-video-62",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de marketing de uma loja de artigos esportivos quer produzir vídeos curtos de produtos para redes sociais a partir de uma descrição em texto e de uma foto de referência de cada produto, sem gravações. Qual tipo de solução atende a esse caso de uso?",
+      "explicacao": "Criar vídeos curtos a partir de uma descrição em texto e de uma imagem de referência é o caso de uso de modelos de geração de vídeo, uma das aplicações da IA generativa. O Amazon Polly gera fala a partir de texto, e poderia narrar um vídeo, mas não produz imagens em movimento. O Amazon Transcribe converte áudio em texto, o caminho oposto. E o Amazon Rekognition Video analisa vídeos que já existem, identificando objetos e atividades, sem criar vídeos novos.",
+      "opcoes": [
+        { "texto": "Um modelo de geração de vídeo a partir de texto e imagem.", "correta": true },
+        { "texto": "Amazon Polly", "correta": false },
+        { "texto": "Amazon Transcribe", "correta": false },
+        { "texto": "Amazon Rekognition Video", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacao-data-corte-63",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de um banco, baseado apenas num modelo de base, respondeu a um cliente com taxas de juros que estavam em vigor na época em que o modelo foi treinado, e não as taxas atuais. O texto da resposta era correto em tudo mais. Qual limitação explica o problema e qual solução é adequada?",
+      "explicacao": "O modelo só conhece informações até a data de corte dos dados de treinamento, então as taxas que ele menciona são as da época do treinamento. A solução é fornecer as taxas atuais no momento da pergunta, por RAG sobre a tabela vigente ou por uma ferramenta que consulta o sistema de taxas. Atribuir o erro a uma temperatura alta confunde variação da resposta com desatualização: com temperatura zero o modelo repetiria as mesmas taxas antigas. Viés trata de resultados desiguais entre grupos, sem relação com dados desatualizados. E a janela de contexto limita quanto texto o modelo recebe; não faz o modelo conhecer as taxas atuais se ninguém as envia.",
+      "opcoes": [
+        { "texto": "Limite dos dados de treinamento; fornecer as taxas atuais por RAG ou por uma ferramenta.", "correta": true },
+        { "texto": "Temperatura alta; reduzir a temperatura para que o modelo informe as taxas corretas.", "correta": false },
+        { "texto": "Viés nos dados; rebalancear os dados de treinamento do modelo.", "correta": false },
+        { "texto": "Janela de contexto pequena; usar um modelo com janela de contexto maior.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-ai-service-cards-64",
+      "topico": "Benefícios da infraestrutura da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Antes de adotar um serviço de IA da AWS, o comitê de ética de uma empresa quer ler a documentação da própria AWS sobre os casos de uso pretendidos do serviço, suas limitações, as escolhas de design responsável e as boas práticas de implantação. Onde a empresa encontra esse tipo de documentação?",
+      "explicacao": "As AWS AI Service Cards são documentos publicados pela AWS com informações sobre casos de uso pretendidos, limitações, escolhas de design responsável e boas práticas de implantação e operação de seus serviços de IA — exatamente o que o comitê procura. O AWS Artifact fornece relatórios de conformidade e certificações da AWS, voltados a auditorias de segurança, não a usos pretendidos e limitações dos serviços de IA. O AWS Trusted Advisor dá recomendações sobre a configuração da conta. E o AWS CloudTrail registra chamadas de API, sem documentação sobre os serviços.",
+      "opcoes": [
+        { "texto": "Nas AWS AI Service Cards.", "correta": true },
+        { "texto": "No AWS Artifact.", "correta": false },
+        { "texto": "No AWS Trusted Advisor.", "correta": false },
+        { "texto": "No AWS CloudTrail.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-cobertura-regional-65",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa usa um modelo de base no Amazon Bedrock numa Região dos Estados Unidos. Ao expandir o assistente para clientes no Japão, a latência percebida por esses usuários ficou alta. Não há restrição de residência de dados, e o modelo usado também está disponível numa Região na Ásia. Qual mudança melhora o desempenho para esses usuários?",
+      "explicacao": "Parte da latência vem da distância entre os usuários e a Região onde o modelo é executado. Como o modelo está disponível numa Região na Ásia e não há restrição de residência, atender os usuários do Japão a partir dessa Região reduz a latência — a cobertura regional é justamente um dos fatores de desempenho e custo na escolha de serviços de IA generativa. Aumentar o limite de tokens de saída alonga as respostas. Trocar por um modelo maior tende a aumentar a latência. E a inferência em lote é assíncrona, incompatível com um assistente interativo.",
+      "opcoes": [
+        { "texto": "Atender os usuários do Japão com o modelo na Região da Ásia.", "correta": true },
+        { "texto": "Aumentar o limite de tokens de saída das respostas.", "correta": false },
+        { "texto": "Trocar por um modelo maior da mesma família.", "correta": false },
+        { "texto": "Enviar as perguntas desses usuários para a inferência em lote.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servicos-aws-assoc-66",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Uma empresa mapeou iniciativas de IA generativa para os próximos meses. Associe cada iniciativa ao serviço ou recurso da AWS mais adequado.",
+      "explicacao": "Modernizar aplicações .NET Framework legadas com agentes especializados é o AWS Transform. Escrever software a partir de requisitos, design e tarefas gerados por um agente é o Kiro. Construir agentes em código com um SDK de código aberto é o Strands Agents. Implantar e operar agentes com segurança e em escala, com execução, memória, identidade e observabilidade gerenciadas, é o Amazon Bedrock AgentCore. E dar a usuários de negócio uma aplicação pronta para analisar dados, pesquisar e automatizar tarefas é o Amazon Quick. O Amazon Polly está no painel porque é um serviço de IA da AWS, mas converte texto em fala e não atende a nenhuma das iniciativas.",
+      "associacoes": [
+        { "alvo": "Modernizar aplicações .NET Framework legadas com agentes especializados", "item": "AWS Transform" },
+        { "alvo": "Escrever software a partir de requisitos, design e tarefas gerados por um agente", "item": "Kiro" },
+        { "alvo": "Construir agentes em código com um SDK de código aberto", "item": "Strands Agents" },
+        { "alvo": "Implantar e operar agentes com segurança e em escala", "item": "Amazon Bedrock AgentCore" },
+        { "alvo": "Dar a usuários de negócio uma aplicação pronta para analisar dados e automatizar tarefas", "item": "Amazon Quick" }
+      ],
+      "itensExtras": ["Amazon Polly"]
+    },
+    {
+      "id": "aifc01-gen-agente-memoria-ordenacao-67",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "Ordenacao",
+      "enunciado": "Um agente de viagens corporativas usa memória de longo prazo para personalizar o atendimento de cada funcionário. Selecione e ordene as etapas que o agente executa para cada mensagem recebida.",
+      "explicacao": "O ciclo começa com a mensagem do funcionário. Em seguida o agente recupera as memórias relevantes daquele usuário, como preferência de assento ou companhia aérea, e gera a resposta usando esse contexto. Por fim, extrai da conversa os fatos novos que valem ser lembrados e os salva, para as próximas sessões. Apagar a memória a cada mensagem eliminaria justamente a personalização entre sessões. E salvar a transcrição completa de toda mensagem, sem filtrar, enche a memória de ruído e torna a recuperação lenta e pouco relevante.",
+      "sequencia": [
+        "Receber a mensagem do funcionário.",
+        "Recuperar as memórias relevantes daquele usuário.",
+        "Gerar a resposta usando as memórias recuperadas como contexto.",
+        "Extrair e salvar os fatos novos que valem ser lembrados."
+      ],
+      "itensExtras": [
+        "Apagar a memória do usuário a cada nova mensagem.",
+        "Salvar a transcrição completa de cada mensagem, sem filtrar."
+      ]
+    }
+  ]
+}

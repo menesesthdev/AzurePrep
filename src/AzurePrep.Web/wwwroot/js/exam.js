@@ -1,11 +1,24 @@
-// Lógica da tela de prova, fiel à entrega real (Pearson VUE / Microsoft):
-// navegação linear sem recarregar a página, tela de revisão como único meio de saltar
-// entre itens, timer com submissão automática e gravação incremental das respostas.
+// Lógica da tela de prova, fiel à entrega real (Pearson VUE): navegação linear sem recarregar a
+// página, tela de revisão como único meio de saltar entre itens, timer com submissão automática e
+// gravação incremental das respostas.
+//
+// Serve as duas telas — Microsoft e AWS (body[data-vendor="aws"]). O que é igual (gravação, timer,
+// marcação, respostas por par) fica num caminho só; o que muda é o FLUXO da revisão: na Microsoft a
+// tela de revisão está sempre a um botão; na AWS ela aparece depois do último item, troca a moldura
+// (faixa com Instruções, fundo cinza) e "Revisar todas" percorre as questões em sequência. Nas duas,
+// os filtros só filtram a tabela.
 (function () {
     "use strict";
 
     const data = JSON.parse(document.getElementById("exam-data").textContent);
     const total = data.totalQuestions;
+    const isAws = document.body.getAttribute("data-vendor") === "aws";
+    const counterEl = document.getElementById("question-counter");
+
+    // AWS: o botão "Tela de revisão" só existe depois que a revisão apareceu uma vez, e os botões
+    // de revisão percorrem uma fila de questões (todas, incompletas ou marcadas) em sequência.
+    let reviewReached = false;
+    let reviewQueue = null;
 
     // Status por item (index 0 = item 1). "seen" não vem do servidor: um item respondido
     // obrigatoriamente foi visto, e o item 1 é visto assim que a prova abre.
@@ -79,11 +92,7 @@
         return "unseen";
     }
 
-    const CLASSIFICATION_LABELS = {
-        complete: "Completo",
-        incomplete: "Incompleto",
-        unseen: "Não visto"
-    };
+    const CLASSIFICATION_LABELS = { complete: "Completo", incomplete: "Incompleto", unseen: "Não visto" };
 
     // ---- Leitura do DOM da questão atual ---------------------------------
     function currentQuestionEl() { return container.querySelector(".question"); }
@@ -135,6 +144,7 @@
 
         currentNumber = n;
         questionEnteredAt = Date.now();
+        if (counterEl) counterEl.textContent = `Questão ${n} de ${total}`;
         pickedItem = null; // item pendente de arrastar não atravessa a navegação
 
         // Sincroniza "required" com o que o servidor devolveu para este item.
@@ -161,6 +171,8 @@
     async function showReviewView() {
         await saveCurrent();
         inReview = true;
+        reviewReached = true;
+        reviewQueue = null;
         questionView.hidden = true;
         reviewView.hidden = false;
         renderReviewRows();
@@ -170,6 +182,8 @@
 
     // A barra inferior muda conforme a tela — igual à prova real.
     function renderFooter() {
+        if (isAws) { renderFooterAws(); return; }
+
         markToggleEl.hidden = inReview;
         btnComments.hidden = inReview;
 
@@ -193,12 +207,128 @@
         btnEnd.hidden = !isLast;
     }
 
+    const reviewButtons = Array.from(document.querySelectorAll(".btn--filter"));
+    const btnInstructions = document.getElementById("btn-instructions");
+    const counterLine = document.getElementById("counter-line");
+
+    // AWS: rodapé só com Anterior/Próxima durante a prova; na revisão, os três "Revisar..." e
+    // "Encerrar revisão". "Tela de revisão" volta a estar à mão depois da primeira passagem por ela.
+    function renderFooterAws() {
+        markToggleEl.hidden = inReview;
+        btnComments.hidden = inReview;
+        btnInstructions.hidden = !inReview;
+        counterLine.hidden = inReview;
+        document.body.classList.toggle("is-review", inReview);
+        btnEnd.hidden = !inReview;
+
+        // Na primeira questão o demo não mostra "Anterior" — o botão some, não fica desabilitado.
+        const isFirst = reviewQueue ? reviewQueue.indexOf(currentNumber) <= 0 : currentNumber === 1;
+        btnPrev.hidden = inReview || isFirst;
+        btnNext.hidden = inReview;
+        btnReview.hidden = inReview || !reviewReached;
+    }
+
+    // Revisão da AWS: selo de status, "Sim/Não" para marcada e link "Revisar" por linha; as abas
+    // levam a contagem, e "Marcadas" só aparece quando existe alguma.
+    function renderReviewRowsAws() {
+        reviewRows.innerHTML = "";
+        const counts = { all: total, incomplete: 0, marked: 0 };
+        for (let n = 1; n <= total; n++) {
+            if (classify(n) !== "complete") counts.incomplete++;
+            if (statusOf(n).flagged) counts.marked++;
+        }
+
+        const markedTab = document.querySelector('.aws-review__tab[data-filter="marked"]');
+        markedTab.hidden = counts.marked === 0;
+        if (reviewFilter === "marked" && counts.marked === 0) {
+            reviewFilter = "all";
+            reviewButtons.forEach(function (b) { b.classList.toggle("is-active", b.getAttribute("data-filter") === "all"); });
+        }
+        document.querySelectorAll("[data-count]").forEach(function (el) {
+            el.textContent = counts[el.getAttribute("data-count")];
+        });
+
+        let shown = 0;
+        for (let n = 1; n <= total; n++) {
+            const complete = classify(n) === "complete";
+            const st = statusOf(n);
+            if (reviewFilter === "incomplete" && complete) continue;
+            if (reviewFilter === "marked" && !st.flagged) continue;
+            shown++;
+
+            const tr = document.createElement("tr");
+            tr.className = "review-row";
+            tr.tabIndex = 0;
+            tr.setAttribute("role", "button");
+            tr.setAttribute("data-number", n);
+
+            const tdNumber = document.createElement("td");
+            tdNumber.textContent = n;
+
+            const tdTitle = document.createElement("td");
+            tdTitle.textContent = "Questão";
+
+            const tdStatus = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = "aws-badge " + (complete ? "aws-badge--complete" : "aws-badge--incomplete");
+            badge.textContent = complete ? "Completa" : "Incompleta";
+            tdStatus.appendChild(badge);
+
+            const tdMarked = document.createElement("td");
+            tdMarked.textContent = st.flagged ? "Sim" : "Não";
+
+            const tdAction = document.createElement("td");
+            tdAction.className = "aws-review__action";
+            tdAction.textContent = "Revisar";
+
+            tr.append(tdNumber, tdTitle, tdStatus, tdMarked, tdAction);
+            reviewRows.appendChild(tr);
+        }
+
+        reviewEmpty.hidden = shown > 0;
+    }
+
+    function nextAws() {
+        if (reviewQueue) {
+            const next = reviewQueue[reviewQueue.indexOf(currentNumber) + 1];
+            if (next) { goTo(next); } else { showReviewView(); }
+            return;
+        }
+        // Depois do último item vem a tela de revisão, não o encerramento.
+        if (currentNumber === total) { showReviewView(); } else { goTo(currentNumber + 1); }
+    }
+
+    function prevAws() {
+        if (reviewQueue) {
+            const prev = reviewQueue[reviewQueue.indexOf(currentNumber) - 1];
+            if (prev) goTo(prev);
+            return;
+        }
+        goTo(currentNumber - 1);
+    }
+
+    function startReviewQueue(filter) {
+        const queue = [];
+        for (let n = 1; n <= total; n++) {
+            if (filter === "incomplete" && classify(n) === "complete") continue;
+            if (filter === "marked" && !statusOf(n).flagged) continue;
+            queue.push(n);
+        }
+        if (queue.length === 0) {
+            reviewEmpty.hidden = false;
+            return;
+        }
+        reviewQueue = queue;
+        goTo(queue[0]);
+    }
+
     function renderCommentsButton() {
         btnComments.classList.toggle("has-comment", comments.has(currentNumber));
     }
 
     // ---- Tela de revisão -------------------------------------------------
     function renderReviewRows() {
+        if (isAws) { renderReviewRowsAws(); return; }
         reviewRows.innerHTML = "";
         let shown = 0;
 
@@ -241,6 +371,8 @@
         const m = Math.floor((s % 3600) / 60);
         const ss = s % 60;
         const pad = function (v) { return String(v).padStart(2, "0"); };
+        // A AWS mostra minutos e segundos ("29:45"); com uma hora ou mais, a hora vem na frente.
+        if (isAws) return h > 0 ? `${h}:${pad(m)}:${pad(ss)}` : `${pad(m)}:${pad(ss)}`;
         return `${pad(h)}:${pad(m)}:${pad(ss)}`;
     }
 
@@ -289,9 +421,10 @@
             if (statusOf(n).flagged) marked++;
         }
 
-        finishSummary.textContent =
-            `Completos: ${complete} de ${total}. ` +
-            `Incompletos: ${incomplete}. Não vistos: ${unseen}. Marcados: ${marked}.`;
+        finishSummary.textContent = isAws
+            ? `Respondidas: ${complete} de ${total}. Incompletas: ${incomplete + unseen}. Marcadas para revisão: ${marked}.`
+            : `Completos: ${complete} de ${total}. ` +
+              `Incompletos: ${incomplete}. Não vistos: ${unseen}. Marcados: ${marked}.`;
         finishModal.hidden = false;
     }
 
@@ -411,6 +544,12 @@
 
     // ---- Ligações de eventos --------------------------------------------
     container.addEventListener("change", function (e) {
+        // Lista suspensa da AWS (ordenação e associação): escolher um item é marcar o par
+        // alvo × item — o mesmo setPair que o arrastar da Microsoft usa.
+        if (e.target.classList.contains("dd-select")) {
+            setPair(e.target.getAttribute("data-target"), e.target.value || null);
+            return;
+        }
         if (e.target.classList.contains("option__input")) {
             saveCurrent();
         }
@@ -423,18 +562,18 @@
         saveCurrent();
     });
 
-    btnPrev.addEventListener("click", function () { goTo(currentNumber - 1); });
-    btnNext.addEventListener("click", function () { goTo(currentNumber + 1); });
+    btnPrev.addEventListener("click", function () { if (isAws) { prevAws(); } else { goTo(currentNumber - 1); } });
+    btnNext.addEventListener("click", function () { if (isAws) { nextAws(); } else { goTo(currentNumber + 1); } });
     btnEnd.addEventListener("click", openFinishModal);
 
     btnReview.addEventListener("click", function () {
         if (inReview) { showQuestionView(); } else { showReviewView(); }
     });
 
-    reviewView.querySelectorAll(".btn--filter").forEach(function (btn) {
+    reviewButtons.forEach(function (btn) {
         btn.addEventListener("click", function () {
             reviewFilter = btn.getAttribute("data-filter");
-            reviewView.querySelectorAll(".btn--filter").forEach(function (b) {
+            reviewButtons.forEach(function (b) {
                 b.classList.toggle("is-active", b === btn);
             });
             renderReviewRows();
@@ -444,6 +583,7 @@
     function jumpFromReview(e) {
         const row = e.target.closest(".review-row");
         if (!row) return;
+        reviewQueue = null;
         goTo(parseInt(row.getAttribute("data-number"), 10));
     }
 
@@ -456,6 +596,15 @@
     });
 
     btnComments.addEventListener("click", openCommentsModal);
+
+    if (isAws) {
+        const instructionsModal = document.getElementById("instructions-modal");
+        document.getElementById("btn-review-all").addEventListener("click", function () { startReviewQueue("all"); });
+        btnInstructions.addEventListener("click", function () { instructionsModal.hidden = false; });
+        document.getElementById("btn-instructions-close").addEventListener("click", function () {
+            instructionsModal.hidden = true;
+        });
+    }
     document.getElementById("btn-comments-cancel").addEventListener("click", function () {
         commentsModal.hidden = true;
     });

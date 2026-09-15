@@ -1,0 +1,168 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "seguranca-conformidade-governanca",
+  "questoes": [
+    {
+      "id": "aifc01-seg-funcao-iam-lambda-40",
+      "topico": "Controle de acesso a serviços de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma função do AWS Lambda chama o Amazon Bedrock usando uma chave de acesso de longo prazo de um usuário do IAM, armazenada em variáveis de ambiente da função. O time de segurança quer eliminar credenciais de longo prazo desse fluxo. Qual solução atende a esse requisito?",
+      "explicacao": "Atribuir à função Lambda uma função do IAM (role) com permissão apenas para invocar os modelos necessários faz o serviço obter credenciais temporárias, rotacionadas automaticamente, sem nenhuma chave de longo prazo armazenada. Mover a mesma chave para o AWS Secrets Manager melhora a proteção do segredo, mas continua usando uma credencial de longo prazo, que é o que se quer eliminar. Usar as credenciais do usuário raiz é uma das piores práticas numa conta AWS. E compartilhar a mesma chave entre várias funções amplia o impacto de um vazamento e dificulta saber quem fez cada chamada.",
+      "opcoes": [
+        { "texto": "Atribuir à função Lambda uma função do IAM com permissão apenas para invocar os modelos necessários.", "correta": true },
+        { "texto": "Mover a chave de acesso de longo prazo para o AWS Secrets Manager.", "correta": false },
+        { "texto": "Usar as credenciais do usuário raiz, que têm permissão garantida.", "correta": false },
+        { "texto": "Compartilhar a mesma chave de acesso entre todas as funções que chamam o Bedrock.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-criptografia-base-vetorial-41",
+      "topico": "Proteção de dados em sistemas de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma operadora de saúde usa uma base de conhecimento do Amazon Bedrock com documentos num bucket do Amazon S3 e vetores num banco vetorial gerenciado. A política de segurança exige que tanto os documentos de origem quanto os vetores gerados a partir deles fiquem criptografados em repouso com chaves controladas pela empresa. Qual solução atende a esse requisito?",
+      "explicacao": "Os vetores são derivados de documentos sensíveis e precisam da mesma proteção. Configurar a criptografia em repouso com uma chave gerenciada pelo cliente no AWS KMS, tanto no bucket de origem quanto no banco vetorial, atende ao requisito nas duas pontas. O HTTPS protege os dados em trânsito, não os dados armazenados. O AWS PrivateLink mantém o tráfego em rede privada, sem criptografar o que está em repouso. E o Amazon Macie descobre dados sensíveis no S3, sem criptografar documentos nem vetores.",
+      "opcoes": [
+        { "texto": "Configurar criptografia em repouso com chave gerenciada pelo cliente no AWS KMS no bucket e no banco vetorial.", "correta": true },
+        { "texto": "Garantir que todas as consultas à base de conhecimento usem HTTPS.", "correta": false },
+        { "texto": "Acessar a base de conhecimento por meio do AWS PrivateLink.", "correta": false },
+        { "texto": "Habilitar o Amazon Macie no bucket dos documentos de origem.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-menor-privilegio-agente-42",
+      "topico": "Segurança de agentes de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para simplificar a configuração, a equipe deu à função de execução de um agente de suporte a política de administrador da conta. O agente só precisa ler registros de clientes numa tabela do Amazon DynamoDB e abrir chamados por uma API interna. O time de segurança questionou a decisão. Qual abordagem é mais adequada?",
+      "explicacao": "A função de execução do agente deve seguir o menor privilégio: permitir apenas a leitura na tabela específica do DynamoDB e a chamada da API de chamados. Assim, mesmo que o agente seja manipulado por uma injeção de prompt, o dano fica limitado ao que suas ferramentas precisam fazer. Manter o acesso de administrador e confiar nos filtros de conteúdo deixa qualquer falha nesses filtros com acesso total à conta. Instruções no prompt sobre o que o agente pode fazer são orientação, não controle de acesso. E registrar as ações no AWS CloudTrail ajuda a investigar depois, sem impedir o uso indevido das permissões.",
+      "opcoes": [
+        { "texto": "Restringir a função do agente à leitura da tabela e à chamada da API de chamados.", "correta": true },
+        { "texto": "Manter a política de administrador e configurar filtros de conteúdo no agente.", "correta": false },
+        { "texto": "Manter a política de administrador e instruir o agente a usar só o necessário.", "correta": false },
+        { "texto": "Manter a política de administrador e registrar as ações no AWS CloudTrail.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-dados-ambiente-desenvolvimento-43",
+      "topico": "Engenharia de dados segura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Os desenvolvedores de um assistente de um banco pedem uma cópia completa da base de conversas reais dos clientes, com nomes, CPFs e dados de conta, para testar novas versões no ambiente de desenvolvimento, que tem controles de acesso menos rígidos que a produção. Qual prática de engenharia de dados segura é mais adequada?",
+      "explicacao": "Ambientes de desenvolvimento costumam ter mais pessoas com acesso e controles menos rígidos, então não devem receber dados pessoais reais. Usar dados mascarados ou sintéticos, que preservam a estrutura e a variedade das conversas sem expor clientes, permite testar com qualidade enquanto os dados reais ficam restritos à produção. Copiar a base completa para o ambiente de desenvolvimento expõe os dados a um ambiente menos protegido. Liberar acesso de todos os desenvolvedores à produção amplia ainda mais a exposição. E desativar os registros de acesso no desenvolvimento elimina a rastreabilidade justamente onde o controle é mais fraco.",
+      "opcoes": [
+        { "texto": "Usar dados mascarados ou sintéticos no desenvolvimento e manter os dados reais restritos à produção.", "correta": true },
+        { "texto": "Copiar a base completa de conversas reais para o ambiente de desenvolvimento.", "correta": false },
+        { "texto": "Dar a todos os desenvolvedores acesso de leitura à base de produção.", "correta": false },
+        { "texto": "Copiar a base real e desativar os registros de acesso no desenvolvimento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-integridade-logs-cloudtrail-44",
+      "topico": "Registro e auditoria de interações com IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa investigação interna sobre o uso indevido de modelos de IA, os auditores precisam demonstrar que os registros do AWS CloudTrail usados como evidência não foram alterados nem apagados depois de gerados. Qual combinação de medidas atende a esse requisito?",
+      "explicacao": "A validação de integridade dos arquivos de log do CloudTrail permite verificar se um arquivo foi alterado ou apagado depois de entregue, e armazenar os logs num bucket do S3 com acesso restrito e bloqueio de objetos impede que sejam modificados ou excluídos durante o período definido. Juntas, as medidas sustentam o valor de evidência dos registros. Um painel do Amazon CloudWatch mostra métricas, sem garantir a integridade dos arquivos. O AWS Artifact fornece relatórios de conformidade da AWS, sem relação com os logs da conta. E o AWS Trusted Advisor dá recomendações gerais, sem proteger nem validar arquivos de log.",
+      "opcoes": [
+        { "texto": "Habilitar a validação de integridade dos logs do CloudTrail e guardá-los com acesso restrito e bloqueio de objetos.", "correta": true },
+        { "texto": "Criar um painel do Amazon CloudWatch com as chamadas registradas pelo CloudTrail.", "correta": false },
+        { "texto": "Baixar os relatórios de conformidade da AWS no AWS Artifact.", "correta": false },
+        { "texto": "Ativar as verificações de segurança do AWS Trusted Advisor.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-inventario-transparencia-45",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um órgão público usa sistemas de IA em diversos serviços, como triagem de solicitações e atendimento aos cidadãos. Uma norma de transparência passou a exigir que os cidadãos possam saber quais sistemas de IA o órgão utiliza e para quê. Qual prática atende a essa norma?",
+      "explicacao": "Manter e publicar um inventário dos sistemas de IA em uso, com a finalidade de cada um, os tipos de dados utilizados e o nível de risco, permite aos cidadãos saber onde e para quê a IA é usada — o que a norma de transparência exige. Manter essa informação restrita à equipe técnica descumpre a norma. Publicar o código-fonte e as credenciais de acesso não é transparência para o cidadão e cria um risco grave de segurança. E informar apenas depois de incidentes transforma a transparência em reação, sem permitir que os cidadãos saibam antes como são atendidos.",
+      "opcoes": [
+        { "texto": "Publicar um inventário dos sistemas de IA em uso, com finalidade, dados utilizados e nível de risco.", "correta": true },
+        { "texto": "Manter a lista de sistemas de IA restrita à equipe técnica do órgão.", "correta": false },
+        { "texto": "Publicar o código-fonte e as credenciais de acesso de cada sistema de IA.", "correta": false },
+        { "texto": "Informar os cidadãos sobre um sistema de IA apenas depois de algum incidente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-scoping-matrix-assoc-46",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "Associacao",
+      "enunciado": "O time de segurança está classificando os usos de IA generativa da empresa segundo a Generative AI Security Scoping Matrix. Associe cada uso ao escopo correspondente.",
+      "explicacao": "Funcionários usando um chatbot público gratuito é o escopo 1, de aplicação de consumo, em que a empresa controla quase nada além do que decide enviar. Assinar um software de CRM com IA embutida é o escopo 2, de aplicação empresarial de terceiros. Construir uma aplicação própria sobre um modelo do Amazon Bedrock, sem ajuste, é o escopo 3, de modelos pré-treinados. E ajustar esse modelo com dados da empresa é o escopo 4, de modelos ajustados, em que a empresa passa a responder também pelos dados usados no ajuste. O escopo 5, de modelos treinados pela própria empresa, está no painel porque completa a matriz, mas nenhum dos usos listados envolve treinar um modelo do zero.",
+      "associacoes": [
+        { "alvo": "Funcionários usam um chatbot público gratuito para redigir e-mails", "item": "Escopo 1: aplicação de consumo" },
+        { "alvo": "A empresa assina um software de CRM que tem recursos de IA embutidos", "item": "Escopo 2: aplicação empresarial" },
+        { "alvo": "A empresa constrói uma aplicação própria sobre um modelo do Amazon Bedrock, sem ajuste", "item": "Escopo 3: modelos pré-treinados" },
+        { "alvo": "A empresa ajusta um modelo do Amazon Bedrock com seus próprios dados", "item": "Escopo 4: modelos ajustados" }
+      ],
+      "itensExtras": ["Escopo 5: modelos treinados pela própria empresa"]
+    },
+    {
+      "id": "aifc01-seg-bucket-publico-artefatos-47",
+      "topico": "Proteção de dados em sistemas de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Durante uma revisão, a empresa descobriu que um bucket do Amazon S3 com artefatos de modelos e dados de treinamento estava acessível publicamente por engano há semanas. Ela quer impedir que isso aconteça de novo em qualquer bucket da conta e ser alertada se alguma configuração voltar a permitir acesso público. Qual combinação atende a esse requisito?",
+      "explicacao": "O bloqueio de acesso público do Amazon S3, ativado no nível da conta, impede que buckets e objetos sejam expostos publicamente por engano, e uma regra do AWS Config que verifica essa configuração alerta se algum recurso sair do padrão. O Amazon Macie ajuda a descobrir dados sensíveis e a identificar buckets públicos, mas sozinho não impede a exposição. O AWS CloudTrail registraria a mudança que tornou o bucket público, útil para investigar, sem bloqueá-la. E o Amazon Bedrock Guardrails filtra entradas e saídas de modelos, sem relação com permissões de buckets.",
+      "opcoes": [
+        { "texto": "Ativar o bloqueio de acesso público do S3 na conta e monitorar a configuração com o AWS Config.", "correta": true },
+        { "texto": "Habilitar apenas o Amazon Macie nos buckets da conta.", "correta": false },
+        { "texto": "Habilitar apenas o AWS CloudTrail para registrar as mudanças nos buckets.", "correta": false },
+        { "texto": "Configurar o Amazon Bedrock Guardrails para os modelos armazenados no bucket.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-rag-seguro-medidas-48",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai colocar em produção um assistente com RAG sobre contratos e documentos internos confidenciais. Quais medidas de segurança são adequadas para essa aplicação?",
+      "explicacao": "Duas medidas protegem o que a aplicação tem de mais sensível. O controle de acesso na recuperação garante que cada usuário só receba trechos de documentos que tem permissão de ler. E a criptografia em repouso e em trânsito dos documentos e dos vetores protege o conteúdo armazenado e trafegado. Tornar o bucket de documentos público para facilitar a ingestão expõe os contratos confidenciais a qualquer pessoa. Usar credenciais de administrador no processo de ingestão viola o menor privilégio e amplia o impacto de qualquer falha. E desabilitar os registros das consultas elimina a trilha necessária para investigar acessos indevidos.",
+      "opcoes": [
+        { "texto": "Controle de acesso por usuário na recuperação dos documentos.", "correta": true },
+        { "texto": "Criptografia em repouso e em trânsito dos documentos e dos vetores.", "correta": true },
+        { "texto": "Bucket de documentos público, para facilitar a ingestão.", "correta": false },
+        { "texto": "Credenciais de administrador no processo de ingestão dos documentos.", "correta": false },
+        { "texto": "Registros das consultas desabilitados, para preservar a confidencialidade.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-ciclo-vida-dados-ordenacao-49",
+      "topico": "Estratégias de governança de dados",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa vai começar a armazenar as conversas dos clientes com seu assistente de IA para análise de qualidade e quer aplicar governança ao ciclo de vida desses dados. Selecione e ordene as etapas que devem ser seguidas.",
+      "explicacao": "Primeiro os dados das conversas são classificados quanto à sensibilidade, porque é a classificação que determina as regras aplicáveis. Com isso, definem-se as Regiões permitidas para armazenamento e processamento e o prazo de retenção. Em seguida aplicam-se os controles de acesso e o registro de quem acessa os dados, durante todo o período de uso. E, ao fim do prazo, os dados são excluídos. Excluir as conversas antes de classificá-las elimina a informação sem saber o que se estava descartando nem por quê. E replicar os dados para todas as Regiões ignora as restrições de residência que a classificação poderia impor.",
+      "sequencia": [
+        "Classificar os dados das conversas quanto à sensibilidade.",
+        "Definir as Regiões permitidas e o prazo de retenção.",
+        "Aplicar controles de acesso e registrar quem acessa os dados.",
+        "Excluir os dados ao fim do prazo de retenção."
+      ],
+      "itensExtras": [
+        "Excluir as conversas antes de classificá-las.",
+        "Replicar as conversas para todas as Regiões da AWS."
+      ]
+    },
+    {
+      "id": "aifc01-seg-politica-chave-kms-50",
+      "topico": "Proteção de dados em sistemas de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa criptografa os dados de treinamento de seus modelos com uma chave do AWS KMS. A equipe de infraestrutura precisa administrar a chave — ativar rotação, alterar políticas, agendar exclusão —, mas não deve conseguir descriptografar os dados. Já a função usada pelos jobs de treinamento precisa descriptografar os dados, sem poder administrar a chave. Qual abordagem atende a esses requisitos?",
+      "explicacao": "A política de chave do AWS KMS permite separar quem administra a chave de quem pode usá-la para criptografar e descriptografar. Dando à equipe de infraestrutura apenas permissões administrativas e à função dos jobs apenas permissões de uso, cada um faz só o que precisa — separação de funções. Compartilhar a chave com permissões completas para todos elimina exatamente essa separação. Usar uma única função do IAM para as duas equipes mistura as responsabilidades. E guardar a chave no AWS Secrets Manager não se aplica: chaves do KMS não são exportadas para outros serviços, e isso não criaria a separação pedida.",
+      "opcoes": [
+        { "texto": "Na política da chave do KMS, separar administradores da chave dos usuários autorizados a usá-la.", "correta": true },
+        { "texto": "Conceder permissões completas sobre a chave às duas equipes.", "correta": false },
+        { "texto": "Usar uma única função do IAM para a infraestrutura e para os jobs de treinamento.", "correta": false },
+        { "texto": "Armazenar a chave do KMS no AWS Secrets Manager com acesso restrito.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-logs-dados-sensiveis-51",
+      "topico": "Registro e auditoria de interações com IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa habilitou o registro das interações com seu assistente para fins de auditoria. Os registros incluem prompts com dados pessoais dos clientes, como CPF e endereço, e hoje qualquer desenvolvedor consegue lê-los. A empresa precisa manter os registros para auditoria. Qual abordagem é mais adequada?",
+      "explicacao": "Registros de auditoria também são dados sensíveis e precisam de proteção própria. Mascarar os dados pessoais antes de gravá-los, quando a auditoria não precisa do dado completo, criptografar os registros com o AWS KMS e restringir a leitura a quem realmente precisa protege os clientes sem perder a trilha exigida. Desativar os registros elimina a auditoria que a empresa é obrigada a manter. Tornar os registros públicos para dar transparência expõe dados pessoais a qualquer pessoa. E guardá-los no repositório de código os coloca ao alcance de todos os desenvolvedores e de ferramentas que processam o código.",
+      "opcoes": [
+        { "texto": "Mascarar os dados pessoais antes de registrar, criptografar os logs e restringir quem pode lê-los.", "correta": true },
+        { "texto": "Desativar o registro das interações para evitar a exposição dos dados.", "correta": false },
+        { "texto": "Tornar os registros públicos para dar transparência ao uso do assistente.", "correta": false },
+        { "texto": "Armazenar os registros no repositório de código da aplicação.", "correta": false }
+      ]
+    }
+  ]
+}

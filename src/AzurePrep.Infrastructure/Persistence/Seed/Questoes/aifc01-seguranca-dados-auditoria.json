@@ -1,0 +1,246 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "seguranca-conformidade-governanca",
+  "questoes": [
+    {
+      "id": "aifc01-seg-criptografia-transito-tls-22",
+      "topico": "Proteção de rede e dados em trânsito",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O time de segurança de uma empresa exige que os prompts e as respostas trocados entre sua aplicação e o Amazon Bedrock estejam criptografados em trânsito. Um analista propôs criar chaves no AWS KMS especificamente para isso. Qual afirmação está correta?",
+      "explicacao": "As APIs do Amazon Bedrock são acessadas por HTTPS, com TLS, que criptografa os dados em trânsito entre a aplicação e o serviço — o requisito já é atendido pelo próprio canal. O AWS KMS gerencia chaves usadas principalmente para criptografia em repouso, como a de dados armazenados e modelos personalizados; ele não é o mecanismo que protege a comunicação HTTPS. O AWS PrivateLink mantém o tráfego em rede privada, o que é uma camada adicional de proteção, mas não substitui a criptografia do canal. E o Amazon Macie descobre dados sensíveis no Amazon S3, sem criptografar nada.",
+      "opcoes": [
+        { "texto": "As chamadas às APIs do Amazon Bedrock usam HTTPS com TLS, que já criptografa os dados em trânsito.", "correta": true },
+        { "texto": "É preciso criar chaves no AWS KMS para criptografar cada prompt antes do envio.", "correta": false },
+        { "texto": "O AWS PrivateLink substitui a necessidade de criptografia dos dados em trânsito.", "correta": false },
+        { "texto": "O Amazon Macie criptografa automaticamente os prompts enviados ao serviço.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-pseudonimizacao-analitica-23",
+      "topico": "Engenharia de dados segura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de análise de uma varejista precisa estudar o comportamento de compra dos clientes, cruzando dados de várias tabelas, para criar atributos de um modelo de recomendação. Os analistas não devem conseguir identificar os clientes, mas precisam saber que registros de tabelas diferentes pertencem à mesma pessoa. Qual técnica atende a esses requisitos?",
+      "explicacao": "A pseudonimização substitui identificadores como CPF por tokens que não revelam a pessoa, mas que são consistentes entre as tabelas — os analistas conseguem ligar os registros do mesmo cliente sem saber quem ele é. Criptografar o bucket com o AWS KMS protege os dados em repouso, mas quem tem permissão para ler os dados continua vendo os identificadores. Restringir o acesso por horário limita quando os analistas acessam, não o que eles veem. E copiar os dados para outra Região muda onde os dados ficam, sem proteger a identidade dos clientes.",
+      "opcoes": [
+        { "texto": "Substituir os identificadores por tokens consistentes entre as tabelas (pseudonimização).", "correta": true },
+        { "texto": "Criptografar o bucket de dados com uma chave do AWS KMS.", "correta": false },
+        { "texto": "Permitir o acesso dos analistas apenas em horário comercial.", "correta": false },
+        { "texto": "Copiar os dados para uma Região da AWS dedicada à análise.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-lake-formation-colunas-24",
+      "topico": "Engenharia de dados segura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um data lake no Amazon S3, catalogado no AWS Glue Data Catalog, alimenta vários projetos de ML. A equipe de marketing pode usar a tabela de clientes, mas não pode ver as colunas de renda e score de crédito, que só a equipe de risco pode acessar. A empresa quer gerenciar essas permissões de forma centralizada, no nível de tabela e coluna. Qual solução atende a esse requisito?",
+      "explicacao": "O AWS Lake Formation gerencia permissões de forma centralizada sobre os dados catalogados, com controle refinado no nível de tabela, coluna e linha — permitindo que marketing leia a tabela de clientes sem as colunas de renda e score. Uma política de bucket do S3 controla o acesso a objetos e prefixos, mas não enxerga colunas dentro dos arquivos. O Amazon Macie descobre dados sensíveis e alerta sobre eles, sem conceder ou negar acesso. E o AWS Config avalia a configuração dos recursos, sem controlar quem lê quais colunas.",
+      "opcoes": [
+        { "texto": "Permissões refinadas no AWS Lake Formation.", "correta": true },
+        { "texto": "Uma política de bucket do Amazon S3 para cada equipe.", "correta": false },
+        { "texto": "Alertas do Amazon Macie sobre as colunas sensíveis.", "correta": false },
+        { "texto": "Regras do AWS Config aplicadas à tabela de clientes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-integridade-dados-treinamento-25",
+      "topico": "Engenharia de dados segura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa descobriu que um arquivo de dados de treinamento foi alterado sem autorização e ninguém sabe qual era o conteúdo original, o que comprometeu um modelo em produção. Ela quer garantir a integridade dos conjuntos de dados armazenados num bucket do Amazon S3 daqui em diante. Qual combinação de medidas é mais adequada?",
+      "explicacao": "O versionamento do S3 preserva as versões anteriores de cada objeto, permitindo recuperar o conteúdo original; o bloqueio de objetos (S3 Object Lock) impede que versões sejam sobrescritas ou apagadas durante o período definido; e restringir quem pode gravar no bucket reduz a chance de alteração não autorizada. As três juntas protegem a integridade dos dados. O Amazon Macie descobre dados sensíveis, mas não impede nem desfaz alterações. Tornar o bucket público para dar transparência amplia exatamente o risco de alteração e de vazamento. E aumentar a temperatura é um parâmetro de inferência, sem nenhuma relação com a integridade de dados armazenados.",
+      "opcoes": [
+        { "texto": "Habilitar versionamento e bloqueio de objetos no bucket e restringir quem pode gravar.", "correta": true },
+        { "texto": "Habilitar o Amazon Macie no bucket de dados de treinamento.", "correta": false },
+        { "texto": "Tornar o bucket público para que alterações sejam percebidas mais rápido.", "correta": false },
+        { "texto": "Reduzir a temperatura dos modelos treinados com esses dados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-qualidade-dados-pipeline-26",
+      "topico": "Engenharia de dados segura",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo é retreinado toda semana com dados que chegam de sistemas de parceiros. Duas vezes, um parceiro enviou arquivos com colunas vazias e valores fora da faixa possível, e o problema só foi percebido depois que o modelo ruim entrou em produção. Qual prática evita que isso se repita?",
+      "explicacao": "Verificações automatizadas de qualidade no pipeline — valores ausentes, duplicados, fora da faixa e esquema esperado — interrompem o retreinamento quando os dados de um parceiro chegam com problemas, antes que um modelo ruim seja produzido. Treinar primeiro e verificar depois é justamente o que permitiu o incidente. Duplicar os registros para compensar os valores ausentes não corrige os dados ruins e ainda distorce o conjunto. E criptografar os arquivos recebidos protege a confidencialidade, sem dizer nada sobre a qualidade do conteúdo.",
+      "opcoes": [
+        { "texto": "Aplicar verificações automatizadas de qualidade dos dados antes de cada retreinamento.", "correta": true },
+        { "texto": "Treinar o modelo e verificar a qualidade dos dados depois da implantação.", "correta": false },
+        { "texto": "Duplicar os registros completos para compensar os valores ausentes.", "correta": false },
+        { "texto": "Criptografar os arquivos recebidos dos parceiros com o AWS KMS.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-vazamento-chatbot-publico-27",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa descobriu que desenvolvedores estão colando trechos de código-fonte proprietário e dados de clientes num chatbot público gratuito para pedir ajuda. A empresa não quer proibir o uso de IA generativa, mas precisa evitar o vazamento de dados. Qual abordagem é mais adequada?",
+      "explicacao": "A abordagem equilibrada combina política, alternativa e controle: definir uma política de uso de IA generativa, oferecer uma ferramenta corporativa aprovada, com proteção contratual e técnica dos dados, e bloquear ou monitorar o uso de chatbots públicos não autorizados. Assim a necessidade dos desenvolvedores é atendida sem que os dados saiam para serviços sem garantias. Confiar que provedores públicos não armazenam dados ignora os termos de uso desses serviços, que muitas vezes permitem reter ou usar o conteúdo. Fazer fine-tuning de um modelo não resolve o comportamento de colar dados num serviço externo. E o AWS CloudTrail registra chamadas de API na conta AWS da empresa, sem visibilidade sobre um chatbot público de terceiros.",
+      "opcoes": [
+        { "texto": "Definir política de uso, oferecer ferramenta corporativa aprovada e bloquear ou monitorar chatbots públicos não autorizados.", "correta": true },
+        { "texto": "Confiar que os provedores de chatbots públicos não armazenam nem usam os dados enviados.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo com o código-fonte da empresa.", "correta": false },
+        { "texto": "Habilitar o AWS CloudTrail para registrar o uso do chatbot público.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-validacao-saida-pagamentos-28",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente lê faturas de fornecedores e gera um JSON com fornecedor, valor e conta bancária, que é enviado automaticamente ao sistema de pagamentos. O prompt pede o formato correto, mas em raros casos o JSON vem com campos faltando ou com um valor diferente do total da fatura. Qual medida é mais adequada?",
+      "explicacao": "A saída do modelo deve ser tratada como entrada não confiável quando alimenta um sistema crítico. Validar o JSON contra um esquema e contra regras de negócio — campos obrigatórios, valor igual ao total da fatura, conta cadastrada para o fornecedor — antes de enviá-lo ao sistema de pagamentos bloqueia os casos raros que o prompt não evita. Confiar no formato pedido no prompt é o que já falha hoje. Aumentar o limite de tokens de saída só ajudaria se o JSON estivesse sendo cortado, o que não explica valores diferentes. E registrar os envios no AWS CloudTrail cria uma trilha para depois do pagamento errado, sem impedi-lo.",
+      "opcoes": [
+        { "texto": "Validar o JSON contra um esquema e regras de negócio antes de enviá-lo ao sistema de pagamentos.", "correta": true },
+        { "texto": "Reforçar no prompt a instrução de seguir o formato JSON corretamente.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída do modelo.", "correta": false },
+        { "texto": "Registrar os envios no AWS CloudTrail para auditoria posterior.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-grupo-seguranca-endpoint-29",
+      "topico": "Proteção de rede e dados em trânsito",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa hospeda um modelo em instâncias Amazon EC2 numa VPC, e apenas a aplicação interna, que roda numa sub-rede específica, deve conseguir chamar o servidor de inferência. Hoje o grupo de segurança das instâncias aceita tráfego de qualquer endereço na porta do serviço, e a equipe confia na autenticação da aplicação. Qual medida de proteção de infraestrutura é adequada?",
+      "explicacao": "Restringir o grupo de segurança para aceitar tráfego na porta do serviço apenas a partir da sub-rede ou do grupo de segurança da aplicação reduz a superfície de ataque na camada de rede, somando uma defesa à autenticação — defesa em profundidade. Manter a porta aberta para qualquer endereço e depender só da autenticação deixa o servidor exposto a varreduras e a qualquer falha nessa autenticação. O Amazon CloudFront distribui conteúdo para usuários na internet, o que expõe ainda mais o serviço em vez de restringi-lo. E o Amazon Macie descobre dados sensíveis no S3, sem controlar tráfego de rede.",
+      "opcoes": [
+        { "texto": "Restringir o grupo de segurança para aceitar tráfego apenas da sub-rede da aplicação.", "correta": true },
+        { "texto": "Manter o grupo de segurança aberto e confiar apenas na autenticação da aplicação.", "correta": false },
+        { "texto": "Colocar uma distribuição do Amazon CloudFront na frente do servidor de inferência.", "correta": false },
+        { "texto": "Habilitar o Amazon Macie para proteger o servidor de inferência.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-auditoria-acoes-agente-30",
+      "topico": "Registro e auditoria de interações com IA",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um agente de TI executa ações em sistemas internos, como redefinir senhas e liberar acessos. O comitê de auditoria quer conseguir reconstruir, para qualquer ação, o que foi pedido, o que o modelo respondeu e quais ferramentas o agente chamou em cada passo. Quais recursos atendem a esse requisito?",
+      "explicacao": "Dois registros juntos permitem reconstruir cada ação. O registro de invocação de modelos guarda o conteúdo dos prompts e das respostas, e o rastreamento dos passos do agente — como o do Amazon Bedrock AgentCore Observability — mostra cada chamada de ferramenta, com entradas e resultados. O AWS Trusted Advisor dá recomendações sobre a conta, sem registrar interações. Desativar os registros para preservar a privacidade elimina justamente a trilha exigida pelo comitê; a privacidade deve ser tratada com controle de acesso e retenção dos logs, não com sua ausência. E o AWS Artifact fornece relatórios de conformidade da AWS, sem relação com as ações do agente.",
+      "opcoes": [
+        { "texto": "Registro de invocação dos modelos, com o conteúdo dos prompts e das respostas.", "correta": true },
+        { "texto": "Rastreamento de cada passo e chamada de ferramenta do agente.", "correta": true },
+        { "texto": "Verificações do AWS Trusted Advisor sobre a conta.", "correta": false },
+        { "texto": "Desativação dos registros de interação para preservar a privacidade.", "correta": false },
+        { "texto": "Relatórios de conformidade baixados no AWS Artifact.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-catalogo-dados-glue-31",
+      "topico": "Linhagem de dados e citação de fontes",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Cientistas de dados de uma empresa perdem tempo procurando quais conjuntos de dados existem no data lake, qual é o esquema de cada tabela e onde os arquivos estão armazenados. A empresa quer um repositório central de metadados dos conjuntos de dados, que também sirva de base para documentar a origem dos dados usados nos modelos. Qual serviço atende a esse requisito?",
+      "explicacao": "O AWS Glue Data Catalog é o repositório central de metadados: registra tabelas, esquemas e localizações dos dados, permitindo descobrir o que existe no data lake e servindo de base para documentar a origem dos dados usados nos modelos. O Amazon Macie identifica dados sensíveis, mas não cataloga esquemas nem localizações para descoberta. O AWS CloudTrail registra chamadas de API, não metadados de conjuntos de dados. E o SageMaker Model Cards documenta modelos; pode referenciar os dados usados, mas não é o catálogo dos conjuntos de dados da empresa.",
+      "opcoes": [
+        { "texto": "AWS Glue Data Catalog", "correta": true },
+        { "texto": "Amazon Macie", "correta": false },
+        { "texto": "AWS CloudTrail", "correta": false },
+        { "texto": "Amazon SageMaker Model Cards", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-retencao-ciclo-vida-s3-32",
+      "topico": "Estratégias de governança de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A política de governança de uma empresa determina que os registros das conversas com o assistente de IA, gravados no Amazon S3, sejam mantidos por exatamente um ano e excluídos depois disso, sem depender de intervenção manual. Qual solução atende a esse requisito?",
+      "explicacao": "Uma regra de ciclo de vida do Amazon S3 com expiração de objetos após um ano exclui automaticamente os registros ao fim do prazo, aplicando a retenção definida sem intervenção manual. Um script executado manualmente uma vez por ano depende justamente da intervenção que a política quer evitar, e deixaria registros além do prazo entre uma execução e outra. Mover os registros para o Amazon S3 Glacier e mantê-los para sempre reduz custo, mas descumpre a exclusão exigida. E o AWS CloudTrail registra chamadas de API, sem gerenciar o tempo de vida dos objetos.",
+      "opcoes": [
+        { "texto": "Uma regra de ciclo de vida do Amazon S3 que expira os objetos após um ano.", "correta": true },
+        { "texto": "Um script executado manualmente uma vez por ano para apagar os registros.", "correta": false },
+        { "texto": "Mover os registros para o Amazon S3 Glacier e mantê-los indefinidamente.", "correta": false },
+        { "texto": "Configurar o AWS CloudTrail para apagar os registros após um ano.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-cloudwatch-alarmes-uso-33",
+      "topico": "Estratégias de governança de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer ser avisada rapidamente quando o uso do Amazon Bedrock fugir do padrão — por exemplo, um aumento repentino de invocações ou de tokens processados, que pode indicar abuso de uma credencial ou um erro de código gerando custo. Qual solução atende a esse requisito?",
+      "explicacao": "O Amazon CloudWatch recebe métricas de uso do Amazon Bedrock, como invocações e tokens, e permite criar alarmes que avisam quando esses valores ultrapassam limites — monitoramento contínuo do padrão de uso. O AWS Artifact fornece relatórios de conformidade da AWS, sem monitorar o uso. O AWS Config avalia a configuração dos recursos, e um pico de invocações não é mudança de configuração. E o Amazon Macie descobre dados sensíveis no S3, sem acompanhar métricas de uso de modelos.",
+      "opcoes": [
+        { "texto": "Criar alarmes do Amazon CloudWatch sobre as métricas de invocações e tokens do Amazon Bedrock.", "correta": true },
+        { "texto": "Consultar periodicamente os relatórios do AWS Artifact.", "correta": false },
+        { "texto": "Criar regras do AWS Config para o uso do Amazon Bedrock.", "correta": false },
+        { "texto": "Habilitar o Amazon Macie para detectar picos de uso dos modelos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-cadencia-revisao-34",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O comitê de governança de IA de uma seguradora está definindo quando revisar os casos de uso de IA generativa já aprovados. Os modelos usados recebem novas versões com frequência, e a regulação do setor está em evolução. Qual estratégia de revisão é mais adequada?",
+      "explicacao": "Revisões periódicas, numa cadência definida, garantem que todo caso de uso seja reavaliado mesmo sem problemas aparentes, e revisões extraordinárias disparadas por eventos — incidentes, troca de versão do modelo, mudança regulatória — cobrem as mudanças que não podem esperar o próximo ciclo. Revisar apenas no lançamento ignora que modelos, usos e regras mudam depois. Revisar só depois de incidentes transforma a governança em reação a danos já ocorridos. E uma cadência de cinco anos é incompatível com modelos que recebem versões novas com frequência e com uma regulação em evolução.",
+      "opcoes": [
+        { "texto": "Revisões periódicas definidas, somadas a revisões disparadas por incidentes, troca de modelo ou mudança regulatória.", "correta": true },
+        { "texto": "Uma revisão única no momento da aprovação de cada caso de uso.", "correta": false },
+        { "texto": "Revisões realizadas somente depois que ocorrer algum incidente.", "correta": false },
+        { "texto": "Uma revisão completa a cada cinco anos, alinhada ao planejamento estratégico.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-treinamento-equipes-35",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa publicou há seis meses uma política de uso de IA generativa que proíbe enviar dados de clientes a ferramentas não aprovadas. Mesmo assim, auditorias continuam encontrando funcionários fazendo isso, e a maioria diz desconhecer a política. Qual medida trata a causa do problema?",
+      "explicacao": "Os funcionários desconhecem a política, então a causa é a falta de capacitação. Um treinamento obrigatório e periódico sobre a política e os riscos, com exemplos práticos do dia a dia, faz a regra chegar a quem precisa segui-la — requisito comum em processos de governança. Republicar a política na intranet sem divulgação repete o que já não funcionou. Punir os funcionários sem antes capacitá-los ataca o sintoma e não muda o conhecimento de quem ainda não foi flagrado. E proibir todo uso de IA na empresa é uma reação desproporcional, que tende a empurrar o uso para ferramentas ainda menos controladas.",
+      "opcoes": [
+        { "texto": "Treinamento obrigatório e periódico das equipes sobre a política e os riscos, com exemplos práticos.", "correta": true },
+        { "texto": "Republicar a política na intranet, no mesmo formato atual.", "correta": false },
+        { "texto": "Aplicar punições aos funcionários flagrados, sem outras ações.", "correta": false },
+        { "texto": "Proibir o uso de qualquer ferramenta de IA generativa na empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-well-architected-lente-36",
+      "topico": "Serviços de governança e conformidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um arquiteto quer revisar de forma estruturada uma carga de trabalho de IA generativa já em produção, comparando-a com boas práticas de segurança, confiabilidade, eficiência de desempenho, otimização de custos e sustentabilidade, e registrar os pontos de melhoria identificados. Qual serviço atende a esse objetivo?",
+      "explicacao": "O AWS Well-Architected Tool conduz revisões estruturadas de cargas de trabalho contra os pilares do Well-Architected Framework e permite aplicar lentes específicas, inclusive para IA generativa e ML, registrando os riscos e as melhorias identificados. O AWS Trusted Advisor executa verificações automáticas sobre a conta, útil mas sem a revisão estruturada por pilares de uma carga de trabalho. O AWS Config avalia a conformidade da configuração dos recursos com regras, sem cobrir práticas de arquitetura. E o AWS Artifact fornece relatórios de conformidade da AWS, sem revisar a arquitetura do cliente.",
+      "opcoes": [
+        { "texto": "AWS Well-Architected Tool", "correta": true },
+        { "texto": "AWS Trusted Advisor", "correta": false },
+        { "texto": "AWS Config", "correta": false },
+        { "texto": "AWS Artifact", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-responsabilidade-autohospedado-37",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai deixar de usar um modelo de base pelo Amazon Bedrock e passar a hospedar um modelo de código aberto em instâncias Amazon EC2, com seu próprio servidor de inferência. Pelo modelo de responsabilidade compartilhada, qual responsabilidade passa a ser da empresa com essa mudança?",
+      "explicacao": "Num serviço gerenciado como o Amazon Bedrock, a AWS cuida da infraestrutura que executa os modelos. Ao hospedar o modelo em instâncias EC2, a empresa passa a ser responsável pelo sistema operacional, pelo servidor de inferência e pelas bibliotecas instaladas — inclusive aplicar correções de segurança. A segurança física dos data centers continua sendo da AWS em qualquer caso. Afirmar que nada muda ignora que a fronteira da responsabilidade se desloca conforme o tipo de serviço. E a manutenção do hipervisor que executa as instâncias também continua com a AWS.",
+      "opcoes": [
+        { "texto": "Aplicar correções no sistema operacional, no servidor de inferência e nas bibliotecas.", "correta": true },
+        { "texto": "Garantir a segurança física dos data centers onde as instâncias são executadas.", "correta": false },
+        { "texto": "Nenhuma, porque as responsabilidades são as mesmas nos dois modelos de uso.", "correta": false },
+        { "texto": "Manter e corrigir o hipervisor que executa as instâncias Amazon EC2.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-tecnicas-privacidade-assoc-38",
+      "topico": "Engenharia de dados segura",
+      "tipo": "Associacao",
+      "enunciado": "O encarregado de proteção de dados de uma empresa listou necessidades de projetos de ML. Associe cada necessidade à técnica de proteção de dados que a atende.",
+      "explicacao": "Trocar o CPF por um identificador que não revela o cliente, mas mantém a ligação entre tabelas, é pseudonimização. Remover definitivamente tudo o que permitiria identificar a pessoa num relatório público é anonimização — ao contrário da pseudonimização, não há como reverter a ligação. Exibir só os quatro últimos dígitos do cartão é mascaramento. E garantir que só a equipe de risco leia a coluna de renda é controle de acesso refinado. A replicação entre Regiões está no painel porque também envolve dados, mas serve à disponibilidade e à recuperação — não protege a identidade de ninguém e não atende a nenhuma das necessidades.",
+      "associacoes": [
+        { "alvo": "Trocar o CPF por um identificador que não revela o cliente, mantendo a ligação entre tabelas", "item": "Pseudonimização" },
+        { "alvo": "Remover definitivamente tudo o que permita identificar as pessoas num relatório público", "item": "Anonimização" },
+        { "alvo": "Exibir apenas os quatro últimos dígitos do cartão na tela de atendimento", "item": "Mascaramento" },
+        { "alvo": "Garantir que apenas a equipe de risco leia a coluna de renda", "item": "Controle de acesso refinado" }
+      ],
+      "itensExtras": ["Replicação entre Regiões"]
+    },
+    {
+      "id": "aifc01-seg-resposta-incidente-ordenacao-39",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "Ordenacao",
+      "enunciado": "A equipe de segurança de uma empresa descobriu que uma credencial de acesso ao Amazon Bedrock vazou num repositório público e foi usada por terceiros para invocar modelos. Selecione e ordene as etapas de resposta ao incidente.",
+      "explicacao": "A primeira etapa é conter o incidente, revogando a credencial vazada para interromper o uso indevido. Depois vem a investigação, com o AWS CloudTrail e os registros de invocação, para saber o que foi feito, quando e com quais dados. Com o escopo conhecido, corrige-se a causa — por exemplo, tirando credenciais do código e usando funções do IAM. Por fim, os controles são revisados e o incidente é comunicado conforme a política da empresa. Apagar os registros para limitar a exposição destrói as evidências necessárias à investigação e à conformidade. E retomar o uso normal sem investigar deixa a empresa sem saber o que foi acessado e sem corrigir a causa.",
+      "sequencia": [
+        "Revogar a credencial vazada para interromper o uso indevido.",
+        "Investigar o uso com o AWS CloudTrail e os registros de invocação.",
+        "Corrigir a causa, removendo credenciais do código e usando funções do IAM.",
+        "Revisar os controles e comunicar o incidente conforme a política."
+      ],
+      "itensExtras": [
+        "Apagar os registros de invocação para limitar a exposição dos dados.",
+        "Retomar o uso normal assim que a credencial for revogada, sem investigar."
+      ]
+    }
+  ]
+}

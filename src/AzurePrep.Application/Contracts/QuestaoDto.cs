@@ -36,4 +36,5 @@ public sealed record QuestaoDto(
     IReadOnlyList<Guid> SelectedOptionIds,
     bool IsFlaggedForReview,
     int TotalQuestions,
-    int RequiredSelections);
+    int RequiredSelections,
+    FornecedorDoExame Vendor = FornecedorDoExame.Microsoft);

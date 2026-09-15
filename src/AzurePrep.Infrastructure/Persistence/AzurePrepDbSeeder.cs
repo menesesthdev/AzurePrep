@@ -1,4 +1,5 @@
 using AzurePrep.Domain.Entidades;
+using AzurePrep.Domain.Enums;
 using AzurePrep.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -102,7 +103,30 @@ public static class AzurePrepDbSeeder
                 new AreaDeExame("seguranca-conformidade", "Desenvolver plano de segurança e conformidade", 12.5m),
                 new AreaDeExame("instrumentacao", "Implementar estratégia de instrumentação", 7.5m)
             ],
-            Publicado: true)
+            Publicado: true),
+
+        // Primeiro exame AWS, publicado em 15/09/2026 com 450 questões (90/108/126/63/63).
+        // Exam guide oficial v1.1 (30/04/2026): 65 questões em 90 minutos — 50
+        // pontuadas e 15 não pontuadas na prova real; aqui as 65 contam (decisão de 15/09/2026:
+        // descartar 15 ao acaso só deixaria a nota mais ruidosa, e a pressão de tempo é a mesma).
+        // Os pesos são números exatos, não faixas. A AWS não publica percentual de corte, só "700
+        // numa escala de 100–1000"; os 70% são a âncora da nossa aproximação, como nos exames Azure.
+        new DefinicaoDeExame(
+            Code: "AIF-C01",
+            Name: "AWS Certified AI Practitioner",
+            TimeLimitMinutes: 90,
+            PassingScorePercent: 70,
+            TotalQuestions: 65,
+            Areas:
+            [
+                new AreaDeExame("fundamentos-ia-ml", "Fundamentos de IA e ML", 20m),
+                new AreaDeExame("fundamentos-ia-generativa", "Fundamentos de IA generativa", 24m),
+                new AreaDeExame("aplicacoes-modelos-fundacionais", "Aplicações de modelos de base", 28m),
+                new AreaDeExame("ia-responsavel", "Diretrizes para IA responsável", 14m),
+                new AreaDeExame("seguranca-conformidade-governanca", "Segurança, conformidade e governança para soluções de IA", 14m)
+            ],
+            Publicado: true,
+            Fornecedor: FornecedorDoExame.Aws)
     ];
 
     /// <summary>
@@ -123,6 +147,13 @@ public static class AzurePrepDbSeeder
             e => (IReadOnlyCollection<string>)e.Areas.Select(a => a.Key).ToList(),
             StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>
+    /// O fornecedor de cada exame, por código — é o que diz ao validador quais regras de formato
+    /// valem para cada lote (a AWS não tem Sim/Não; múltipla resposta pede ao menos 5 alternativas).
+    /// </summary>
+    public static IReadOnlyDictionary<string, FornecedorDoExame> FornecedorPorExame { get; } =
+        Exames.ToDictionary(e => e.Code, e => e.Fornecedor, StringComparer.OrdinalIgnoreCase);
+
     public static async Task SemearAsync(
         AzurePrepDbContext db,
         ILogger? logger = null,
@@ -133,7 +164,7 @@ public static class AzurePrepDbSeeder
         // Valida o catálogo INTEIRO de uma vez, antes de tocar no banco. Validar por exame, dentro
         // do laço, deixaria passar justamente o erro que só existe entre exames: um lote cujo
         // 'exameCode' não casa com exame nenhum não pertence a nenhuma iteração e sumiria calado.
-        var problemas = CatalogoDeQuestoesDeSeed.Validar(catalogo, AreasPorExame);
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(catalogo, AreasPorExame, FornecedorPorExame);
         if (problemas.Count > 0)
         {
             // Fail fast: subir com banco de questões inválido produziria prova com gabarito
@@ -170,7 +201,8 @@ public static class AzurePrepDbSeeder
                 timeLimitMinutes: definicao.TimeLimitMinutes,
                 passingScorePercent: definicao.PassingScorePercent,
                 totalQuestions: definicao.TotalQuestions,
-                isPublished: definicao.Publicado);
+                isPublished: definicao.Publicado,
+                vendor: definicao.Fornecedor);
 
             db.Exams.Add(exam);
         }
@@ -181,7 +213,8 @@ public static class AzurePrepDbSeeder
                 definicao.TimeLimitMinutes,
                 definicao.PassingScorePercent,
                 definicao.TotalQuestions,
-                definicao.Publicado);
+                definicao.Publicado,
+                definicao.Fornecedor);
         }
 
         var areasPorKey = exam.SkillAreas.ToDictionary(a => a.Key, StringComparer.OrdinalIgnoreCase);

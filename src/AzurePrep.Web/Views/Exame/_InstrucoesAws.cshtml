@@ -1,0 +1,42 @@
+@model InstrucoesAwsViewModel
+@*
+    Texto próprio do PrepHub. O demo oficial serve de referência para ONDE as instruções aparecem
+    (antes da primeira questão e no botão "Instruções" da revisão), não para o que dizem — copiar o
+    texto dele seria reproduzir conteúdo da AWS numa página com chave Pix.
+*@
+<div class="aws-intro">
+    <p class="aws-intro__title"><strong>@Model.ExamName (@Model.ExamCode) — simulado</strong></p>
+
+    <p>
+        Este simulado reproduz a interface de entrega das provas de certificação da AWS. São
+        @Model.TotalQuestions questões e @Model.TimeLimitMinutes minutos. O tempo começa a contar quando você
+        selecionar Próxima, e a prova é encerrada automaticamente quando ele terminar.
+    </p>
+
+    <p><strong>Tipos de questão</strong></p>
+    <p>
+        Escolha única, múltipla resposta, ordenação e associação. Nas questões de múltipla resposta e de
+        ordenação, o enunciado indica quantas opções selecionar. Não há crédito parcial: a questão só conta
+        se todas as seleções estiverem corretas. Questão sem resposta conta como errada, e não há penalidade
+        por chutar.
+    </p>
+
+    <p><strong>Marcação e revisão</strong></p>
+    <p>
+        Use Marcar para revisão para voltar a uma questão depois. Ao passar pela última questão, a tela de
+        revisão lista todas as questões com o status de cada uma. Encerrar a revisão conclui a prova, e não
+        é possível retornar às questões depois disso.
+    </p>
+
+    <p><strong>Acessibilidade</strong></p>
+    <p>
+        O seletor Esquema de cores muda as cores da área da questão. Use Ctrl+ e Ctrl- para ampliar e reduzir
+        a tela, e Ctrl 0 para voltar ao tamanho padrão. As letras sublinhadas nos botões são atalhos de teclado
+        do navegador (normalmente Alt + letra).
+    </p>
+
+    <p class="aws-intro__note">
+        O PrepHub é um simulado independente e não tem vínculo com a Amazon Web Services. As questões são
+        originais, escritas a partir do guia público do exame.
+    </p>
+</div>

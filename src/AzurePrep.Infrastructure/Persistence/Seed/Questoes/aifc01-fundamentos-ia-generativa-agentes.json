@@ -1,0 +1,194 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-difusao-processo-68",
+      "topico": "Tipos de modelos generativos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa apresentação sobre IA generativa, um gerente perguntou como um modelo de difusão cria a imagem de uma paisagem que nunca existiu a partir de uma descrição em texto. Qual explicação está correta?",
+      "explicacao": "Um modelo de difusão aprende, durante o treinamento, a remover ruído de imagens. Na geração, parte de ruído aleatório e o remove em várias etapas, guiado pela descrição em texto, até chegar a uma imagem nova — por isso consegue criar paisagens que nunca existiram. Ele não recorta e combina fotografias guardadas do conjunto de treinamento; aprende padrões, não armazena um banco de imagens para colar. Não busca na internet uma imagem parecida com a descrição. E não aplica regras de desenho programadas manualmente, e sim o que aprendeu com os dados.",
+      "opcoes": [
+        { "texto": "Parte de ruído aleatório e o remove em várias etapas, guiado pela descrição, até formar a imagem.", "correta": true },
+        { "texto": "Recorta e combina fotografias armazenadas do conjunto de treinamento.", "correta": false },
+        { "texto": "Busca na internet a imagem mais parecida com a descrição.", "correta": false },
+        { "texto": "Aplica regras de desenho programadas manualmente pelos desenvolvedores.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-embeddings-multimodais-busca-69",
+      "topico": "Embeddings e vetores",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um marketplace quer que os clientes encontrem produtos digitando descrições como tênis vermelho de corrida com sola branca, e que a busca compare essa descrição diretamente com as fotos dos produtos, inclusive de anúncios cujo texto é pobre ou está em branco. Qual abordagem atende a esse requisito?",
+      "explicacao": "Embeddings multimodais representam textos e imagens no mesmo espaço vetorial, então a descrição digitada pode ser comparada diretamente com os vetores das fotos — funcionando mesmo quando o texto do anúncio é pobre. Extrair texto das fotos com o Amazon Textract não ajuda, porque fotos de tênis raramente contêm texto que descreva cor e uso. Rótulos genéricos do Amazon Rekognition, como calçado, perdem os detalhes da descrição e não são comparados por significado com a busca. E um modelo de difusão gera imagens novas, sem buscar entre as fotos existentes.",
+      "opcoes": [
+        { "texto": "Usar embeddings multimodais, que representam textos e imagens no mesmo espaço vetorial.", "correta": true },
+        { "texto": "Extrair o texto das fotos dos produtos com o Amazon Textract.", "correta": false },
+        { "texto": "Gerar rótulos genéricos das fotos com o Amazon Rekognition e buscar por eles.", "correta": false },
+        { "texto": "Usar um modelo de difusão para gerar imagens a partir da descrição.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-recomendacao-personalize-texto-70",
+      "topico": "Casos de uso de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma livraria on-line quer enviar e-mails em que os livros recomendados sejam escolhidos com base no comportamento de milhões de clientes e a mensagem de cada e-mail seja escrita de forma personalizada, citando os interesses do leitor. A empresa quer usar serviços da AWS adequados a cada parte. Qual combinação é mais adequada?",
+      "explicacao": "Escolher os livros a partir do comportamento de milhões de clientes é o caso de uso de um serviço de recomendação, como o Amazon Personalize, que aprende com as interações. Escrever a mensagem personalizada citando os interesses do leitor é geração de texto, adequada a um modelo de base. Pedir ao modelo de base que escolha os livros apenas pelo prompt não aproveita o comportamento agregado dos clientes e encarece cada e-mail. O Amazon Polly converte texto em fala e não redige mensagens. E o Amazon Comprehend analisa textos, sem recomendar livros nem escrever e-mails.",
+      "opcoes": [
+        { "texto": "Amazon Personalize para escolher os livros e um modelo de base para redigir a mensagem.", "correta": true },
+        { "texto": "Um modelo de base que escolhe os livros e redige a mensagem apenas a partir do prompt.", "correta": false },
+        { "texto": "Amazon Personalize para escolher os livros e Amazon Polly para redigir a mensagem.", "correta": false },
+        { "texto": "Amazon Comprehend para escolher os livros e redigir a mensagem.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-tipo-modelo-embeddings-71",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe está montando uma aplicação com RAG e precisa escolher o modelo do componente que converte os documentos e as perguntas em vetores para a busca por similaridade. A resposta final ao usuário será gerada por outro modelo. Qual tipo de modelo deve ser usado nesse componente?",
+      "explicacao": "Converter textos em vetores que representam seu significado é a função de um modelo de embeddings; é esse vetor que o banco vetorial usa na busca por similaridade. Um modelo de geração de texto, mesmo com temperatura baixa, produz texto, não os vetores de que a busca precisa — ele é o componente que gera a resposta final. Um modelo de difusão gera imagens. E um modelo de fala converte áudio e texto, sem relação com a busca vetorial.",
+      "opcoes": [
+        { "texto": "Um modelo de embeddings.", "correta": true },
+        { "texto": "Um modelo de geração de texto com temperatura baixa.", "correta": false },
+        { "texto": "Um modelo de difusão.", "correta": false },
+        { "texto": "Um modelo de síntese e reconhecimento de fala.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-metrica-tempo-atendimento-72",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma central de atendimento deu aos atendentes humanos um assistente de IA generativa que resume o histórico do cliente e sugere respostas durante a ligação. A diretoria quer medir o ganho de eficiência trazido pela ferramenta. Qual métrica é mais adequada?",
+      "explicacao": "Se o assistente torna os atendentes mais eficientes, as ligações passam a ser resolvidas em menos tempo. Comparar o tempo médio de atendimento antes e depois da ferramenta, com volumes e tipos de ligação comparáveis, mede diretamente esse ganho. A pontuação BLEU dos resumos compara textos com referências, sem medir eficiência. O número de tokens processados mostra volume de uso e custo. E o número de parâmetros do modelo descreve o modelo, sem relação com o desempenho da central.",
+      "opcoes": [
+        { "texto": "O tempo médio de atendimento antes e depois da adoção do assistente.", "correta": true },
+        { "texto": "A pontuação BLEU dos resumos gerados pelo assistente.", "correta": false },
+        { "texto": "O número de tokens processados pelo assistente por mês.", "correta": false },
+        { "texto": "O número de parâmetros do modelo usado pelo assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-baixa-utilizacao-73",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe estimou que um assistente interno ocuparia, em média, menos de 5% da capacidade de uma unidade de Provisioned Throughput ao longo do mês, com uso concentrado em poucas horas de alguns dias. O gerente sugere contratar a capacidade reservada para garantir desempenho. Qual avaliação é mais adequada?",
+      "explicacao": "O Provisioned Throughput cobra pela capacidade reservada, esteja ela em uso ou não. Com utilização média abaixo de 5%, a empresa pagaria por capacidade ociosa na maior parte do tempo, e o modo sob demanda, que cobra só pelos tokens usados, tende a sair muito mais barato. Contratar a capacidade reservada para garantir desempenho só se justifica com volume alto e constante ou exigência de vazão garantida. Reservar capacidade para vários modelos multiplicaria o desperdício. E a inferência em lote é assíncrona, inadequada para um assistente interativo.",
+      "opcoes": [
+        { "texto": "Manter o modo sob demanda, porque a capacidade reservada ficaria ociosa na maior parte do tempo.", "correta": true },
+        { "texto": "Contratar o Provisioned Throughput, que sempre é mais barato para uso corporativo.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput para vários modelos, garantindo alternativas.", "correta": false },
+        { "texto": "Enviar as perguntas do assistente para a inferência em lote.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agente-limite-passos-74",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente de pesquisa, quando uma API externa retorna erro, tenta novamente de formas ligeiramente diferentes. Numa noite, a API ficou fora do ar, e o agente passou horas repetindo chamadas ao modelo e à ferramenta, gerando um custo alto sem concluir nenhuma tarefa. Qual medida é mais adequada?",
+      "explicacao": "Agentes precisam de limites de execução: um número máximo de passos e de tempo por tarefa e um tratamento para falhas repetidas de ferramenta — por exemplo, desistir após algumas tentativas e informar o usuário. Isso impede ciclos que consomem tokens indefinidamente. Aumentar a temperatura só faria o agente tentar variações ainda mais diferentes, sem limitar o ciclo. Uma janela de contexto maior permitiria acumular mais tentativas, aumentando o custo. E remover os registros de execução apenas esconderia o problema, dificultando diagnosticá-lo.",
+      "opcoes": [
+        { "texto": "Definir limites de passos e de tempo por tarefa e tratar falhas repetidas das ferramentas.", "correta": true },
+        { "texto": "Aumentar a temperatura para que o agente encontre outra forma de chamar a API.", "correta": false },
+        { "texto": "Usar um modelo com janela de contexto maior para registrar todas as tentativas.", "correta": false },
+        { "texto": "Remover os registros de execução para reduzir o custo de armazenamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-mcp-seguranca-servidor-75",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai criar um servidor MCP para que agentes internos consultem o banco de dados de clientes. Um desenvolvedor sugeriu expor todas as tabelas e operações, sem autenticação, já que o servidor ficará na rede interna. Qual abordagem é mais adequada?",
+      "explicacao": "Um servidor MCP é uma porta de acesso a sistemas e dados, e deve ser protegido como tal: exigir autenticação e autorização de quem o chama e expor apenas as operações de que os agentes realmente precisam, com o menor privilégio. Estar na rede interna não é proteção suficiente, porque qualquer agente ou pessoa com acesso a essa rede, inclusive por meio de uma injeção de prompt, poderia usar todas as operações. Confiar nas instruções do prompt dos agentes para limitar o uso é orientação, não controle de acesso. E expor todas as tabelas para evitar retrabalho amplia a superfície de dano sem necessidade.",
+      "opcoes": [
+        { "texto": "Exigir autenticação e autorização no servidor MCP e expor apenas as operações necessárias.", "correta": true },
+        { "texto": "Expor todas as operações sem autenticação, já que o servidor fica na rede interna.", "correta": false },
+        { "texto": "Expor todas as operações e limitar o uso por meio das instruções no prompt dos agentes.", "correta": false },
+        { "texto": "Expor todas as tabelas para evitar retrabalho quando surgirem novos agentes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-comunicacao-entre-agentes-76",
+      "topico": "Conceitos de IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de logística tem um agente de cotação de fretes, e seus parceiros transportadores têm agentes próprios, construídos com frameworks diferentes, que informam disponibilidade e aceitam reservas. A empresa quer que seu agente descubra os agentes dos parceiros, delegue tarefas a eles e receba as respostas de forma padronizada. Qual abordagem atende a esse requisito?",
+      "explicacao": "Quando o objetivo é agentes conversarem entre si — descobrir capacidades, delegar tarefas e trocar resultados, mesmo com frameworks diferentes —, o adequado é um protocolo de comunicação entre agentes, como o Agent2Agent (A2A). O MCP é o protocolo que conecta um agente a ferramentas e fontes de dados; ele é complementar, mas não foi pensado para que agentes independentes negociem tarefas entre si. Fazer fine-tuning conjunto dos modelos não cria um meio de comunicação entre agentes de empresas diferentes. E uma base de conhecimento compartilhada permite consultar informações, sem delegar tarefas nem receber respostas dos agentes parceiros.",
+      "opcoes": [
+        { "texto": "Um protocolo de comunicação entre agentes, como o Agent2Agent (A2A).", "correta": true },
+        { "texto": "O Model Context Protocol, usado para conectar um agente a ferramentas e fontes de dados.", "correta": false },
+        { "texto": "Um fine-tuning conjunto dos modelos usados pelos agentes das empresas.", "correta": false },
+        { "texto": "Uma base de conhecimento compartilhada com os documentos dos parceiros.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-contexto-resultado-ferramenta-77",
+      "topico": "Engenharia de contexto",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um agente financeiro chama uma API que devolve o extrato completo do cliente em JSON, com milhares de lançamentos e dezenas de campos por lançamento. O agente inclui essa resposta inteira no contexto para responder perguntas como quanto gastei com restaurantes em maio?. As chamadas ficaram lentas, caras e às vezes excedem o limite de contexto. Qual prática de engenharia de contexto é mais adequada?",
+      "explicacao": "Resultados de ferramentas também ocupam a janela de contexto e custam tokens. Filtrar e resumir a resposta da API antes de colocá-la no contexto — mantendo só os lançamentos e campos relevantes para a pergunta, ou já somando os valores — reduz tokens, latência e o risco de exceder o limite, além de facilitar a resposta correta. Enviar o JSON completo é exatamente o que causa o problema. Um modelo com janela maior permitiria enviar mais dados, mas manteria o custo e a lentidão. E aumentar a temperatura não reduz o contexto nem ajuda o cálculo.",
+      "opcoes": [
+        { "texto": "Filtrar e resumir o resultado da API, mantendo só os dados relevantes para a pergunta.", "correta": true },
+        { "texto": "Continuar enviando o JSON completo para não perder nenhuma informação.", "correta": false },
+        { "texto": "Trocar por um modelo com janela de contexto maior.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo processe o extrato mais rápido.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-chunking-estrutura-documento-78",
+      "topico": "Chunking",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa indexou suas normas internas, que são organizadas em capítulos, seções e artigos, dividindo o texto em trechos de tamanho fixo. Com isso, muitos trechos começam no meio de um artigo e terminam no início de outro, e as respostas misturam regras de artigos diferentes. Qual estratégia de divisão é mais adequada?",
+      "explicacao": "Quando o documento tem estrutura clara, dividir respeitando essa estrutura — ou o significado do texto — faz cada trecho corresponder a uma unidade coerente, como um artigo, com o contexto de capítulo e seção. Isso evita trechos que misturam regras de artigos diferentes. Reduzir o tamanho fixo continuaria cortando artigos em pontos arbitrários, só que em pedaços menores. Indexar cada norma inteira, sem divisão, diluiria o conteúdo e dificultaria encontrar o artigo relevante. E dividir em pontos aleatórios agravaria a mistura de regras.",
+      "opcoes": [
+        { "texto": "Dividir respeitando a estrutura do documento, como capítulos, seções e artigos.", "correta": true },
+        { "texto": "Reduzir o tamanho fixo dos trechos.", "correta": false },
+        { "texto": "Indexar cada norma inteira como um único trecho.", "correta": false },
+        { "texto": "Dividir o texto em pontos aleatórios para variar o conteúdo dos trechos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacoes-mitigacoes-assoc-79",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe listou problemas observados nos assistentes de IA generativa da empresa. Associe cada problema à mitigação mais adequada.",
+      "explicacao": "Um assistente que inventa cláusulas inexistentes nas políticas precisa de RAG com citação das fontes, para fundamentar e verificar as respostas. Testes que falham porque a mesma pergunta gera redações diferentes pedem temperatura menor e avaliação por critérios, em vez de igualdade de texto. Informar o status de um pedido que muda a cada minuto exige uma ferramenta que consulta a API de pedidos no momento da pergunta. E somas longas com totais errados pedem uma ferramenta determinística de cálculo. Aumentar a janela de contexto está no painel porque parece resolver vários desses problemas, mas só aumenta quanto texto cabe numa chamada, sem fundamentar respostas, estabilizar a redação, trazer dados em tempo real nem garantir cálculos exatos.",
+      "associacoes": [
+        { "alvo": "O assistente cita cláusulas que não existem nas políticas da empresa", "item": "RAG com citação das fontes" },
+        { "alvo": "Testes automatizados falham porque a mesma pergunta gera redações diferentes", "item": "Temperatura menor e avaliação por critérios" },
+        { "alvo": "O assistente informa o status de pedidos que mudam a cada minuto", "item": "Ferramenta que consulta a API de pedidos" },
+        { "alvo": "O assistente erra o total ao somar pedidos com dezenas de itens", "item": "Ferramenta determinística de cálculo" }
+      ],
+      "itensExtras": ["Aumentar a janela de contexto"]
+    },
+    {
+      "id": "aifc01-gen-construcao-aplicacao-ordenacao-80",
+      "topico": "Ciclo de vida de modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa de seguros quer criar sua primeira aplicação de IA generativa, um assistente que ajuda corretores a comparar coberturas. A equipe quer seguir um caminho de baixo risco e custo. Selecione e ordene as etapas.",
+      "explicacao": "O caminho começa definindo o caso de uso e as métricas de sucesso, que orientam todas as escolhas seguintes. Depois escolhe-se um modelo de base candidato adequado aos requisitos. Com ele, constrói-se um protótipo usando engenharia de prompt, a abordagem de menor custo. Por fim, o protótipo é avaliado contra as métricas e iterado antes de ir para produção. Pré-treinar um modelo próprio antes do protótipo é a opção mais cara e desnecessária para uma primeira aplicação. E lançar sem métricas definidas impede saber se o assistente atinge o objetivo.",
+      "sequencia": [
+        "Definir o caso de uso e as métricas de sucesso.",
+        "Escolher um modelo de base candidato adequado aos requisitos.",
+        "Construir um protótipo usando engenharia de prompt.",
+        "Avaliar o protótipo contra as métricas e iterar antes da produção."
+      ],
+      "itensExtras": [
+        "Pré-treinar um modelo próprio antes de construir o protótipo.",
+        "Lançar o assistente antes de definir as métricas de sucesso."
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-agentes-fatores-81",
+      "topico": "Tokens e preço por token",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa migrou um assistente simples, que respondia cada pergunta com uma única chamada ao modelo, para um agente que planeja e usa ferramentas. O custo por atendimento aumentou bastante. Quais fatores explicam esse aumento?",
+      "explicacao": "Um agente costuma chamar o modelo várias vezes por tarefa — para planejar, escolher ferramentas, interpretar resultados e responder —, e cada chamada é cobrada. Além disso, a cada passo o contexto acumula o histórico e os resultados das ferramentas, então os tokens de entrada crescem ao longo da tarefa. O número de funcionários da empresa não altera o custo de cada atendimento. O tamanho do código-fonte da aplicação não é cobrado pelo modelo. E a cor da interface não tem nenhuma relação com tokens.",
+      "opcoes": [
+        { "texto": "O número de chamadas ao modelo em cada tarefa do agente.", "correta": true },
+        { "texto": "Os tokens de contexto acumulados a cada passo, com histórico e resultados de ferramentas.", "correta": true },
+        { "texto": "O número de funcionários da empresa que desenvolveu o agente.", "correta": false },
+        { "texto": "O tamanho do código-fonte da aplicação do agente.", "correta": false },
+        { "texto": "A cor e o layout da interface usada pelos clientes.", "correta": false }
+      ]
+    }
+  ]
+}

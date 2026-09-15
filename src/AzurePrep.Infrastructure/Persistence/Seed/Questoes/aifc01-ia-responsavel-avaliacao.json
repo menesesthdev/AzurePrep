@@ -1,0 +1,221 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "ia-responsavel",
+  "questoes": [
+    {
+      "id": "aifc01-resp-metrica-falsos-negativos-grupo-48",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma financeira identificou que o dano mais grave do seu modelo de crédito é recusar clientes que teriam pago o empréstimo em dia, porque isso os exclui do acesso ao crédito. A área de ética quer verificar se esse dano atinge desproporcionalmente algum grupo demográfico. Qual análise é mais adequada?",
+      "explicacao": "O dano descrito é recusar quem teria pago — o falso negativo, quando a classe positiva é bom pagador. Comparar a taxa de falsos negativos entre os grupos demográficos mostra se candidatos qualificados de algum grupo são recusados com mais frequência, que é exatamente a pergunta da área de ética. A acurácia geral pode ser alta enquanto um grupo sofre muito mais recusas indevidas. O número total de aprovações não diz se as recusas foram indevidas nem em qual grupo. E a latência mede tempo de resposta, sem relação com equidade.",
+      "opcoes": [
+        { "texto": "Comparar a taxa de falsos negativos — bons pagadores recusados — entre os grupos demográficos.", "correta": true },
+        { "texto": "Verificar se a acurácia geral do modelo está acima da meta.", "correta": false },
+        { "texto": "Contar o número total de empréstimos aprovados por mês.", "correta": false },
+        { "texto": "Comparar a latência das previsões entre os grupos demográficos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-dataset-desequilibrio-classes-49",
+      "topico": "Características de conjuntos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Num conjunto de dados para detectar reclamações que indicam risco à saúde de consumidores, apenas 0,3% dos registros são desse tipo. O modelo treinado quase nunca sinaliza esses casos, embora tenha acurácia de 99,6%. Qual abordagem trata o problema do conjunto de dados?",
+      "explicacao": "Com a classe de interesse tão rara, o modelo aprende que acertar a maioria basta, e a acurácia alta esconde isso. Equilibrar o conjunto — por reamostragem da classe rara ou atribuindo pesos maiores a ela — e avaliar com métricas por classe, como recall dos casos de risco, faz o modelo prestar atenção aos casos que importam. Remover os poucos exemplos de risco agravaria o desequilíbrio. Manter a acurácia como métrica principal esconde o problema que se quer resolver. E aumentar a temperatura não se aplica a esse classificador nem corrige o desequilíbrio.",
+      "opcoes": [
+        { "texto": "Equilibrar o conjunto, com reamostragem ou pesos por classe, e avaliar com métricas por classe.", "correta": true },
+        { "texto": "Remover os registros de risco à saúde, por serem estatisticamente irrelevantes.", "correta": false },
+        { "texto": "Manter o conjunto atual e acompanhar apenas a acurácia geral.", "correta": false },
+        { "texto": "Aumentar a temperatura do classificador para sinalizar mais casos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-inclusao-linguagem-idiomas-50",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma prefeitura orienta cidadãos sobre programas sociais. Os testes foram feitos só por servidores com ensino superior, e o assistente responde com termos técnicos e jurídicos. Parte relevante do público tem baixa escolaridade, e há comunidades que falam espanhol e línguas indígenas. Qual abordagem trata a inclusão?",
+      "explicacao": "Inclusão significa que o sistema funciona bem para toda a população atendida. Testar o assistente com cidadãos representativos desse público e ajustá-lo para usar linguagem simples e atender aos idiomas das comunidades trata diretamente quem está sendo excluído hoje. Manter a linguagem técnica por ser juridicamente precisa deixa de fora justamente quem mais precisa dos programas. Aumentar o limite de tokens de saída só alongaria as respostas técnicas. E aumentar a temperatura deixaria as respostas mais variadas, sem torná-las mais acessíveis.",
+      "opcoes": [
+        { "texto": "Testar com cidadãos representativos e ajustar para linguagem simples e os idiomas das comunidades.", "correta": true },
+        { "texto": "Manter a linguagem técnica, por ser mais precisa do ponto de vista jurídico.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída para respostas mais completas.", "correta": false },
+        { "texto": "Aumentar a temperatura para variar o vocabulário das respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-explicacao-contrafactual-51",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco quer que o cliente que teve um pedido de cartão recusado entenda o resultado e saiba o que pode fazer para ter o pedido aprovado no futuro. A equipe de design discute que tipo de explicação apresentar no aplicativo. Qual opção segue melhor os princípios de design centrado no ser humano?",
+      "explicacao": "Uma explicação contrafactual mostra o que precisaria ser diferente para o resultado mudar — por exemplo, um nível menor de endividamento — e dá ao cliente algo compreensível e acionável, que é o objetivo declarado. Exibir os pesos internos do modelo é informação técnica que o cliente não consegue interpretar. Mostrar apenas recusado deixa o cliente sem entender nem saber como agir. E disponibilizar o código-fonte do modelo não explica a decisão para uma pessoa comum, além de expor o banco a riscos.",
+      "opcoes": [
+        { "texto": "Uma explicação contrafactual, indicando o que precisaria mudar para o pedido ser aprovado.", "correta": true },
+        { "texto": "Os pesos internos do modelo usados na decisão.", "correta": false },
+        { "texto": "Apenas o resultado recusado, para simplificar a tela.", "correta": false },
+        { "texto": "Um link para o código-fonte do modelo de aprovação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-avaliacao-impacto-rh-52",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa vai adotar um modelo de um fornecedor para ranquear candidatos em processos seletivos. O fornecedor garante que o modelo é justo, mas não apresenta evidências. O modelo afetará milhares de candidatos por ano. O que a empresa deve fazer antes de colocá-lo em uso?",
+      "explicacao": "Um sistema que afeta o acesso de milhares de pessoas a empregos exige evidência, não promessa. Realizar uma avaliação de impacto sobre os grupos afetados, com análise de desempenho por subgrupo usando dados representativos dos candidatos da empresa, mostra se o modelo trata os grupos de forma desigual antes que alguém seja prejudicado. Implantar e monitorar só a latência ignora a qualidade e a equidade das decisões. Aceitar a garantia verbal do fornecedor transfere o risco sem nenhuma verificação. E publicar o código do sistema não mede nem corrige possíveis vieses.",
+      "opcoes": [
+        { "texto": "Realizar uma avaliação de impacto com análise por subgrupo usando dados representativos dos candidatos.", "correta": true },
+        { "texto": "Implantar o modelo e monitorar apenas a latência do ranqueamento.", "correta": false },
+        { "texto": "Aceitar a garantia verbal do fornecedor de que o modelo é justo.", "correta": false },
+        { "texto": "Publicar o código do sistema de seleção para dar transparência.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-baixa-confianca-encaminhamento-53",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma empresa de energia responde dúvidas sobre contas. Em casos incomuns, como cobranças retroativas, ele às vezes responde com a mesma segurança de sempre, mesmo quando a resposta é incerta, e os clientes seguem orientações erradas. Qual desenho segue melhor os princípios de design centrado no ser humano?",
+      "explicacao": "Um bom desenho não esconde a incerteza do sistema. Indicar ao cliente quando a resposta tem baixa confiança e oferecer encaminhamento a um atendente humano permite que ele calibre a confiança e tenha um caminho seguro nos casos incomuns. Esconder a incerteza para não gerar desconfiança mantém exatamente o problema de clientes seguindo orientações erradas. Instruir o assistente a sempre responder com segurança agrava a confiança excessiva. E remover a opção de falar com um atendente elimina a saída que esses casos exigem.",
+      "opcoes": [
+        { "texto": "Indicar quando a resposta tem baixa confiança e oferecer encaminhamento a um atendente humano.", "correta": true },
+        { "texto": "Esconder a incerteza das respostas para não gerar desconfiança nos clientes.", "correta": false },
+        { "texto": "Instruir o assistente a responder sempre com segurança, mesmo nos casos incomuns.", "correta": false },
+        { "texto": "Remover a opção de falar com um atendente para aumentar o uso do assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-teste-contrafactual-genero-54",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de base gera resumos de currículos para recrutadores. Uma recrutadora percebeu que resumos de candidatas usam com mais frequência adjetivos como dedicada e organizada, enquanto os de candidatos destacam liderança e estratégia. A empresa quer verificar se o modelo trata os gêneros de forma diferente. Qual teste é mais adequado?",
+      "explicacao": "Um teste contrafactual isola a variável suspeita: criar pares de currículos idênticos em tudo, trocando apenas os indicadores de gênero, como o nome, e comparar os resumos gerados. Se os resumos mudarem, a diferença é atribuível ao gênero. Aumentar a temperatura só deixaria os resumos mais variados, sem responder à pergunta. Esconder os nomes apenas na interface do recrutador não altera o que o modelo recebeu nem o texto que ele gerou. E confiar que o modelo é neutro por ser amplamente usado ignora a evidência que a recrutadora já observou.",
+      "opcoes": [
+        { "texto": "Gerar resumos de pares de currículos idênticos, trocando apenas o gênero, e compará-los.", "correta": true },
+        { "texto": "Aumentar a temperatura para diversificar os adjetivos usados nos resumos.", "correta": false },
+        { "texto": "Esconder os nomes dos candidatos apenas na tela exibida aos recrutadores.", "correta": false },
+        { "texto": "Considerar o modelo neutro, já que ele é usado por muitas empresas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-eficiencia-energetica-inferencia-55",
+      "topico": "Seleção responsável de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa hospeda em instâncias Amazon EC2 um modelo de classificação de imagens que atende milhões de requisições por dia, com picos no horário comercial. Hoje usa instâncias grandes com GPU funcionando 24 horas, mesmo de madrugada, quando o tráfego é mínimo. A empresa quer reduzir o consumo de energia da inferência sem piorar o serviço. Qual abordagem é mais adequada?",
+      "explicacao": "Duas escolhas reduzem o consumo sem prejudicar o serviço: usar instâncias com aceleradores feitos para inferência eficiente, como as baseadas em AWS Inferentia, e dimensionar a capacidade conforme a carga, com escalonamento automático que reduz as instâncias de madrugada. Trocar por instâncias com GPU ainda maiores aumenta o consumo sem necessidade. Manter as instâncias atuais funcionando 24 horas sem escalonamento é justamente a origem do desperdício. E duplicar os endpoints em todas as horas multiplica o consumo sem ganho para o serviço.",
+      "opcoes": [
+        { "texto": "Usar instâncias com aceleradores de inferência eficientes, como AWS Inferentia, com escalonamento automático.", "correta": true },
+        { "texto": "Trocar por instâncias com GPU ainda maiores para processar mais rápido.", "correta": false },
+        { "texto": "Manter as instâncias atuais funcionando 24 horas, sem escalonamento.", "correta": false },
+        { "texto": "Duplicar os endpoints em todas as horas do dia para garantir desempenho.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-excesso-bloqueio-seguranca-56",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma rede de farmácias usa filtros de conteúdo com limiares muito rígidos. Com isso, perguntas legítimas, como posso tomar este antialérgico junto com anti-inflamatório?, estão sendo bloqueadas, e os clientes deixaram de usar o assistente. Ao mesmo tempo, a empresa precisa continuar bloqueando pedidos realmente perigosos. Qual abordagem equilibra segurança e utilidade?",
+      "explicacao": "Existe um trade-off entre segurança e utilidade, e o equilíbrio vem de medir os dois lados: ajustar os limiares dos filtros e testá-los com um conjunto de perguntas legítimas e outro de pedidos maliciosos, até bloquear o que é perigoso sem barrar o que é útil. Remover os filtros resolve a utilidade abrindo mão da segurança. Bloquear todas as perguntas sobre medicamentos elimina a razão de ser do assistente. E aumentar a temperatura não altera o comportamento dos filtros.",
+      "opcoes": [
+        { "texto": "Ajustar os limiares e testá-los com perguntas legítimas e com pedidos maliciosos.", "correta": true },
+        { "texto": "Remover os filtros de conteúdo para voltar a responder a todas as perguntas.", "correta": false },
+        { "texto": "Bloquear todas as perguntas que mencionem nomes de medicamentos.", "correta": false },
+        { "texto": "Aumentar a temperatura para reduzir os bloqueios dos filtros.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-ferramentas-aws-assoc-57",
+      "topico": "Ferramentas de IA responsável da AWS",
+      "tipo": "Associacao",
+      "enunciado": "Uma empresa definiu necessidades do seu programa de IA responsável. Associe cada necessidade à ferramenta ou ao recurso da AWS mais adequado.",
+      "explicacao": "Detectar desequilíbrio nos dados de treinamento de um modelo tabular é função do Amazon SageMaker Clarify. Documentar o uso pretendido e as limitações de um modelo da empresa é o Amazon SageMaker Model Cards. Bloquear conteúdo nocivo nas respostas de um assistente é o Amazon Bedrock Guardrails. Comparar modelos de base quanto à toxicidade das respostas é o Amazon Bedrock Model Evaluation. E consultar os usos pretendidos e as limitações de um serviço de IA da própria AWS se faz nas AWS AI Service Cards. O AWS Trusted Advisor está no painel porque também faz recomendações, mas sobre segurança, custo e desempenho da conta, e não atende a nenhuma dessas necessidades.",
+      "associacoes": [
+        { "alvo": "Detectar desequilíbrio nos dados de treinamento de um modelo tabular", "item": "Amazon SageMaker Clarify" },
+        { "alvo": "Documentar o uso pretendido e as limitações de um modelo da empresa", "item": "Amazon SageMaker Model Cards" },
+        { "alvo": "Bloquear conteúdo nocivo nas respostas de um assistente", "item": "Amazon Bedrock Guardrails" },
+        { "alvo": "Comparar modelos de base quanto à toxicidade das respostas", "item": "Amazon Bedrock Model Evaluation" },
+        { "alvo": "Consultar usos pretendidos e limitações de um serviço de IA da AWS", "item": "AWS AI Service Cards" }
+      ],
+      "itensExtras": ["AWS Trusted Advisor"]
+    },
+    {
+      "id": "aifc01-resp-riscos-legais-marketing-58",
+      "topico": "Riscos legais da IA generativa",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma fabricante de cosméticos vai usar um modelo de base para gerar automaticamente descrições de produtos e textos de anúncios, publicados sem revisão. Quais riscos legais são mais relevantes nesse uso?",
+      "explicacao": "Dois riscos legais se destacam. O modelo pode reproduzir trechos de textos protegidos, como descrições de concorrentes ou conteúdo editorial, gerando reivindicações de violação de propriedade intelectual. E pode gerar afirmações falsas sobre o produto — benefícios não comprovados, por exemplo —, por alucinação, o que num anúncio configura propaganda enganosa. Subajuste é um problema técnico de modelos que não aprenderam o padrão, sem ser, por si, um risco legal. Latência alta é uma questão de desempenho. E o custo de armazenamento dos textos é um tema financeiro, sem relação com riscos legais.",
+      "opcoes": [
+        { "texto": "Violação de propriedade intelectual por reprodução de textos protegidos.", "correta": true },
+        { "texto": "Afirmações falsas sobre o produto, geradas por alucinação, configurando propaganda enganosa.", "correta": true },
+        { "texto": "Subajuste do modelo usado para gerar os textos.", "correta": false },
+        { "texto": "Latência alta na geração das descrições.", "correta": false },
+        { "texto": "Custo de armazenamento dos textos gerados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-explicacao-decisao-ordenacao-59",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma operadora de saúde vai explicar aos beneficiários as decisões automatizadas de aprovação de procedimentos, seguindo princípios de design centrado no ser humano. Selecione e ordene as etapas que a equipe deve seguir.",
+      "explicacao": "O processo começa por identificar quem receberá a explicação e o que essa pessoa precisa entender para agir — um beneficiário não precisa do mesmo que um auditor. Depois geram-se as explicações dos fatores de cada decisão com uma ferramenta adequada. Em seguida essas explicações são traduzidas para uma linguagem que o beneficiário compreenda. Por fim, coleta-se o feedback de quem as recebe e ajusta-se a forma de explicar. Mostrar o código-fonte do modelo não é uma explicação compreensível para beneficiários. E ocultar que a decisão foi automatizada contraria a transparência que motiva todo o processo.",
+      "sequencia": [
+        "Identificar quem receberá a explicação e o que essa pessoa precisa entender.",
+        "Gerar as explicações dos fatores de cada decisão com uma ferramenta adequada.",
+        "Traduzir as explicações para uma linguagem compreensível ao beneficiário.",
+        "Coletar o feedback dos beneficiários e ajustar as explicações."
+      ],
+      "itensExtras": [
+        "Disponibilizar o código-fonte do modelo como explicação da decisão.",
+        "Ocultar que a decisão foi automatizada para evitar contestações."
+      ]
+    },
+    {
+      "id": "aifc01-resp-monitoramento-fundamentacao-60",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente com RAG usa a verificação de fundamentação contextual para bloquear respostas não sustentadas pelas fontes. A empresa quer saber se a veracidade das respostas está piorando com o tempo — por exemplo, depois de mudanças nos documentos ou de troca de modelo — e ser avisada quando isso acontecer. Qual abordagem é mais adequada?",
+      "explicacao": "Para acompanhar a veracidade ao longo do tempo, é preciso medir continuamente: registrar as pontuações de fundamentação e a proporção de respostas bloqueadas, acompanhar essas métricas em painéis e criar alarmes, por exemplo no Amazon CloudWatch, quando elas se deteriorarem. Assim mudanças nos documentos ou no modelo que afetem a qualidade são percebidas rapidamente. Verificar a fundamentação só no lançamento não detecta pioras posteriores. Monitorar apenas a latência mede rapidez, não veracidade. E desativar a verificação para reduzir custo elimina justamente o controle que se quer acompanhar.",
+      "opcoes": [
+        { "texto": "Registrar as pontuações de fundamentação e as respostas bloqueadas, com painéis e alarmes de piora.", "correta": true },
+        { "texto": "Avaliar a fundamentação das respostas apenas no lançamento do assistente.", "correta": false },
+        { "texto": "Monitorar apenas a latência das respostas do assistente.", "correta": false },
+        { "texto": "Desativar a verificação de fundamentação para reduzir o custo por resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-consentimento-melhoria-modelo-61",
+      "topico": "Riscos legais da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer usar as conversas dos clientes com seu assistente para melhorar o modelo por fine-tuning. Os termos de uso atuais não mencionam essa finalidade, e parte dos clientes compartilha informações pessoais nas conversas. Qual abordagem é mais responsável?",
+      "explicacao": "Usar dados de clientes para uma finalidade não informada fere a confiança e pode violar a legislação de proteção de dados. A abordagem responsável é informar claramente os clientes sobre o novo uso, oferecer a opção de não participar e tratar os dados pessoais, por exemplo mascarando-os, antes do fine-tuning. Usar as conversas sem informar ninguém é exatamente o risco a evitar. Informar apenas quem perguntar não dá aos demais a possibilidade de escolher. E compartilhar as conversas com terceiros para acelerar o projeto amplia o problema, expondo dados pessoais a mais partes.",
+      "opcoes": [
+        { "texto": "Informar os clientes sobre o uso, oferecer a opção de não participar e tratar os dados pessoais.", "correta": true },
+        { "texto": "Usar as conversas no fine-tuning sem informar os clientes, por serem dados da própria empresa.", "correta": false },
+        { "texto": "Usar as conversas e informar sobre isso apenas aos clientes que perguntarem.", "correta": false },
+        { "texto": "Compartilhar as conversas com uma empresa parceira para acelerar o treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-pratica-nao-detecta-vies-62",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um comitê de IA responsável listou práticas para detectar e monitorar viés e confiabilidade nos modelos da empresa. Qual das práticas a seguir NÃO serve a esse objetivo?",
+      "explicacao": "A prática que não serve é aumentar a temperatura do modelo: ela só muda a aleatoriedade das respostas geradas e não mede nem revela nada sobre viés ou confiabilidade. As outras três são práticas reconhecidas. A análise de desempenho por subgrupo mostra se algum grupo é tratado de forma pior. As auditorias humanas sobre amostras de decisões detectam problemas que métricas automáticas não captam. E a análise da qualidade dos rótulos revela erros e vieses introduzidos já na preparação dos dados.",
+      "opcoes": [
+        { "texto": "Aumentar a temperatura do modelo.", "correta": true },
+        { "texto": "Analisar o desempenho do modelo por subgrupo.", "correta": false },
+        { "texto": "Realizar auditorias humanas sobre amostras de decisões.", "correta": false },
+        { "texto": "Analisar a qualidade dos rótulos dos dados de treinamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-raciocinio-nao-e-explicacao-fiel-63",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para atender a um pedido de explicabilidade, uma equipe passou a pedir que o modelo de base escreva, junto de cada decisão, o raciocínio que o levou a ela. O comitê de risco pergunta se esse texto pode ser tratado como uma explicação fiel de como o modelo decidiu. Qual avaliação está correta?",
+      "explicacao": "O raciocínio escrito pelo modelo é texto gerado e pode não refletir o processo interno que produziu a decisão: o modelo pode apresentar uma justificativa plausível que não corresponde ao que de fato pesou. Por isso ele é útil, mas não deve ser tratado como explicação fiel sozinho; deve ser combinado com evidências verificáveis, como as fontes citadas, e com avaliação e revisão humana das decisões. Afirmar que o texto é sempre fiel ignora essa limitação. Ele não revela os pesos internos do modelo. E não substitui auditorias, que continuam necessárias para verificar as decisões.",
+      "opcoes": [
+        { "texto": "Não necessariamente; o texto pode não refletir o processo real e deve ser combinado com evidências e revisão.", "correta": true },
+        { "texto": "Sim, o raciocínio escrito pelo modelo sempre corresponde ao processo que gerou a decisão.", "correta": false },
+        { "texto": "Sim, porque o texto revela os pesos internos que o modelo usou na decisão.", "correta": false },
+        { "texto": "Sim, e ele dispensa auditorias sobre as decisões do modelo.", "correta": false }
+      ]
+    }
+  ]
+}

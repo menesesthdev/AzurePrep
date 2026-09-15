@@ -1,0 +1,169 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "seguranca-conformidade-governanca",
+  "questoes": [
+    {
+      "id": "aifc01-seg-tls-dentro-vpc-52",
+      "topico": "Proteção de rede e dados em trânsito",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação envia prontuários médicos para um servidor de inferência hospedado em instâncias Amazon EC2 na mesma VPC. Um arquiteto propôs usar HTTP sem criptografia nessa comunicação, argumentando que o tráfego nunca sai da VPC. A política de segurança exige criptografia de dados sensíveis em trânsito. Qual avaliação está correta?",
+      "explicacao": "A política exige criptografia em trânsito de dados sensíveis, e estar dentro da VPC não dispensa essa proteção: um erro de configuração ou um invasor com acesso à rede interna poderia ler o tráfego. A abordagem correta é usar TLS entre a aplicação e o servidor de inferência, mesmo dentro da VPC — defesa em profundidade. Dispensar a criptografia por estar na VPC contraria a política. O AWS KMS gerencia chaves, principalmente para criptografia em repouso, e não criptografa sozinho o tráfego HTTP. E o Amazon Macie descobre dados sensíveis no S3, sem proteger tráfego de rede.",
+      "opcoes": [
+        { "texto": "É preciso usar TLS entre a aplicação e o servidor de inferência, mesmo dentro da VPC.", "correta": true },
+        { "texto": "HTTP sem criptografia é aceitável, porque o tráfego não sai da VPC.", "correta": false },
+        { "texto": "Basta criar uma chave no AWS KMS para que o tráfego HTTP seja protegido.", "correta": false },
+        { "texto": "Basta habilitar o Amazon Macie para proteger os prontuários em trânsito.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-abuso-custo-chatbot-53",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa publicou um chatbot gratuito no site, que usa um modelo de base sob demanda. Em uma semana, robôs passaram a enviar milhares de mensagens longas por minuto, e a fatura disparou antes que alguém percebesse. A empresa quer continuar oferecendo o chatbot. Qual combinação de medidas é mais adequada?",
+      "explicacao": "O abuso por volume transforma o preço por token em risco financeiro. Aplicar limites de requisições e de tamanho de mensagem por usuário ou por origem contém o abuso, e configurar alertas de orçamento no AWS Budgets garante que um aumento anormal de gasto seja percebido rapidamente. Aumentar o limite de tokens de saída faria cada abuso custar ainda mais. Remover a autenticação ou qualquer controle de acesso facilita justamente o uso por robôs. E o AWS Artifact fornece relatórios de conformidade, sem relação com o controle de uso e custo.",
+      "opcoes": [
+        { "texto": "Aplicar limites de requisições por usuário e configurar alertas de orçamento no AWS Budgets.", "correta": true },
+        { "texto": "Aumentar o limite de tokens de saída para atender os robôs mais rápido.", "correta": false },
+        { "texto": "Remover qualquer controle de acesso para simplificar o uso do chatbot.", "correta": false },
+        { "texto": "Consultar os relatórios de conformidade da AWS no AWS Artifact.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-isolamento-multiclientes-rag-54",
+      "topico": "Considerações de segurança e privacidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de software oferece a centenas de clientes corporativos um assistente com RAG sobre os documentos de cada cliente. Todos os documentos foram indexados numa única base de conhecimento. Num teste, um usuário da empresa A recebeu trechos de um contrato da empresa B. Qual abordagem é mais adequada?",
+      "explicacao": "Numa aplicação que atende vários clientes, o isolamento dos dados de cada um precisa ser imposto na recuperação, e não confiado ao modelo. Aplicar filtros obrigatórios por cliente em toda consulta — com base num metadado de cliente associado a cada documento — ou manter bases de conhecimento separadas por cliente impede que trechos de uma empresa cheguem ao usuário de outra. Instruir o modelo a não mostrar documentos de outras empresas deixa os dados no contexto e depende do modelo obedecer. Recuperar mais trechos aumenta a chance de misturar clientes. E aumentar a temperatura não tem relação com isolamento.",
+      "opcoes": [
+        { "texto": "Isolar os dados por cliente, com filtro obrigatório por cliente na recuperação ou bases separadas.", "correta": true },
+        { "texto": "Instruir o modelo a nunca mostrar documentos de outras empresas.", "correta": false },
+        { "texto": "Aumentar o número de trechos recuperados em cada consulta.", "correta": false },
+        { "texto": "Aumentar a temperatura para reduzir a reprodução literal dos documentos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-rastreabilidade-resposta-55",
+      "topico": "Registro e auditoria de interações com IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco precisa conseguir explicar, meses depois, por que seu assistente deu determinada resposta a um cliente. Nesse período, o modelo, a versão do prompt e os documentos da base de conhecimento podem ter mudado várias vezes. Qual prática de registro atende a esse requisito?",
+      "explicacao": "Para reconstruir uma resposta depois de mudanças, é preciso saber o que a produziu naquele momento. Registrar, junto de cada resposta, o identificador do modelo, a versão do prompt usada e as fontes recuperadas permite reconstituir as condições exatas da interação. Guardar apenas o texto da resposta mostra o que foi dito, mas não por quê. Não guardar registros para evitar exposição impede atender ao requisito. E acompanhar apenas métricas agregadas no Amazon CloudWatch mostra volumes e tendências, sem permitir analisar uma resposta específica.",
+      "opcoes": [
+        { "texto": "Registrar com cada resposta o identificador do modelo, a versão do prompt e as fontes recuperadas.", "correta": true },
+        { "texto": "Guardar apenas o texto de cada resposta enviada ao cliente.", "correta": false },
+        { "texto": "Não guardar registros das interações para evitar a exposição de dados.", "correta": false },
+        { "texto": "Acompanhar apenas as métricas agregadas de uso no Amazon CloudWatch.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-aprovacao-formal-producao-56",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Numa empresa, qualquer equipe pode colocar um novo modelo ou assistente de IA em produção por conta própria, e o comitê de governança só fica sabendo quando surge um problema. A empresa quer um processo de governança antes da entrada em produção. Qual prática é mais adequada?",
+      "explicacao": "Um ponto de aprovação formal antes da produção, exigindo avaliação de riscos, documentação como o model card e resultados de avaliação, dá ao comitê a oportunidade de identificar problemas antes que afetem clientes, com critérios claros e registro da decisão. Uma aprovação verbal do gestor da equipe não deixa registro nem garante critérios. Dispensar a aprovação para modelos de terceiros ignora que esses modelos também trazem riscos para o uso da empresa. E aprovar formalmente só depois do lançamento mantém exatamente a situação atual.",
+      "opcoes": [
+        { "texto": "Exigir aprovação formal com avaliação de riscos, model card e resultados de avaliação antes da produção.", "correta": true },
+        { "texto": "Exigir apenas a aprovação verbal do gestor de cada equipe.", "correta": false },
+        { "texto": "Dispensar a aprovação para modelos fornecidos por terceiros.", "correta": false },
+        { "texto": "Realizar a aprovação formal somente depois que o sistema entrar em produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-politica-endpoint-vpc-57",
+      "topico": "Controle de acesso a serviços de IA",
+      "tipo": "EscolhaUnica",
+      "enunciado": "As aplicações de uma empresa acessam o Amazon Bedrock por um endpoint de VPC de interface. O comitê de governança aprovou apenas dois modelos para uso, e a empresa quer garantir, na camada de rede, que nenhuma chamada por esse endpoint invoque outros modelos, mesmo que alguma função do IAM tenha permissões amplas. Qual solução atende a esse requisito?",
+      "explicacao": "Uma política do endpoint de VPC controla quais ações e recursos podem ser acessados por meio daquele endpoint. Permitindo apenas a invocação dos dois modelos aprovados, chamadas a outros modelos são negadas no endpoint, mesmo que a função do IAM tenha permissões mais amplas — uma segunda camada de controle. Grupos de segurança filtram tráfego por endereço e porta, e não conseguem distinguir qual modelo está sendo invocado. O Amazon Bedrock Guardrails filtra conteúdo de entradas e saídas, sem restringir quais modelos são chamados. E um gateway NAT dá acesso de saída à internet, o que não restringe nada e ainda tiraria o tráfego do caminho privado.",
+      "opcoes": [
+        { "texto": "Uma política no endpoint de VPC que permita invocar apenas os dois modelos aprovados.", "correta": true },
+        { "texto": "Regras no grupo de segurança do endpoint indicando os nomes dos modelos aprovados.", "correta": false },
+        { "texto": "Um guardrail do Amazon Bedrock que bloqueie os modelos não aprovados.", "correta": false },
+        { "texto": "Um gateway NAT que encaminhe apenas as chamadas aos modelos aprovados.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-alarmes-guardrails-58",
+      "topico": "Estratégias de governança de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente público usa o Amazon Bedrock Guardrails com filtros de ataques de prompt. O time de segurança quer ser avisado quando houver um aumento repentino de tentativas bloqueadas, que pode indicar uma campanha coordenada de ataque. Qual abordagem atende a esse requisito?",
+      "explicacao": "O Amazon Bedrock Guardrails publica métricas no Amazon CloudWatch, como o número de invocações em que houve intervenção. Criar alarmes sobre essas métricas avisa o time de segurança quando as tentativas bloqueadas aumentarem de forma anormal. O AWS Artifact fornece relatórios de conformidade da AWS, sem monitorar ataques. O AWS Trusted Advisor dá recomendações gerais sobre a conta, sem acompanhar intervenções dos guardrails. E desativar os guardrails para reduzir o volume de alertas remove a proteção justamente durante um possível ataque.",
+      "opcoes": [
+        { "texto": "Criar alarmes no Amazon CloudWatch sobre as métricas de intervenção do Guardrails.", "correta": true },
+        { "texto": "Consultar os relatórios de conformidade no AWS Artifact.", "correta": false },
+        { "texto": "Ativar as verificações do AWS Trusted Advisor na conta.", "correta": false },
+        { "texto": "Desativar os guardrails para reduzir o volume de alertas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-exclusao-dados-vetores-59",
+      "topico": "Estratégias de governança de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um cliente pediu a exclusão dos seus dados pessoais, com base na LGPD. Seus documentos estão num bucket do Amazon S3 usado como fonte de uma base de conhecimento do Amazon Bedrock, e os trechos correspondentes já foram convertidos em vetores. Um analista propôs apagar apenas os arquivos do S3. Qual abordagem atende ao pedido de forma completa?",
+      "explicacao": "Os vetores e os trechos indexados são derivados dos documentos do cliente e continuam permitindo que seu conteúdo apareça nas respostas. Por isso é preciso excluir os documentos de origem e também os dados derivados, sincronizando a base de conhecimento para remover os trechos e vetores correspondentes, e registrar o atendimento do pedido. Apagar só os arquivos do S3 sem sincronizar deixa o conteúdo indexado. Manter os vetores porque não são legíveis por pessoas ignora que eles são usados para recuperar e reproduzir o conteúdo. E ampliar o prazo de retenção contraria o pedido de exclusão.",
+      "opcoes": [
+        { "texto": "Excluir os documentos de origem e sincronizar a base para remover os dados derivados, registrando o atendimento.", "correta": true },
+        { "texto": "Excluir apenas os arquivos do bucket do Amazon S3, sem sincronizar a base.", "correta": false },
+        { "texto": "Manter os vetores, porque não são legíveis por pessoas.", "correta": false },
+        { "texto": "Ampliar o prazo de retenção dos dados até a próxima revisão da base.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-agente-navegador-60",
+      "topico": "Segurança de agentes de IA",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai dar a um agente de pesquisa a capacidade de navegar em sites externos, preencher formulários e extrair informações usando um navegador gerenciado. Quais medidas de segurança são adequadas para essa capacidade?",
+      "explicacao": "Páginas externas são conteúdo não confiável, e podem conter instruções escondidas feitas para manipular o agente. Tratar o conteúdo das páginas como dado, sem seguir instruções encontradas nelas, reduz esse risco. E isolar a sessão de navegação, restringindo as ações que o agente pode executar, limita o dano caso algo dê errado. Dar credenciais administrativas ao navegador amplia o impacto de qualquer manipulação. Desativar os registros da navegação impede investigar o que o agente fez. E permitir downloads e a execução de qualquer arquivo abre caminho para código malicioso.",
+      "opcoes": [
+        { "texto": "Tratar o conteúdo das páginas como não confiável, sem seguir instruções encontradas nelas.", "correta": true },
+        { "texto": "Isolar a sessão de navegação e restringir as ações que o agente pode executar.", "correta": true },
+        { "texto": "Dar ao navegador do agente credenciais administrativas dos sistemas internos.", "correta": false },
+        { "texto": "Desativar os registros da navegação para preservar a privacidade.", "correta": false },
+        { "texto": "Permitir o download e a execução de qualquer arquivo encontrado nos sites.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-seg-avaliacao-provedor-ordenacao-61",
+      "topico": "Processos e frameworks de governança",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma seguradora avalia adotar um serviço de IA generativa de um novo provedor para analisar documentos de sinistros. Selecione e ordene as etapas da avaliação de riscos antes da adoção.",
+      "explicacao": "A avaliação começa por identificar quais dados serão enviados ao serviço e como estão classificados, porque isso define o nível de exigência. Com esse contexto, revisam-se os termos, a licença e as políticas de uso de dados do provedor — por exemplo, se os dados podem ser usados para treinar modelos. Em seguida avaliam-se os controles de segurança e de conformidade do serviço. Por fim, registram-se a decisão e os controles definidos no inventário de IA. Adotar o serviço e revisar os termos depois inverte a lógica e pode expor dados antes de saber como serão tratados. E enviar dados reais em testes antes de revisar os termos cria exatamente essa exposição.",
+      "sequencia": [
+        "Identificar os dados que serão enviados e sua classificação.",
+        "Revisar os termos, a licença e as políticas de uso de dados do provedor.",
+        "Avaliar os controles de segurança e de conformidade do serviço.",
+        "Registrar a decisão e os controles definidos no inventário de IA."
+      ],
+      "itensExtras": [
+        "Adotar o serviço e revisar os termos do provedor depois.",
+        "Enviar documentos reais de sinistros em testes antes de revisar os termos."
+      ]
+    },
+    {
+      "id": "aifc01-seg-controles-assoc-62",
+      "topico": "Controle de acesso a serviços de IA",
+      "tipo": "Associacao",
+      "enunciado": "O time de segurança listou necessidades de proteção para as aplicações de IA da empresa. Associe cada necessidade ao controle mais adequado.",
+      "explicacao": "Impedir que aplicações usem modelos não aprovados por meio do endpoint de VPC é o papel da política do endpoint de VPC. Guardar a chave de API de um serviço de terceiros, com rotação, é o AWS Secrets Manager. Controlar quem pode descriptografar os dados de treinamento é feito na política de chave do AWS KMS. Descobrir dados pessoais em buckets de treinamento é o Amazon Macie. E bloquear chamadas de ferramenta de um agente que violem regras de negócio é o Policy no Amazon Bedrock AgentCore. O AWS Artifact está no painel porque aparece em temas de conformidade, mas fornece relatórios de auditoria da AWS e não protege nenhum desses pontos.",
+      "associacoes": [
+        { "alvo": "Impedir que aplicações usem modelos não aprovados por meio do endpoint de VPC", "item": "Política do endpoint de VPC" },
+        { "alvo": "Guardar a chave de API de um serviço de terceiros, com rotação", "item": "AWS Secrets Manager" },
+        { "alvo": "Controlar quem pode descriptografar os dados de treinamento", "item": "Política de chave do AWS KMS" },
+        { "alvo": "Descobrir dados pessoais em buckets de dados de treinamento", "item": "Amazon Macie" },
+        { "alvo": "Bloquear chamadas de ferramenta de um agente que violem regras de negócio", "item": "Policy no Amazon Bedrock AgentCore" }
+      ],
+      "itensExtras": ["AWS Artifact"]
+    },
+    {
+      "id": "aifc01-seg-responsabilidade-guardrails-63",
+      "topico": "Modelo de responsabilidade compartilhada",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma loja, construído com o Amazon Bedrock, respondeu a um cliente com conteúdo ofensivo. A equipe argumentou que a responsabilidade é da AWS, porque o Amazon Bedrock oferece o recurso de guardrails. Pelo modelo de responsabilidade compartilhada, quem é responsável por configurar filtros adequados para essa aplicação?",
+      "explicacao": "A AWS disponibiliza o recurso de guardrails e é responsável por operá-lo com segurança, mas decidir se ele é usado, quais filtros aplicar e com quais limiares para o caso de uso é responsabilidade do cliente, que conhece a aplicação e seu público. Por isso a configuração adequada cabe à empresa que construiu o assistente. Atribuir essa responsabilidade à AWS confunde oferecer o recurso com configurá-lo para cada aplicação. O provedor do modelo desenvolve o modelo, sem conhecer nem configurar a aplicação da loja. E os filtros não são aplicados automaticamente de forma adequada a qualquer caso de uso; precisam ser definidos por quem constrói a aplicação.",
+      "opcoes": [
+        { "texto": "A empresa cliente, que decide quais filtros e limiares aplicar ao seu caso de uso.", "correta": true },
+        { "texto": "A AWS, por disponibilizar o recurso de guardrails no Amazon Bedrock.", "correta": false },
+        { "texto": "O provedor do modelo de base usado pelo assistente.", "correta": false },
+        { "texto": "Ninguém, porque os filtros são aplicados automaticamente a qualquer aplicação.", "correta": false }
+      ]
+    }
+  ]
+}

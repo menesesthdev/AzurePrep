@@ -1,0 +1,221 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-selecao-voz-tempo-real-87",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer um assistente de voz em que o cliente fala e ouve a resposta falada quase instantaneamente, como numa conversa telefônica natural, inclusive podendo interromper o assistente. A equipe está escolhendo o modelo de base. Qual critério é determinante para esse caso?",
+      "explicacao": "Numa conversa falada natural, o modelo precisa trabalhar com áudio na entrada e na saída e responder com latência muito baixa — é o critério que decide se a experiência parece uma conversa ou uma sequência de esperas. Uma janela de contexto maior ajuda em conversas muito longas, mas não resolve a necessidade de fala em tempo real. Geração de imagens não faz parte da interação. E suporte a fine-tuning pode ser útil no futuro, mas não é o que torna a conversa por voz possível.",
+      "opcoes": [
+        { "texto": "Suporte a áudio como entrada e saída, com baixa latência.", "correta": true },
+        { "texto": "A maior janela de contexto disponível.", "correta": false },
+        { "texto": "Capacidade de gerar imagens a partir de texto.", "correta": false },
+        { "texto": "Suporte a fine-tuning com dados próprios.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-cache-prompt-ordem-prefixo-88",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe habilitou o cache de prompt para um assistente que envia, a cada chamada, a pergunta do usuário seguida de instruções fixas e de um manual técnico longo, sempre idênticos. Depois de uma semana, o custo e a latência praticamente não mudaram. Qual ajuste faz o cache funcionar?",
+      "explicacao": "O cache de prompt reaproveita o processamento de um prefixo idêntico entre requisições. Como a pergunta do usuário, que muda a cada chamada, está no início, o prefixo nunca se repete e o cache não é aproveitado. Colocar o conteúdo estático — instruções e manual — no início e a pergunta variável no final cria o prefixo repetido de que o cache precisa. Desativar o cache elimina a possibilidade de economia. Aumentar a temperatura não tem relação com o reaproveitamento do processamento. E reduzir o limite de tokens de saída atua sobre a resposta, não sobre o prefixo repetido que o cache deveria economizar.",
+      "opcoes": [
+        { "texto": "Colocar as instruções e o manual no início do prompt e a pergunta variável no final.", "correta": true },
+        { "texto": "Desativar o cache de prompt, que não traz benefício nesse cenário.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o cache seja reaproveitado com mais frequência.", "correta": false },
+        { "texto": "Reduzir o limite de tokens de saída das respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-reclassificacao-89",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente com RAG recupera 20 trechos por pergunta, mas por limite de contexto envia só os 5 primeiros ao modelo. A equipe percebeu que, com frequência, o trecho que responde à pergunta aparece entre as posições 10 e 15 da busca e acaba ficando de fora. Qual ajuste é mais adequado?",
+      "explicacao": "A busca vetorial encontra trechos relevantes, mas nem sempre os coloca na melhor ordem. Aplicar um modelo de reclassificação (reranking) aos 20 trechos recuperados reavalia a relevância de cada um em relação à pergunta e coloca os melhores no topo, antes de escolher os 5 enviados ao modelo. Aumentar a temperatura não muda quais trechos chegam ao modelo. Treinar um modelo de embeddings próprio poderia melhorar a busca, mas é um esforço muito maior para um problema de ordenação. E enviar só o primeiro trecho aumentaria a chance de deixar a resposta de fora.",
+      "opcoes": [
+        { "texto": "Aplicar um modelo de reclassificação aos trechos recuperados antes de selecionar os enviados ao modelo.", "correta": true },
+        { "texto": "Aumentar a temperatura do modelo que gera as respostas.", "correta": false },
+        { "texto": "Treinar do zero um modelo de embeddings próprio com os documentos.", "correta": false },
+        { "texto": "Enviar ao modelo apenas o primeiro trecho recuperado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-busca-hibrida-codigos-90",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma base de conhecimento de suporte técnico usa apenas busca semântica. Perguntas descritivas funcionam bem, mas quando o técnico pergunta o que significa o erro E-4471?, a busca devolve trechos sobre erros parecidos e não o documento que cita exatamente o código E-4471. Qual ajuste é mais adequado?",
+      "explicacao": "A busca semântica é boa para significados, mas códigos exatos como E-4471 não têm significado que os embeddings capturem bem. A busca híbrida combina a busca por palavras-chave, que encontra a ocorrência exata do código, com a busca semântica, que continua atendendo às perguntas descritivas. Um modelo de embeddings com mais dimensões continua sendo busca semântica, sujeita ao mesmo problema. Reduzir o tamanho dos trechos não faz o código exato ser priorizado. E aumentar a temperatura não afeta a busca.",
+      "opcoes": [
+        { "texto": "Habilitar a busca híbrida, combinando palavras-chave e busca semântica.", "correta": true },
+        { "texto": "Trocar por um modelo de embeddings com mais dimensões.", "correta": false },
+        { "texto": "Reduzir o tamanho dos trechos indexados.", "correta": false },
+        { "texto": "Aumentar a temperatura do modelo gerador.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-decomposicao-consulta-91",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de uma operadora de planos de saúde responde bem a perguntas simples, mas perguntas compostas como compare os planos Essencial e Premium em carência, rede credenciada e reembolso trazem respostas incompletas, porque a busca, feita com a pergunta inteira, recupera trechos sobre só alguns dos aspectos. Qual técnica é mais adequada?",
+      "explicacao": "Uma pergunta composta mistura vários assuntos, e uma única busca tende a trazer trechos sobre apenas parte deles. Decompor a consulta em subperguntas — carência de cada plano, rede de cada plano, reembolso de cada plano — e fazer uma recuperação para cada uma garante que todos os aspectos cheguem ao modelo, que então compõe a comparação. Aumentar o tamanho dos trechos traz mais texto por trecho, sem garantir que todos os aspectos sejam recuperados. Aumentar a temperatura não traz informação nova. E fazer fine-tuning com as tabelas dos planos coloca o conteúdo nos pesos, com custo e desatualização, sem resolver a recuperação.",
+      "opcoes": [
+        { "texto": "Decompor a pergunta em subperguntas e fazer uma recuperação para cada uma.", "correta": true },
+        { "texto": "Aumentar o tamanho dos trechos indexados na base.", "correta": false },
+        { "texto": "Aumentar a temperatura para respostas mais completas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com as tabelas dos planos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-custo-few-shot-versus-ajuste-92",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um classificador de chamados processa 5 milhões de requisições por mês usando um prompt com 40 exemplos, o que representa a maior parte dos tokens de cada chamada. A tarefa é estável há um ano. A equipe calculou que fazer fine-tuning de um modelo menor, dispensando os exemplos do prompt, reduziria o custo total mesmo incluindo o treinamento. Por que isso pode acontecer?",
+      "explicacao": "In-context learning não tem custo de treinamento, mas paga os exemplos em toda requisição. Com 5 milhões de chamadas por mês e exemplos ocupando a maior parte dos tokens, esse custo recorrente é enorme. O fine-tuning tem custo de treinamento e de uso do modelo personalizado, mas elimina os exemplos de cada prompt; com volume alto e tarefa estável, o custo de treinamento se dilui e o total pode ficar menor. Afirmar que o fine-tuning não tem custo é falso. In-context learning não exige retreinar o modelo — é justamente sua vantagem. E RAG não é obrigatório nem tem relação com o cálculo descrito.",
+      "opcoes": [
+        { "texto": "O ajuste elimina os exemplos de cada requisição, e o custo de treinamento se dilui no volume alto.", "correta": true },
+        { "texto": "O fine-tuning não tem nenhum custo de treinamento nem de uso do modelo.", "correta": false },
+        { "texto": "O in-context learning exige retreinar o modelo a cada mudança nos exemplos.", "correta": false },
+        { "texto": "O fine-tuning torna obrigatório o uso de RAG, que reduz o custo por token.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-pre-treinamento-justificado-93",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "O diretor de tecnologia de um grupo empresarial pergunta em que situação faria sentido pré-treinar um modelo de base do zero, em vez de adaptar um modelo existente. Qual resposta é mais adequada?",
+      "explicacao": "O pré-treinamento do zero é a abordagem mais cara de todas, em dados, computação e especialistas. Ele só se justifica quando nenhum modelo existente atende a um domínio ou idioma muito específico, mesmo com adaptação, e a organização dispõe de dados e orçamento em escala muito grande. Mudar o tom das respostas se resolve com engenharia de prompt ou fine-tuning. Incluir documentos que mudam diariamente é o caso de uso de RAG. E pré-treinar do zero não é caminho para reduzir custo de inferência — para isso existem modelos menores e a destilação.",
+      "opcoes": [
+        { "texto": "Quando nenhum modelo existente atende a um domínio ou idioma muito específico e há dados e orçamento em grande escala.", "correta": true },
+        { "texto": "Sempre que a empresa quiser mudar o tom de voz das respostas.", "correta": false },
+        { "texto": "Quando as respostas precisarem refletir documentos que mudam diariamente.", "correta": false },
+        { "texto": "Quando o objetivo principal for reduzir o custo de inferência.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-prompt-few-shot-com-raciocinio-94",
+      "topico": "Técnicas de engenharia de prompt",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo precisa decidir se um pedido de reembolso de despesas de viagem está conforme uma política com várias regras interdependentes e devolver a decisão num formato padronizado. Com exemplos que mostram apenas a decisão final, o formato fica certo, mas as decisões erram em casos que combinam várias regras. Qual técnica é mais adequada?",
+      "explicacao": "Os exemplos atuais ensinam o formato, mas não o caminho do raciocínio que casos com várias regras exigem. Exemplos few-shot que mostram o raciocínio passo a passo, aplicando cada regra, seguidos da decisão no formato padronizado, combinam os dois benefícios: o modelo aprende o método e mantém o formato. Voltar ao zero-shot com temperatura alta perde o formato e aumenta a variação. Manter exemplos só com a decisão final repete o problema atual. E uma instrução negativa para não errar não ensina ao modelo como aplicar as regras.",
+      "opcoes": [
+        { "texto": "Exemplos few-shot que mostram o raciocínio passo a passo e a decisão no formato padronizado.", "correta": true },
+        { "texto": "Remover os exemplos e aumentar a temperatura (zero-shot).", "correta": false },
+        { "texto": "Manter os exemplos que mostram apenas a decisão final e acrescentar mais deles.", "correta": false },
+        { "texto": "Acrescentar a instrução não cometa erros ao aplicar as regras.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-fine-tuning-poucos-exemplos-95",
+      "topico": "Preparação de dados para fine-tuning",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe fez fine-tuning de um modelo com apenas 50 exemplos para uma tarefa complexa de redação de pareceres técnicos. O modelo ajustado ficou pior que o modelo original com um bom prompt, e varia muito entre temas. Qual é o caminho mais adequado?",
+      "explicacao": "Cinquenta exemplos costumam ser pouco para ensinar uma tarefa complexa e variada por fine-tuning, e o resultado pior que o do modelo original mostra isso. O caminho adequado é ampliar o conjunto com exemplos de qualidade que cubram a variedade de temas — ou, se o modelo original com bom prompt já atende, manter essa abordagem, que é mais barata. Aumentar muito as épocas com os mesmos 50 exemplos levaria o modelo a decorá-los. Duplicar os exemplos não acrescenta informação e tem o mesmo efeito de decorar. E aumentar a temperatura só deixaria as respostas ainda mais variáveis.",
+      "opcoes": [
+        { "texto": "Ampliar o conjunto com exemplos de qualidade e variados, ou manter o modelo original com bom prompt.", "correta": true },
+        { "texto": "Aumentar bastante o número de épocas com os mesmos 50 exemplos.", "correta": false },
+        { "texto": "Duplicar os 50 exemplos até chegar a milhares de registros.", "correta": false },
+        { "texto": "Aumentar a temperatura do modelo ajustado.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-contaminacao-benchmark-96",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo tem pontuação excelente num benchmark público de perguntas de raciocínio muito conhecido. Quando a empresa o testou com perguntas próprias, de dificuldade parecida e nunca publicadas, o desempenho foi bem inferior. Qual explicação é plausível e qual prática de avaliação é recomendada?",
+      "explicacao": "Benchmarks públicos muito conhecidos podem ter aparecido, direta ou indiretamente, nos dados de treinamento dos modelos, e aí a pontuação mede em parte memorização — o que explica o desempenho bem menor em perguntas nunca publicadas. A prática recomendada é avaliar com conjuntos próprios, mantidos privados e fora de qualquer treinamento. Concluir que o benchmark comprova a qualidade e que as perguntas da empresa estão erradas ignora a evidência. Reduzir a temperatura estabiliza as respostas, sem explicar a diferença. E uma janela de contexto maior não tem relação com o resultado.",
+      "opcoes": [
+        { "texto": "O benchmark pode ter influenciado o treinamento; avaliar com conjuntos próprios mantidos privados.", "correta": true },
+        { "texto": "O benchmark comprova a qualidade; as perguntas próprias da empresa devem estar erradas.", "correta": false },
+        { "texto": "A temperatura estava alta nos testes da empresa; basta reduzi-la.", "correta": false },
+        { "texto": "A janela de contexto do modelo é pequena para as perguntas da empresa.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-humana-cega-97",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer decidir se a nova versão do seu assistente de redação é melhor que a atual. Para esse produto, a qualidade é subjetiva: clareza, tom e utilidade do texto. A equipe quer evitar que os avaliadores sejam influenciados por saber qual versão produziu cada texto. Qual abordagem é mais adequada?",
+      "explicacao": "Numa avaliação humana às cegas, revisores recebem, para o mesmo pedido, as respostas das duas versões sem saber qual é qual e escolhem a preferida segundo critérios definidos. Isso mede a qualidade subjetiva que importa ao produto e elimina o viés de saber a origem de cada texto. O ROUGE compara textos com referências e não captura clareza, tom ou utilidade. A latência mede rapidez, não qualidade do texto. E contar tokens gerados mede tamanho e custo, e textos mais longos não são necessariamente melhores.",
+      "opcoes": [
+        { "texto": "Avaliação humana às cegas, com revisores escolhendo a resposta preferida entre as duas versões.", "correta": true },
+        { "texto": "Comparar o ROUGE das duas versões contra textos de referência.", "correta": false },
+        { "texto": "Comparar a latência média das duas versões.", "correta": false },
+        { "texto": "Comparar a quantidade de tokens gerados por cada versão.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-vies-llm-juiz-98",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe usa um modelo como juiz para avaliar respostas de um assistente. Ao comparar com uma amostra avaliada por especialistas, percebeu que o juiz dá notas mais altas a respostas mais longas e à resposta que aparece primeiro, mesmo quando os especialistas preferem a outra. Qual conjunto de medidas é mais adequado?",
+      "explicacao": "Modelos usados como juiz podem ter vieses, como preferir respostas mais longas ou a que aparece em determinada posição. As medidas adequadas são usar uma rubrica explícita com critérios objetivos, alternar ou randomizar a ordem das respostas comparadas e calibrar o juiz periodicamente contra uma amostra avaliada por humanos. Confiar nas notas sem verificação ignora o viés já constatado. Fazer o juiz avaliar as próprias respostas acrescenta outro possível viés, o de favorecer o próprio estilo. E aumentar a temperatura do juiz só deixaria as notas mais instáveis.",
+      "opcoes": [
+        { "texto": "Usar rubrica explícita, randomizar a ordem das respostas e calibrar o juiz com amostras humanas.", "correta": true },
+        { "texto": "Continuar usando as notas do juiz sem verificação, porque a avaliação é automática.", "correta": false },
+        { "texto": "Usar o próprio modelo avaliado como juiz de suas respostas.", "correta": false },
+        { "texto": "Aumentar a temperatura do modelo juiz para equilibrar as notas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-agente-metricas-99",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa vai avaliar um agente que abre chamados, consulta o inventário de equipamentos e agenda trocas de notebooks para os funcionários. Quais métricas são mais adequadas para avaliar esse agente?",
+      "explicacao": "Um agente é avaliado pelo que faz. A taxa de conclusão da tarefa mostra se a troca foi de fato agendada corretamente, de ponta a ponta. E a precisão na seleção e no uso das ferramentas mostra se o agente chamou as ferramentas certas, com os parâmetros certos, o que ajuda a localizar falhas. A pontuação BLEU compara textos com traduções de referência e não diz nada sobre ações executadas. O número de parâmetros descreve o modelo, não o desempenho do agente. E o tamanho do prompt de sistema é uma característica da configuração, sem relação com a qualidade do resultado.",
+      "opcoes": [
+        { "texto": "A taxa de conclusão das tarefas solicitadas.", "correta": true },
+        { "texto": "A precisão na seleção e no uso das ferramentas.", "correta": true },
+        { "texto": "A pontuação BLEU das mensagens enviadas pelo agente.", "correta": false },
+        { "texto": "O número de parâmetros do modelo usado pelo agente.", "correta": false },
+        { "texto": "O tamanho, em tokens, do prompt de sistema do agente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-avaliacao-custo-interacao-agente-100",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Duas versões de um agente de atendimento foram avaliadas com o mesmo conjunto de tarefas. As duas concluíram 94% das tarefas, com a mesma satisfação dos usuários. A versão 2, porém, faz em média três vezes mais chamadas ao modelo e às ferramentas por atendimento. Qual versão a empresa deve preferir e por quê?",
+      "explicacao": "Com a mesma taxa de conclusão e a mesma satisfação, o critério que diferencia as versões é o custo por interação, e a versão 1 atinge o mesmo resultado com um terço das chamadas — o que também tende a reduzir a latência. Preferir a versão 2 por parecer mais minuciosa ignora que o esforço extra não gerou nenhum ganho medido. Um modelo maior não foi o fator avaliado e não justifica o custo sem ganho de resultado. E dizer que as versões são equivalentes desconsidera uma diferença de custo que se multiplica por milhares de atendimentos.",
+      "opcoes": [
+        { "texto": "A versão 1, porque entrega o mesmo resultado com custo por interação muito menor.", "correta": true },
+        { "texto": "A versão 2, porque faz mais chamadas e, portanto, é mais minuciosa.", "correta": false },
+        { "texto": "A versão 2, porque provavelmente usa um modelo maior e mais capaz.", "correta": false },
+        { "texto": "Qualquer uma, porque as duas têm a mesma taxa de conclusão.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-diagnostico-rag-ordenacao-101",
+      "topico": "Avaliação de aplicações com modelos de base",
+      "tipo": "Ordenacao",
+      "enunciado": "Um assistente com RAG respondeu incorretamente a uma pergunta cuja resposta existe na documentação da empresa. A equipe quer diagnosticar a causa de forma sistemática antes de mudar qualquer coisa. Selecione e ordene as etapas do diagnóstico.",
+      "explicacao": "O diagnóstico segue o caminho da informação. Primeiro verifica-se se o documento com a resposta foi de fato indexado na base. Depois, se a recuperação devolve o trecho certo para aquela pergunta. Em seguida, se a resposta gerada usa fielmente o trecho recuperado. Com a etapa com falha identificada, ajusta-se essa etapa e reavalia-se. Trocar o modelo gerador antes de verificar a recuperação pode gastar esforço no lugar errado, já que o problema pode estar antes da geração. E aumentar a temperatura não é etapa de diagnóstico e tende a afastar a resposta dos trechos recuperados.",
+      "sequencia": [
+        "Verificar se o documento com a resposta está indexado na base.",
+        "Verificar se a recuperação devolve o trecho certo para a pergunta.",
+        "Verificar se a resposta gerada usa fielmente o trecho recuperado.",
+        "Ajustar a etapa em que a falha foi encontrada e reavaliar."
+      ],
+      "itensExtras": [
+        "Trocar o modelo gerador antes de verificar a recuperação.",
+        "Aumentar a temperatura para gerar respostas alternativas."
+      ]
+    },
+    {
+      "id": "aifc01-apl-abordagens-avaliacao-assoc-102",
+      "topico": "Abordagens de avaliação de modelos de base",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe de IA precisa escolher como avaliar diferentes aplicações da empresa. Associe cada necessidade de avaliação à abordagem mais adequada.",
+      "explicacao": "Comparar resumos gerados com resumos de referência escritos por especialistas é o terreno do ROUGE. Comparar traduções com traduções de referência é o do BLEU. Avaliar 50 mil respostas abertas segundo os critérios de uma rubrica, sem referências e em grande volume, é o caso do LLM como juiz. Decidir se textos seguem o tom da marca, com a palavra final dos especialistas, pede avaliação humana. E fazer uma triagem inicial de modelos em tarefas padronizadas usa conjuntos de dados de benchmark. A latência média está no painel porque é uma métrica acompanhada em qualquer aplicação, mas mede rapidez, e nenhuma das necessidades é sobre tempo de resposta.",
+      "associacoes": [
+        { "alvo": "Comparar resumos gerados com resumos de referência escritos por especialistas", "item": "ROUGE" },
+        { "alvo": "Comparar traduções geradas com traduções de referência", "item": "BLEU" },
+        { "alvo": "Avaliar 50 mil respostas abertas segundo os critérios de uma rubrica", "item": "LLM como juiz" },
+        { "alvo": "Decidir se textos seguem o tom da marca, com a palavra final dos especialistas", "item": "Avaliação humana" },
+        { "alvo": "Fazer uma triagem inicial de modelos em tarefas padronizadas", "item": "Conjuntos de dados de benchmark" }
+      ],
+      "itensExtras": ["Latência média"]
+    }
+  ]
+}

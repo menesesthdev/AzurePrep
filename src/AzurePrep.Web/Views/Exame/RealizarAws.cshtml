@@ -1,0 +1,181 @@
+@model RealizarProvaViewModel
+@using System.Security.Claims
+@{
+    Layout = null;
+    var state = Model.State;
+    var candidato = User.FindFirst(ClaimTypes.Name)?.Value ?? "Candidato";
+    var instrucoes = new InstrucoesAwsViewModel(Guid.Empty, state.ExamCode, state.ExamName, state.Questions.Count, state.TimeLimitMinutes);
+    var initialData = new
+    {
+        attemptId = state.AttemptId,
+        remainingSeconds = state.RemainingSeconds,
+        totalQuestions = state.Questions.Count,
+        statuses = state.Questions.Select(q => new
+        {
+            number = q.Number,
+            answered = q.IsAnswered,
+            flagged = q.IsFlaggedForReview,
+            selectedCount = q.SelectedCount,
+            required = q.RequiredSelections
+        }),
+        urls = new
+        {
+            question = Url.Action("Questao", "Exame", new { attemptId = state.AttemptId, number = 0 })!.Replace("/0", "/{n}"),
+            answer = Url.Action("SalvarResposta", "Exame", new { attemptId = state.AttemptId }),
+            finish = Url.Action("Finalizar", "Exame", new { attemptId = state.AttemptId })
+        }
+    };
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@state.ExamCode · Simulado em andamento</title>
+    <partial name="_Favicon" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="exam-body exam-aws" data-vendor="aws">
+    @*
+        Tela de prova da AWS, calibrada pelo demo oficial da Pearson VUE para a AWS: barra azul com
+        exame e candidato à esquerda, tempo e posição à direita; faixa de ferramentas logo abaixo
+        (Comentário à esquerda; Marcar para revisão e Esquema de cores à direita); fundo branco com
+        fonte serifada; rodapé só com Anterior e Próxima. A revisão aparece depois do último item e
+        troca a moldura: faixa com Instruções, fundo cinza e Encerrar revisão no canto esquerdo.
+    *@
+    <header class="aws-top">
+        <div class="aws-top__title">@state.ExamName - @candidato</div>
+        <div class="aws-top__status">
+            <div class="aws-top__line">
+                <svg class="aws-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="2" /><path d="M8 4v4.5l3 1.5" fill="none" stroke="currentColor" stroke-width="2" /></svg>
+                <span>Tempo restante</span> <span id="timer" aria-live="off">--:--</span>
+            </div>
+            <div class="aws-top__line" id="counter-line">
+                <svg class="aws-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h10" stroke="currentColor" stroke-width="2" /></svg>
+                <span id="question-counter">Questão 1 de @state.Questions.Count</span>
+            </div>
+        </div>
+    </header>
+
+    <div class="aws-tools">
+        <button type="button" class="aws-tool" id="btn-comments" accesskey="c">
+            <svg class="aws-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h9v12H2zM4 5h5M4 8h5M4 11h3" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M10 12l4-6" stroke="currentColor" stroke-width="1.6" /></svg>
+            <span><u>C</u>omentário</span>
+        </button>
+        <button type="button" class="aws-tool" id="btn-instructions" accesskey="i" hidden>
+            <svg class="aws-icon" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h9v12H2zM4 5h5M4 8h5M4 11h3" fill="none" stroke="currentColor" stroke-width="1.4" /></svg>
+            <span><u>I</u>nstruções</span>
+        </button>
+        <div class="aws-tools__right">
+            <label class="aws-tool mark-toggle" accesskey="m">
+                <input type="checkbox" id="flag-toggle" class="aws-tool__check" />
+                <svg class="aws-icon aws-icon--flag" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 15V2M4 2c3-1.5 5 1.5 9 0v7c-4 1.5-6-1.5-9 0" fill="none" stroke="currentColor" stroke-width="1.4" /></svg>
+                <span><u>M</u>arcar para revisão</span>
+            </label>
+            <partial name="_EsquemaDeCoresAws" />
+        </div>
+    </div>
+
+    <main class="aws-stage">
+        <section class="exam-sheet" id="question-view">
+            <div id="question-container">
+                @await Html.PartialAsync("_QuestaoAws", Model.FirstQuestion)
+            </div>
+        </section>
+
+        @*
+            Revisão no formato do demo: título e "Revisar todas" no alto, abas com contagem (Todas /
+            Incompletas / Marcadas — esta só aparece quando há alguma marcada), e a tabela num cartão
+            branco com o status em selo. "Revisar todas" percorre as questões em sequência; as abas
+            só filtram a tabela; clicar numa linha leva à questão.
+        *@
+        <section class="exam-sheet aws-review" id="review-view" hidden>
+            <div class="aws-review__head">
+                <h1 class="aws-review__title">Revisão</h1>
+                <button type="button" class="aws-review__all" id="btn-review-all" accesskey="t">Revisar <u>t</u>odas</button>
+            </div>
+
+            <div class="aws-review__tabs" role="group" aria-label="Filtrar questões">
+                <button type="button" class="aws-review__tab btn--filter is-active" data-filter="all"><span>Todas (<span data-count="all">0</span>)</span></button>
+                <button type="button" class="aws-review__tab btn--filter" data-filter="incomplete"><span>Incompletas (<span data-count="incomplete">0</span>)</span>
+                    <svg class="aws-icon" viewBox="0 0 16 16" role="img" aria-label="Questões sem resposta ou com seleção parcial"><title>Questões sem resposta ou com seleção parcial</title><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.2" /><path d="M8 7v5M8 4.2v1" stroke="currentColor" stroke-width="1.6" /></svg>
+                </button>
+                <button type="button" class="aws-review__tab btn--filter" data-filter="marked" hidden><span>Marcadas (<span data-count="marked">0</span>)</span></button>
+            </div>
+
+            <div class="aws-review__card">
+                <table class="aws-review__table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Questão</th>
+                            <th scope="col">Título</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Marcada</th>
+                            <th scope="col"><span class="aws-sr-only">Ação</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="review-rows"></tbody>
+                </table>
+                <p class="aws-review__empty" id="review-empty" hidden>Nenhuma questão nesta categoria.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="aws-nav">
+        <button type="button" class="aws-nav__btn aws-nav__btn--left" id="btn-end" accesskey="e" hidden>
+            <svg class="aws-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 8h9M7 4.5L10.5 8 7 11.5M11 2h4v12h-4" fill="none" stroke="currentColor" stroke-width="2.2" /></svg>
+            <span><u>E</u>ncerrar revisão</span>
+        </button>
+        <div class="aws-nav__right">
+            <button type="button" class="aws-nav__btn" id="btn-review" hidden>Tela de revisão</button>
+            <button type="button" class="aws-nav__btn" id="btn-prev" accesskey="a">
+                <svg class="aws-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2L3 8l6 6M3 8h11" fill="none" stroke="currentColor" stroke-width="2.6" /></svg> <span><u>A</u>nterior</span>
+            </button>
+            <button type="button" class="aws-nav__btn" id="btn-next" accesskey="p">
+                <span><u>P</u>róxima</span> <svg class="aws-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M7 2l6 6-6 6M13 8H2" fill="none" stroke="currentColor" stroke-width="2.6" /></svg>
+            </button>
+        </div>
+    </footer>
+
+    <div class="modal" id="finish-modal" hidden>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="finish-title">
+            <h2 class="modal__title" id="finish-title">Encerrar a revisão?</h2>
+            <p class="modal__body" id="finish-summary"></p>
+            <p class="modal__warning">Ao encerrar a revisão, a prova é concluída e não será possível retornar às questões.</p>
+            <div class="modal__actions">
+                <button type="button" class="btn" id="btn-finish-cancel">Voltar</button>
+                <button type="button" class="btn btn--primary" id="btn-finish-confirm">Encerrar revisão</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="comments-modal" hidden>
+        <div class="modal__dialog" role="dialog" aria-modal="true" aria-labelledby="comments-title">
+            <h2 class="modal__title" id="comments-title">Comentário sobre a questão</h2>
+            <p class="modal__body">
+                Registre aqui qualquer observação sobre esta questão. O comentário não afeta sua nota.
+            </p>
+            <textarea class="modal__textarea" id="comments-text" rows="6"></textarea>
+            <div class="modal__actions">
+                <button type="button" class="btn" id="btn-comments-cancel">Cancelar</button>
+                <button type="button" class="btn btn--primary" id="btn-comments-save">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="instructions-modal" hidden>
+        <div class="modal__dialog modal__dialog--wide" role="dialog" aria-modal="true" aria-label="Instruções">
+            <partial name="_InstrucoesAws" model="instrucoes" />
+            <div class="modal__actions">
+                <button type="button" class="btn btn--primary" id="btn-instructions-close">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    @Html.AntiForgeryToken()
+
+    <script id="exam-data" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(initialData))</script>
+    <script src="~/js/aws-esquema.js" asp-append-version="true"></script>
+    <script src="~/js/exam.js" asp-append-version="true"></script>
+</body>
+</html>

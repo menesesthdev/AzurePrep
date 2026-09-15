@@ -16,6 +16,10 @@ namespace AzurePrep.Infrastructure.Persistence.Seed;
 /// questões normalmente — o que permite exercitá-lo pelo seed e pelos testes desde a primeira
 /// questão —, mas fica fora do catálogo e recusa novas tentativas até virar <c>true</c>.
 /// </param>
+/// <param name="Fornecedor">
+/// Quem emite a certificação. Decide a escala da nota (1–1000 na Microsoft, 100–1000 na AWS), as
+/// regras de formato que o validador aplica aos lotes e a tela em que a prova é entregue.
+/// </param>
 public sealed record DefinicaoDeExame(
     string Code,
     string Name,
@@ -23,7 +27,8 @@ public sealed record DefinicaoDeExame(
     int PassingScorePercent,
     int TotalQuestions,
     IReadOnlyList<AreaDeExame> Areas,
-    bool Publicado = true);
+    bool Publicado = true,
+    Domain.Enums.FornecedorDoExame Fornecedor = Domain.Enums.FornecedorDoExame.Microsoft);
 
 /// <summary>Um domínio do Skills Measured: slug estável, nome de UI e peso em pontos percentuais.</summary>
 /// <param name="Key">

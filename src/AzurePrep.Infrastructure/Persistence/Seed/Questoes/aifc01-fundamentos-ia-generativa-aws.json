@@ -1,0 +1,250 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-generativa",
+  "questoes": [
+    {
+      "id": "aifc01-gen-limitacao-alucinacao-juridico-18",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente de pesquisa jurídica baseado em modelo de base redigiu um parecer bem estruturado que citava três decisões judiciais. Ao conferir, a equipe descobriu que duas das decisões não existiam. O escritório quer continuar usando o assistente. Qual é a limitação que causou o problema e qual mitigação é adequada?",
+      "explicacao": "Gerar conteúdo plausível, mas falso, como decisões inexistentes, é alucinação. A mitigação adequada é fundamentar as respostas numa base verificada de jurisprudência e exigir que o parecer cite as fontes recuperadas, que podem ser conferidas. Temperatura zero reduz a variação entre respostas, mas não impede o modelo de inventar: ele pode produzir a mesma citação falsa de forma consistente. Uma janela de contexto maior permite enviar mais texto, sem garantir que as decisões citadas venham desse texto. E viés nos dados de treinamento é outro problema, ligado a resultados injustos ou desequilibrados entre grupos, não à invenção de fatos.",
+      "opcoes": [
+        { "texto": "Alucinação; fundamentar as respostas numa base verificada de jurisprudência e exigir a citação das fontes.", "correta": true },
+        { "texto": "Não determinismo; configurar a temperatura em zero para que o modelo não invente informações.", "correta": false },
+        { "texto": "Limite da janela de contexto; usar um modelo com janela de contexto maior.", "correta": false },
+        { "texto": "Viés nos dados de treinamento; rebalancear os dados usados para treinar o modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-limitacao-nao-determinismo-testes-19",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de qualidade de uma empresa criou testes automatizados que enviam o mesmo prompt a um assistente generativo e comparam a resposta, caractere por caractere, com uma resposta esperada. Os testes falham de forma intermitente, embora as respostas estejam corretas e só mudem a redação. O que explica o comportamento e como a equipe deve ajustar os testes?",
+      "explicacao": "Modelos generativos escolhem cada próximo token de forma probabilística, então o mesmo prompt pode gerar redações diferentes — é não determinismo, e explica respostas corretas com textos distintos. Reduzir a temperatura diminui essa variação, e avaliar a resposta por critérios (conteúdo obrigatório, formato, fatos corretos) em vez de igualdade exata de texto torna o teste adequado ao tipo de sistema. Alucinação seria resposta incorreta ou inventada, e o enunciado diz que as respostas estão corretas. Desvio de dados é mudança na distribuição dos dados em produção ao longo do tempo, que não causa variação entre duas execuções seguidas. E aumentar o limite de tokens de saída só permitiria respostas mais longas, sem estabilizar a redação.",
+      "opcoes": [
+        { "texto": "Não determinismo; reduzir a temperatura e avaliar as respostas por critérios, não por texto idêntico.", "correta": true },
+        { "texto": "Alucinação; adicionar RAG para que o modelo passe a gerar sempre o mesmo texto.", "correta": false },
+        { "texto": "Desvio de dados; retreinar o modelo com as respostas esperadas pelos testes.", "correta": false },
+        { "texto": "Limite de tokens de saída; aumentar o número máximo de tokens da resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-vantagens-faq-regras-20",
+      "topico": "Vantagens e limitações da IA generativa",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma operadora de saúde vai substituir o chatbot baseado em regras e respostas prontas por um assistente baseado em modelo de base. A diretoria pediu uma lista realista do que esperar da mudança. Quais vantagens a empresa pode esperar da IA generativa?",
+      "explicacao": "As duas vantagens reais são as que o modelo de base traz sobre regras fixas: entender perguntas formuladas de jeitos que ninguém previu, que é a adaptabilidade, e responder em linguagem natural ajustada ao contexto de cada conversa, que é a capacidade conversacional. As outras três opções descrevem justamente as limitações do modelo. Resposta sempre idêntica para a mesma pergunta contraria o não determinismo da geração. Dispensar revisão em temas regulados ignora o risco de alucinação, especialmente grave em saúde. E explicar quais parâmetros internos produziram cada resposta esbarra na baixa interpretabilidade desses modelos.",
+      "opcoes": [
+        { "texto": "Entender perguntas formuladas de maneiras que não foram previstas pela equipe.", "correta": true },
+        { "texto": "Gerar respostas em linguagem natural adaptadas ao contexto de cada conversa.", "correta": true },
+        { "texto": "Garantir que a mesma pergunta receba sempre exatamente a mesma resposta.", "correta": false },
+        { "texto": "Eliminar a necessidade de revisar respostas sobre coberturas e procedimentos regulados.", "correta": false },
+        { "texto": "Explicar com precisão quais parâmetros internos do modelo produziram cada resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-modelo-latencia-voz-21",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de telefonia vai colocar um assistente de voz para responder dúvidas simples, como segunda via de fatura e horário de lojas. A resposta precisa começar em menos de um segundo para a conversa soar natural, e a previsão é de milhões de interações por mês. Testes mostraram que perguntas desse tipo são respondidas corretamente por vários modelos. Qual critério deve orientar a escolha do modelo?",
+      "explicacao": "Com tarefas simples que vários modelos resolvem, latência baixa e volume de milhões de interações, o critério é escolher um modelo menor, rápido e com menor custo por token que atinja a qualidade exigida nos testes. O melhor resultado em benchmarks gerais costuma vir de modelos maiores, mais lentos e caros — qualidade que a tarefa não precisa, paga em latência e em custo multiplicado pelo volume. Uma janela de contexto maior não ajuda perguntas curtas e não reduz a latência. E contratar Provisioned Throughput para um modelo grande garante capacidade reservada, mas não torna cada resposta mais rápida e ainda aumenta o custo de uma escolha que já era desproporcional.",
+      "opcoes": [
+        { "texto": "Um modelo menor, de baixa latência e menor custo por token, que atinja a qualidade exigida nos testes.", "correta": true },
+        { "texto": "O modelo com a maior pontuação em benchmarks gerais de raciocínio.", "correta": false },
+        { "texto": "O modelo com a maior janela de contexto disponível.", "correta": false },
+        { "texto": "Um modelo grande, com Provisioned Throughput para garantir a qualidade das respostas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-modelo-residencia-dados-22",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um hospital no Brasil vai usar um modelo de base no Amazon Bedrock para resumir prontuários. A área jurídica determinou que os dados dos pacientes, inclusive durante o processamento, não podem sair de uma Região da AWS específica. A equipe técnica tem uma lista de modelos candidatos com diferentes preços, janelas de contexto e resultados em benchmarks. Qual critério deve eliminar candidatos primeiro?",
+      "explicacao": "Um requisito de residência de dados é eliminatório: não importa quão bom ou barato seja um modelo se ele não puder ser usado dentro da Região exigida. Por isso o primeiro filtro é a disponibilidade do modelo naquela Região, sem recursos que encaminhem a inferência para outras Regiões. Só depois fazem sentido os critérios de comparação. A pontuação em benchmark de raciocínio é critério de qualidade e não substitui a conformidade. Buscar o menor preço por token entre todas as Regiões pode levar justamente a uma Região proibida. E a maior janela de contexto é útil para prontuários longos, mas também é um critério de comparação entre modelos já permitidos, não de eliminação.",
+      "opcoes": [
+        { "texto": "A disponibilidade do modelo na Região exigida, sem encaminhar a inferência para outras Regiões.", "correta": true },
+        { "texto": "A maior pontuação em benchmarks de raciocínio entre os modelos candidatos.", "correta": false },
+        { "texto": "O menor preço por token do modelo considerando todas as Regiões da AWS.", "correta": false },
+        { "texto": "A maior janela de contexto, para processar os prontuários mais longos.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-metrica-conversao-assistente-23",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja on-line lançou um assistente de compras com IA generativa para parte dos visitantes, mantendo os demais sem o assistente. A diretoria quer saber se o assistente aumentou as vendas. Qual métrica responde a essa pergunta?",
+      "explicacao": "A pergunta é se o assistente fez mais visitantes comprarem, e a comparação entre a taxa de conversão de quem usou o assistente e a de quem não teve acesso a ele mede exatamente esse impacto — o grupo sem assistente é o que isola o efeito. O número de tokens processados por dia mostra quanto o assistente foi usado e quanto custa, não se vendeu mais. A pontuação BLEU compara textos gerados com textos de referência, típica de tradução; mede semelhança de texto, não resultado de negócio. E a latência até o primeiro token é métrica de experiência técnica: um assistente rápido pode não converter ninguém.",
+      "opcoes": [
+        { "texto": "A taxa de conversão dos visitantes com o assistente comparada à dos visitantes sem ele.", "correta": true },
+        { "texto": "O número de tokens processados pelo assistente por dia.", "correta": false },
+        { "texto": "A pontuação BLEU das respostas geradas pelo assistente.", "correta": false },
+        { "texto": "A latência média até o primeiro token de cada resposta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-metricas-negocio-assoc-24",
+      "topico": "Métricas de negócio de IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Um varejista preparou perguntas para avaliar o assistente de IA generativa lançado há um ano. Associe cada pergunta à métrica de negócio que a responde.",
+      "explicacao": "Saber se os clientes atendidos continuam comprando por mais tempo é medir o valor do tempo de vida do cliente (CLV), que olha a receita ao longo de todo o relacionamento. Saber se mais visitantes finalizaram a compra é a taxa de conversão. A receita média gerada por usuário num período é o ARPU. Comparar o ganho financeiro com o custo de construir e operar o assistente é o ROI. E medir se a equipe de atendimento resolve mais chamados por hora é eficiência operacional. A pontuação ROUGE está no painel por ser uma métrica conhecida de IA generativa, mas mede a sobreposição de um resumo gerado com um resumo de referência — é qualidade de texto, não resposta a nenhuma pergunta de negócio da lista.",
+      "associacoes": [
+        { "alvo": "Os clientes atendidos pelo assistente continuam comprando por mais tempo?", "item": "Valor do tempo de vida do cliente (CLV)" },
+        { "alvo": "O assistente fez mais visitantes finalizarem a compra?", "item": "Taxa de conversão" },
+        { "alvo": "Quanto cada usuário gera de receita, em média, por mês?", "item": "Receita média por usuário (ARPU)" },
+        { "alvo": "O ganho financeiro supera o custo de construir e operar o assistente?", "item": "Retorno sobre o investimento (ROI)" },
+        { "alvo": "A equipe de atendimento passou a resolver mais chamados por hora?", "item": "Eficiência operacional" }
+      ],
+      "itensExtras": ["Pontuação ROUGE"]
+    },
+    {
+      "id": "aifc01-gen-servico-sagemaker-controle-25",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de pesquisa quer desenvolver um modelo generativo próprio para sequências de proteínas. Ela precisa usar código de treinamento escrito pela própria equipe, escolher os tipos de instância com GPU dos jobs de treinamento e controlar todo o ciclo, do treinamento à hospedagem do modelo. Qual serviço da AWS atende a esses requisitos?",
+      "explicacao": "O Amazon SageMaker AI é o serviço para construir, treinar e implantar modelos com controle total: aceita código de treinamento próprio, permite escolher as instâncias dos jobs e hospeda o modelo resultante. O Amazon Bedrock oferece modelos de base prontos por API, com opções de personalização dos modelos suportados, mas não executa algoritmos de treinamento arbitrários nem expõe a escolha de instâncias. O Amazon Quick é um espaço de trabalho com agentes para usuários de negócio analisarem dados, pesquisarem e automatizarem tarefas, sem relação com treinar modelos. E o Kiro é um ambiente de desenvolvimento com agentes que ajuda a escrever software; poderia ajudar a escrever o código de treinamento, mas não executa nem hospeda o treinamento.",
+      "opcoes": [
+        { "texto": "Amazon SageMaker AI", "correta": true },
+        { "texto": "Amazon Bedrock", "correta": false },
+        { "texto": "Amazon Quick", "correta": false },
+        { "texto": "Kiro", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servico-amazon-quick-26",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe comercial de uma distribuidora, sem desenvolvedores, quer fazer perguntas em linguagem natural sobre os dados de vendas armazenados no Amazon Redshift, gerar pesquisas que combinem esses dados com documentos internos e automatizar tarefas simples, como enviar um relatório semanal. Tudo deve ser feito numa aplicação pronta, sem escrever código. Qual solução atende a esses requisitos?",
+      "explicacao": "O Amazon Quick é um espaço de trabalho com agentes de IA voltado a usuários de negócio: responde perguntas em linguagem natural sobre dados, faz pesquisas combinando fontes internas e automatiza fluxos de trabalho, tudo numa aplicação pronta. O Amazon Bedrock AgentCore é uma plataforma para desenvolvedores implantarem e operarem agentes com segurança e em escala — exigiria construir a solução. O Strands Agents é um SDK de código aberto para escrever agentes em código, o oposto de uma aplicação sem código. E o SageMaker JumpStart é um catálogo de modelos e soluções para implantar no SageMaker AI, também voltado a equipes técnicas.",
+      "opcoes": [
+        { "texto": "Amazon Quick", "correta": true },
+        { "texto": "Amazon Bedrock AgentCore", "correta": false },
+        { "texto": "Strands Agents", "correta": false },
+        { "texto": "Amazon SageMaker JumpStart", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servico-kiro-especificacoes-27",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe de desenvolvimento quer usar IA para acelerar a construção de um sistema, mas teve problemas com assistentes que saem escrevendo código direto a partir de um pedido vago. A equipe quer uma ferramenta em que o agente, antes de programar, produza requisitos, um documento de design e uma lista de tarefas que ficam no repositório como referência do projeto. Qual solução atende a esse requisito?",
+      "explicacao": "O Kiro é o ambiente de desenvolvimento com agentes da AWS baseado em desenvolvimento orientado a especificações: antes de escrever código, o agente gera requisitos, design e lista de tarefas, que permanecem no repositório como fonte da verdade — exatamente a etapa de planejamento que faltava. O Strands Agents é um SDK para construir agentes próprios; a equipe teria de desenvolver essa ferramenta em vez de usá-la. O Amazon Quick atende usuários de negócio com análise de dados, pesquisa e automação, não desenvolvimento de software. E o Amazon Bedrock Prompt Management versiona e gerencia prompts usados por aplicações, sem produzir especificações nem escrever código.",
+      "opcoes": [
+        { "texto": "Kiro", "correta": true },
+        { "texto": "Strands Agents", "correta": false },
+        { "texto": "Amazon Quick", "correta": false },
+        { "texto": "Amazon Bedrock Prompt Management", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-servico-strands-sdk-28",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Desenvolvedores de uma fintech querem escrever, em Python, um agente que recebe um prompt com sua função e uma lista de ferramentas, e deixar que o próprio modelo planeje quais ferramentas usar e em que ordem, sem codificar o fluxo passo a passo. Eles querem um framework de código aberto que rode dentro da própria aplicação. Qual solução atende a esses requisitos?",
+      "explicacao": "O Strands Agents é um SDK de código aberto, em Python e TypeScript, com abordagem orientada ao modelo: o desenvolvedor define o prompt e as ferramentas, e o modelo decide como encadear o raciocínio e as chamadas — rodando dentro da própria aplicação, sem plano de controle hospedado. O AgentCore Runtime é complementar, e é por isso que confunde: ele hospeda e escala agentes feitos com qualquer framework, inclusive o Strands, mas não é a biblioteca com que o agente é escrito. O Amazon Quick é uma aplicação pronta para usuários de negócio, não um framework. E o SageMaker JumpStart oferece modelos para implantar, sem o laço de agente que planeja e chama ferramentas.",
+      "opcoes": [
+        { "texto": "Strands Agents", "correta": true },
+        { "texto": "Amazon Bedrock AgentCore Runtime", "correta": false },
+        { "texto": "Amazon Quick", "correta": false },
+        { "texto": "Amazon SageMaker JumpStart", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-agentcore-componentes-assoc-29",
+      "topico": "Serviços da AWS para IA generativa",
+      "tipo": "Associacao",
+      "enunciado": "Uma empresa vai colocar em produção um agente de atendimento usando o Amazon Bedrock AgentCore. A equipe listou as necessidades abaixo. Associe cada necessidade ao componente do AgentCore que a atende.",
+      "explicacao": "Executar o agente sem gerenciar servidores, com sessões isoladas, é o AgentCore Runtime. Transformar APIs e funções AWS Lambda existentes em ferramentas compatíveis com MCP é o AgentCore Gateway. Lembrar as preferências do cliente entre sessões é a memória de longo prazo do AgentCore Memory. Acessar sistemas em nome do usuário, integrando com o provedor de identidade que a empresa já usa, é o AgentCore Identity. E rastrear cada passo da execução para depurar falhas em produção é o AgentCore Observability. O AgentCore Code Interpreter está no painel porque também é um componente real: ele oferece um ambiente isolado para o agente executar código, o que nenhuma das necessidades pediu.",
+      "associacoes": [
+        { "alvo": "Executar o agente sem gerenciar servidores, com sessões isoladas por usuário", "item": "AgentCore Runtime" },
+        { "alvo": "Transformar APIs e funções AWS Lambda existentes em ferramentas compatíveis com MCP", "item": "AgentCore Gateway" },
+        { "alvo": "Lembrar as preferências de cada cliente entre sessões diferentes", "item": "AgentCore Memory" },
+        { "alvo": "Acessar sistemas em nome do usuário usando o provedor de identidade da empresa", "item": "AgentCore Identity" },
+        { "alvo": "Rastrear cada passo da execução do agente para depurar falhas em produção", "item": "AgentCore Observability" }
+      ],
+      "itensExtras": ["AgentCore Code Interpreter"]
+    },
+    {
+      "id": "aifc01-gen-vantagem-servicos-gerenciados-30",
+      "topico": "Vantagens dos serviços de IA generativa da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup sem equipe de ML precisa lançar em seis semanas um recurso que gera descrições de produtos a partir de fichas técnicas. Os investidores exigem baixo custo inicial, e a empresa não quer operar infraestrutura. Qual abordagem aproveita melhor as vantagens dos serviços de IA generativa da AWS para esse cenário?",
+      "explicacao": "Usar um modelo de base gerenciado no Amazon Bedrock aproveita as vantagens centrais dos serviços de IA generativa da AWS: barreira de entrada baixa, rapidez para chegar ao mercado e custo proporcional ao uso, sem treinar nem hospedar modelos. Hospedar um modelo de pesos abertos do SageMaker JumpStart em endpoint próprio é viável, mas coloca a startup para dimensionar e manter instâncias, que é a operação que ela quer evitar, com custo mesmo sem uso. Pré-treinar um modelo próprio em instâncias com GPU exige dados, especialistas e meses — incompatível com seis semanas e com baixo custo inicial. E esperar reunir dados rotulados para um modelo tradicional atrasa o lançamento e, ainda assim, não resolve bem a geração de texto livre.",
+      "opcoes": [
+        { "texto": "Usar um modelo de base gerenciado no Amazon Bedrock, pagando pelo uso.", "correta": true },
+        { "texto": "Hospedar um modelo de pesos abertos do SageMaker JumpStart em um endpoint próprio.", "correta": false },
+        { "texto": "Pré-treinar um modelo próprio em instâncias Amazon EC2 com GPU.", "correta": false },
+        { "texto": "Reunir dados rotulados para treinar um modelo tradicional de geração de texto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-seguranca-bedrock-afirmacoes-31",
+      "topico": "Benefícios da infraestrutura da AWS para IA generativa",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "O comitê de segurança de uma operadora de saúde está avaliando o Amazon Bedrock para uma aplicação que processará informações de beneficiários. Quais afirmações sobre o uso do Amazon Bedrock estão corretas?",
+      "explicacao": "Duas afirmações estão corretas. O Amazon Bedrock não usa os prompts e as respostas dos clientes para treinar os modelos de base, e esses dados não são compartilhados com os provedores dos modelos. E o serviço pode ser acessado a partir de uma VPC por meio do AWS PrivateLink, sem que o tráfego passe pela internet pública. As outras três afirmações estão erradas. Pelo modelo de responsabilidade compartilhada, a conformidade da aplicação com a LGPD continua sendo responsabilidade do cliente, que decide quais dados envia e como os protege. O Bedrock não anonimiza dados automaticamente; recursos como o Amazon Bedrock Guardrails podem filtrar informações sensíveis, mas precisam ser configurados. E usar um modelo de base não dá ao cliente uma cópia exclusiva do modelo; personalizações têm custo próprio.",
+      "opcoes": [
+        { "texto": "Os prompts e as respostas não são usados para treinar os modelos de base.", "correta": true },
+        { "texto": "O serviço pode ser acessado a partir da VPC por AWS PrivateLink, sem tráfego pela internet pública.", "correta": true },
+        { "texto": "A AWS assume a responsabilidade pela conformidade da aplicação com a LGPD.", "correta": false },
+        { "texto": "Os dados pessoais são anonimizados automaticamente antes de chegarem ao modelo.", "correta": false },
+        { "texto": "Cada cliente recebe uma cópia exclusiva do modelo de base, sem custo adicional.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-provisioned-throughput-32",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma plataforma de atendimento usa um modelo de base sob demanda no Amazon Bedrock. O volume é alto e estável 24 horas por dia, e nos horários de pico as requisições começam a ser limitadas, o que viola o acordo de nível de serviço com os clientes. A empresa aceita assumir um compromisso de prazo em troca de capacidade garantida. Qual opção atende a esse requisito?",
+      "explicacao": "O Provisioned Throughput reserva capacidade de processamento dedicada para um modelo, com compromisso de prazo, e garante a vazão necessária para um volume alto e estável — exatamente a troca que a empresa aceita fazer. Reduzir o tamanho dos prompts diminui o custo por requisição, mas não garante capacidade no pico: o modo sob demanda continua sujeito a limites. A inferência em lote processa grandes volumes de forma assíncrona e com preço menor, mas não serve para atendimento em tempo real. E trocar para um modelo maior aumenta o custo e a latência sem resolver a limitação de capacidade.",
+      "opcoes": [
+        { "texto": "Contratar Provisioned Throughput para o modelo, com compromisso de prazo.", "correta": true },
+        { "texto": "Continuar sob demanda e reduzir o tamanho dos prompts enviados.", "correta": false },
+        { "texto": "Migrar as requisições de atendimento para a inferência em lote.", "correta": false },
+        { "texto": "Trocar o modelo atual por um modelo maior da mesma família.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-inferencia-lote-bedrock-33",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um marketplace precisa gerar, uma vez por semana, descrições novas para 500 mil anúncios usando um modelo de base no Amazon Bedrock. Os textos só são publicados na manhã seguinte, e nenhum usuário espera a resposta durante o processamento. A empresa quer o menor custo possível. Qual opção atende a esse requisito?",
+      "explicacao": "A inferência em lote do Amazon Bedrock processa um grande conjunto de requisições de forma assíncrona, a partir de arquivos no Amazon S3, e tem preço menor que o modo sob demanda nos modelos compatíveis — é a opção feita para volume grande sem necessidade de resposta imediata. Disparar chamadas sob demanda em paralelo funciona, mas paga o preço cheio por token e ainda esbarra nos limites de requisições. O Provisioned Throughput reserva capacidade com compromisso de prazo, o que não compensa para uma carga semanal que fica ociosa o resto do tempo. E hospedar um modelo num endpoint em tempo real do SageMaker AI mantém instâncias ativas para uma latência que ninguém está esperando.",
+      "opcoes": [
+        { "texto": "Usar a inferência em lote do Amazon Bedrock com os dados no Amazon S3.", "correta": true },
+        { "texto": "Disparar chamadas sob demanda em paralelo para o modelo no Amazon Bedrock.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput para o período de processamento semanal.", "correta": false },
+        { "texto": "Hospedar um modelo em um endpoint de inferência em tempo real do SageMaker AI.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-custo-inferencia-entre-regioes-34",
+      "topico": "Custos de serviços de IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de mídia usa um modelo sob demanda no Amazon Bedrock para gerar legendas de vídeos. Em eventos ao vivo, o volume dispara por algumas horas e as requisições passam a ser limitadas na Região usada. Não há restrição sobre em qual Região da mesma área geográfica os dados são processados, e a empresa não quer assumir compromisso de capacidade para picos ocasionais. Qual opção atende a esses requisitos?",
+      "explicacao": "A inferência entre Regiões (cross-Region inference) do Amazon Bedrock distribui as requisições entre Regiões de uma mesma área geográfica, aumentando a vazão disponível nos picos sem compromisso de capacidade — e o enunciado deixa claro que processar em outra Região da área é permitido. Essa mesma opção seria descartada num cenário com exigência de residência numa Região específica. O Provisioned Throughput garante capacidade, mas com compromisso de prazo, que a empresa não quer para picos ocasionais. A inferência em lote é assíncrona e não serve para legendas de eventos ao vivo. E fazer fine-tuning de um modelo menor cria um modelo personalizado com custo de treinamento, sem resolver o limite de vazão da Região.",
+      "opcoes": [
+        { "texto": "Usar a inferência entre Regiões do Amazon Bedrock dentro da mesma área geográfica.", "correta": true },
+        { "texto": "Contratar Provisioned Throughput para cobrir os eventos ao vivo.", "correta": false },
+        { "texto": "Enviar as legendas dos eventos ao vivo para a inferência em lote.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo menor para reduzir o consumo de tokens.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-gen-selecao-modelo-processo-ordenacao-35",
+      "topico": "Critérios de seleção de modelos",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma seguradora vai escolher o modelo de base de um assistente que responde dúvidas de corretores. Há requisitos de latência, de custo por interação e de conformidade com a política interna de dados. Selecione e ordene as etapas que a equipe deve seguir para escolher o modelo.",
+      "explicacao": "A escolha começa pelos requisitos — latência, custo e conformidade —, porque são eles que definem o que é um bom modelo para este caso. Com os requisitos claros, a equipe elimina os modelos que não os atendem, como os indisponíveis onde a política de dados exige. Os candidatos restantes são avaliados com perguntas reais e representativas dos corretores, e a decisão final compara qualidade com o custo estimado por interação. Escolher o modelo com mais parâmetros confunde tamanho com adequação: modelos maiores custam mais e respondem mais devagar, e podem não ser necessários. E fazer fine-tuning de todos os candidatos antes de avaliá-los multiplica o custo sem necessidade, antes de saber se algum já atende sem personalização.",
+      "sequencia": [
+        "Definir os requisitos de latência, custo por interação e conformidade.",
+        "Eliminar os modelos que não atendem aos requisitos obrigatórios.",
+        "Avaliar os candidatos restantes com perguntas reais dos corretores.",
+        "Comparar a qualidade obtida com o custo estimado por interação e escolher."
+      ],
+      "itensExtras": [
+        "Escolher o modelo com o maior número de parâmetros disponível.",
+        "Fazer fine-tuning de todos os modelos candidatos antes de avaliá-los."
+      ]
+    }
+  ]
+}

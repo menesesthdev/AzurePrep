@@ -28,7 +28,19 @@ public sealed class CatalogoDeExamesService : ICatalogoDeExamesService
                 e.Name,
                 e.TimeLimitMinutes,
                 e.TotalQuestions,
-                e.PassingScorePercent))
+                e.PassingScorePercent,
+                e.Vendor))
             .ToList();
+    }
+
+    public async Task<ResumoDeExameDto?> ObterExameDisponivelAsync(Guid examId, CancellationToken cancellationToken = default)
+    {
+        var e = await _examRepository.ObterPorIdAsync(examId, cancellationToken);
+
+        // Mesma regra do catálogo: a tela de instruções da AWS vem antes de a tentativa existir, e
+        // não pode virar a porta dos fundos por onde um exame em construção aparece.
+        return e is null || !e.IsPublished
+            ? null
+            : new ResumoDeExameDto(e.Id, e.Code, e.Name, e.TimeLimitMinutes, e.TotalQuestions, e.PassingScorePercent, e.Vendor);
     }
 }

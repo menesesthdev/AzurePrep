@@ -1,0 +1,234 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "ia-responsavel",
+  "questoes": [
+    {
+      "id": "aifc01-resp-equidade-taxas-contratacao-18",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo que recomenda candidatos para entrevistas tem boa acurácia geral. Uma análise mostrou que, entre candidatos com qualificações equivalentes, a taxa de recomendação para pessoas acima de 50 anos é muito menor do que para as demais. A empresa quer tratar isso como uma questão de equidade. Qual abordagem de avaliação é adequada?",
+      "explicacao": "Equidade significa que o modelo não trata de forma desigual grupos com perfis equivalentes. A avaliação adequada compara taxas de recomendação e taxas de erro entre os grupos etários, controlando pelas qualificações — é assim que se mede e acompanha a diferença observada. Otimizar a acurácia geral pode até aumentar a desigualdade, porque a média é dominada pelo grupo maior. Remover o atributo idade e considerar o problema resolvido ignora atributos correlacionados, como ano de formatura ou tempo de carreira, que continuam permitindo ao modelo discriminar. E publicar o código do modelo aumenta a transparência, mas não mede nem corrige a diferença entre grupos.",
+      "opcoes": [
+        { "texto": "Comparar as taxas de recomendação e de erro entre grupos etários com qualificações equivalentes.", "correta": true },
+        { "texto": "Otimizar o modelo para aumentar ainda mais a acurácia geral.", "correta": false },
+        { "texto": "Remover o atributo idade e considerar o problema resolvido.", "correta": false },
+        { "texto": "Publicar o código-fonte do modelo para dar transparência ao processo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-variavel-proxy-cep-19",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para evitar discriminação, uma financeira removeu dos dados de treinamento os atributos de raça e gênero. Mesmo assim, uma auditoria encontrou taxas de aprovação muito diferentes entre grupos raciais. Os dados incluem CEP de residência, que tem forte correlação com a composição racial dos bairros da cidade. O que explica o resultado e qual ação é adequada?",
+      "explicacao": "O CEP funciona como variável substituta (proxy): por ser correlacionado com a composição racial dos bairros, permite que o modelo reproduza a discriminação mesmo sem o atributo raça. A ação adequada é analisar os atributos correlacionados com grupos protegidos e medir os resultados por subgrupo — com uma ferramenta como o SageMaker Clarify —, para decidir como tratar o CEP e verificar se a diferença desaparece. Adicionar de volta o atributo raça não corrige o viés e cria um uso direto de dado sensível. Considerar o problema resolvido porque o atributo foi removido é a premissa que a auditoria acabou de refutar. E aumentar a temperatura não se aplica a um modelo de aprovação de crédito nem altera o viés aprendido.",
+      "opcoes": [
+        { "texto": "O CEP atua como variável substituta; analisar atributos correlacionados e os resultados por subgrupo.", "correta": true },
+        { "texto": "Falta o atributo raça; adicioná-lo novamente para que o modelo compense a diferença.", "correta": false },
+        { "texto": "O problema está resolvido, porque os atributos sensíveis foram removidos do treinamento.", "correta": false },
+        { "texto": "Há excesso de determinismo; aumentar a temperatura do modelo de aprovação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-geracao-imagens-estereotipos-20",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma plataforma de ensino gera ilustrações para materiais didáticos com um modelo de imagens. Ao pedir imagens de médicos e engenheiros, quase sempre recebe homens brancos; ao pedir enfermeiros, quase sempre mulheres. A plataforma atende alunos de todo o país e quer materiais inclusivos. Qual abordagem é mais adequada?",
+      "explicacao": "O modelo reproduz estereótipos presentes nos dados com que foi treinado. A abordagem adequada é avaliar sistematicamente as saídas por grupo demográfico, com um conjunto de prompts de teste, e agir sobre o que se encontra: especificar diversidade nos prompts, revisar os materiais e considerar modelos com avaliações melhores nesse aspecto. Aumentar a resolução das imagens melhora a qualidade visual, sem mudar quem aparece nelas. Aumentar a temperatura pode variar as imagens por acaso, mas não é sistemático nem verificável. E aceitar o resultado por refletir estatísticas de profissões ignora o objetivo declarado de inclusão e reforça estereótipos para os alunos.",
+      "opcoes": [
+        { "texto": "Avaliar as imagens geradas por grupo demográfico e ajustar prompts, revisão e escolha do modelo.", "correta": true },
+        { "texto": "Aumentar a resolução das imagens geradas para melhorar a qualidade.", "correta": false },
+        { "texto": "Aumentar a temperatura como única medida para variar as imagens.", "correta": false },
+        { "texto": "Manter as imagens como estão, porque refletem estatísticas reais das profissões.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-seguranca-saude-mental-21",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um aplicativo de bem-estar vai oferecer um assistente conversacional. A equipe identificou o risco de usuários em sofrimento emocional mencionarem automutilação. Nesses casos, o assistente não pode fornecer nenhuma orientação prejudicial e deve encaminhar a pessoa a ajuda profissional. Qual abordagem trata esse risco de segurança de forma mais responsável?",
+      "explicacao": "Segurança, como dimensão de IA responsável, é evitar que o sistema cause dano. A abordagem adequada combina controles aplicados de forma consistente — filtros de conteúdo e respostas definidas que encaminham para ajuda profissional — com testes de cenários de risco antes do lançamento, para confirmar que funcionam. Fazer fine-tuning com conversas de usuários pode mudar o comportamento do modelo, mas não garante o bloqueio em todos os casos e ainda usa dados sensíveis. Uma janela de contexto maior não tem relação com segurança. E uma única instrução negativa no prompt é orientação que o modelo pode deixar de seguir, especialmente em conversas longas ou mensagens indiretas.",
+      "opcoes": [
+        { "texto": "Configurar filtros e respostas de encaminhamento a ajuda profissional e testar cenários de risco antes do lançamento.", "correta": true },
+        { "texto": "Fazer fine-tuning do modelo com conversas reais de usuários em sofrimento.", "correta": false },
+        { "texto": "Usar um modelo com janela de contexto maior para entender melhor o usuário.", "correta": false },
+        { "texto": "Incluir no prompt de sistema uma única instrução para não falar sobre o tema.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-veracidade-resumos-financeiros-22",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um portal de notícias usa um modelo de base para resumir balanços de empresas. Os leitores apontaram resumos com lucros e percentuais diferentes dos publicados nos balanços originais. Os resumos são publicados automaticamente. Qual dimensão de IA responsável está comprometida e qual medida é adequada?",
+      "explicacao": "Veracidade é a dimensão que trata de o sistema produzir informações verdadeiras, e números diferentes dos balanços a comprometem diretamente. A medida adequada é conferir os valores do resumo contra o documento de origem antes da publicação e incluir revisão humana, já que um número errado num portal de notícias tem consequência séria. Equidade trata de desempenho justo entre grupos, sem relação com números incorretos. Robustez trata de entradas com ruído ou variação, e aqui os balanços são documentos bem formatados. E sustentabilidade diz respeito ao consumo de recursos, que não explica nem corrige os erros de conteúdo.",
+      "opcoes": [
+        { "texto": "Veracidade; conferir os números contra o balanço original e incluir revisão humana antes de publicar.", "correta": true },
+        { "texto": "Equidade; comparar o desempenho do modelo entre empresas de diferentes setores.", "correta": false },
+        { "texto": "Robustez; treinar o modelo com balanços que contenham erros de digitação.", "correta": false },
+        { "texto": "Sustentabilidade; trocar por um modelo menor, com menor consumo de energia.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-red-teaming-lancamento-23",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco vai lançar um assistente generativo para clientes. Antes do lançamento, quer descobrir se o assistente pode ser induzido a gerar respostas ofensivas, a revelar informações indevidas ou a dar recomendações financeiras proibidas. Qual prática é mais adequada para esse objetivo?",
+      "explicacao": "Testes adversariais conduzidos por revisores humanos, também chamados de red teaming, tentam deliberadamente provocar comportamentos inadequados — ofensas, vazamentos e recomendações proibidas — e revelam falhas antes que clientes as encontrem. Um benchmark público de raciocínio mede capacidade geral em tarefas padronizadas, sem testar tentativas de manipulação no contexto do banco. O ROUGE compara textos gerados com referências e não detecta comportamento inadequado. E lançar e aguardar reclamações usa os próprios clientes como teste, expondo o banco justamente aos danos que se queria evitar.",
+      "opcoes": [
+        { "texto": "Realizar testes adversariais com revisores humanos tentando provocar respostas inadequadas.", "correta": true },
+        { "texto": "Comparar o assistente com outros modelos num benchmark público de raciocínio.", "correta": false },
+        { "texto": "Calcular o ROUGE das respostas em relação a respostas de referência.", "correta": false },
+        { "texto": "Lançar o assistente e monitorar as reclamações recebidas dos clientes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-bedrock-evaluation-toxicidade-24",
+      "topico": "Ferramentas de IA responsável da AWS",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe quer comparar três modelos de base do Amazon Bedrock quanto à toxicidade das respostas e à robustez a variações nas perguntas, usando conjuntos de dados prontos e métricas padronizadas, antes de escolher o modelo de um assistente público. Qual recurso atende a esse requisito?",
+      "explicacao": "O Amazon Bedrock Model Evaluation executa avaliações automáticas de modelos com conjuntos de dados prontos ou próprios e oferece métricas como toxicidade e robustez, permitindo comparar os candidatos antes da escolha. O SageMaker Model Cards documenta um modelo, e poderia registrar os resultados, mas não executa a avaliação. O Amazon CloudWatch coleta métricas operacionais, como latência e erros, sem medir toxicidade. E o Amazon Macie descobre dados sensíveis no Amazon S3, sem avaliar respostas de modelos.",
+      "opcoes": [
+        { "texto": "Amazon Bedrock Model Evaluation", "correta": true },
+        { "texto": "Amazon SageMaker Model Cards", "correta": false },
+        { "texto": "Amazon CloudWatch", "correta": false },
+        { "texto": "Amazon Macie", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-transparencia-usuario-chatbot-25",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma companhia de energia vai colocar um assistente generativo no atendimento aos clientes. A diretoria quer que o assistente seja transparente com quem o usa. Quais práticas atendem a esse objetivo?",
+      "explicacao": "Transparência com o usuário começa por dizer com o que ele está interagindo e de onde vem a informação. Informar que o atendimento é feito por IA permite que o cliente calibre a confiança nas respostas, e indicar as fontes usadas, quando aplicável, permite verificar o que foi dito. Apresentar as respostas como se fossem escritas por um atendente humano engana o cliente e fere a confiança quando ele descobre. Esconder as limitações conhecidas leva o cliente a confiar demais em respostas que podem estar erradas. E não oferecer canal para reportar respostas incorretas elimina o mecanismo de feedback que um design centrado no ser humano exige.",
+      "opcoes": [
+        { "texto": "Informar ao cliente que ele está sendo atendido por um assistente de IA.", "correta": true },
+        { "texto": "Indicar as fontes usadas na resposta, quando aplicável.", "correta": true },
+        { "texto": "Apresentar as respostas como se tivessem sido escritas por um atendente humano.", "correta": false },
+        { "texto": "Omitir as limitações conhecidas do assistente para não gerar desconfiança.", "correta": false },
+        { "texto": "Remover a opção de reportar respostas incorretas para simplificar a interface.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-licenca-modelo-aberto-26",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup escolheu um modelo de pesos abertos para embutir num produto comercial que será vendido a outras empresas. Um desenvolvedor argumenta que, por os pesos estarem disponíveis para download, o modelo pode ser usado de qualquer forma. Qual avaliação está correta?",
+      "explicacao": "Pesos abertos não significam uso irrestrito: cada modelo tem uma licença própria, que pode limitar o uso comercial, exigir atribuição, restringir certos casos de uso ou impor condições conforme o número de usuários. Antes de adotar o modelo num produto comercial, a startup precisa verificar se a licença permite o uso pretendido. A ideia de que a licença só importa para quem treina o modelo é falsa: ela rege o uso dos pesos, inclusive a inferência. E citar o autor pode ser uma das exigências, mas não substitui o cumprimento das demais condições da licença.",
+      "opcoes": [
+        { "texto": "É preciso verificar se a licença do modelo permite o uso comercial pretendido antes de adotá-lo.", "correta": true },
+        { "texto": "O desenvolvedor está certo: pesos disponíveis para download podem ser usados sem restrição.", "correta": false },
+        { "texto": "A licença só se aplica a quem treina o modelo, não a quem apenas o executa.", "correta": false },
+        { "texto": "Basta citar o autor do modelo na documentação do produto.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-explicabilidade-fontes-rag-27",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente jurídico interno responde perguntas com base nas normas da empresa usando RAG. Os advogados dizem que só confiarão nas respostas se puderem entender de onde veio cada afirmação. Qual recurso atende melhor a essa necessidade de explicabilidade?",
+      "explicacao": "Exibir os trechos das normas recuperados que sustentaram cada resposta permite ao advogado conferir a origem de cada afirmação — é a forma de explicabilidade útil e verificável para uma aplicação com RAG. Mostrar os pesos de atenção do modelo expõe detalhes internos que nenhum advogado consegue interpretar, e que não indicam de forma confiável a origem da informação. Publicar os parâmetros do modelo tampouco explica uma resposta específica. E aumentar a temperatura só deixa as respostas mais variadas, reduzindo a previsibilidade em vez de aumentar a confiança.",
+      "opcoes": [
+        { "texto": "Exibir junto de cada resposta os trechos das normas que a sustentaram.", "correta": true },
+        { "texto": "Mostrar aos advogados os pesos de atenção do modelo em cada resposta.", "correta": false },
+        { "texto": "Publicar internamente os parâmetros do modelo usado pelo assistente.", "correta": false },
+        { "texto": "Aumentar a temperatura para que as respostas sejam mais completas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-tradeoff-seguranca-transparencia-28",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Para ser transparente, uma empresa pensa em publicar a lista completa de padrões e palavras que seus filtros usam para bloquear tentativas de manipulação do assistente. A equipe de segurança alerta que isso ajudaria atacantes a contornar os filtros. Qual abordagem equilibra melhor segurança e transparência?",
+      "explicacao": "Há um trade-off real entre segurança e transparência, e a abordagem equilibrada é divulgar que existem controles, qual é o seu propósito e como o usuário pode contestar um bloqueio, sem publicar os detalhes que permitiriam contorná-los. Publicar a lista completa maximiza a transparência ao custo de enfraquecer a proteção. Não informar nada sobre os controles protege os filtros, mas deixa usuários sem entender por que foram bloqueados e sem canal de contestação. E remover os controles para ser transparente troca a segurança dos usuários por uma transparência sobre um sistema desprotegido.",
+      "opcoes": [
+        { "texto": "Divulgar a existência e o propósito dos controles, sem publicar os detalhes que permitiriam contorná-los.", "correta": true },
+        { "texto": "Publicar a lista completa de padrões bloqueados para garantir total transparência.", "correta": false },
+        { "texto": "Não informar aos usuários que existem controles aplicados às conversas.", "correta": false },
+        { "texto": "Remover os filtros para que o comportamento do assistente seja totalmente transparente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-feedback-usuarios-29",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer melhorar continuamente seu assistente de suporte a partir da experiência dos usuários, e também quer que eles sintam que são ouvidos. Qual mecanismo de feedback segue os princípios de design centrado no ser humano?",
+      "explicacao": "Um botão de avaliação em cada resposta, com espaço para o motivo, coleta o feedback no momento da experiência, e encaminhar essas avaliações para análise e correção fecha o ciclo de melhoria — é o mecanismo de feedback que o design centrado no ser humano propõe. Uma pesquisa anual chega tarde demais para ligar a opinião a respostas específicas. Retreinar automaticamente com todo o feedback, sem revisão, abre caminho para dados enganosos ou maliciosos entrarem no modelo, o que é risco de envenenamento. E ocultar a opção de avaliação para evitar críticas elimina justamente a voz do usuário.",
+      "opcoes": [
+        { "texto": "Avaliação em cada resposta, com campo para o motivo, encaminhada para análise e correção.", "correta": true },
+        { "texto": "Uma pesquisa de satisfação anual enviada por e-mail aos usuários.", "correta": false },
+        { "texto": "Retreinamento automático do modelo com todo o feedback recebido, sem revisão.", "correta": false },
+        { "texto": "Ocultar a opção de avaliação para evitar a exposição de críticas ao assistente.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-tipos-vies-assoc-30",
+      "topico": "Efeitos de viés e variância",
+      "tipo": "Associacao",
+      "enunciado": "Uma consultoria analisou problemas encontrados em modelos de clientes. Associe cada problema ao tipo de viés que o origina.",
+      "explicacao": "Treinar um modelo de crédito só com clientes aprovados no passado é viés de seleção: os dados excluem quem foi recusado, então o modelo nunca aprende sobre esse grupo. Anotadores que rotulam reclamações informais como mais agressivas introduzem viés de rotulagem, que o modelo aprende como se fosse verdade. Um modelo de promoção que aprendeu com um histórico em que poucas mulheres eram promovidas reproduz viés histórico, mesmo com dados coletados corretamente. E um assistente de voz que erra mais com sotaques pouco presentes nos dados sofre de viés de representação. O sobreajuste está no painel porque também degrada modelos, mas é um problema de generalização — decorar os dados de treinamento — e não um tipo de viés que explique algum dos casos.",
+      "associacoes": [
+        { "alvo": "O modelo de crédito foi treinado apenas com clientes aprovados no passado", "item": "Viés de seleção" },
+        { "alvo": "Os anotadores rotularam reclamações escritas de forma informal como mais agressivas", "item": "Viés de rotulagem" },
+        { "alvo": "O modelo de promoções aprendeu com um histórico em que poucas mulheres eram promovidas", "item": "Viés histórico" },
+        { "alvo": "O assistente de voz erra mais com sotaques pouco presentes nos dados de treinamento", "item": "Viés de representação" }
+      ],
+      "itensExtras": ["Sobreajuste"]
+    },
+    {
+      "id": "aifc01-resp-incidente-vies-ordenacao-31",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "Ordenacao",
+      "enunciado": "Um cliente denunciou que o assistente de uma loja deu respostas ofensivas ao receber perguntas escritas com expressões regionais. A empresa quer tratar o incidente de forma responsável. Selecione e ordene as etapas que a equipe deve seguir.",
+      "explicacao": "O tratamento começa registrando e reproduzindo o caso relatado, porque sem reproduzir não há como investigar. Depois se verifica se o erro se repete de forma sistemática com outras perguntas do mesmo grupo — a diferença entre um caso isolado e um viés. Com a causa identificada, corrige-se o que for necessário: dados, modelo, prompts ou controles. E antes de republicar, reavalia-se o desempenho por subgrupo para confirmar que a correção funcionou sem criar outro problema. Descartar o relato por ser um caso isolado encerra a investigação antes de saber se é. E publicar a correção sem reavaliação pode manter o problema ou criar outro, sem que ninguém perceba.",
+      "sequencia": [
+        "Registrar e reproduzir o caso relatado pelo cliente.",
+        "Verificar se o erro se repete com outras perguntas do mesmo grupo.",
+        "Corrigir os dados, o modelo ou os controles conforme a causa encontrada.",
+        "Reavaliar o desempenho por subgrupo antes de republicar o assistente."
+      ],
+      "itensExtras": [
+        "Descartar o relato por se tratar de um caso isolado.",
+        "Publicar a correção imediatamente, sem nova avaliação."
+      ]
+    },
+    {
+      "id": "aifc01-resp-sustentabilidade-praticas-32",
+      "topico": "Seleção responsável de modelos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa quer reduzir o impacto ambiental de suas iniciativas de IA generativa sem abrir mão da qualidade exigida em cada caso de uso. Quais práticas contribuem para esse objetivo?",
+      "explicacao": "Duas práticas reduzem a computação necessária sem perder qualidade. Escolher o menor modelo que atinge a qualidade exigida evita gastar energia com capacidade que o caso de uso não usa. E reutilizar modelos pré-treinados, adaptando-os quando necessário, evita o enorme consumo de computação de treinar um modelo do zero. Treinar um modelo próprio do zero para cada caso de uso faz o oposto, multiplicando o gasto mais intensivo do ciclo. Executar vários modelos em paralelo em toda requisição para escolher a melhor resposta multiplica o consumo sem ganho comprovado. E aumentar o limite de tokens de saída gera respostas mais longas, com mais computação e sem ganho de qualidade.",
+      "opcoes": [
+        { "texto": "Escolher o menor modelo que atinge a qualidade exigida em cada caso de uso.", "correta": true },
+        { "texto": "Reutilizar modelos pré-treinados em vez de treinar modelos do zero.", "correta": true },
+        { "texto": "Treinar um modelo próprio do zero para cada caso de uso.", "correta": false },
+        { "texto": "Executar vários modelos em paralelo em toda requisição e escolher a melhor resposta.", "correta": false },
+        { "texto": "Aumentar o limite de tokens de saída para evitar novas requisições.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-transparente-arvore-ensemble-33",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma cooperativa de crédito compara dois modelos: uma árvore de decisão rasa, com poucas regras, e um ensemble com centenas de árvores profundas, ligeiramente mais preciso. O comitê pergunta qual deles é transparente e o que seria necessário para explicar as decisões do outro. Qual afirmação está correta?",
+      "explicacao": "A árvore de decisão rasa é transparente por si mesma: suas regras podem ser lidas e seguidas, e cada decisão é explicada pelo caminho percorrido. O ensemble com centenas de árvores profundas não é interpretável diretamente, e suas decisões só podem ser explicadas com ferramentas de explicação aplicadas depois, que estimam a contribuição de cada atributo, como as do SageMaker Clarify. Dizer que os dois são igualmente interpretáveis ignora a diferença de complexidade entre eles. A acurácia maior não torna um modelo mais transparente; muitas vezes ocorre o contrário. E afirmar que nenhum modelo de ML pode ser explicado desconsidera tanto os modelos interpretáveis quanto as técnicas de explicação existentes.",
+      "opcoes": [
+        { "texto": "A árvore rasa é interpretável por si mesma; o ensemble exige ferramentas de explicação aplicadas depois.", "correta": true },
+        { "texto": "Os dois são igualmente interpretáveis, porque ambos são baseados em árvores de decisão.", "correta": false },
+        { "texto": "O ensemble é mais transparente, porque tem maior acurácia que a árvore rasa.", "correta": false },
+        { "texto": "Nenhum dos dois pode ser explicado, porque modelos de ML são sempre caixas-pretas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-pratica-nao-responsavel-34",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa preparou um checklist de práticas para o lançamento de um assistente generativo voltado a clientes. Qual dos itens a seguir NÃO é uma prática de IA responsável?",
+      "explicacao": "O item inadequado é desativar o registro das interações para evitar auditorias: sem registros, a empresa não consegue investigar incidentes, demonstrar conformidade nem detectar vieses e erros ao longo do tempo. As outras três práticas são responsáveis. Testar o assistente com usuários de perfis diversos antes do lançamento revela falhas que atingem grupos específicos. Configurar filtros para conteúdo nocivo reduz o risco de dano aos usuários. E documentar as limitações conhecidas dá transparência a quem opera e a quem usa o assistente.",
+      "opcoes": [
+        { "texto": "Desativar o registro das interações para evitar auditorias futuras.", "correta": true },
+        { "texto": "Testar o assistente com usuários de perfis diversos antes do lançamento.", "correta": false },
+        { "texto": "Configurar filtros para bloquear conteúdo nocivo nas entradas e saídas.", "correta": false },
+        { "texto": "Documentar as limitações conhecidas do assistente.", "correta": false }
+      ]
+    }
+  ]
+}

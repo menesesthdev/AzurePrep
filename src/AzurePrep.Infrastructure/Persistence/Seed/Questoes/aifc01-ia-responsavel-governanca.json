@@ -1,0 +1,183 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "ia-responsavel",
+  "questoes": [
+    {
+      "id": "aifc01-resp-deriva-vies-producao-35",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um modelo de aprovação de crédito passou numa análise de viés antes do lançamento. Um ano depois, o perfil dos clientes que pedem crédito mudou bastante, e a empresa teme que o modelo tenha passado a tratar grupos de forma desigual sem que ninguém perceba. O modelo está implantado num endpoint do Amazon SageMaker AI. Qual abordagem é mais adequada?",
+      "explicacao": "Viés pode surgir depois do lançamento quando a população atendida muda. Monitorar continuamente a deriva de viés em produção, com o SageMaker Model Monitor integrado ao SageMaker Clarify, compara as métricas de viés ao longo do tempo com uma linha de base e alerta quando elas se deterioram. Repetir a análise apenas quando houver reclamações deixa o problema ser descoberto pelos clientes afetados. Documentar a análise original num model card registra o passado, mas não detecta mudanças. E o AWS CloudTrail registra chamadas de API, sem medir o tratamento dado a cada grupo.",
+      "opcoes": [
+        { "texto": "Monitorar a deriva de viés em produção com o SageMaker Model Monitor integrado ao SageMaker Clarify.", "correta": true },
+        { "texto": "Repetir a análise de viés apenas quando houver reclamações de clientes.", "correta": false },
+        { "texto": "Registrar a análise de viés do lançamento no SageMaker Model Cards.", "correta": false },
+        { "texto": "Habilitar o AWS CloudTrail no endpoint do modelo.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-risco-usuario-final-juridico-36",
+      "topico": "Riscos legais da IA generativa",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup lançou um assistente que responde dúvidas sobre direito do consumidor. Pesquisas mostram que muitos usuários tomam decisões — como desistir de uma ação judicial — apenas com base nas respostas, sem consultar um advogado, e algumas respostas estavam desatualizadas. Qual risco está em jogo e qual medida é adequada?",
+      "explicacao": "Usuários agindo com base nas respostas, em decisões com consequências sérias, é o risco ao usuário final — que também expõe a startup a responsabilização. A medida adequada limita e contextualiza o uso: avisos claros de que as respostas não substituem orientação profissional, limitação do escopo do que o assistente responde e encaminhamento a um advogado nos casos que envolvem decisões importantes. Aumentar a temperatura só varia as respostas. Remover os avisos para passar mais confiança amplia justamente o dano. E fazer fine-tuning com decisões judiciais não resolve a dependência dos usuários nem garante respostas atualizadas.",
+      "opcoes": [
+        { "texto": "Risco ao usuário final; incluir avisos claros, limitar o escopo e encaminhar a um advogado.", "correta": true },
+        { "texto": "Não determinismo; aumentar a temperatura para diversificar as respostas.", "correta": false },
+        { "texto": "Perda de confiança; remover os avisos para as respostas parecerem mais seguras.", "correta": false },
+        { "texto": "Subajuste; fazer fine-tuning do modelo com decisões judiciais recentes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-procedencia-dados-comprados-37",
+      "topico": "Características de conjuntos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer comprar de um fornecedor um grande conjunto de dados de comportamento de consumidores para treinar um modelo de recomendação. O fornecedor não informa como os dados foram coletados, e há indícios de que parte veio de redes sociais, sem consentimento dos titulares. O preço é baixo. Qual abordagem é mais responsável?",
+      "explicacao": "Um conjunto de dados responsável vem de fontes curadas, com procedência conhecida e direitos de uso comprovados. Exigir do fornecedor a documentação da origem, do método de coleta e da base legal de uso antes de adquirir e usar os dados evita riscos legais e éticos que não aparecem no preço. Usar os dados porque foram comprados transfere para a empresa o problema de uma coleta possivelmente ilegal. Treinar primeiro e anonimizar depois não resolve, porque o modelo já terá aprendido com dados obtidos sem direito de uso. E treinar e retirar os dados só se alguém reclamar trata a conformidade como reação, deixando o dano acontecer.",
+      "opcoes": [
+        { "texto": "Exigir documentação da origem, da coleta e dos direitos de uso antes de adquirir e usar os dados.", "correta": true },
+        { "texto": "Usar os dados normalmente, já que a empresa pagou pela licença de uso.", "correta": false },
+        { "texto": "Treinar o modelo com os dados e anonimizá-los depois do treinamento.", "correta": false },
+        { "texto": "Treinar o modelo e retirar os dados apenas se algum titular reclamar.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-variancia-subgrupo-38",
+      "topico": "Efeitos de viés e variância",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco retreina todo mês um modelo de risco. Para a maioria dos clientes, as previsões são estáveis de um mês para o outro. Para clientes de uma região pequena, com poucas centenas de registros no conjunto de treinamento, as previsões mudam muito a cada retreinamento, mesmo quando o perfil do cliente não mudou. Qual é o diagnóstico e a medida adequada?",
+      "explicacao": "Previsões que oscilam muito entre retreinamentos para um grupo com poucos exemplos indicam alta variância para esse subgrupo: com poucos dados, pequenas diferenças na amostra mudam bastante o que o modelo aprende sobre ele. A medida adequada é ampliar e equilibrar os dados desse grupo, para que o modelo aprenda um padrão estável. Subajuste geral apareceria como desempenho ruim para todos, não como instabilidade num grupo. Desvio de dados em produção é mudança na distribuição dos clientes atendidos, e o enunciado diz que o perfil não mudou. E alucinação é uma limitação de modelos generativos, sem relação com um modelo de risco.",
+      "opcoes": [
+        { "texto": "Alta variância no subgrupo por poucos exemplos; ampliar e equilibrar os dados desse grupo.", "correta": true },
+        { "texto": "Subajuste geral; aumentar a complexidade do modelo para todos os clientes.", "correta": false },
+        { "texto": "Desvio de dados em produção; retreinar com mais frequência.", "correta": false },
+        { "texto": "Alucinação; fundamentar as previsões em documentos da região.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-selecao-modelo-responsavel-39",
+      "topico": "Seleção responsável de modelos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma prefeitura vai escolher um modelo de base para um assistente que orienta cidadãos sobre serviços públicos. Além de qualidade e custo, a equipe quer aplicar critérios de seleção responsável. Quais verificações atendem a esse objetivo?",
+      "explicacao": "Duas verificações tratam da responsabilidade da escolha. Consultar a documentação de avaliação do modelo — viés, segurança, limitações conhecidas — mostra riscos que um teste rápido não revelaria. E confirmar que a política de uso aceitável do provedor permite o caso de uso evita adotar um modelo cujo uso no serviço público seja proibido ou restrito. Escolher o maior modelo disponível não é critério de responsabilidade e costuma aumentar custo e consumo de energia. Ignorar a licença de um modelo de pesos abertos é um erro: pesos disponíveis não significam uso irrestrito. E preferir o modelo que gera respostas mais longas não diz nada sobre segurança, equidade ou adequação ao uso.",
+      "opcoes": [
+        { "texto": "Consultar a documentação de avaliação de viés, segurança e limitações do modelo.", "correta": true },
+        { "texto": "Confirmar que a política de uso aceitável do provedor permite o caso de uso.", "correta": true },
+        { "texto": "Escolher o maior modelo disponível, por ser o mais capaz.", "correta": false },
+        { "texto": "Desconsiderar a licença, caso o modelo tenha pesos abertos.", "correta": false },
+        { "texto": "Preferir o modelo que gera as respostas mais longas e detalhadas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-rotulo-conteudo-gerado-40",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma construtora vai publicar em seu site e em anúncios imagens de apartamentos decorados que foram totalmente geradas por um modelo de imagens, e não fotografadas. A empresa quer ser transparente com os compradores. Qual prática é mais adequada?",
+      "explicacao": "Identificar as imagens como geradas por IA, com um rótulo visível e, quando disponível, marca-d'água ou metadados de origem, deixa claro ao comprador que não se trata de fotografias do imóvel real — é a prática de transparência sobre conteúdo gerado. Publicar as imagens sem nenhuma indicação leva o comprador a acreditar que está vendo o apartamento real. Descrevê-las como fotografias reais é enganoso e expõe a empresa a riscos legais. E remover os metadados que indicam a origem elimina justamente uma das formas de rastrear que o conteúdo foi gerado.",
+      "opcoes": [
+        { "texto": "Identificar as imagens como geradas por IA, com rótulo visível e marca-d'água quando disponível.", "correta": true },
+        { "texto": "Publicar as imagens sem indicação, já que representam o padrão do acabamento.", "correta": false },
+        { "texto": "Descrever as imagens como fotografias do apartamento decorado.", "correta": false },
+        { "texto": "Remover os metadados das imagens antes de publicá-las.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-supervisao-humana-cancelamento-41",
+      "topico": "Design centrado no ser humano para IA explicável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora quer usar um modelo que identifica apólices com indícios de fraude e, a partir disso, cancelá-las automaticamente, sem intervenção humana. O cancelamento deixa o cliente sem cobertura imediatamente, e o modelo tem taxa de falsos positivos baixa, mas não nula. Qual desenho é mais responsável?",
+      "explicacao": "Quando a decisão tem impacto grave e o modelo erra em alguma proporção, o desenho responsável mantém supervisão humana: o modelo sinaliza as apólices, um analista revisa as evidências e decide, e o cliente é informado e pode contestar. Assim o modelo dá escala à triagem sem que um falso positivo deixe um cliente inocente sem cobertura. Cancelar automaticamente porque os falsos positivos são poucos ignora o dano causado a cada um deles. Reduzir o limiar de sinalização aumentaria os falsos positivos. E não informar o motivo do cancelamento fere a transparência e impede a contestação.",
+      "opcoes": [
+        { "texto": "O modelo sinaliza as apólices, um analista revisa e decide, e o cliente pode contestar.", "correta": true },
+        { "texto": "Cancelar automaticamente, já que a taxa de falsos positivos é baixa.", "correta": false },
+        { "texto": "Reduzir o limiar de sinalização para cancelar mais apólices suspeitas.", "correta": false },
+        { "texto": "Cancelar automaticamente sem informar ao cliente o motivo do cancelamento.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-robustez-adversarial-42",
+      "topico": "Características de IA responsável",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Pesquisadores mostraram que um modelo de visão usado por um sistema de estacionamento pode ser enganado com pequenos adesivos colados nas placas dos veículos, que fazem o modelo ler outro número, embora a placa continue legível para uma pessoa. Qual característica de IA responsável está deficiente e qual medida é adequada?",
+      "explicacao": "Robustez inclui manter o comportamento correto diante de entradas manipuladas de propósito. A medida adequada é testar o modelo com entradas adversariais, como placas com adesivos, e reforçar o treinamento com esses casos, além de adicionar validações no sistema. Equidade trata de desempenho justo entre grupos, sem relação com placas adulteradas. Veracidade diz respeito a gerar informações verdadeiras em modelos generativos. E sustentabilidade trata do consumo de recursos, que não explica nem corrige a vulnerabilidade.",
+      "opcoes": [
+        { "texto": "Robustez; testar com entradas adversariais e reforçar o treinamento com esses casos.", "correta": true },
+        { "texto": "Equidade; comparar o desempenho do modelo entre marcas de veículos.", "correta": false },
+        { "texto": "Veracidade; fundamentar a leitura das placas em documentos oficiais.", "correta": false },
+        { "texto": "Sustentabilidade; trocar por um modelo de visão menor.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-explicacao-posterior-modelo-complexo-43",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco usa um modelo complexo de detecção de fraude, com desempenho bem superior ao de modelos interpretáveis testados. Um novo regulamento exige que o banco explique ao cliente os principais fatores de cada transação bloqueada. Trocar pelo melhor modelo interpretável aumentaria significativamente as perdas com fraude. Qual abordagem equilibra melhor desempenho e explicabilidade?",
+      "explicacao": "Quando o modelo complexo é muito superior, uma alternativa ao trade-off é mantê-lo e gerar explicações por decisão com técnicas de explicação aplicadas depois, como as atribuições de importância de atributos do SageMaker Clarify, validando com a área jurídica se essas explicações atendem ao regulamento. Trocar sempre por um modelo linear resolveria a explicação, mas com o aumento de perdas que o banco quer evitar, sem avaliar a alternativa. Deixar de explicar descumpre o regulamento. E publicar os pesos do modelo não explica ao cliente os fatores de uma transação específica e ainda ajudaria fraudadores a contornar o sistema.",
+      "opcoes": [
+        { "texto": "Manter o modelo e gerar explicações por decisão com ferramentas de explicação, validando-as com o jurídico.", "correta": true },
+        { "texto": "Trocar imediatamente por um modelo linear, sem avaliar alternativas.", "correta": false },
+        { "texto": "Manter o modelo e não fornecer explicações, por proteção contra fraudadores.", "correta": false },
+        { "texto": "Publicar os pesos do modelo para que qualquer cliente possa verificar as decisões.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-dimensoes-assoc-44",
+      "topico": "Características de IA responsável",
+      "tipo": "Associacao",
+      "enunciado": "Um comitê de IA definiu requisitos para os sistemas da empresa. Associe cada requisito à dimensão de IA responsável que ele representa.",
+      "explicacao": "Manter o desempenho com fotos tiradas em baixa iluminação é robustez, a capacidade de lidar com variações nas entradas. Taxas de aprovação equivalentes entre grupos com o mesmo perfil é equidade. Respostas que conferem com as fontes oficiais é veracidade. Não fornecer instruções que possam causar dano é segurança. E atender pessoas com deficiência visual e falantes de diferentes idiomas é inclusão. A latência está no painel porque é um requisito comum de sistemas, mas é desempenho operacional, não uma dimensão de IA responsável — nenhum dos requisitos a descreve.",
+      "associacoes": [
+        { "alvo": "O modelo mantém o desempenho com fotos tiradas em baixa iluminação", "item": "Robustez" },
+        { "alvo": "As taxas de aprovação são equivalentes entre grupos com o mesmo perfil", "item": "Equidade" },
+        { "alvo": "As respostas do assistente conferem com as fontes oficiais", "item": "Veracidade" },
+        { "alvo": "O assistente não fornece instruções que possam causar dano", "item": "Segurança" },
+        { "alvo": "A interface atende pessoas com deficiência visual e falantes de diferentes idiomas", "item": "Inclusão" }
+      ],
+      "itensExtras": ["Latência"]
+    },
+    {
+      "id": "aifc01-resp-dataset-responsavel-ordenacao-45",
+      "topico": "Características de conjuntos de dados",
+      "tipo": "Ordenacao",
+      "enunciado": "Um hospital vai montar o conjunto de dados para treinar um modelo que prioriza atendimentos no pronto-socorro e quer que ele atenda com qualidade todos os perfis de pacientes. Selecione e ordene as etapas de preparação do conjunto de dados.",
+      "explicacao": "Primeiro define-se a população que o modelo vai atender — idades, condições, perfis —, porque é contra ela que a representatividade será medida. Depois os dados são coletados de fontes com procedência e direitos de uso verificados. Com os dados em mãos, analisa-se a representatividade e o equilíbrio entre os grupos e, por fim, completam-se os grupos sub-representados antes do treinamento. Descartar os grupos minoritários para simplificar produz exatamente um modelo que falha com esses pacientes. E treinar primeiro, deixando a análise de representatividade para depois do lançamento, só descobre o problema quando pacientes já foram prejudicados.",
+      "sequencia": [
+        "Definir a população de pacientes que o modelo vai atender.",
+        "Coletar dados de fontes com procedência e direitos de uso verificados.",
+        "Analisar a representatividade e o equilíbrio entre os grupos de pacientes.",
+        "Completar os grupos sub-representados antes do treinamento."
+      ],
+      "itensExtras": [
+        "Descartar os grupos minoritários de pacientes para simplificar o conjunto.",
+        "Treinar o modelo e analisar a representatividade depois do lançamento."
+      ]
+    },
+    {
+      "id": "aifc01-resp-auditoria-humana-periodica-46",
+      "topico": "Detecção e monitoramento de viés",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente generativo de uma empresa de telecomunicações está em produção há seis meses e atende milhares de clientes por dia. A empresa quer acompanhar continuamente se as respostas continuam verdadeiras, adequadas e sem tratamento desigual entre clientes. Qual prática complementa melhor as métricas automáticas?",
+      "explicacao": "Métricas automáticas cobrem volume, mas não captam tudo o que importa em respostas abertas. Auditorias humanas periódicas sobre uma amostra representativa das conversas, com critérios definidos de veracidade, adequação e equidade, detectam problemas sutis e ajudam a calibrar as métricas automáticas. Acompanhar apenas latência e disponibilidade mede a operação, não a qualidade das respostas. Revisar apenas no lançamento ignora que modelos, dados e usos mudam. E depender só das reclamações espontâneas deixa de fora a maioria dos problemas, que os clientes não relatam.",
+      "opcoes": [
+        { "texto": "Auditorias humanas periódicas sobre amostras representativas das conversas.", "correta": true },
+        { "texto": "Acompanhamento apenas das métricas de latência e disponibilidade.", "correta": false },
+        { "texto": "Uma revisão completa das respostas somente no lançamento.", "correta": false },
+        { "texto": "Análise apenas das reclamações enviadas espontaneamente pelos clientes.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-resp-conteudo-model-card-47",
+      "topico": "Transparência e explicabilidade",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma equipe está preenchendo o model card de um modelo que estima o risco de evasão de alunos, que será usado por coordenadores pedagógicos. Quais informações devem constar no model card?",
+      "explicacao": "Um model card documenta o modelo para quem o usa e para quem o audita. O uso pretendido e os usos fora de escopo orientam os coordenadores sobre para que o modelo serve e para que não deve ser usado — por exemplo, não para decisões disciplinares. E os resultados de avaliação, inclusive por subgrupo de alunos, mostram o desempenho e as limitações conhecidas. Senhas ou credenciais de acesso ao endpoint nunca devem ir para documentação, que circula entre muitas pessoas. O código-fonte completo da aplicação não é conteúdo de um model card. E a lista nominal dos alunos avaliados expõe dados pessoais sem necessidade.",
+      "opcoes": [
+        { "texto": "O uso pretendido do modelo e os usos que estão fora de escopo.", "correta": true },
+        { "texto": "Os resultados de avaliação, inclusive por subgrupo de alunos.", "correta": true },
+        { "texto": "A senha de acesso ao endpoint em que o modelo está implantado.", "correta": false },
+        { "texto": "O código-fonte completo da aplicação que consome o modelo.", "correta": false },
+        { "texto": "A lista nominal dos alunos que já foram avaliados pelo modelo.", "correta": false }
+      ]
+    }
+  ]
+}

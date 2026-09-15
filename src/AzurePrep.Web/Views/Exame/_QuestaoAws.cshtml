@@ -1,0 +1,145 @@
+@model QuestaoDto
+@{
+    // Questão na tela da AWS (demo oficial da Pearson VUE para a AWS): enunciado corrido em cima,
+    // alternativas embaixo, e a instrução de quantidade no FIM do enunciado, entre parênteses —
+    // não em linhas próprias, como na tela da Microsoft.
+    var isMultiple = Model.Type == TipoDeQuestao.EscolhaMultipla;
+    var isOrdenacao = Model.Type == TipoDeQuestao.Ordenacao;
+    var isAssociacao = Model.Type == TipoDeQuestao.Associacao;
+    var isDePares = isOrdenacao || isAssociacao;
+    var selected = Model.SelectedOptionIds.ToHashSet();
+
+    // A AWS imprime a quantidade em maiúsculas: "(Select TWO.)", "(Select and order THREE.)".
+    var quantidade = Model.RequiredSelections switch
+    {
+        2 => "DUAS",
+        3 => "TRÊS",
+        4 => "QUATRO",
+        5 => "CINCO",
+        6 => "SEIS",
+        7 => "SETE",
+        _ => Model.RequiredSelections.ToString()
+    };
+
+    var instrucao = Model.Type switch
+    {
+        TipoDeQuestao.EscolhaMultipla => $"(Selecione {quantidade}.)",
+        TipoDeQuestao.Ordenacao => $"Cada etapa deve ser selecionada uma vez ou nenhuma. (Selecione e ordene {quantidade}.)",
+        TipoDeQuestao.Associacao => "Cada resposta pode ser selecionada uma vez, mais de uma vez ou nenhuma.",
+        _ => null
+    };
+
+    // O enunciado vem do arquivo como texto corrido; quebra de linha no JSON separa parágrafos,
+    // que é como o demo separa o cenário da pergunta.
+    var paragrafos = Model.Text
+        .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .ToList();
+
+    // Os itens saem da ordem dos pares, que já vem embaralhada pela tentativa.
+    var itens = isDePares
+        ? Model.Options.Select(o => o.Text).Distinct(StringComparer.Ordinal).ToList()
+        : new List<string>();
+
+    // Etapas têm ordem natural e NÃO podem sair embaralhadas ("Etapa 2" antes da "Etapa 1" seria
+    // defeito de tela); os enunciados da associação seguem a ordem da tentativa.
+    var alvos = isDePares
+        ? Model.Options.Select(o => o.TargetText ?? string.Empty).Distinct(StringComparer.Ordinal).ToList()
+        : new List<string>();
+    if (isOrdenacao)
+    {
+        alvos.Sort(StringComparer.Ordinal);
+    }
+
+    var itemPorAlvo = isDePares
+        ? Model.Options.Where(o => selected.Contains(o.Id))
+            .GroupBy(o => o.TargetText ?? string.Empty, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().Text, StringComparer.Ordinal)
+        : new Dictionary<string, string>(StringComparer.Ordinal);
+}
+
+<article class="question question--aws"
+         data-number="@Model.Number"
+         data-question-id="@Model.Id"
+         data-type="@Model.Type"
+         data-required="@Model.RequiredSelections"
+         data-flagged="@(Model.IsFlaggedForReview ? "true" : "false")">
+
+    <div class="aws-q__text">
+        @for (var i = 0; i < paragrafos.Count; i++)
+        {
+            var ultimo = i == paragrafos.Count - 1;
+            <p>@paragrafos[i]@if (ultimo && instrucao is not null)
+                {
+                    <text> @instrucao</text>
+                }</p>
+        }
+    </div>
+
+    @if (isDePares)
+    {
+        <ul class="aws-q__list">
+            @foreach (var item in itens)
+            {
+                <li>@item</li>
+            }
+        </ul>
+
+        <div class="aws-q__selects">
+            @for (var i = 0; i < alvos.Count; i++)
+            {
+                var alvo = alvos[i];
+                var selectId = $"sel-{Model.Id}-{i}";
+                itemPorAlvo.TryGetValue(alvo, out var escolhido);
+                <div class="aws-q__select-row">
+                    <label class="aws-q__select-label" for="@selectId">@alvo:</label>
+                    <select class="aws-q__select dd-select" id="@selectId" data-target="@alvo">
+                        <option value="">Selecione...</option>
+                        @foreach (var item in itens)
+                        {
+                            <option value="@item" selected="@(item == escolhido)">@item</option>
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+
+        @* Mesmo mecanismo do arrastar da Microsoft: a lista suspensa só marca os checkboxes
+           ocultos, que continuam sendo a resposta que exam.js lê e grava. *@
+        <div class="dnd__pairs" hidden>
+            @foreach (var option in Model.Options)
+            {
+                <input class="option__input"
+                       type="checkbox"
+                       id="opt-@option.Id"
+                       name="answer-@Model.Id"
+                       value="@option.Id"
+                       data-target="@option.TargetText"
+                       data-item="@option.Text"
+                       checked="@(selected.Contains(option.Id))" />
+            }
+        </div>
+    }
+    else
+    {
+        var inputType = isMultiple ? "checkbox" : "radio";
+        <ul class="aws-q__options">
+            @for (var i = 0; i < Model.Options.Count; i++)
+            {
+                var option = Model.Options[i];
+                var inputId = $"opt-{option.Id}";
+                <li>
+                    <label class="aws-q__option" for="@inputId">
+                        <input class="option__input"
+                               type="@inputType"
+                               id="@inputId"
+                               name="answer-@Model.Id"
+                               value="@option.Id"
+                               checked="@(selected.Contains(option.Id))" />
+                        <span class="aws-q__letter">@((char)('A' + i)).</span>
+                        <span>@option.Text</span>
+                    </label>
+                </li>
+            }
+        </ul>
+    }
+</article>

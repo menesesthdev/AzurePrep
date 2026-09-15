@@ -77,6 +77,29 @@ public class ExameEmConstrucaoTests
         Assert.Empty(await catalogo.ObterExamesDisponiveisAsync());
     }
 
+    [Fact]
+    public async Task ExameDisponivel_EmConstrucao_DevolveNulo()
+    {
+        var exame = EmConstrucao();
+        var catalogo = new CatalogoDeExamesService(new InMemoryExamRepository(exame));
+
+        Assert.Null(await catalogo.ObterExameDisponivelAsync(exame.Id));
+    }
+
+    [Fact]
+    public async Task ExameDisponivel_Publicado_DevolveOResumoComOFornecedor()
+    {
+        var exame = ComQuestoes(
+            new Exame("AIF-C01", "AWS Certified AI Practitioner", 90, 70, 65, vendor: FornecedorDoExame.Aws),
+            quantas: 1);
+        var catalogo = new CatalogoDeExamesService(new InMemoryExamRepository(exame));
+
+        var resumo = await catalogo.ObterExameDisponivelAsync(exame.Id);
+
+        Assert.NotNull(resumo);
+        Assert.Equal(FornecedorDoExame.Aws, resumo.Vendor);
+    }
+
     // -------------------------------------------------------------------- início da tentativa
 
     /// <summary>

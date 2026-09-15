@@ -71,17 +71,29 @@ public static class CatalogoDeQuestoesDeSeed
         ArgumentNullException.ThrowIfNull(questao);
 
         if (!TentarConverterTipo(questao.Tipo, out var tipo)
-            || tipo != TipoDeQuestao.Associacao
-            || questao.Associacoes.Count == 0
+            || tipo is not (TipoDeQuestao.Associacao or TipoDeQuestao.Ordenacao)
             || questao.Opcoes.Count > 0)
         {
             return questao;
         }
 
-        var itens = ItensArrastaveis(questao);
+        // A ordenação é uma associação cujos alvos são as posições: "Etapa 1" recebe o primeiro
+        // passo da sequência, e assim por diante. Converter aqui mantém uma expansão só.
+        var gabarito = tipo == TipoDeQuestao.Ordenacao
+            ? questao.Sequencia
+                .Select((passo, i) => new AssociacaoDeSeed { Alvo = RotuloDaEtapa(i + 1), Item = passo })
+                .ToList()
+            : questao.Associacoes.ToList();
 
-        var pares = new List<OpcaoDeSeed>(questao.Associacoes.Count * itens.Count);
-        foreach (var associacao in questao.Associacoes)
+        if (gabarito.Count == 0)
+        {
+            return questao;
+        }
+
+        var itens = ItensDoPainel(gabarito, questao.ItensExtras);
+
+        var pares = new List<OpcaoDeSeed>(gabarito.Count * itens.Count);
+        foreach (var associacao in gabarito)
         {
             foreach (var item in itens)
             {
@@ -98,14 +110,21 @@ public static class CatalogoDeQuestoesDeSeed
     }
 
     /// <summary>
+    /// Rótulo do alvo de uma posição numa questão de ordenação ("Etapa 1"). É também o que a tela
+    /// usa para ordenar as etapas — por isso é público e único: dois textos para a mesma etapa
+    /// fariam a tela e o carregador discordarem da ordem.
+    /// </summary>
+    public static string RotuloDaEtapa(int posicao) => $"Etapa {posicao}";
+
+    /// <summary>
     /// O painel de itens da questão: os que respondem a algum alvo, na ordem do gabarito, seguidos
     /// dos distratores. Sem repetição — um item que responde a dois alvos aparece uma vez só.
     /// </summary>
-    private static IReadOnlyList<string> ItensArrastaveis(QuestaoDeSeed questao)
+    private static IReadOnlyList<string> ItensDoPainel(IEnumerable<AssociacaoDeSeed> gabarito, IEnumerable<string> extras)
     {
         var itens = new List<string>();
 
-        foreach (var texto in questao.Associacoes.Select(a => a.Item).Concat(questao.ItensExtras))
+        foreach (var texto in gabarito.Select(a => a.Item).Concat(extras))
         {
             if (!string.IsNullOrWhiteSpace(texto) && !itens.Contains(texto, StringComparer.Ordinal))
             {
@@ -129,8 +148,9 @@ public static class CatalogoDeQuestoesDeSeed
     /// </summary>
     public static IReadOnlyList<string> Validar(
         IReadOnlyList<ArquivoDeQuestoes> arquivos,
-        IReadOnlyCollection<string> areasConhecidas)
-        => Validar(arquivos, _ => areasConhecidas);
+        IReadOnlyCollection<string> areasConhecidas,
+        FornecedorDoExame fornecedor = FornecedorDoExame.Microsoft)
+        => Validar(arquivos, _ => areasConhecidas, _ => fornecedor);
 
     /// <summary>
     /// Valida um catálogo de <b>vários exames</b>, cada lote contra as áreas do exame que ele
@@ -143,14 +163,24 @@ public static class CatalogoDeQuestoesDeSeed
     /// <b>sumiria em silêncio</b> — sem erro, sem log, sem questão no banco. Com um exame só o
     /// risco era teórico; com quatro, um dígito trocado é questão de tempo.
     /// </remarks>
+    /// <param name="fornecedorPorExame">
+    /// Fornecedor de cada exame, que decide as regras de formato. Exame ausente do dicionário (ou
+    /// dicionário nulo) é tratado como Microsoft, que era a única regra antes de a AWS existir.
+    /// </param>
     public static IReadOnlyList<string> Validar(
         IReadOnlyList<ArquivoDeQuestoes> arquivos,
-        IReadOnlyDictionary<string, IReadOnlyCollection<string>> areasPorExame)
+        IReadOnlyDictionary<string, IReadOnlyCollection<string>> areasPorExame,
+        IReadOnlyDictionary<string, FornecedorDoExame>? fornecedorPorExame = null)
     {
         ArgumentNullException.ThrowIfNull(areasPorExame);
 
-        return Validar(arquivos, codigo =>
-            areasPorExame.TryGetValue(codigo ?? string.Empty, out var areas) ? areas : null);
+        return Validar(
+            arquivos,
+            codigo => areasPorExame.TryGetValue(codigo ?? string.Empty, out var areas) ? areas : null,
+            codigo => fornecedorPorExame is not null
+                      && fornecedorPorExame.TryGetValue(codigo ?? string.Empty, out var fornecedor)
+                ? fornecedor
+                : FornecedorDoExame.Microsoft);
     }
 
     /// <param name="areasDoExame">
@@ -160,7 +190,8 @@ public static class CatalogoDeQuestoesDeSeed
     /// </param>
     private static IReadOnlyList<string> Validar(
         IReadOnlyList<ArquivoDeQuestoes> arquivos,
-        Func<string, IReadOnlyCollection<string>?> areasDoExame)
+        Func<string, IReadOnlyCollection<string>?> areasDoExame,
+        Func<string, FornecedorDoExame> fornecedorDoExame)
     {
         var problemas = new List<string>();
         var idsVistos = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -169,6 +200,7 @@ public static class CatalogoDeQuestoesDeSeed
         foreach (var arquivo in arquivos)
         {
             var areasConhecidas = areasDoExame(arquivo.ExameCode);
+            var fornecedor = fornecedorDoExame(arquivo.ExameCode);
 
             if (areasConhecidas is null)
             {
@@ -209,7 +241,7 @@ public static class CatalogoDeQuestoesDeSeed
                 }
 
                 ValidarConteudo(questao, rotulo, problemas);
-                ValidarOpcoes(questao, rotulo, problemas);
+                ValidarOpcoes(questao, rotulo, fornecedor, problemas);
 
                 var chaveDeTexto = NormalizarTexto(questao.Enunciado);
                 if (chaveDeTexto.Length > 0)
@@ -255,11 +287,16 @@ public static class CatalogoDeQuestoesDeSeed
         }
     }
 
-    private static void ValidarOpcoes(QuestaoDeSeed questao, string rotulo, List<string> problemas)
+    private static void ValidarOpcoes(
+        QuestaoDeSeed questao,
+        string rotulo,
+        FornecedorDoExame fornecedor,
+        List<string> problemas)
     {
         var corretas = questao.Opcoes.Count(o => o.Correta);
-        TentarConverterTipo(questao.Tipo, out var tipoLido);
-        var ehAssociacao = tipoLido == TipoDeQuestao.Associacao;
+        var tipoConhecido = TentarConverterTipo(questao.Tipo, out var tipoLido);
+        var ehAssociacao = tipoConhecido && tipoLido is TipoDeQuestao.Associacao or TipoDeQuestao.Ordenacao;
+        var ehAws = fornecedor == FornecedorDoExame.Aws;
 
         if (questao.Opcoes.Any(o => string.IsNullOrWhiteSpace(o.Texto)))
         {
@@ -292,14 +329,45 @@ public static class CatalogoDeQuestoesDeSeed
             return;
         }
 
-        if (questao.Associacoes.Count > 0 && !ehAssociacao)
+        if (questao.Associacoes.Count > 0 && tipo != TipoDeQuestao.Associacao)
         {
             problemas.Add($"{rotulo}: 'associacoes' só vale para o tipo Associacao (tipo é {questao.Tipo}).");
         }
 
-        if (ehAssociacao)
+        if (questao.Sequencia.Count > 0 && tipo != TipoDeQuestao.Ordenacao)
         {
-            ValidarAssociacoes(questao, rotulo, problemas);
+            problemas.Add($"{rotulo}: 'sequencia' só vale para o tipo Ordenacao (tipo é {questao.Tipo}).");
+        }
+
+        // Na AWS a instrução de quantidade é impressa pela tela, no fim do enunciado — "(Selecione
+        // DUAS.)", "(Selecione e ordene TRÊS.)" —, como no demo oficial. Escrita também no texto,
+        // sairia duplicada na prova.
+        if (ehAws
+            && tipo is TipoDeQuestao.EscolhaMultipla or TipoDeQuestao.Ordenacao
+            && questao.Enunciado.Contains("(Selecione", StringComparison.OrdinalIgnoreCase))
+        {
+            problemas.Add($"{rotulo}: não escreva '(Selecione ...)' no enunciado — nos exames AWS a tela " +
+                          "acrescenta a instrução a partir do gabarito.");
+        }
+
+        if (tipo == TipoDeQuestao.Ordenacao)
+        {
+            ValidarOrdenacao(questao, rotulo, problemas);
+            return;
+        }
+
+        if (tipo == TipoDeQuestao.Associacao)
+        {
+            ValidarAssociacoes(questao, rotulo, ehAws ? 7 : 6, problemas);
+            return;
+        }
+
+        if (ehAws && tipo == TipoDeQuestao.SimNao)
+        {
+            // O exam guide da AWS lista quatro formatos: escolha única, múltipla resposta, ordenação
+            // e associação. Um item Sim/Não seria um formato que o candidato nunca verá na prova.
+            problemas.Add($"{rotulo}: SimNao não existe nos exames AWS — use EscolhaUnica, EscolhaMultipla, " +
+                          "Ordenacao ou Associacao.");
             return;
         }
 
@@ -313,8 +381,10 @@ public static class CatalogoDeQuestoesDeSeed
                 problemas.Add($"{rotulo}: EscolhaUnica exige exatamente 1 correta (tem {corretas}).");
                 break;
 
-            case TipoDeQuestao.EscolhaMultipla when questao.Opcoes.Count < 4:
-                problemas.Add($"{rotulo}: EscolhaMultipla exige ao menos 4 alternativas (tem {questao.Opcoes.Count}).");
+            case TipoDeQuestao.EscolhaMultipla when questao.Opcoes.Count < (ehAws ? 5 : 4):
+                // AWS: "two or more correct responses out of five or more response options".
+                problemas.Add($"{rotulo}: EscolhaMultipla exige ao menos {(ehAws ? 5 : 4)} alternativas " +
+                              $"(tem {questao.Opcoes.Count}).");
                 break;
 
             case TipoDeQuestao.EscolhaMultipla when corretas < 2:
@@ -327,7 +397,7 @@ public static class CatalogoDeQuestoesDeSeed
 
             // O enunciado precisa dizer quantas marcar — a UI imprime "Escolha duas." a partir da
             // contagem, mas quem lê a questão tem de encontrar a instrução no texto também.
-            case TipoDeQuestao.EscolhaMultipla when !MencionaQuantidade(questao.Enunciado):
+            case TipoDeQuestao.EscolhaMultipla when !ehAws && !MencionaQuantidade(questao.Enunciado):
                 problemas.Add($"{rotulo}: EscolhaMultipla sem instrução de quantas alternativas selecionar.");
                 break;
 
@@ -346,15 +416,18 @@ public static class CatalogoDeQuestoesDeSeed
     /// não sobre os pares já expandidos — é ali que o erro é cometido e é ali que a mensagem
     /// precisa apontar.
     /// </summary>
-    private static void ValidarAssociacoes(QuestaoDeSeed questao, string rotulo, List<string> problemas)
+    /// <param name="maximoDeAlvos">
+    /// 6 na Microsoft (o que cabe no painel de arrastar); 7 na AWS, que publica "3–7 prompts" e
+    /// responde por lista suspensa, uma linha por enunciado.
+    /// </param>
+    private static void ValidarAssociacoes(QuestaoDeSeed questao, string rotulo, int maximoDeAlvos, List<string> problemas)
     {
         var alvos = questao.Associacoes;
 
-        if (alvos.Count < 3 || alvos.Count > 6)
+        if (alvos.Count < 3 || alvos.Count > maximoDeAlvos)
         {
-            // Menos de três alvos vira escolha única disfarçada; mais de seis não cabe na tela sem
-            // rolagem, e a prova real também fica nessa faixa.
-            problemas.Add($"{rotulo}: Associacao exige de 3 a 6 alvos (tem {alvos.Count}).");
+            // Menos de três alvos vira escolha única disfarçada; acima do teto a prova real não vai.
+            problemas.Add($"{rotulo}: Associacao exige de 3 a {maximoDeAlvos} alvos (tem {alvos.Count}).");
         }
 
         if (alvos.Any(a => string.IsNullOrWhiteSpace(a.Alvo) || string.IsNullOrWhiteSpace(a.Item)))
@@ -408,9 +481,71 @@ public static class CatalogoDeQuestoesDeSeed
                           "um item em mais de um alvo, senão a última associação sai por eliminação.");
         }
 
-        if (questao.Opcoes.Count != alvos.Count * ItensArrastaveis(questao).Count)
+        if (questao.Opcoes.Count != alvos.Count * ItensDoPainel(alvos, questao.ItensExtras).Count)
         {
             problemas.Add($"{rotulo}: pares candidatos inconsistentes com os alvos e itens declarados.");
+        }
+    }
+
+    /// <summary>
+    /// Regras da ordenação, verificadas sobre a sequência escrita à mão.
+    /// </summary>
+    /// <remarks>
+    /// A AWS publica "a list of 3–5 responses" a ordenar, e o demo oficial lista passos que não
+    /// entram em etapa nenhuma ("Each step should be selected one time or not at all"). Sem passo
+    /// sobrando, a questão vira só "coloque em ordem" — mais fácil que a real, porque ninguém
+    /// precisa decidir quais passos pertencem à solução.
+    /// </remarks>
+    private static void ValidarOrdenacao(QuestaoDeSeed questao, string rotulo, List<string> problemas)
+    {
+        var passos = questao.Sequencia;
+
+        if (passos.Count < 3 || passos.Count > 5)
+        {
+            problemas.Add($"{rotulo}: Ordenacao exige de 3 a 5 passos na 'sequencia' (tem {passos.Count}).");
+        }
+
+        if (passos.Any(string.IsNullOrWhiteSpace))
+        {
+            problemas.Add($"{rotulo}: passo vazio na 'sequencia'.");
+            return;
+        }
+
+        // Um passo repetido seria a mesma opção em duas etapas — o formato diz "uma vez ou nenhuma".
+        foreach (var repetido in passos.GroupBy(NormalizarTexto).Where(g => g.Count() > 1).Select(g => g.First()))
+        {
+            problemas.Add($"{rotulo}: passo repetido na 'sequencia' ('{repetido}').");
+        }
+
+        if (questao.ItensExtras.Count == 0)
+        {
+            problemas.Add($"{rotulo}: Ordenacao sem passo distrator — inclua 'itensExtras' com passos que " +
+                          "não pertencem à solução, como na prova real.");
+        }
+
+        var noGabarito = passos.Select(NormalizarTexto).ToHashSet();
+        var extrasVistos = new HashSet<string>();
+        foreach (var extra in questao.ItensExtras)
+        {
+            var chave = NormalizarTexto(extra);
+            if (chave.Length == 0)
+            {
+                problemas.Add($"{rotulo}: item extra vazio.");
+            }
+            else if (noGabarito.Contains(chave))
+            {
+                problemas.Add($"{rotulo}: item extra '{extra}' também está na 'sequencia'.");
+            }
+            else if (!extrasVistos.Add(chave))
+            {
+                problemas.Add($"{rotulo}: item extra repetido ('{extra}').");
+            }
+        }
+
+        var totalDePassos = passos.Select(NormalizarTexto).Concat(extrasVistos).Distinct().Count();
+        if (questao.Opcoes.Count != passos.Count * totalDePassos)
+        {
+            problemas.Add($"{rotulo}: pares candidatos inconsistentes com a sequência declarada.");
         }
     }
 

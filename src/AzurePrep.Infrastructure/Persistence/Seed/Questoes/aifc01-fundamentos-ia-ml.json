@@ -1,0 +1,170 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "fundamentos-ia-ml",
+  "questoes": [
+    {
+      "id": "aifc01-fund-inferencia-lote-semanal-01",
+      "topico": "Tipos de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma varejista treinou no Amazon SageMaker AI um modelo que classifica o sentimento de avaliações de produtos. Toda semana, cerca de dois milhões de avaliações novas são exportadas para um único prefixo do Amazon S3, e o painel que consome as classificações só é atualizado na manhã seguinte. Nenhum sistema consulta o modelo fora desse processamento semanal. Qual opção de inferência atende ao requisito com o menor custo?",
+      "explicacao": "Batch transform é a opção certa porque o conjunto inteiro já está no S3, ninguém precisa da resposta durante o processamento e a infraestrutura só existe enquanto o job roda — não há endpoint ocioso entre uma semana e outra. Um endpoint de inferência em tempo real mantém instâncias provisionadas continuamente para responder com baixa latência, que é exatamente o que este cenário não pede, e pagaria por seis dias sem uso. A inferência assíncrona também processa sem o chamador esperar, mas é orientada a requisições individuais que chegam a um endpoint e são enfileiradas; ela serve para cargas grandes por requisição que chegam a qualquer momento, não para pontuar um conjunto de dados de uma vez. A inferência serverless elimina a gestão de capacidade para tráfego intermitente de requisições pequenas, mas continua sendo um endpoint chamado requisição a requisição: dois milhões de chamadas custariam mais e exigiriam orquestrar o envio, quando um job em lote resolve o arquivo inteiro.",
+      "opcoes": [
+        { "texto": "Executar um job de batch transform sobre os dados no Amazon S3.", "correta": true },
+        { "texto": "Implantar o modelo em um endpoint de inferência em tempo real.", "correta": false },
+        { "texto": "Implantar o modelo em um endpoint de inferência assíncrona.", "correta": false },
+        { "texto": "Implantar o modelo em um endpoint de inferência serverless.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-inferencia-payload-grande-02",
+      "topico": "Tipos de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma seguradora usa um modelo hospedado no Amazon SageMaker AI para analisar vídeos de vistorias de veículos. Cada vídeo tem centenas de megabytes e a análise leva vários minutos. Os vídeos chegam em horários imprevisíveis, com dias inteiros sem nenhum envio, e o aplicativo do vistoriador não precisa aguardar a resposta: basta ser notificado quando o resultado estiver pronto. A empresa quer evitar custo de instâncias ociosas. Qual opção de inferência atende a esses requisitos?",
+      "explicacao": "A inferência assíncrona foi feita para este perfil: cada requisição entra numa fila, pode ter carga grande e processamento longo, o resultado é gravado no Amazon S3 com notificação ao término, e o endpoint pode reduzir a capacidade a zero quando a fila está vazia. A inferência em tempo real é síncrona — o chamador espera a resposta dentro de um tempo curto —, então não comporta vários minutos de processamento, além de manter instâncias ativas nos dias sem envio. A inferência serverless também escala a zero, e é por isso que atrai, mas foi desenhada para requisições pequenas e rápidas, com limites de tamanho de carga e de tempo de processamento que um vídeo de centenas de megabytes analisado por minutos ultrapassa. Batch transform processa um conjunto de dados acumulado de uma vez; aqui cada vídeo chega sozinho, a qualquer hora, e deve ser tratado quando chega, não esperar a próxima execução de lote.",
+      "opcoes": [
+        { "texto": "Inferência assíncrona, com notificação ao concluir o processamento.", "correta": true },
+        { "texto": "Inferência em tempo real, com escalonamento automático de instâncias.", "correta": false },
+        { "texto": "Inferência serverless, com a memória máxima configurada no endpoint.", "correta": false },
+        { "texto": "Batch transform agendado para processar os vídeos a cada hora.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-aprendizado-segmentacao-etapas-03",
+      "topico": "Tipos de aprendizado",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco tem cinco anos de histórico de transações de clientes, sem nenhuma categoria atribuída. O marketing quer, primeiro, descobrir quais perfis de comportamento existem nessa base. Depois que os analistas derem nome a cada perfil encontrado, o banco quer que cada cliente novo seja atribuído automaticamente a um desses perfis nomeados. Qual combinação de técnicas corresponde às duas etapas, na ordem?",
+      "explicacao": "Na primeira etapa não existe rótulo nenhum e o objetivo é descobrir grupos, o que é agrupamento, uma técnica de aprendizado não supervisionado. Na segunda etapa os perfis já têm nome, então cada cliente do histórico passa a ter um rótulo, e atribuir um cliente novo a uma categoria conhecida é classificação, que é aprendizado supervisionado. Usar classificação nas duas etapas falha na primeira: classificação precisa de exemplos rotulados para aprender, e os perfis ainda não existem. Regressão prevê um valor numérico contínuo, como um gasto mensal, e não descobre grupos; e fazer agrupamento na segunda etapa ignoraria os nomes que os analistas acabaram de definir. Aprendizado por reforço treina um agente que toma ações e recebe recompensas ao longo do tempo — não há ação nem recompensa em descobrir perfis numa base histórica.",
+      "opcoes": [
+        { "texto": "Agrupamento (não supervisionado) na primeira etapa e classificação (supervisionada) na segunda.", "correta": true },
+        { "texto": "Classificação (supervisionada) na primeira etapa e classificação (supervisionada) na segunda.", "correta": false },
+        { "texto": "Regressão (supervisionada) na primeira etapa e agrupamento (não supervisionado) na segunda.", "correta": false },
+        { "texto": "Aprendizado por reforço na primeira etapa e classificação (supervisionada) na segunda.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-metricas-fraude-recall-04",
+      "topico": "Métricas de avaliação de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma fintech avalia um modelo que sinaliza transações fraudulentas. Apenas 0,5% das transações são fraude. Deixar passar uma fraude gera prejuízo alto e reclamação regulatória; já uma transação legítima sinalizada por engano só é revisada por um analista em poucos minutos. Um primeiro modelo obteve 99,5% de acurácia marcando todas as transações como legítimas. Qual métrica a equipe deve priorizar ao comparar os próximos modelos?",
+      "explicacao": "Recall mede a proporção das fraudes reais que o modelo consegue identificar, então penaliza justamente o erro caro deste cenário: a fraude que passa como legítima (falso negativo). A acurácia é a métrica que enganou a equipe: com classes tão desbalanceadas, um modelo que nunca aponta fraude acerta 99,5% das vezes e não tem utilidade nenhuma. Precisão mede, entre as transações sinalizadas, quantas eram fraude de fato, e seria a prioridade se o falso positivo fosse o erro caro — aqui ele custa minutos de um analista. O F1 score equilibra precisão e recall e é a escolha quando os dois erros têm peso parecido; o enunciado deixa explícito que não têm, e otimizar o F1 aceitaria perder fraudes para reduzir alarmes baratos.",
+      "opcoes": [
+        { "texto": "Recall", "correta": true },
+        { "texto": "Acurácia", "correta": false },
+        { "texto": "Precisão", "correta": false },
+        { "texto": "F1 score", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-quando-nao-usar-ml-05",
+      "topico": "Quando não usar ML",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa está avaliando iniciativas propostas pelas áreas de negócio. Em quais delas uma solução de machine learning NÃO é a abordagem adequada?",
+      "explicacao": "O cálculo do tributo segue uma tabela legal publicada e precisa produzir sempre o mesmo valor exato: é regra determinística, e um modelo de ML entregaria uma previsão com margem de erro onde a lei exige um resultado específico — uma regra programada resolve com precisão total e auditável. A classificação de 40 documentos por mês falha na análise de custo-benefício: coletar e rotular dados, treinar, implantar e manter um modelo custa muito mais que a hora mensal de trabalho que ele substituiria. As outras três são usos típicos de ML. Prever demanda a partir de anos de vendas é previsão de série temporal, em que padrões sazonais são difíceis de codificar à mão. Detectar anomalias em transações cujos padrões mudam com frequência é justamente onde regras fixas envelhecem e o modelo pode ser retreinado. E transcrever chamadas de atendimento é reconhecimento de fala, disponível pronto como serviço gerenciado (Amazon Transcribe), sem necessidade de construir modelo.",
+      "opcoes": [
+        { "texto": "Calcular o tributo devido em cada nota fiscal conforme a tabela de alíquotas publicada em lei.", "correta": true },
+        { "texto": "Classificar os cerca de 40 contratos recebidos por mês, tarefa que um funcionário conclui em uma hora.", "correta": true },
+        { "texto": "Prever a demanda semanal de cada produto a partir de cinco anos de histórico de vendas.", "correta": false },
+        { "texto": "Detectar transações anômalas cujos padrões de fraude mudam a cada poucas semanas.", "correta": false },
+        { "texto": "Transcrever as gravações das chamadas de atendimento para análise posterior.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-servicos-gerenciados-assoc-06",
+      "topico": "Serviços gerenciados de IA da AWS",
+      "tipo": "Associacao",
+      "enunciado": "Uma companhia aérea quer resolver cada necessidade abaixo com um serviço gerenciado de IA da AWS, sem treinar modelos próprios. Associe cada necessidade ao serviço adequado.",
+      "explicacao": "Converter os textos dos avisos de embarque em fala natural é síntese de voz, do Amazon Polly. Extrair campos e tabelas de formulários digitalizados é o Amazon Textract, que entende a estrutura do documento (pares chave-valor, tabelas). Identificar sentimento e entidades em mensagens de clientes é processamento de linguagem natural do Amazon Comprehend. Um assistente que conduz a conversa por voz e texto para coletar dados de reserva é um bot conversacional do Amazon Lex. Transformar gravações em texto pesquisável é reconhecimento de fala do Amazon Transcribe — o caminho inverso do Polly, e é por isso que os dois se confundem. O Amazon Rekognition está no painel porque também analisa imagens, mas reconhece objetos, rostos e texto solto em cenas; não interpreta a estrutura de um formulário, que é o que a extração exige. O Amazon Translate traduz texto entre idiomas e não resolve nenhuma das necessidades: nenhuma delas pede mudança de idioma.",
+      "associacoes": [
+        { "alvo": "Gerar áudio natural a partir dos textos dos avisos de embarque", "item": "Amazon Polly" },
+        { "alvo": "Extrair campos e tabelas de formulários de reembolso digitalizados", "item": "Amazon Textract" },
+        { "alvo": "Identificar o sentimento e as entidades citadas nas mensagens de clientes", "item": "Amazon Comprehend" },
+        { "alvo": "Criar um assistente que coleta dados de reserva por voz e por texto", "item": "Amazon Lex" },
+        { "alvo": "Converter gravações de reuniões em texto pesquisável", "item": "Amazon Transcribe" }
+      ],
+      "itensExtras": ["Amazon Rekognition", "Amazon Translate"]
+    },
+    {
+      "id": "aifc01-fund-mlops-desvio-ordenacao-07",
+      "topico": "MLOps",
+      "tipo": "Ordenacao",
+      "enunciado": "Um modelo de previsão de cancelamento de assinaturas está em produção há um ano. O time de negócio relata que as previsões pioraram depois que a empresa lançou novos planos, que mudaram o perfil dos clientes. A equipe quer restaurar a qualidade das previsões sem arriscar colocar em produção um modelo pior que o atual. Selecione e ordene os passos que a equipe deve seguir.",
+      "explicacao": "A sequência começa confirmando o problema com dados: o monitoramento do modelo em produção compara a distribuição dos dados recebidos com a de treinamento e evidencia o desvio causado pelos novos planos. Confirmado o desvio, o modelo é retreinado com dados recentes e rotulados, que já refletem o novo perfil. Por fim, o modelo retreinado é avaliado contra o atual antes da substituição, que é o que atende à restrição de não publicar um modelo pior. Retreinar com o conjunto original não resolve nada: o modelo aprenderia de novo o perfil que deixou de existir. Aumentar o número de instâncias do endpoint melhora a capacidade de atender requisições, não a qualidade da previsão. E trocar o endpoint em tempo real por batch transform muda a forma de servir o modelo, sem tocar no motivo da piora.",
+      "sequencia": [
+        "Usar o monitoramento do modelo em produção para confirmar o desvio nos dados de entrada.",
+        "Retreinar o modelo com dados recentes e rotulados que reflitam os novos planos.",
+        "Avaliar o modelo retreinado contra o modelo atual antes de substituí-lo."
+      ],
+      "itensExtras": [
+        "Retreinar o modelo com o mesmo conjunto de dados usado no treinamento original.",
+        "Aumentar o número de instâncias do endpoint de inferência.",
+        "Substituir o endpoint em tempo real por um job de batch transform."
+      ]
+    },
+    {
+      "id": "aifc01-fund-ml-tradicional-credito-08",
+      "topico": "ML tradicional versus modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um banco quer automatizar a decisão de aprovação de crédito pessoal usando dados tabulares de renda, histórico de pagamentos e endividamento. O regulador exige que cada recusa seja justificada pelos fatores que efetivamente pesaram na decisão, e que a mesma solicitação sempre receba a mesma resposta. Qual abordagem atende melhor a esses requisitos?",
+      "explicacao": "Um modelo de ML tradicional treinado nos dados tabulares é a escolha certa: dados estruturados são o terreno natural desses modelos, a mesma entrada produz a mesma saída, e é possível medir a contribuição de cada atributo para cada decisão — o que gera a justificativa exigida a partir dos fatores reais. Pedir a um modelo de base no Amazon Bedrock que decida e redija a justificativa falha nos dois requisitos: a resposta pode variar entre execuções, e o texto explicativo é gerado depois, sem garantia de refletir o que de fato determinou a decisão. O fine-tuning de um modelo de base com o histórico adapta o comportamento do modelo, mas não o torna interpretável, e custa mais para um problema tabular que modelos menores resolvem bem. RAG sobre a política de crédito fundamenta o texto em documentos da empresa, o que ajuda a citar regras, mas a decisão continua sendo produzida pelo modelo generativo, com os mesmos problemas de rastreabilidade e determinismo.",
+      "opcoes": [
+        { "texto": "Treinar um modelo de ML tradicional nos dados tabulares e medir a contribuição de cada atributo em cada decisão.", "correta": true },
+        { "texto": "Usar um modelo de base no Amazon Bedrock que decida a solicitação e redija a justificativa da recusa.", "correta": false },
+        { "texto": "Fazer fine-tuning de um modelo de base com o histórico de solicitações aprovadas e recusadas.", "correta": false },
+        { "texto": "Usar RAG com a política de crédito do banco para que um modelo de base decida cada solicitação.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-producao-jumpstart-09",
+      "topico": "Formas de usar um modelo em produção",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma startup escolheu um modelo de pesos abertos disponível no catálogo do Amazon SageMaker JumpStart. A equipe precisa escolher o tipo de instância que executa o modelo, para equilibrar custo e latência, e quer que o modelo rode dentro da própria conta AWS. Não há intenção de treinar um modelo do zero. Qual abordagem atende a esses requisitos com o menor esforço?",
+      "explicacao": "Implantar o modelo pelo SageMaker JumpStart em um endpoint do SageMaker AI na própria conta atende aos dois requisitos: o modelo é hospedado pela equipe, que escolhe o tipo e a quantidade de instâncias, e o JumpStart já traz o modelo empacotado, sem exigir montar contêiner ou servidor de inferência. Consumir um modelo sob demanda no Amazon Bedrock é o caminho de API gerenciada: é o de menor esforço quando não se quer gerenciar infraestrutura, mas justamente por isso a escolha de instância não fica com o cliente. Pré-treinar um modelo equivalente em instâncias Amazon EC2 contraria o enunciado e é, de longe, a opção mais cara em dados, tempo e computação. O Amazon Q Business é um assistente pronto para uso com os dados da empresa; ele não hospeda um modelo escolhido pela equipe nem expõe a escolha de instância.",
+      "opcoes": [
+        { "texto": "Implantar o modelo pelo SageMaker JumpStart em um endpoint do SageMaker AI na própria conta.", "correta": true },
+        { "texto": "Consumir o modelo sob demanda pela API do Amazon Bedrock, pagando por token.", "correta": false },
+        { "texto": "Pré-treinar um modelo equivalente em instâncias Amazon EC2 com GPUs.", "correta": false },
+        { "texto": "Configurar um aplicativo do Amazon Q Business apontando para o modelo escolhido.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-mlops-reprodutibilidade-10",
+      "topico": "MLOps",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Durante uma auditoria, uma empresa precisou reproduzir exatamente o modelo que estava em produção seis meses antes e não conseguiu: ninguém sabia com quais dados e configurações ele tinha sido treinado. Quais práticas de MLOps evitam que isso se repita?",
+      "explicacao": "Reproduzir um modelo exige saber exatamente o que o produziu, e as duas práticas corretas guardam essa informação. O rastreamento de experimentos registra, para cada execução de treinamento, a versão dos dados, do código e dos hiperparâmetros usados. O registro de modelos guarda cada versão aprovada ligada aos artefatos e à execução que a geraram, de modo que se sabe qual versão estava em produção em cada data. Retreinar com mais frequência é prática para lidar com desvio de dados; sem registro, só multiplica o número de modelos que ninguém sabe reproduzir. Instâncias de treinamento maiores reduzem o tempo de treinamento e não guardam nenhuma informação sobre a origem do modelo. Monitorar a latência do endpoint trata do desempenho operacional do serviço em produção, não da rastreabilidade de como o modelo foi construído.",
+      "opcoes": [
+        { "texto": "Registrar em cada execução de treinamento a versão dos dados, do código e dos hiperparâmetros.", "correta": true },
+        { "texto": "Guardar cada versão aprovada num registro de modelos ligada aos artefatos que a geraram.", "correta": true },
+        { "texto": "Retreinar o modelo com maior frequência para mantê-lo sempre atualizado.", "correta": false },
+        { "texto": "Usar instâncias de treinamento maiores para reduzir o tempo de cada execução.", "correta": false },
+        { "texto": "Monitorar continuamente a latência do endpoint de inferência em produção.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-dados-serie-temporal-11",
+      "topico": "Tipos de dados",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma distribuidora de energia quer prever o consumo de cada região para as próximas 24 horas usando leituras horárias de medidores dos últimos três anos. Um analista propôs embaralhar todas as leituras e separar 20% delas, ao acaso, como conjunto de teste. O modelo obteve resultados excelentes no teste e péssimos em produção. Qual é a caracterização correta dos dados e da forma de avaliá-los?",
+      "explicacao": "As leituras são uma série temporal: cada valor depende dos anteriores e a tarefa é prever o futuro. Por isso a separação precisa respeitar a cronologia — treinar com o período mais antigo e testar com o mais recente. Embaralhar colocou no treinamento leituras posteriores às do teste, e o modelo foi avaliado sobre momentos cujo futuro já tinha visto: é vazamento de dados, e explica o teste excelente seguido do fracasso em produção. Tratar as leituras como dados tabulares independentes é exatamente o erro do analista, e aumentar a proporção de teste não corrige vazamento. Os dados são estruturados e numéricos, então não há conteúdo não estruturado que exija embeddings. E transformar cada leitura em classe muda o problema: a distribuidora quer um valor de consumo, que é previsão numérica, não categoria.",
+      "opcoes": [
+        { "texto": "Série temporal; o conjunto de teste deve conter as leituras mais recentes, posteriores às de treinamento.", "correta": true },
+        { "texto": "Dados tabulares independentes; basta aumentar a proporção de leituras separadas para teste.", "correta": false },
+        { "texto": "Dados não estruturados; as leituras devem ser convertidas em embeddings antes do treinamento.", "correta": false },
+        { "texto": "Dados rotulados para classificação; cada faixa de consumo deve virar uma classe distinta.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-fund-ia-agentica-devolucoes-12",
+      "topico": "IA agêntica",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma loja on-line tem um assistente baseado em modelo de base que responde dúvidas sobre trocas usando a política de devolução como contexto. A empresa quer que, a partir de um único pedido do cliente, o sistema consulte o status do pedido no sistema interno, verifique se o prazo de troca é válido, abra a solicitação de devolução e envie a etiqueta de postagem, decidindo sozinho a sequência desses passos. Qual mudança descreve essa evolução?",
+      "explicacao": "A diferença está em agir, e não em saber mais: o assistente atual gera respostas, e o novo requisito pede um sistema que planeje passos, chame ferramentas (o sistema de pedidos, a abertura da devolução, o envio da etiqueta) e decida a sequência com base no resultado de cada uma. Isso é IA agêntica. Adicionar RAG com os dados de pedidos daria ao modelo informação atualizada para responder melhor, mas recuperar informação não executa nenhuma ação no sistema interno. Fazer fine-tuning com o histórico de devoluções mudaria o estilo e o conhecimento do modelo, sem dar a ele a capacidade de chamar sistemas externos. E trocar por um modelo maior de deep learning pode melhorar a qualidade do texto, mas o tamanho do modelo não é o que falta: falta orquestração de ferramentas.",
+      "opcoes": [
+        { "texto": "Evoluir de um assistente generativo para um agente que planeja passos e usa ferramentas para executá-los.", "correta": true },
+        { "texto": "Adicionar RAG com os dados de pedidos para que o modelo tenha informações atualizadas.", "correta": false },
+        { "texto": "Fazer fine-tuning do modelo com o histórico de solicitações de devolução já atendidas.", "correta": false },
+        { "texto": "Trocar o modelo por um de deep learning maior, com mais parâmetros e contexto mais longo.", "correta": false }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+using AzurePrep.Domain.Enums;
 using AzurePrep.Infrastructure.Persistence;
 using AzurePrep.Infrastructure.Persistence.Seed;
 using Xunit;
@@ -47,9 +48,12 @@ public class CatalogoDeQuestoesDeSeedTests
     [Fact]
     public void Validar_CatalogoRealEmbutido_EstaIntegro()
     {
+        // Com os fornecedores: um lote AWS com Sim/Não ou com múltipla resposta de quatro
+        // alternativas só é reprovado quando o validador sabe de que exame ele é.
         var problemas = CatalogoDeQuestoesDeSeed.Validar(
             CatalogoDeQuestoesDeSeed.Carregar(),
-            AzurePrepDbSeeder.AreasPorExame);
+            AzurePrepDbSeeder.AreasPorExame,
+            AzurePrepDbSeeder.FornecedorPorExame);
 
         Assert.Empty(problemas);
     }
@@ -545,7 +549,162 @@ public class CatalogoDeQuestoesDeSeedTests
         Assert.True(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas).Count >= 3);
     }
 
+    // ------------------------------------------------------------------- regras da AWS
+
+    [Fact]
+    public void Validar_SimNaoEmExameAws_Acusa()
+    {
+        var lote = Lote(QuestaoValida() with
+        {
+            Tipo = "SimNao",
+            Opcoes = Opcoes(("Sim", true), ("Não", false))
+        });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("SimNao não existe nos exames AWS"));
+    }
+
+    /// <summary>
+    /// "Two or more correct responses out of five or more response options": com quatro
+    /// alternativas e duas corretas, a questão é mais fácil do que a da prova real.
+    /// </summary>
+    [Fact]
+    public void Validar_EscolhaMultiplaComQuatroAlternativas_AcusaNaAwsENaoNaMicrosoft()
+    {
+        var questao = QuestaoMultipla() with { Enunciado = "Quais serviços atendem ao requisito?" };
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { Lote(questao) }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("ao menos 5 alternativas"));
+
+        Assert.DoesNotContain(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { Lote(QuestaoMultipla()) }, Areas),
+            p => p.Contains("alternativas (tem"));
+    }
+
+    [Fact]
+    public void Validar_InstrucaoDeQuantidadeNoEnunciadoAws_Acusa()
+    {
+        // A tela AWS acrescenta "(Selecione DUAS.)" sozinha; escrita também no texto, sai duplicada.
+        var lote = Lote(QuestaoMultipla() with
+        {
+            Enunciado = "Quais serviços atendem ao requisito? (Selecione DUAS.)",
+            Opcoes = Opcoes(("A", true), ("B", true), ("C", false), ("D", false), ("E", false))
+        });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("não escreva '(Selecione"));
+    }
+
+    [Fact]
+    public void Validar_AssociacaoComSeteAlvos_PassaNaAwsEFalhaNaMicrosoft()
+    {
+        var associacoes = Enumerable.Range(0, 7)
+            .Select(i => new AssociacaoDeSeed { Alvo = $"Alvo {i}", Item = $"Item {i % 3}" })
+            .ToList();
+        var lote = Lote(QuestaoDeAssociacao() with { Associacoes = associacoes });
+
+        Assert.DoesNotContain(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("alvos (tem"));
+        Assert.Contains(CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas), p => p.Contains("de 3 a 6 alvos"));
+    }
+
+    // ------------------------------------------------------------------------ ordenação
+
+    /// <summary>
+    /// Mesmo contrato de posição da associação: etapa a etapa, e dentro da etapa os passos da
+    /// sequência seguidos dos extras. A posição decide o Id da alternativa.
+    /// </summary>
+    [Fact]
+    public void Expandir_Ordenacao_GeraUmParPorEtapaEPasso_ComOGabaritoNaPosicaoCerta()
+    {
+        var expandida = CatalogoDeQuestoesDeSeed.Expandir(QuestaoDeOrdenacao());
+
+        // 3 etapas × 4 passos (3 da sequência + 1 extra).
+        Assert.Equal(12, expandida.Opcoes.Count);
+        Assert.Equal(
+            new[] { "Etapa 1", "Etapa 2", "Etapa 3" },
+            expandida.Opcoes.Select(o => o.Alvo).Distinct());
+        Assert.Equal(
+            new[] { "Passo 1", "Passo 2", "Passo 3", "Passo extra" },
+            expandida.Opcoes.Take(4).Select(o => o.Texto));
+        Assert.Equal(
+            new[] { "Etapa 1=Passo 1", "Etapa 2=Passo 2", "Etapa 3=Passo 3" },
+            expandida.Opcoes.Where(o => o.Correta).Select(o => $"{o.Alvo}={o.Texto}"));
+    }
+
+    [Fact]
+    public void Validar_OrdenacaoBemFormada_NaoAcusaNada()
+    {
+        Assert.Empty(CatalogoDeQuestoesDeSeed.Validar(new[] { Lote(QuestaoDeOrdenacao()) }, Areas, FornecedorDoExame.Aws));
+    }
+
+    [Fact]
+    public void Validar_OrdenacaoSemPassoDistrator_Acusa()
+    {
+        // Sem passo sobrando, ninguém precisa decidir QUAIS passos pertencem à solução — só a ordem.
+        var lote = Lote(QuestaoDeOrdenacao() with { ItensExtras = Array.Empty<string>() });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("sem passo distrator"));
+    }
+
+    [Theory]
+    [InlineData(2)]
+    [InlineData(6)]
+    public void Validar_OrdenacaoForaDaFaixaDePassos_Acusa(int quantidade)
+    {
+        var lote = Lote(QuestaoDeOrdenacao() with
+        {
+            Sequencia = Enumerable.Range(1, quantidade).Select(i => $"Passo {i}").ToList()
+        });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws),
+            p => p.Contains("de 3 a 5 passos"));
+    }
+
+    [Fact]
+    public void Validar_OrdenacaoComPassoRepetidoOuExtraNaSequencia_Acusa()
+    {
+        var lote = Lote(QuestaoDeOrdenacao() with
+        {
+            Sequencia = new[] { "Passo 1", "passo 1", "Passo 3" },
+            ItensExtras = new[] { "Passo 3" }
+        });
+
+        var problemas = CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas, FornecedorDoExame.Aws);
+
+        Assert.Contains(problemas, p => p.Contains("passo repetido"));
+        Assert.Contains(problemas, p => p.Contains("também está na 'sequencia'"));
+    }
+
+    [Fact]
+    public void Validar_SequenciaEmTipoQueNaoEOrdenacao_Acusa()
+    {
+        var lote = Lote(QuestaoValida() with { Sequencia = new[] { "Passo 1", "Passo 2", "Passo 3" } });
+
+        Assert.Contains(
+            CatalogoDeQuestoesDeSeed.Validar(new[] { lote }, Areas),
+            p => p.Contains("só vale para o tipo Ordenacao"));
+    }
+
     // --------------------------------------------------------------------------- auxiliares
+
+    private static QuestaoDeSeed QuestaoDeOrdenacao() => new()
+    {
+        Id = "aifc01-teste-ordenacao-01",
+        Topico = "Ciclo de vida de ML",
+        Tipo = "Ordenacao",
+        Enunciado = "Selecione e ordene os passos que colocam o modelo em produção.",
+        Explicacao = ExplicacaoValida,
+        Sequencia = new[] { "Passo 1", "Passo 2", "Passo 3" },
+        ItensExtras = new[] { "Passo extra" }
+    };
 
     private static ArquivoDeQuestoes Lote(params QuestaoDeSeed[] questoes) => new()
     {

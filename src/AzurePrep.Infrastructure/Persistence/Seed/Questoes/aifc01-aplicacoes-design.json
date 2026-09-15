@@ -1,0 +1,252 @@
+{
+  "exameCode": "AIF-C01",
+  "area": "aplicacoes-modelos-fundacionais",
+  "questoes": [
+    {
+      "id": "aifc01-apl-parametro-temperatura-slogans-01",
+      "topico": "Parâmetros de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "A equipe de marketing usa um modelo de base para gerar opções de slogan para campanhas. Ela reclama que, ao pedir novas opções com o mesmo prompt, recebe slogans quase idênticos aos anteriores. As respostas têm o tamanho certo e seguem as instruções. Qual ajuste atende ao pedido da equipe?",
+      "explicacao": "A temperatura controla o quanto a escolha dos próximos tokens se afasta dos mais prováveis. Com temperatura baixa, o mesmo prompt tende a gerar quase o mesmo texto; aumentá-la dá mais variedade, que é o que se quer em slogans. Reduzir a temperatura faria o contrário, deixando as respostas ainda mais repetitivas — é o ajuste certo para tarefas que exigem consistência, como classificação. Reduzir o limite de tokens de saída só encurtaria os slogans, e o enunciado diz que o tamanho está certo. E uma sequência de parada interrompe a geração quando um marcador aparece, sem alterar a variedade do que é gerado.",
+      "opcoes": [
+        { "texto": "Aumentar a temperatura.", "correta": true },
+        { "texto": "Reduzir a temperatura.", "correta": false },
+        { "texto": "Reduzir o limite de tokens de saída.", "correta": false },
+        { "texto": "Definir uma sequência de parada.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-parametro-tokens-saida-cortada-02",
+      "topico": "Parâmetros de inferência",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma aplicação gera resumos executivos de relatórios de auditoria com um modelo de base. Os relatórios são enviados inteiros e bem abaixo do limite da janela de contexto do modelo. Com frequência, porém, o resumo termina no meio de uma frase, antes das recomendações finais. Qual ajuste resolve o problema?",
+      "explicacao": "Um texto que termina no meio da frase é o sinal típico de que a geração atingiu o limite máximo de tokens de saída configurado na requisição; aumentar esse limite deixa o modelo concluir o resumo. Aumentar a temperatura só muda a variação na escolha das palavras, sem dar mais espaço para a resposta. Trocar por um modelo com janela de contexto maior não resolve, porque o enunciado mostra que a entrada já cabe com folga — o corte está na saída configurada. E reduzir o relatório enviado piora o resumo, que perderia informação, e também não mexe no limite que está cortando a resposta.",
+      "opcoes": [
+        { "texto": "Aumentar o limite máximo de tokens de saída da requisição.", "correta": true },
+        { "texto": "Aumentar a temperatura para que o modelo gere textos mais completos.", "correta": false },
+        { "texto": "Trocar por um modelo com janela de contexto maior.", "correta": false },
+        { "texto": "Enviar apenas a primeira metade de cada relatório de auditoria.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-politicas-semanais-03",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa quer um assistente que responda perguntas de funcionários sobre políticas internas. As políticas, armazenadas como documentos no Amazon S3, são revisadas quase toda semana. Cada resposta precisa indicar de qual documento a informação foi tirada, e a empresa quer evitar custos de treinamento. Qual abordagem atende a esses requisitos?",
+      "explicacao": "RAG com o Amazon Bedrock Knowledge Bases recupera, a cada pergunta, os trechos relevantes dos documentos atuais no S3 e os entrega ao modelo, que responde com citação das fontes. Quando uma política muda, basta sincronizar os documentos, sem treinar nada. Fazer fine-tuning mensal colocaria o conteúdo nos pesos do modelo: teria custo de treinamento, ficaria desatualizado entre um ajuste e outro e não permitiria citar o documento de origem. O pré-treinamento contínuo com os documentos tem o mesmo problema, com custo ainda maior. E incluir exemplos de perguntas e respostas no prompt melhora o formato das respostas, mas não dá ao modelo o conteúdo das políticas atualizadas.",
+      "opcoes": [
+        { "texto": "Usar RAG com o Amazon Bedrock Knowledge Bases sobre os documentos no Amazon S3.", "correta": true },
+        { "texto": "Fazer fine-tuning mensal de um modelo de base com as políticas atualizadas.", "correta": false },
+        { "texto": "Fazer pré-treinamento contínuo do modelo com todos os documentos de políticas.", "correta": false },
+        { "texto": "Incluir no prompt exemplos de perguntas e respostas sobre as políticas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-vetorial-aurora-existente-04",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa de software já mantém todos os dados da aplicação num cluster Amazon Aurora compatível com PostgreSQL, operado pela equipe há anos. Ela vai adicionar busca semântica sobre as descrições de produtos e quer armazenar os embeddings junto dos dados relacionais existentes, consultando tudo com SQL e sem adotar um novo serviço de banco de dados. Qual solução atende a esses requisitos?",
+      "explicacao": "O Aurora compatível com PostgreSQL suporta a extensão pgvector, que armazena embeddings e faz busca por similaridade dentro do próprio banco, com SQL e junto dos dados relacionais — atende a todos os requisitos sem novo serviço. O Amazon OpenSearch Service é uma ótima opção de banco vetorial, mas seria justamente um novo serviço para operar, com os dados divididos entre dois lugares. O Amazon Neptune também oferece busca vetorial e brilha quando os relacionamentos entre entidades importam, mas igualmente exige adotar outro serviço e outro modelo de dados. E o Amazon DynamoDB é um banco chave-valor sem busca por similaridade vetorial nativa.",
+      "opcoes": [
+        { "texto": "Usar a extensão pgvector no cluster Amazon Aurora compatível com PostgreSQL.", "correta": true },
+        { "texto": "Armazenar os embeddings num domínio do Amazon OpenSearch Service.", "correta": false },
+        { "texto": "Armazenar os embeddings num banco de grafos do Amazon Neptune.", "correta": false },
+        { "texto": "Armazenar os embeddings numa tabela do Amazon DynamoDB.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-vetorial-neptune-relacionamentos-05",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma montadora quer um assistente que responda perguntas como quais modelos de carro usam peças de fornecedores afetados por um recall. A resposta depende de percorrer relações entre fornecedores, componentes, peças e modelos, além de encontrar documentos técnicos semanticamente relacionados à pergunta. Qual serviço é mais adequado para armazenar esses dados e embeddings?",
+      "explicacao": "O Amazon Neptune é um banco de dados de grafos que também oferece busca vetorial, o que permite combinar a navegação pelas relações entre fornecedores, componentes, peças e modelos com a similaridade semântica dos documentos — a base de uma abordagem de RAG com grafos. O Amazon OpenSearch Service faz busca vetorial e por palavras-chave muito bem, mas não representa nem percorre relações em várias etapas entre entidades. O Amazon RDS para PostgreSQL com pgvector guarda embeddings e dados relacionais, mas consultas que atravessam muitos níveis de relação ficam complexas e custosas em SQL. E o Amazon DynamoDB não tem busca vetorial nativa nem consultas por relacionamento.",
+      "opcoes": [
+        { "texto": "Amazon Neptune", "correta": true },
+        { "texto": "Amazon OpenSearch Service", "correta": false },
+        { "texto": "Amazon RDS para PostgreSQL com pgvector", "correta": false },
+        { "texto": "Amazon DynamoDB", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-vetorial-opensearch-hibrida-06",
+      "topico": "Bancos de dados vetoriais",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um distribuidor de peças industriais tem milhões de fichas técnicas. Os usuários buscam tanto por códigos exatos, como PX-4471-B, quanto por descrições como rolamento resistente a alta temperatura. A empresa não tem banco de dados relacional para essa base e quer um serviço gerenciado que combine, numa só consulta, busca por palavras-chave e busca vetorial. Qual serviço atende a esses requisitos?",
+      "explicacao": "O Amazon OpenSearch Service é um mecanismo de busca gerenciado que oferece busca por palavras-chave e busca vetorial, e permite combinar as duas numa busca híbrida — encontrando o código exato e também a descrição com o mesmo significado. O Amazon Neptune é voltado a dados de grafos e relacionamentos entre entidades, que não são o centro deste caso. O Amazon DynamoDB localiza itens por chave, mas não faz busca textual por relevância nem busca vetorial nativa. E o Amazon Redshift é um data warehouse para consultas analíticas sobre grandes volumes, não um mecanismo de busca por relevância e similaridade.",
+      "opcoes": [
+        { "texto": "Amazon OpenSearch Service", "correta": true },
+        { "texto": "Amazon Neptune", "correta": false },
+        { "texto": "Amazon DynamoDB", "correta": false },
+        { "texto": "Amazon Redshift", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-personalizacao-escalonamento-ordenacao-07",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma empresa quer que um modelo de base responda sobre seus próprios produtos e no tom de voz da marca. A diretriz interna é começar pela abordagem de menor custo e esforço e só avançar para a seguinte se a anterior não atingir a qualidade esperada. Selecione e ordene as abordagens na sequência que a empresa deve seguir.",
+      "explicacao": "A escala de custo e esforço começa pela engenharia de prompt, com instruções e exemplos no próprio prompt: não exige infraestrutura nem treinamento. Se faltar conhecimento sobre os produtos, o próximo passo é RAG, que acrescenta um banco vetorial e tokens de contexto, mas nenhum treinamento. Se ainda assim o tom ou o formato não ficarem consistentes, parte-se para o fine-tuning, que tem custo de preparação de dados, de treinamento e, geralmente, de uso do modelo personalizado. Aumentar a temperatura não é abordagem de personalização: só muda a variação das respostas. E contratar Provisioned Throughput resolve capacidade de processamento, não a qualidade das respostas sobre os produtos.",
+      "sequencia": [
+        "Engenharia de prompt com instruções e exemplos.",
+        "RAG com os documentos dos produtos.",
+        "Fine-tuning do modelo com exemplos no tom da marca."
+      ],
+      "itensExtras": [
+        "Aumentar a temperatura do modelo.",
+        "Contratar Provisioned Throughput para o modelo."
+      ]
+    },
+    {
+      "id": "aifc01-apl-destilacao-modelo-menor-08",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma empresa usa um modelo de base grande para classificar e extrair dados de milhões de e-mails por mês. A qualidade é excelente, mas o custo por requisição e a latência estão acima do aceitável. A tarefa é sempre a mesma, e a empresa quer um modelo menor que reproduza a qualidade do modelo grande nessa tarefa específica, sem montar manualmente um grande conjunto de dados rotulados. Qual abordagem atende a esses requisitos?",
+      "explicacao": "Na destilação de modelos, um modelo grande (professor) gera as respostas que servem de exemplos para treinar um modelo menor (aluno), que passa a reproduzir a qualidade do grande numa tarefa específica, com custo e latência menores — e sem rotulagem manual, porque o professor produz os exemplos. O pré-treinamento contínuo do modelo grande o adaptaria ao domínio, mas manteria o mesmo tamanho, custo e latência. RAG acrescenta contexto recuperado a cada requisição, o que tende a aumentar os tokens processados, sem reduzir o tamanho do modelo. E o Provisioned Throughput garante capacidade, mas não reduz a latência de um modelo grande nem o torna mais barato por tarefa.",
+      "opcoes": [
+        { "texto": "Destilar o modelo grande num modelo menor para essa tarefa.", "correta": true },
+        { "texto": "Fazer pré-treinamento contínuo do modelo grande com os e-mails.", "correta": false },
+        { "texto": "Adicionar RAG com e-mails já classificados como exemplos.", "correta": false },
+        { "texto": "Contratar Provisioned Throughput para o modelo grande.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-cache-prompt-manual-09",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um assistente técnico envia, em toda requisição, o mesmo prompt de sistema longo seguido de um manual de 50 páginas que precisa ser considerado por inteiro, e só no final a pergunta curta do usuário, que muda a cada chamada. O custo e o tempo de resposta estão altos por reprocessar esse prefixo idêntico em todas as chamadas. Qual recurso reduz custo e latência sem alterar o conteúdo que o modelo recebe?",
+      "explicacao": "O cache de prompt guarda o processamento de um prefixo que se repete entre requisições — aqui, o prompt de sistema e o manual — e reaproveita esse trabalho nas chamadas seguintes, reduzindo custo e latência sem mudar o que o modelo recebe. Substituir o manual por RAG também reduziria tokens, mas enviaria só trechos, e o enunciado exige que o manual seja considerado por inteiro. Reduzir o limite de tokens de saída atua sobre a parte pequena da requisição e pode cortar respostas. E a inferência em lote é assíncrona, adequada para processamento em massa, não para um assistente que responde ao usuário na hora.",
+      "opcoes": [
+        { "texto": "Usar cache de prompt para o prefixo que se repete entre as requisições.", "correta": true },
+        { "texto": "Substituir o manual completo por RAG, enviando apenas os trechos mais relevantes.", "correta": false },
+        { "texto": "Reduzir o limite máximo de tokens de saída das respostas.", "correta": false },
+        { "texto": "Processar as perguntas por meio da inferência em lote.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-selecao-contratos-escaneados-10",
+      "topico": "Critérios de seleção de modelos de base",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um escritório vai escolher um modelo de base para analisar contratos recebidos como imagens escaneadas, com até 300 páginas cada, redigidos em português ou em inglês. O modelo deve ler o contrato inteiro e responder perguntas sobre cláusulas. Quais critérios de seleção são indispensáveis para esse caso?",
+      "explicacao": "Três critérios decorrem diretamente do enunciado. Como os contratos chegam como imagens escaneadas, o modelo precisa aceitar imagens como entrada (modalidade). Como têm até 300 páginas e devem ser lidos por inteiro, o tamanho de entrada suportado precisa comportar documentos longos. E como estão em português ou em inglês, o modelo precisa ter bom desempenho nos dois idiomas. Gerar imagens não faz parte da tarefa, que é analisar e responder em texto. O maior número de parâmetros não é requisito: um modelo menor pode atender, com menor custo. E suporte a fine-tuning só seria indispensável se o desempenho sem personalização fosse insuficiente, o que o enunciado não indica.",
+      "opcoes": [
+        { "texto": "Aceitar imagens como entrada.", "correta": true },
+        { "texto": "Suportar um tamanho de entrada compatível com documentos longos.", "correta": true },
+        { "texto": "Ter bom desempenho em português e em inglês.", "correta": true },
+        { "texto": "Ser capaz de gerar imagens a partir de texto.", "correta": false },
+        { "texto": "Ter o maior número de parâmetros entre os candidatos.", "correta": false },
+        { "texto": "Oferecer suporte a fine-tuning no Amazon Bedrock.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-agentes-casos-de-uso-11",
+      "topico": "Agentes de IA e aplicações de negócio",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Uma empresa está priorizando casos de uso de IA generativa. Em quais deles um agente de IA, que planeja passos e executa ações em outros sistemas, agrega valor em relação a um assistente que apenas gera respostas?",
+      "explicacao": "O agente agrega valor quando o resultado exige agir em sistemas e decidir o próximo passo com base no que encontra. Remarcar passageiros de um voo cancelado envolve consultar disponibilidade, aplicar regras tarifárias e emitir o novo bilhete. Investigar um alerta de segurança envolve consultar logs, abrir chamado e isolar a instância conforme o runbook — em ambos, cada ação depende do resultado da anterior. Responder sobre a política de bagagem é recuperação de informação, que um assistente com RAG resolve. Resumir um relatório trimestral e traduzir um manual são gerações de uma etapa, sem ação em outro sistema; um agente só acrescentaria custo e complexidade.",
+      "opcoes": [
+        { "texto": "Remarcar passageiros de um voo cancelado, consultando disponibilidade, aplicando regras tarifárias e emitindo o novo bilhete.", "correta": true },
+        { "texto": "Investigar alertas de segurança, consultando logs, abrindo chamado e isolando a instância afetada conforme o runbook.", "correta": true },
+        { "texto": "Responder a perguntas sobre a política de bagagem com base no regulamento da companhia.", "correta": false },
+        { "texto": "Resumir o relatório trimestral de resultados para a diretoria.", "correta": false },
+        { "texto": "Traduzir o manual de operações do inglês para o português.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-rag-fluxo-ordenacao-12",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "Ordenacao",
+      "enunciado": "Uma equipe está implementando RAG para que um assistente responda com base nos manuais de procedimentos da empresa. Selecione e ordene as etapas que levam dos documentos brutos até a resposta ao usuário.",
+      "explicacao": "Primeiro os manuais são divididos em trechos, para que cada unidade indexada trate de um assunto específico. Em seguida cada trecho é convertido em embedding e armazenado no banco vetorial, o que conclui a ingestão. Quando chega uma pergunta, ela também é convertida em embedding para recuperar os trechos mais similares, e por fim a pergunta é enviada ao modelo junto com esses trechos, que fundamentam a resposta. Fazer fine-tuning com os trechos recuperados não é etapa do RAG: o objetivo da técnica é justamente fundamentar a resposta sem alterar o modelo. E aumentar a temperatura para combinar os trechos confunde parâmetro de geração com etapa do fluxo — mais aleatoriedade tende a afastar a resposta do que foi recuperado.",
+      "sequencia": [
+        "Dividir os manuais em trechos menores.",
+        "Gerar embeddings dos trechos e armazená-los no banco vetorial.",
+        "Gerar o embedding da pergunta e recuperar os trechos mais similares.",
+        "Enviar a pergunta com os trechos recuperados ao modelo para gerar a resposta."
+      ],
+      "itensExtras": [
+        "Fazer fine-tuning do modelo com os trechos recuperados.",
+        "Aumentar a temperatura para que o modelo combine melhor os trechos."
+      ]
+    },
+    {
+      "id": "aifc01-apl-knowledge-bases-gerenciado-13",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma equipe pequena quer colocar no ar um assistente que responda com base em documentos armazenados no Amazon S3, citando as fontes. Ela não quer escrever nem manter código para dividir os documentos, gerar embeddings, gravar os vetores e fazer a recuperação. Qual recurso atende a esse requisito?",
+      "explicacao": "O Amazon Bedrock Knowledge Bases é o recurso gerenciado de RAG: conecta a fonte de dados no S3, divide os documentos, gera os embeddings, grava os vetores num banco vetorial e faz a recuperação com citação das fontes — exatamente as etapas que a equipe não quer implementar. O Amazon Bedrock Guardrails aplica políticas de segurança, como filtrar conteúdo nocivo e dados sensíveis, sem recuperar documentos. O Amazon Bedrock Prompt Management guarda e versiona prompts, sem ingestão nem busca. E o Amazon Comprehend extrai entidades, sentimento e frases-chave de textos; ele não monta um fluxo de recuperação para um modelo gerador.",
+      "opcoes": [
+        { "texto": "Amazon Bedrock Knowledge Bases", "correta": true },
+        { "texto": "Amazon Bedrock Guardrails", "correta": false },
+        { "texto": "Amazon Bedrock Prompt Management", "correta": false },
+        { "texto": "Amazon Comprehend", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-fine-tuning-formato-codificacao-14",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um laboratório quer que um modelo converta laudos em texto livre para um formato estruturado próprio, com códigos internos e regras de preenchimento que os modelos não conhecem. Mesmo com instruções detalhadas e alguns exemplos no prompt, a saída ainda sai fora do padrão em parte dos casos. O laboratório tem 20 mil pares de laudo e saída estruturada revisados por especialistas, e as regras mudam raramente. Qual abordagem é mais adequada?",
+      "explicacao": "O que falta é comportamento — seguir um formato e regras próprios de maneira consistente —, e existem milhares de pares de entrada e saída revisados. Esse é o cenário do fine-tuning: ajustar o modelo com exemplos rotulados para que ele aprenda o padrão, e com regras estáveis o custo de treinar se justifica. RAG traz conhecimento externo para a resposta, mas não ensina o modelo a seguir um formato de saída de forma consistente. Aumentar a temperatura aumenta a variação, o que pioraria a aderência ao padrão. E o pré-treinamento contínuo usa grande volume de texto sem rótulos para adaptar o modelo ao vocabulário de um domínio; não aproveita os pares revisados nem ensina a tarefa de conversão.",
+      "opcoes": [
+        { "texto": "Fazer fine-tuning do modelo com os pares de laudo e saída estruturada.", "correta": true },
+        { "texto": "Usar RAG com os manuais que descrevem o formato estruturado.", "correta": false },
+        { "texto": "Aumentar a temperatura para que o modelo explore mais formatos de saída.", "correta": false },
+        { "texto": "Fazer pré-treinamento contínuo com os laudos em texto livre, sem as saídas.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-pre-treinamento-continuo-geologia-15",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Uma mineradora tem dois milhões de relatórios geológicos escritos ao longo de décadas, cheios de termos técnicos e abreviações do setor. Os modelos de base disponíveis interpretam mal essa terminologia. A empresa não tem pares de pergunta e resposta rotulados, apenas os relatórios em texto. Qual abordagem de personalização aproveita melhor esses dados?",
+      "explicacao": "O pré-treinamento contínuo prossegue o treinamento de um modelo de base com grande volume de texto sem rótulos de um domínio, adaptando-o à terminologia e ao estilo daquele domínio — exatamente o que dois milhões de relatórios sem rótulo permitem. O fine-tuning com instruções precisa de pares de entrada e saída rotulados, que a empresa não tem. A destilação transfere a capacidade de um modelo grande para um menor; ela não ensina a nenhum dos dois um vocabulário que o modelo grande já interpreta mal. E exemplos de poucos termos no prompt ajudam pontualmente, mas não cobrem uma terminologia inteira acumulada em décadas, além de encarecer cada requisição.",
+      "opcoes": [
+        { "texto": "Pré-treinamento contínuo do modelo de base com os relatórios.", "correta": true },
+        { "texto": "Fine-tuning com instruções usando os relatórios como exemplos.", "correta": false },
+        { "texto": "Destilação do modelo de base para um modelo menor.", "correta": false },
+        { "texto": "Inclusão no prompt de exemplos com os termos técnicos mais comuns.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-custos-personalizacao-afirmacoes-16",
+      "topico": "Custos de personalização de modelos",
+      "tipo": "EscolhaMultipla",
+      "enunciado": "Um comitê de arquitetura está comparando abordagens de personalização de modelos de base antes de aprovar o orçamento de um projeto. Quais afirmações sobre os custos dessas abordagens estão corretas?",
+      "explicacao": "As duas afirmações corretas descrevem onde cada custo aparece. O fine-tuning tem custo de treinamento e, em geral, custo adicional para hospedar ou usar o modelo personalizado. RAG não exige retreinar quando os documentos mudam, mas acrescenta custo de armazenamento e busca vetorial e de tokens de contexto em cada requisição. A engenharia de prompt não retreina o modelo: mudar uma instrução é editar o prompt, e é por isso que ela é a abordagem de menor custo. O pré-treinamento de um modelo é a opção mais cara, porque exige volume enorme de dados e de computação, mesmo com dados públicos. E a destilação reduz o custo de inferência, justamente porque o resultado é um modelo menor que substitui o grande na tarefa.",
+      "opcoes": [
+        { "texto": "O fine-tuning gera custo de treinamento e, em geral, custo adicional para usar o modelo personalizado.", "correta": true },
+        { "texto": "RAG adiciona custos de busca vetorial e de tokens de contexto, mas dispensa retreinar quando os documentos mudam.", "correta": true },
+        { "texto": "A engenharia de prompt exige retreinar o modelo a cada mudança nas instruções.", "correta": false },
+        { "texto": "O pré-treinamento é a abordagem mais barata quando se usam dados públicos.", "correta": false },
+        { "texto": "A destilação aumenta o custo de inferência por depender de um modelo maior.", "correta": false }
+      ]
+    },
+    {
+      "id": "aifc01-apl-parametros-sintomas-assoc-17",
+      "topico": "Parâmetros de inferência",
+      "tipo": "Associacao",
+      "enunciado": "Uma equipe coletou problemas observados em diferentes aplicações com modelos de base. Associe cada problema ao ajuste de inferência que o resolve.",
+      "explicacao": "Um classificador de tickets que dá respostas diferentes para a mesma entrada precisa de consistência: reduzir a temperatura. Resumos cortados no meio da última frase batem no limite de saída: aumentar o limite de tokens de saída. Slogans quase idênticos a cada pedido precisam de variedade: aumentar a temperatura — o mesmo parâmetro do primeiro caso, no sentido oposto, e é isso que tira a eliminação do jogo. E um modelo que continua escrevendo depois do marcador que deveria encerrar a resposta precisa de uma sequência de parada. Trocar por um modelo com janela de contexto maior está no painel porque parece resolver o texto cortado, mas a janela limita a entrada e a saída combinadas; o corte descrito vem do limite de saída configurado.",
+      "associacoes": [
+        { "alvo": "Um classificador de tickets dá respostas diferentes para o mesmo ticket", "item": "Reduzir a temperatura" },
+        { "alvo": "Resumos terminam no meio da última frase", "item": "Aumentar o limite de tokens de saída" },
+        { "alvo": "Slogans gerados são quase idênticos a cada novo pedido", "item": "Aumentar a temperatura" },
+        { "alvo": "O modelo continua escrevendo depois do marcador que deveria encerrar a resposta", "item": "Definir uma sequência de parada" }
+      ],
+      "itensExtras": ["Trocar por um modelo com janela de contexto maior"]
+    },
+    {
+      "id": "aifc01-apl-rag-afirmacao-incorreta-18",
+      "topico": "RAG e Amazon Bedrock Knowledge Bases",
+      "tipo": "EscolhaUnica",
+      "enunciado": "Um gerente de produto listou os benefícios de adotar RAG num assistente de atendimento. Qual dos itens da lista NÃO é um benefício de RAG?",
+      "explicacao": "O item errado é o que afirma que RAG atualiza os pesos do modelo com os documentos da empresa. RAG não altera o modelo: recupera trechos relevantes a cada pergunta e os envia no contexto — mudar os pesos é o que fazem fine-tuning e pré-treinamento. Os outros três itens são benefícios reais. Como a resposta se apoia em trechos recuperados, é possível citar as fontes. Como os documentos são consultados no momento da pergunta, basta atualizar a base para refletir mudanças, sem retreinar. E fundamentar a resposta em conteúdo recuperado reduz as alucinações, embora não as elimine por completo.",
+      "opcoes": [
+        { "texto": "Atualiza os pesos do modelo com o conteúdo dos documentos da empresa.", "correta": true },
+        { "texto": "Permite que as respostas citem os documentos usados como fonte.", "correta": false },
+        { "texto": "Reflete documentos atualizados sem necessidade de retreinar o modelo.", "correta": false },
+        { "texto": "Reduz alucinações ao fundamentar as respostas em conteúdo recuperado.", "correta": false }
+      ]
+    }
+  ]
+}

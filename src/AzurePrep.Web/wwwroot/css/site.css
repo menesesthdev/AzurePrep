@@ -1064,3 +1064,263 @@ a { color: var(--c-primary); }
     .field__input,
     .modal__textarea { font-size: 16px; }
 }
+
+/* ==========================================================================
+   Tela de prova AWS — calibrada pelo demo oficial da Pearson VUE para a AWS.
+   Cores amostradas do demo: barra #006caa, faixa de ferramentas #4678bd.
+   Fonte serifada genérica, como o demo (que usa a serif padrão do sistema).
+   Aqui a fidelidade manda mais que a identidade visual do PrepHub: nenhum
+   token do tema neutro vale dentro de .exam-aws.
+   ========================================================================== */
+.exam-aws {
+    --aws-bar: #006caa;
+    --aws-tools: #4678bd;
+    --aws-teal: #007394;
+    --aws-fg: #222;
+    --aws-bg: #fff;
+    min-height: 100vh;
+    background: var(--aws-bg);
+    color: var(--aws-fg);
+    font-family: serif;
+    font-size: 17px;
+    line-height: 1.25;
+    padding-bottom: 36px;
+}
+.exam-aws u { text-decoration: underline; }
+/* O tema pinta o html de cinza; na tela AWS o branco vai até o rodapé, como no demo. */
+html:has(.exam-aws) { background: #fff; }
+.aws-arrow { width: 15px; height: 15px; vertical-align: -2px; }
+.aws-icon { width: 16px; height: 16px; flex-shrink: 0; }
+
+.aws-top {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-height: 48px;
+    padding: 0 4px 0 10px;
+    background: var(--aws-bar);
+    color: #fff;
+}
+.aws-top__title {
+    font-size: 1.3rem;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.aws-top__status { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; font-size: 1rem; }
+.aws-top__line { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+#timer { font-variant-numeric: tabular-nums; }
+
+.aws-tools {
+    position: sticky;
+    top: 48px;
+    z-index: 19;
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 0 8px;
+    background: var(--aws-tools);
+    color: #fff;
+}
+.aws-tools__right { margin-left: auto; display: flex; align-items: center; }
+.aws-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    font: inherit;
+    font-size: 1rem;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+}
+.aws-tool[hidden] { display: none; }
+.aws-tool:hover { background: rgba(255, 255, 255, .15); }
+.aws-tool__check { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.aws-tool:focus-within { outline: 1px dotted #fff; }
+/* Marcada: a bandeira preenchida é o único sinal — o demo não usa checkbox visível. */
+.aws-tool:has(.aws-tool__check:checked) .aws-icon--flag path { fill: #f5c542; stroke: #fff; }
+
+.aws-stage { padding: 20px 18px 40px; max-width: 1200px; }
+
+.aws-q__text p { margin: 0 0 14px; }
+.aws-q__list { margin: 0 0 16px; padding-left: 40px; }
+.aws-q__list li { margin: 0; }
+
+.aws-q__options { list-style: none; margin: 8px 0 0; padding: 0; }
+/* Espaçamento do demo: linhas altas, letra numa coluna própria e o texto alinhado depois dela. */
+.aws-q__options li + li { margin-top: 12px; }
+.aws-q__option { display: flex; align-items: baseline; gap: 12px; padding: 3px 2px; cursor: pointer; }
+.aws-q__option .option__input { accent-color: #555; width: 14px; height: 14px; margin: 0; align-self: center; }
+.aws-q__letter { min-width: 2.2em; }
+
+.aws-q__selects { display: flex; flex-direction: column; gap: 18px; margin-top: 8px; }
+.aws-q__select-row { display: flex; align-items: center; gap: 14px; }
+.aws-q__select-label { flex-shrink: 0; min-width: 4.2em; }
+.aws-q__select {
+    width: min(518px, 100%);
+    height: 25px;
+    padding: 0 22px 0 5px;
+    font: inherit;
+    color: var(--aws-fg);
+    /* Seta desenhada com currentColor, para continuar visível nos esquemas de fundo escuro. */
+    background:
+        linear-gradient(45deg, transparent 50%, currentColor 50%) no-repeat right 11px center / 5px 5px,
+        linear-gradient(-45deg, transparent 50%, currentColor 50%) no-repeat right 6px center / 5px 5px,
+        var(--aws-bg);
+    border: 1px solid currentColor;
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+}
+/* Associação: o enunciado de cada linha é texto livre e de tamanho variável — em grade, as listas
+   suspensas ficam alinhadas numa coluna só em vez de começar onde cada texto termina. */
+.question--aws[data-type="Associacao"] .aws-q__select-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 518px);
+    column-gap: 14px;
+    max-width: 1100px;
+}
+.question--aws[data-type="Associacao"] .aws-q__select-label { min-width: 0; }
+
+.aws-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    min-height: 33px;
+    background: var(--aws-bar);
+}
+.aws-nav__right { margin: 0 0 0 auto; display: flex; flex-wrap: wrap; justify-content: flex-end; }
+.aws-nav__btn {
+    padding: 2px 8px;
+    font: inherit;
+    font-size: 1.15rem;
+    color: #fff;
+    background: var(--aws-bar);
+    border: 0;
+    border-left: 2px solid #fff;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.aws-nav__btn--left { border-left: 0; border-right: 2px solid #fff; }
+.aws-nav__btn[hidden] { display: none; }
+.aws-nav__btn:hover { background: #005a8e; }
+.aws-nav__btn:disabled { opacity: .55; cursor: default; }
+.aws-nav__btn:disabled:hover { background: var(--aws-bar); }
+
+/* ---- Revisão AWS: outra moldura, como no demo --------------------------- */
+.exam-aws.is-review:not([data-scheme]) { background: #f2f3f5; }
+.aws-review { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: .85rem; padding: 8px 8px 0; }
+.aws-review__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 44px; }
+.aws-review__title { font-size: 1.6rem; font-weight: 700; margin: 0; }
+.aws-review__all {
+    font-family: serif;
+    font-size: 1.05rem;
+    padding: 7px 14px;
+    color: #fff;
+    background: var(--aws-teal);
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.aws-review__tabs { display: flex; margin-bottom: 32px; border-bottom: 1px solid var(--aws-teal); }
+.aws-review__tab {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 6px 8px;
+    font-family: serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -1px;
+    cursor: pointer;
+}
+.aws-review__tab[hidden] { display: none; }
+/* background: transparent vence o .btn--filter.is-active da tela Microsoft, que pinta a aba de azul. */
+.aws-review__tab.is-active { color: var(--aws-teal); background: transparent; border-bottom-color: var(--aws-teal); }
+.aws-review__card { background: var(--aws-bg); border-radius: 6px; padding: 8px 12px; overflow-x: auto; }
+.aws-review__table { width: 100%; border-collapse: collapse; }
+.aws-review__table th {
+    text-align: left;
+    padding: 12px 12px 10px 0;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: #545b64;
+    border-bottom: 1px solid #e5e5e5;
+}
+.aws-review__table .review-row { cursor: pointer; }
+.aws-review__table .review-row td { padding: 14px 12px 8px 0; border-bottom: 1px solid #c0c0c0; }
+.aws-review__table .review-row:hover,
+.aws-review__table .review-row:focus { background: rgba(0, 115, 148, .06); outline: none; }
+.aws-review__table .review-row:focus-visible { outline: 2px solid var(--aws-teal); outline-offset: -2px; }
+.aws-review__action { text-align: right; font-family: serif; font-weight: 700; color: var(--aws-teal); }
+.aws-badge { display: inline-block; padding: 1px 10px; border-radius: 10px; font-weight: 700; }
+.aws-badge--incomplete { background: #fce8e6; color: #c5221f; }
+.aws-badge--complete { background: #e6f4ea; color: #1e6b34; }
+.aws-review__empty { padding: 12px 0; }
+.aws-review__empty[hidden] { display: none; }
+.aws-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---- Instruções --------------------------------------------------------- */
+.aws-intro p { margin: 0 0 14px; }
+.aws-intro__title { margin-top: 24px !important; }
+.aws-intro__note { font-size: .9rem; }
+.modal__dialog--wide { max-width: 760px; max-height: 85vh; overflow-y: auto; }
+
+/* ---- Esquema de cores ---------------------------------------------------- */
+.aws-scheme {
+    margin-left: 6px;
+    width: 196px;
+    height: 26px;
+    padding: 0 6px;
+    font: inherit;
+    font-size: .95rem;
+    color: #fff;
+    background: var(--aws-tools);
+    border: 1px solid #000;
+    border-radius: 0;
+}
+.aws-scheme option { color: #000; background: #fff; }
+.exam-aws[data-scheme="preto-amarelo-claro"] { --aws-fg: #000; --aws-bg: #ffffcc; }
+.exam-aws[data-scheme="preto-salmao"]        { --aws-fg: #000; --aws-bg: #fa8072; }
+.exam-aws[data-scheme="preto-branco"]        { --aws-fg: #000; --aws-bg: #fff; }
+.exam-aws[data-scheme="preto-amarelo"]       { --aws-fg: #000; --aws-bg: #ffff00; }
+.exam-aws[data-scheme="azul-branco"]         { --aws-fg: #0000cc; --aws-bg: #fff; }
+.exam-aws[data-scheme="azul-amarelo"]        { --aws-fg: #0000cc; --aws-bg: #ffff00; }
+.exam-aws[data-scheme="amarelo-claro-preto"] { --aws-fg: #ffffcc; --aws-bg: #000; --aws-teal: #7fd4ec; }
+.exam-aws[data-scheme="branco-preto"]        { --aws-fg: #fff; --aws-bg: #000; --aws-teal: #7fd4ec; }
+.exam-aws[data-scheme="branco-azul"]         { --aws-fg: #fff; --aws-bg: #00008b; --aws-teal: #7fd4ec; }
+
+.exam-aws .modal__dialog { font-family: serif; border-radius: 0; }
+
+@media (max-width: 640px) {
+    .aws-top { flex-wrap: wrap; padding: 4px 8px; }
+    .aws-top__title { font-size: 1.05rem; white-space: normal; }
+    .aws-top__status { margin-left: 0; align-items: flex-start; }
+    .aws-tools { top: 0; position: static; }
+    .aws-q__select-row { flex-wrap: wrap; row-gap: 4px; }
+    .question--aws[data-type="Associacao"] .aws-q__select-row { grid-template-columns: minmax(0, 1fr); row-gap: 4px; }
+    .aws-nav__btn { font-size: 1rem; }
+}
+
+/* Selo do fornecedor no card do exame, ao lado do código. */
+.exam-card__vendor { margin-left: 8px; font-size: .75rem; color: var(--c-text-muted); }

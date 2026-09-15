@@ -5,9 +5,12 @@
     var duration = Model.FinishedAt - Model.StartedAt;
     var inv = System.Globalization.CultureInfo.InvariantCulture;
 
-    // Posições na régua da escala 1–1000.
-    var fillPercent = (Model.ScaledScore / 1000m * 100m).ToString("0.##", inv);
-    var cutPercent = (Model.ScaledPassingScore / 1000m * 100m).ToString("0.##", inv);
+    // Posições na régua da escala, que começa em 1 (Microsoft) ou em 100 (AWS).
+    var piso = (decimal)Model.ScaledMinimumScore;
+    var faixa = 1000m - piso;
+    var fillPercent = ((Model.ScaledScore - piso) / faixa * 100m).ToString("0.##", inv);
+    var cutPercent = ((Model.ScaledPassingScore - piso) / faixa * 100m).ToString("0.##", inv);
+    var isAws = Model.Vendor == FornecedorDoExame.Aws;
 }
 
 @*
@@ -36,7 +39,7 @@
                 <div class="score-scale__cut" style="left:@cutPercent%" title="Nota de corte: @Model.ScaledPassingScore"></div>
             </div>
             <div class="score-scale__ends">
-                <span>1</span>
+                <span>@Model.ScaledMinimumScore</span>
                 <span>1000</span>
             </div>
         </div>
@@ -61,6 +64,36 @@
         Barras sem números, como no relatório real: o candidato vê onde ficou mais forte
         ou mais fraco, não a contagem exata de acertos por domínio.
     *@
+    @if (isAws)
+    {
+        @*
+            A AWS entrega uma tabela de classificação por seção, não barras: cada domínio aparece
+            como atendendo ou não ao padrão, e a nota é compensatória (não é preciso passar em cada
+            seção). A régua de classificação usa o mesmo percentual de corte do exame.
+        *@
+        <section class="result__section">
+            <h2 class="section-title">Classificação por seção</h2>
+            <table class="review-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Seção</th>
+                        <th scope="col">Classificação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var area in Model.SkillAreas)
+                    {
+                        <tr class="review-row">
+                            <td>@area.Name</td>
+                            <td>@(area.ScorePercent >= Model.PassingScorePercent ? "Atende às competências" : "Precisa melhorar")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+    else
+    {
     <section class="result__section">
         <h2 class="section-title">Desempenho por domínio</h2>
         <div class="skill-breakdown">
@@ -77,6 +110,7 @@
             }
         </div>
     </section>
+    }
 
     <div class="result__actions">
         <a class="btn btn--primary" asp-controller="Exame" asp-action="Revisao" asp-route-attemptId="@Model.AttemptId">

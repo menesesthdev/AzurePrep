@@ -117,7 +117,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             attempt.StartedAt,
             CalcularSegundosRestantes(exam, attempt),
             attempt.IsFinished,
-            statuses);
+            statuses,
+            exam.Vendor);
     }
 
     public async Task<QuestaoDto?> ObterQuestaoAsync(Guid attemptId, int number, CancellationToken cancellationToken = default)
@@ -128,7 +129,7 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             return null;
         }
 
-        var (attempt, _, questions) = contexto.Value;
+        var (attempt, exam, questions) = contexto.Value;
         if (number < 1 || number > questions.Count)
         {
             return null;
@@ -151,7 +152,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             answer?.SelectedOptionIds.ToList() ?? new List<Guid>(),
             answer?.IsFlaggedForReview ?? false,
             questions.Count,
-            SelecoesExigidas(question));
+            SelecoesExigidas(question),
+            exam.Vendor);
     }
 
     public async Task<ResultadoDeSalvarResposta> SalvarRespostaAsync(
@@ -412,10 +414,20 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             // Arrastar e soltar gera uma alternativa por combinação de alvo com item — listar todas
             // na revisão seria despejar vinte linhas para uma questão de quatro alvos, quase todas
             // irrelevantes. Sobram o gabarito e o que a pessoa montou, que é o que se vai comparar.
+            var ehDePares = question.Type is TipoDeQuestao.Associacao or TipoDeQuestao.Ordenacao;
             var relevantes = OrdemDasOpcoes.Para(question, attempt.Id)
-                .Where(o => question.Type != TipoDeQuestao.Associacao || o.IsCorrect || selected.Contains(o.Id));
+                .Where(o => !ehDePares || o.IsCorrect || selected.Contains(o.Id));
 
-            if (question.Type == TipoDeQuestao.Associacao)
+            if (question.Type == TipoDeQuestao.Ordenacao)
+            {
+                // Na ordenação o alvo é a etapa ("Etapa 1", "Etapa 2"...), que tem ordem natural:
+                // a revisão lê de cima para baixo na sequência, e não na ordem embaralhada dos pares.
+                relevantes = relevantes
+                    .GroupBy(o => o.TargetText)
+                    .OrderBy(g => g.Key, StringComparer.Ordinal)
+                    .SelectMany(g => g);
+            }
+            else if (question.Type == TipoDeQuestao.Associacao)
             {
                 // Agrupar por alvo põe lado a lado "o que eu montei" e "o que era" de cada linha —
                 // que é a comparação que a revisão existe para permitir. O GroupBy do LINQ preserva
@@ -451,6 +463,8 @@ public sealed class SessaoDeProvaService : ISessaoDeProvaService
             skillAreas,
             reviews,
             score.ScaledScore,
-            EscalaDeNota.NotaDeCorte);
+            EscalaDeNota.NotaDeCorte,
+            EscalaDeNota.NotaMinimaPara(exam.Vendor),
+            exam.Vendor);
     }
 }
