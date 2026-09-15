@@ -273,7 +273,7 @@ public class ContaController : Controller
 
             await _email.EnviarAsync(
                 emitido.Email,
-                "Redefinição de senha · AzurePrep",
+                "Redefinição de senha · PrepHub",
                 MontarEmailDeRedefinicao(emitido.Nome, link),
                 cancellationToken);
         }
@@ -462,7 +462,7 @@ public class ContaController : Controller
 
         return _email.EnviarAsync(
             emitido.Email,
-            "Confirme seu e-mail · AzurePrep",
+            "Confirme seu e-mail · PrepHub",
             MontarEmailDeConfirmacao(emitido.Nome, link),
             cancellationToken);
     }
@@ -480,7 +480,7 @@ public class ContaController : Controller
         return $"""
             Olá, {nome}.
 
-            Sua conta no AzurePrep foi criada. Falta um passo: confirme que este endereço é seu
+            Sua conta no PrepHub foi criada. Falta um passo: confirme que este endereço é seu
             abrindo o link abaixo.
 
             {link}
@@ -490,7 +490,7 @@ public class ContaController : Controller
             Se não foi você que se cadastrou, ignore esta mensagem — sem a confirmação, a conta
             não é ativada.
 
-            AzurePrep
+            PrepHub
             """;
     }
 
@@ -505,7 +505,7 @@ public class ContaController : Controller
         return $"""
             Olá, {nome}.
 
-            Recebemos um pedido para redefinir a senha da sua conta no AzurePrep.
+            Recebemos um pedido para redefinir a senha da sua conta no PrepHub.
             Para criar uma senha nova, abra o endereço abaixo:
 
             {link}
@@ -514,7 +514,7 @@ public class ContaController : Controller
 
             Se não foi você que pediu, ignore esta mensagem — sua senha atual continua valendo.
 
-            AzurePrep
+            PrepHub
             """;
     }
 

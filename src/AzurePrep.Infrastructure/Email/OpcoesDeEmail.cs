@@ -24,7 +24,7 @@ public sealed class OpcoesDeEmail
     /// <summary>Remetente. Muitos provedores recusam envio se não casar com a conta autenticada.</summary>
     public string RemetenteEndereco { get; set; } = "nao-responda@azureprep.local";
 
-    public string RemetenteNome { get; set; } = "AzurePrep";
+    public string RemetenteNome { get; set; } = "PrepHub";
 
     public bool TemHost => !string.IsNullOrWhiteSpace(SmtpHost);
 
