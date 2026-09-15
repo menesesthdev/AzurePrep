@@ -183,8 +183,9 @@ a { color: var(--c-primary); }
 .login__logo {
     position: relative;
     display: block;
-    width: 180px;
-    height: 180px;
+    /* 6:5, a proporção da logo completa — o derivado é gerado nela, então não há distorção. */
+    width: 240px;
+    height: 200px;
     margin: 0 auto;
     /* overflow segura a faixa de brilho dentro do quadro; a logo é PNG com alpha,
        então o fundo do card aparece por trás e não há moldura a esconder. */
@@ -1039,7 +1040,7 @@ a { color: var(--c-primary); }
     .mark-toggle { font-size: .88rem; }
 
     /* A logo grande empurraria o formulário para fora da primeira dobra. */
-    .login__logo { width: 132px; height: 132px; }
+    .login__logo { width: 168px; height: 140px; }
 }
 
 /* ---- Toque: sem estado de hover preso ----------------------------------- */
